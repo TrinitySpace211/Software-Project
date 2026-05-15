@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 4d30a9eca024a874786f810c4b49e3f5
+AssemblyDefinitionImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229593
+  packageName: Scriptable Dynamic Crosshair
+  packageVersion: 1.2.0
+  assetPath: Assets/Obscure045/Scriptable Dynamic Crosshair/Project/Core/SDC.Core.asmdef
+  uploadId: 569514

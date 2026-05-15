@@ -1,0 +1,18 @@
+{
+    "name": "PlayerScripts",
+    "rootNamespace": "",
+    "references": [
+        "Unity.Animation.Rigging",
+        "Unity.InputSystem",
+        "SDC.Core"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

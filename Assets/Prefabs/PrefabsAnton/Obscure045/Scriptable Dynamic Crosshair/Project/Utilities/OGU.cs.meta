@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 07bb3995090f7e441b3c855ce2d42357
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229593
+  packageName: Scriptable Dynamic Crosshair
+  packageVersion: 1.2.0
+  assetPath: Assets/Obscure045/Scriptable Dynamic Crosshair/Project/Utilities/OGU.cs
+  uploadId: 569514
