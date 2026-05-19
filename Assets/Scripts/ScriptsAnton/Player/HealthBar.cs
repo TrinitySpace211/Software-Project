@@ -2,23 +2,25 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class HealthBar : MonoBehaviour {
+
     private Image image;
     private PlayerStats playerStats;
 
-    // Wichtig: Awake statt Start (Fix für NullReference)
+    // Cache der Image-Komponente für schnelleren Zugriff und weniger GetComponent-Aufrufe
     private void Awake() {
         image = GetComponent<Image>();
     }
 
-    // Verbindung zu PlayerStats
+    // Verknüpft die HealthBar mit den PlayerStats und initialisiert direkt den UI-Zustand
     public void Initialize(PlayerStats stats) {
         playerStats = stats;
-
         UpdateHealthBar();
     }
 
+    // Aktualisiert die Anzeige basierend auf aktuellem und maximalem Leben
     public void UpdateHealthBar() {
-        // Safety Check (verhindert NullReference komplett)
+
+        // Schutz vor fehlender Initialisierung (verhindert NullReference Exceptions)
         if (image == null || playerStats == null)
             return;
 

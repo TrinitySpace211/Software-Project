@@ -229,6 +229,13 @@ public class Player : MonoBehaviour {
     public float GetAimLayerWeight() {
         return aimLayer.weight;
     }
+
+    //Wichtig für die HealthBarTests
+    public PlayerStats GetStats() => playerStats;
+    public void SetStats(PlayerStats stats) {
+        playerStats = stats;
+    }
+
     #endregion
 
 }
