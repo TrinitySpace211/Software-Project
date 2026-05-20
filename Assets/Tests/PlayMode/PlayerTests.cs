@@ -16,7 +16,7 @@ public class PlayerTests {
     private Camera _camera;
 
     public void PlayerIntegrationTest() {
-        _playerPrefab = AssetDatabase.LoadAssetAtPath<Player>("Assets/Prefabs/Player.prefab");
+        _playerPrefab = AssetDatabase.LoadAssetAtPath<Player>("Assets/Prefabs/PrefabsAnton/Player.prefab");
 
         Application.targetFrameRate = 60;
         Time.fixedDeltaTime = 1f / 60;
@@ -184,7 +184,7 @@ public class PlayerTests {
         // Speichern der Gewichtung
         float initialWeight = _player.GetAimLayerWeight();
 
-        _playerInputHandler.SetAttackTriggered(true);
+        _playerInputHandler.SetAimingInput(true);
 
         yield return null;
 

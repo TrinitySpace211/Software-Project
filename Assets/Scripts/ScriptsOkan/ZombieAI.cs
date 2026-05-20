@@ -1,12 +1,29 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
 /// <summary>
 ///     Steuert das Zombie-Verhalten: Verfolgen, Stoppen, Angreifen.
 /// </summary>
-public class ZombieAI : MonoBehaviour {
+public class ZombieAI : MonoBehaviour
+{
     /// <summary>Transform des Ziels (Player). Im Inspector setzen.</summary>
     public Transform target;
+    private const string IS_DEAD = "isDead";
+
+    public int health = 100;
+
+    [SerializeField] private SkinnedMeshRenderer skinnedMeshRenderer;
+
+    public Transform target;
+
+    private NavMeshAgent agent;
+    private Animator animator;
+    private Material zombieMaterial;
+    private Color originalColor;
+    private Color hitColor = Color.red;
+
+    private bool isDead = false;
 
     /// <summary>Stats-ScriptableObject mit Speed, Damage, AttackRange etc.</summary>
     public EnemyStatsSO stats;
@@ -17,9 +34,13 @@ public class ZombieAI : MonoBehaviour {
     private bool _isAttacking;
     private PlayerHealth _targetHealth;
 
-    private void Start() {
+    private void Start()
+    {
         _agent = GetComponent<NavMeshAgent>();
         _animController = GetComponent<ZombieAnimationController>();
+
+        zombieMaterial = skinnedMeshRenderer.material;
+        originalColor = zombieMaterial.color;
 
         if (stats != null)
             _agent.speed = stats.moveSpeed;
@@ -28,7 +49,8 @@ public class ZombieAI : MonoBehaviour {
             _targetHealth = target.GetComponent<PlayerHealth>();
     }
 
-    private void Update() {
+    private void Update()
+    {
         if (target is null || !_agent.isOnNavMesh) return;
 
         _attackTimer -= Time.deltaTime;
@@ -40,21 +62,26 @@ public class ZombieAI : MonoBehaviour {
         var sqrDist = (transform.position - targetPos).sqrMagnitude;
         var inAttackRange = stats is not null && sqrDist <= stats.attackRange * stats.attackRange;
 
-        if (inAttackRange) {
+        if (inAttackRange)
+        {
             _agent.isStopped = true;
             _agent.velocity = Vector3.zero;
             _agent.ResetPath();
             _animController?.SetWalking(false);
             HandleAttack();
-        } else {
+        }
+        else
+        {
             _agent.isStopped = false;
             _agent.SetDestination(targetPos);
             _animController?.SetWalking(_agent.velocity.magnitude > 0.1f);
         }
     }
 
-    private void HandleAttack() {
-        if (_attackTimer <= 0f && !_isAttacking) {
+    private void HandleAttack()
+    {
+        if (_attackTimer <= 0f && !_isAttacking)
+        {
             _isAttacking = true;
             _animController?.TriggerAttack();
             _targetHealth?.TakeDamage(stats.damage);
@@ -66,7 +93,36 @@ public class ZombieAI : MonoBehaviour {
     ///     Als Animation Event am Ende der Attack-Animation aufrufen.
     ///     Gibt den Zombie für den nächsten Angriff frei.
     /// </summary>
-    public void OnAttackAnimationEnd() {
+    public void OnAttackAnimationEnd()
+    {
         _isAttacking = false;
+    }
+
+    public void TakeDamage(int damage)
+    {
+        health -= damage;
+
+        StopAllCoroutines();
+        StartCoroutine(HitFeedback());
+
+        if (health <= 0)
+        {
+            isDead = true;
+            animator.SetBool(IS_DEAD, isDead);
+        }
+    }
+
+    private IEnumerator HitFeedback()
+    {
+        zombieMaterial.color = hitColor;
+
+        yield return new WaitForSeconds(0.1f);
+
+        zombieMaterial.color = originalColor;
+    }
+
+    public bool IsDead()
+    {
+        return isDead;
     }
 }
