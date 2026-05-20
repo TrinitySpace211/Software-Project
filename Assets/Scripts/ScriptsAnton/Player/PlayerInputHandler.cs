@@ -88,6 +88,10 @@ public class PlayerInputHandler : MonoBehaviour {
         this.AttackTriggered = AttackTriggered;
     }
 
+    public void SetAimingInput(bool AimingTriggered) {
+        this.AimingTriggered = AimingTriggered;
+    }
+
     public void SetSprintInput(bool SprintTriggered) {
         this.SprintTriggered = SprintTriggered;
     }

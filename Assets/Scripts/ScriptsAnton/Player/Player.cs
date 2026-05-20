@@ -18,6 +18,7 @@ public class Player : MonoBehaviour {
     [SerializeField] private Camera playerCamera;
     [SerializeField] private LayerMask layerMask;
     [SerializeField] private Rig aimLayer;
+    [SerializeField] private BaseStats baseStats;
 
     [Header("Movement Parameters")]
     [SerializeField] private float walkSpeed = 4f;
@@ -35,6 +36,9 @@ public class Player : MonoBehaviour {
     [SerializeField] private float rotationMouseDirAmount = 10f;
     [SerializeField] private float rotationMoveDirAmount = 10f;
 
+    //Define Stats for this Player Instance
+    public PlayerStats playerStats { get; private set; }
+
     //Player Movement Variables
     private Vector3 worldMousePos;
     private Vector3 currentMovement;
@@ -49,6 +53,9 @@ public class Player : MonoBehaviour {
 
     private void Start() {
         _playerState = GetComponent<PlayerState>();
+
+        //playerStats.health = baseStats.health;
+        //playerStats.armor = baseStats.armor;
     }
 
     private void Update() {
