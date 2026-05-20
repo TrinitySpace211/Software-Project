@@ -357,6 +357,18 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3359033928195934705, guid: 2da5194021fdf0241b13bead67ff5619, type: 3}
+      propertyPath: m_Color.b
+      value: 0.019607844
+      objectReference: {fileID: 0}
+    - target: {fileID: 3359033928195934705, guid: 2da5194021fdf0241b13bead67ff5619, type: 3}
+      propertyPath: m_Color.g
+      value: 0.08779631
+      objectReference: {fileID: 0}
+    - target: {fileID: 3359033928195934705, guid: 2da5194021fdf0241b13bead67ff5619, type: 3}
+      propertyPath: m_Color.r
+      value: 0.827451
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -743,7 +755,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2455373665192170937, guid: a1a50fc485dee7f4e8bbcbedbd10cd33, type: 3}
       propertyPath: m_text
-      value: 'Tag 1
+      value: 'Day 1
 
         06:00'
       objectReference: {fileID: 0}
@@ -751,6 +763,10 @@ PrefabInstance:
       propertyPath: m_fontSize
       value: 24.55
       objectReference: {fileID: 0}
+    - target: {fileID: 2455373665192170937, guid: a1a50fc485dee7f4e8bbcbedbd10cd33, type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: dc36b3fdc14f47ebb36fd484a67e268a, type: 2}
     - target: {fileID: 2455373665192170937, guid: a1a50fc485dee7f4e8bbcbedbd10cd33, type: 3}
       propertyPath: m_fontSizeMax
       value: 36
@@ -760,8 +776,16 @@ PrefabInstance:
       value: 24
       objectReference: {fileID: 0}
     - target: {fileID: 2455373665192170937, guid: a1a50fc485dee7f4e8bbcbedbd10cd33, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2140032, guid: dc36b3fdc14f47ebb36fd484a67e268a, type: 2}
+    - target: {fileID: 2455373665192170937, guid: a1a50fc485dee7f4e8bbcbedbd10cd33, type: 3}
       propertyPath: m_enableAutoSizing
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2455373665192170937, guid: a1a50fc485dee7f4e8bbcbedbd10cd33, type: 3}
+      propertyPath: m_hasFontAssetChanged
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7714566966109310577, guid: a1a50fc485dee7f4e8bbcbedbd10cd33, type: 3}
       propertyPath: m_Name
@@ -812,7 +836,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   timeText: {fileID: 965378880}
   notificationText: {fileID: 77453832}
-  minutesPerRealSecond: 0.1
+  minutesPerRealSecond: 2
 --- !u!1 &1082845516
 GameObject:
   m_ObjectHideFlags: 0
