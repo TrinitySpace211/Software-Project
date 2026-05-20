@@ -61,7 +61,7 @@ public class DayNightCycle : MonoBehaviour {
     /// <summary>
     /// Minimum light intensity during night.
     /// </summary>
-    public float nightLightIntensity = 0.3f;
+    public float nightLightIntensity = 0.5f;
 
     /// <summary>
     /// Color during daytime.
@@ -71,7 +71,7 @@ public class DayNightCycle : MonoBehaviour {
     /// <summary>
     /// Color during nighttime.
     /// </summary>
-    public Color nightColor = new Color(0.25f, 0.25f, 0.35f);
+    public Color nightColor = new Color(0.45f, 0.45f, 0.55f);
 
     /// <summary>
     /// Initializes system and hides notification UI.
@@ -239,7 +239,7 @@ public class DayNightCycle : MonoBehaviour {
         );
 
         RenderSettings.ambientIntensity = Mathf.Lerp(
-            0.2f,
+            0.5f,
             1f,
             t
         );
