@@ -19,6 +19,10 @@ public class Player : MonoBehaviour {
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private Rig aimLayer;
 
+    [Header("UI")]
+    [SerializeField] private HealthBar healthBar;
+    private PlayerStats playerStats;
+
     [Header("Movement Parameters")]
     [SerializeField] private float walkSpeed = 4f;
     [SerializeField] private float sprintMultipier = 1.5f;
@@ -46,13 +50,32 @@ public class Player : MonoBehaviour {
     #endregion
 
     private void Start() {
+
         _playerState = GetComponent<PlayerState>();
+
+        BaseStats baseStats = ScriptableObject.CreateInstance<BaseStats>();
+
+        baseStats.health = 100;
+        baseStats.armor = 10;
+
+        StatsMediator mediator = new StatsMediator();
+
+        playerStats = new PlayerStats(mediator, baseStats);
+
+        healthBar.Initialize(playerStats);
     }
 
     private void Update() {
         UpdateMovementState();
         HandleMovement();
         HandleAiming();
+
+        //muss entfernt werden und mit dem Zombie connected der Schaden macht/Medikit das heilt
+        if (UnityEngine.InputSystem.Keyboard.current
+        .spaceKey.wasPressedThisFrame) {
+            playerStats.ChangeHealth(-10);
+            healthBar.UpdateHealthBar();
+        }
     }
 
     public void Construct(PlayerInputHandler playerInputHandler, Camera playerCamera) {
@@ -207,6 +230,13 @@ public class Player : MonoBehaviour {
     public float GetAimLayerWeight() {
         return aimLayer.weight;
     }
+
+    //Wichtig für die HealthBarTests
+    public PlayerStats GetStats() => playerStats;
+    public void SetStats(PlayerStats stats) {
+        playerStats = stats;
+    }
+
     #endregion
 
 }
