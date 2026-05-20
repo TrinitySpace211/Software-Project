@@ -5,13 +5,15 @@ using UnityEngine.AI;
 ///     Steuert das Zombie-Verhalten: Verfolgen, Stoppen, Angreifen.
 /// </summary>
 public class ZombieAI : MonoBehaviour {
+    /// <summary>Transform des Ziels (Player). Im Inspector setzen.</summary>
     public Transform target;
+
+    /// <summary>Stats-ScriptableObject mit Speed, Damage, AttackRange etc.</summary>
     public EnemyStatsSO stats;
 
     private NavMeshAgent _agent;
     private ZombieAnimationController _animController;
     private float _attackTimer;
-
     private bool _isAttacking;
     private PlayerHealth _targetHealth;
 
@@ -22,7 +24,6 @@ public class ZombieAI : MonoBehaviour {
         if (stats != null)
             _agent.speed = stats.moveSpeed;
 
-        // Schaden-Referenz am Ziel holen
         if (target != null)
             _targetHealth = target.GetComponent<PlayerHealth>();
     }
@@ -61,7 +62,10 @@ public class ZombieAI : MonoBehaviour {
         }
     }
 
-// Diese Methode als Animation Event am Ende der Attack-Animation aufrufen
+    /// <summary>
+    ///     Als Animation Event am Ende der Attack-Animation aufrufen.
+    ///     Gibt den Zombie für den nächsten Angriff frei.
+    /// </summary>
     public void OnAttackAnimationEnd() {
         _isAttacking = false;
     }

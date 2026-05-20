@@ -17,6 +17,8 @@ public class EnemyHealth : MonoBehaviour {
         _currentHealth = stats != null ? stats.maxHealth : 100;
     }
 
+    /// <summary>Zieht dem Zombie Schadenspunkte ab.</summary>
+    /// <param name="damage">Abzuziehender Schaden.</param>
     public void TakeDamage(int damage) {
         _currentHealth -= damage;
         if (_currentHealth <= 0)
@@ -32,7 +34,6 @@ public class EnemyHealth : MonoBehaviour {
         if (agent != null)
             agent.enabled = false;
 
-        // Optional: später Destroy mit Verzögerung
-        // Destroy(gameObject, 3f);
+        // Destroy(gameObject, 3f); // TODO: nach Death-Animation einkommentieren
     }
 }

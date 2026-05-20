@@ -14,16 +14,19 @@ public class ZombieAnimationController : MonoBehaviour {
         _animator = GetComponent<Animator>();
     }
 
+    /// <summary>Triggert die Angriffs-Animation.</summary>
     public void TriggerAttack() {
         if (_animator is not null)
             _animator.SetTrigger(ATTACK_TRIGGER);
     }
 
+    /// <summary>Setzt den Walking-Parameter im Animator.</summary>
     public void SetWalking(bool value) {
         if (_animator is not null)
             _animator.SetBool(IS_WALKING, value);
     }
 
+    /// <summary>Setzt den IsAttacking-Parameter im Animator.</summary>
     public void SetAttacking(bool value) {
         if (_animator is not null)
             _animator.SetBool(IS_ATTACKING, value);
