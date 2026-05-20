@@ -25,6 +25,8 @@ public class Inventory : MonoBehaviour
     private Slot draggedSlot = null;
     private bool isDragging = false;
 
+    private bool isPaused = false;
+
     private void Awake() {
         inventorySlots.AddRange(inventorySlotParent.GetComponentsInChildren<Slot>());
         hotbarSlots.AddRange(hotbarObj.GetComponentsInChildren<Slot>());
@@ -33,19 +35,24 @@ public class Inventory : MonoBehaviour
         allSlots.AddRange(hotbarSlots);
     }
 
+    private void Start() {
+        container.SetActive(false);
+    }
+
     //wichtig für die Items
     void Update()
     {
-        if(Keyboard.current.wKey.wasPressedThisFrame) {
+        if(Keyboard.current.bKey.wasPressedThisFrame) {
             AddItem(woodItem, 3);
-        } else if(Keyboard.current.gKey.wasPressedThisFrame) {
+        } else if(Keyboard.current.nKey.wasPressedThisFrame) {
             AddItem(axeItem, 1);
         }
 
-        if (Keyboard.current.tabKey.wasPressedThisFrame) {
+        if (Keyboard.current.iKey.wasPressedThisFrame) {
             container.SetActive(!container.activeInHierarchy);
-            Cursor.lockState = Cursor.lockState == CursorLockMode.Locked ? CursorLockMode.None : CursorLockMode.Locked;
+            //Cursor.lockState = Cursor.lockState == CursorLockMode.Locked ? CursorLockMode.None : CursorLockMode.Locked;
             Cursor.visible = !Cursor.visible;
+            TogglePause();
         }
 
         StartDrag();
@@ -168,5 +175,14 @@ public class Inventory : MonoBehaviour
         if(isDragging) {
             dragIcon.transform.position = Input.mousePosition;
         }
+    }
+    private void TogglePause() {
+        isPaused = !isPaused;
+
+        container.SetActive(isPaused);
+
+        Cursor.visible = isPaused;
+
+        Time.timeScale = isPaused ? 0f : 1f;
     }
 }
