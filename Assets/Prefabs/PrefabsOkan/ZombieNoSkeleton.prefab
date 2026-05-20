@@ -1611,6 +1611,9 @@ GameObject:
   m_Component:
   - component: {fileID: 8614352259884172639}
   - component: {fileID: 7690564801857946918}
+  - component: {fileID: 2361470486471751108}
+  - component: {fileID: -5387112310429555302}
+  - component: {fileID: 2322059663790836396}
   m_Layer: 0
   m_Name: ZombieNoSkeleton
   m_TagString: Untagged
@@ -1648,7 +1651,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: f6ba4413f270e9946a2543697da75d93, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
-  m_ApplyRootMotion: 1
+  m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_AnimatePhysics: 0
@@ -1657,6 +1660,56 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &2361470486471751108
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8829481681053086251}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44db53e7d98252c4389384d9f0efd70f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  health: 100
+  skinnedMeshRenderer: {fileID: 0}
+  target: {fileID: 0}
+  stats: {fileID: 0}
+--- !u!114 &-5387112310429555302
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8829481681053086251}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 837ef56b5ea1b254b88c08ea44b58e4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!195 &2322059663790836396
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8829481681053086251}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 1
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 1.5
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
 --- !u!1 &8868056909011058339
 GameObject:
   m_ObjectHideFlags: 0

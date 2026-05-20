@@ -1,12 +1,7 @@
 {
-    "name": "PlayerScripts",
+    "name": "EnemyScripts",
     "rootNamespace": "",
-    "references": [
-        "Unity.Animation.Rigging",
-        "Unity.InputSystem",
-        "SDC.Core",
-        "EnemyScripts"
-    ],
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

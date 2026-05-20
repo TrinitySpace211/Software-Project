@@ -16,12 +16,9 @@ public class Player : MonoBehaviour {
     [SerializeField] private PlayerInputHandler playerInputHandler;
     [SerializeField] private CharacterController characterController;
     [SerializeField] private Camera playerCamera;
-    [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private LayerMask layerMask;
     [SerializeField] private Rig aimLayer;
-
-    [Header("UI")]
-    [SerializeField] private HealthBar healthBar;
-    private PlayerStats playerStats;
+    [SerializeField] private BaseStats baseStats;
 
     [Header("Movement Parameters")]
     [SerializeField] private float walkSpeed = 4f;
@@ -39,45 +36,42 @@ public class Player : MonoBehaviour {
     [SerializeField] private float rotationMouseDirAmount = 10f;
     [SerializeField] private float rotationMoveDirAmount = 10f;
 
+    //Define Stats for this Player Instance
+    public PlayerStats currentPlayerStats { get; private set; }
+
+    //Player Movement Variables
     private Vector3 worldMousePos;
     private Vector3 currentMovement;
     private float currentSpeed => walkSpeed * (playerInputHandler.SprintTriggered ? sprintMultipier : 1f);
 
-    private PlayerState _playerState;
+    //PlayerState and Movement Checks
+    private CurrentPlayerState _playerState;
     private bool isWalking;
     private bool isMovingLaterally;
     private bool isSprinting;
+    private bool _isDead;
     #endregion
 
     private void Start() {
+        _playerState = GetComponent<CurrentPlayerState>();
 
-        _playerState = GetComponent<PlayerState>();
-
-        BaseStats baseStats = ScriptableObject.CreateInstance<BaseStats>();
-
-        baseStats.health = 100;
-        baseStats.armor = 10;
-
-        StatsMediator mediator = new StatsMediator();
-
-        playerStats = new PlayerStats(mediator, baseStats);
-
-        healthBar.Initialize(playerStats);
+        currentPlayerStats = new PlayerStats {
+            health = baseStats.health,
+            armor = baseStats.armor
+        };
     }
 
     private void Update() {
         UpdateMovementState();
         HandleMovement();
         HandleAiming();
-
-        //muss entfernt werden und mit dem Zombie connected der Schaden macht/Medikit das heilt
-        if (UnityEngine.InputSystem.Keyboard.current
-        .spaceKey.wasPressedThisFrame) {
-            playerStats.ChangeHealth(-10);
-            healthBar.UpdateHealthBar();
-        }
     }
 
+    /// <summary>
+    /// Constructor for testing purposes
+    /// </summary>
+    /// <param name="playerInputHandler">Needs the PlayerInputHandler class so the Movement can be calculated</param>
+    /// <param name="playerCamera">Needs the Main Camera to calculate the Mouse Direction</param>
     public void Construct(PlayerInputHandler playerInputHandler, Camera playerCamera) {
         this.playerInputHandler = playerInputHandler;
         this.playerCamera = playerCamera;
@@ -99,11 +93,11 @@ public class Player : MonoBehaviour {
     /// It shoots out a Ray from the Mouse Position on the Screen on the Ground Layer, so that it only hits the ground
     /// If it hit something, that new point will be the position the Player has to rotate to.
     /// </summary>
-    /// <returns>A Vector3 with the Position where the Mouse ist pointing at </returns>
+    /// <returns>A Vector3 with the Position where the Mouse is pointing at </returns>
     private Vector3 CalculateMouseDirection() {
         Ray ray = playerCamera.ScreenPointToRay(playerInputHandler.MousePosition);
 
-        if (Physics.Raycast(ray, out RaycastHit hit, 100f, groundLayer)) {
+        if (Physics.Raycast(ray, out RaycastHit hit, 50f, layerMask)) {
             worldMousePos = hit.point;
             return worldMousePos;
         }
@@ -134,6 +128,21 @@ public class Player : MonoBehaviour {
         if (lookDir.sqrMagnitude > 0.1f && !isSprinting) {
             Quaternion targetRotation = Quaternion.LookRotation(lookDir);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationMouseDirAmount * Time.deltaTime);
+
+            Ray ray = new Ray(new Vector3(transform.position.x, 1f, transform.position.z), lookDir);
+
+            if (playerInputHandler.AttackTriggered && playerInputHandler.AimingTriggered) {
+                if (Physics.Raycast(ray, out RaycastHit hit, 5f)) { //Hit with bullets
+                    if (hit.transform.TryGetComponent(out ZombieAI zombie)) {
+                        if (!zombie.IsDead()) {
+                            zombie.TakeDamage(50);
+                        }
+                    }
+                }
+
+                // Nur einmal pro Klick Schaden verursachen.
+                playerInputHandler.SetAttackTriggered(false);
+            }
         } else if (moveDir.sqrMagnitude > 0.1f && isSprinting) {
             Quaternion targetRotation = Quaternion.LookRotation(moveDir);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationMoveDirAmount * Time.deltaTime);
@@ -163,7 +172,7 @@ public class Player : MonoBehaviour {
     /// It switches from RigLayer_WeaponPose to RigLayer_WeaponAiming
     /// </summary>
     private void HandleAiming() {
-        if (playerInputHandler.AttackTriggered && !isSprinting) {
+        if (playerInputHandler.AimingTriggered && !isSprinting) {
             aimLayer.weight += Time.deltaTime / aimDuration;
         } else {
             aimLayer.weight -= Time.deltaTime / aimDuration;
@@ -171,7 +180,7 @@ public class Player : MonoBehaviour {
     }
 
     /// <summary>
-    /// Updates the State of the Player Movement
+    /// Updates the State of the Player Movement not the Movement itself
     /// </summary>
     private void UpdateMovementState() {
         //Wenn der Input sich ändert, dann bewegt sich der Spieler
@@ -184,6 +193,22 @@ public class Player : MonoBehaviour {
         _playerState.SetPlayerMovementState(lateralState);
     }
     #endregion
+
+    public void TakeDamage(int damage) {
+        if (_isDead) return;
+
+        currentPlayerStats.health -= damage;
+        currentPlayerStats.health = Mathf.Max(0, currentPlayerStats.health);
+        Debug.Log($"Player HP: {currentPlayerStats.health}/{100}");
+
+        if (currentPlayerStats.health <= 0)
+            Die();
+    }
+
+    private void Die() {
+        _isDead = true;
+        Debug.Log("Player gestorben");
+    }
 
     #region State Checks
 
@@ -230,13 +255,6 @@ public class Player : MonoBehaviour {
     public float GetAimLayerWeight() {
         return aimLayer.weight;
     }
-
-    //Wichtig für die HealthBarTests
-    public PlayerStats GetStats() => playerStats;
-    public void SetStats(PlayerStats stats) {
-        playerStats = stats;
-    }
-
     #endregion
 
 }
