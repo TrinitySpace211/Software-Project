@@ -3,166 +3,256 @@ using TMPro;
 using System.Collections;
 
 /// <summary>
-/// Controls the day and night cycle,
-/// updates the UI clock,
-/// and shows notifications when switching
-/// between day and night.
+/// Controls the full day-night cycle system including:
+/// - Time progression
+/// - UI display
+/// - Notifications
+/// - Dynamic lighting (sun, color, intensity, ambient light)
+/// - Sunrise and sunset transitions
 /// </summary>
 public class DayNightCycle : MonoBehaviour {
     /// <summary>
-    /// Reference to the UI text displaying
-    /// the current cycle and time.
+    /// UI text showing current time and state.
     /// </summary>
     public TMP_Text timeText;
 
     /// <summary>
-    /// Reference to the UI text used
-    /// for transition notifications.
+    /// UI text for transition notifications.
     /// </summary>
     public TMP_Text notificationText;
 
     /// <summary>
-    /// Determines how fast in-game time progresses.
-    /// Value represents in-game hours per real second.
+    /// Speed of time progression (hours per real second).
     /// </summary>
-    public float minutesPerRealSecond = 0.1f;
+    public float hoursPerRealSecond = 0.1f;
 
     /// <summary>
-    /// Current in-game time of day.
-    /// Starts at 06:00 AM.
+    /// Current in-game time (0–24 hours).
     /// </summary>
     private float timeOfDay = 6f;
 
-
     /// <summary>
-    /// Current cycle number
-    /// like Day 1, Night 1, etc.
+    /// Day cycle counter.
     /// </summary>
     private int cycleNumber = 1;
 
     /// <summary>
-    /// Tracks whether the current state is day or night.
+    /// Current time state.
     /// </summary>
-    private bool isDay = true;
+    private enum TimeState {
+        Night,
+        Sunrise,
+        Day,
+        Sunset
+    }
+
+    private TimeState currentState;
 
     /// <summary>
-    /// Initializes the notification UI
-    /// by hiding it at game start.
+    /// Directional light acting as sun/moon.
+    /// </summary>
+    public Light sunLight;
+
+    /// <summary>
+    /// Maximum light intensity during day.
+    /// </summary>
+    public float dayLightIntensity = 1.2f;
+
+    /// <summary>
+    /// Minimum light intensity during night.
+    /// </summary>
+    public float nightLightIntensity = 0.3f;
+
+    /// <summary>
+    /// Color during daytime.
+    /// </summary>
+    public Color dayColor = Color.white;
+
+    /// <summary>
+    /// Color during nighttime.
+    /// </summary>
+    public Color nightColor = new Color(0.25f, 0.25f, 0.35f);
+
+    /// <summary>
+    /// Initializes system and hides notification UI.
     /// </summary>
     void Start() {
+        notificationText.gameObject.SetActive(false);
+        currentState = GetTimeState();
+    }
+
+    /// <summary>
+    /// Main update loop.
+    /// </summary>
+    void Update() {
+        UpdateTime();
+        HandleState();
+        UpdateUI();
+        UpdateLighting();
+    }
+
+    /// <summary>
+    /// Advances in-game time.
+    /// </summary>
+    private void UpdateTime() {
+        timeOfDay += Time.deltaTime * hoursPerRealSecond;
+        timeOfDay %= 24f;
+    }
+
+    /// <summary>
+    /// Determines current time state and handles transitions.
+    /// </summary>
+    private void HandleState() {
+        TimeState newState = GetTimeState();
+
+        if (newState != currentState) {
+            currentState = newState;
+
+            switch (currentState) {
+                case TimeState.Sunrise:
+                    ShowNotification("Sunrise begins...");
+                    break;
+
+                case TimeState.Day:
+                    cycleNumber = Mathf.Max(1, cycleNumber + 1);
+                    ShowNotification($"Day {cycleNumber} begins!");
+                    break;
+
+                case TimeState.Sunset:
+                    ShowNotification("Sunset begins...");
+                    break;
+
+                case TimeState.Night:
+                    ShowNotification($"Night {cycleNumber} begins!");
+                    break;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Updates UI clock display.
+    /// </summary>
+    private void UpdateUI() {
+        int hours = Mathf.FloorToInt(timeOfDay);
+        int minutes = Mathf.FloorToInt((timeOfDay - hours) * 60f);
+
+        string stateText = "";
+
+        if (currentState == TimeState.Day)
+            stateText = $"Day {cycleNumber}";
+        else if (currentState == TimeState.Night)
+            stateText = $"Night {cycleNumber}";
+        else
+            stateText = $"Day {cycleNumber}";
+
+        timeText.text = $"{stateText}\n{hours:00}:{minutes:00}";
+    }
+
+    /// <summary>
+    /// Shows a temporary notification.
+    /// </summary>
+    private void ShowNotification(string message) {
+        StartCoroutine(NotificationRoutine(message));
+    }
+
+    /// <summary>
+    /// Notification coroutine.
+    /// </summary>
+    private IEnumerator NotificationRoutine(string message) {
+        notificationText.text = message;
+        notificationText.gameObject.SetActive(true);
+
+        yield return new WaitForSeconds(3f);
+
         notificationText.gameObject.SetActive(false);
     }
 
     /// <summary>
-    /// Updates the in-game time,
-    /// detects day/night transitions,
-    /// and refreshes the UI.
+    /// Determines the current time state based on the in-game time.
+    /// The day is divided into four phases:
+    /// - Sunrise (05:00–06:00)
+    /// - Day (06:00–20:00)
+    /// - Sunset (20:00–22:00)
+    /// - Night (22:00–05:00)
     /// </summary>
-    void Update() {
-        // Advance time continuously
-        timeOfDay += Time.deltaTime * minutesPerRealSecond;
+    /// <returns>
+    /// The current TimeState from enum based on timeOfDay.
+    /// </returns>
+    private TimeState GetTimeState() {
+        if (timeOfDay >= 5f && timeOfDay < 6f)
+            return TimeState.Sunrise;
 
-        // Reset after 24 hours
-        timeOfDay %= 24f;
+        if (timeOfDay >= 6f && timeOfDay < 20f)
+            return TimeState.Day;
 
-        // Determine whether it is currently day
-        bool currentlyDay =
-            (timeOfDay >= 6f && timeOfDay < 22f);
+        if (timeOfDay >= 20f && timeOfDay < 22f)
+            return TimeState.Sunset;
 
-        // Detect transition between day and night
-        if (currentlyDay != isDay) {
-            isDay = currentlyDay;
+        return TimeState.Night;
+    }
 
-            if (isDay) {
-                // new day starts
-                cycleNumber++;
+    /// <summary>
+    /// Updates sun rotation, intensity, color and ambient lighting.
+    /// </summary>
+    private void UpdateLighting() {
+        if (sunLight == null)
+            return;
 
-                // update cycle number to a maximum of 10
-                if (cycleNumber > 10)
-                    cycleNumber = 10;
+        float normalizedTime = timeOfDay / 24f;
 
-                ShowNotification(
-                    $"Day {cycleNumber} begins!"
-                );
-            } else {
-                // Night starts
-                ShowNotification(
-                    $"Night {cycleNumber} begins!"
-                );
-            }
+        sunLight.transform.rotation = Quaternion.Euler(
+            normalizedTime * 360f - 90f,
+            170f,
+            0f
+        );
+
+        float t = 0f;
+
+        switch (currentState) {
+            case TimeState.Sunrise:
+                t = Mathf.InverseLerp(5f, 6f, timeOfDay);
+                break;
+
+            case TimeState.Day:
+                t = 1f;
+                break;
+
+            case TimeState.Sunset:
+                t = Mathf.InverseLerp(22f, 20f, timeOfDay);
+                break;
+
+            case TimeState.Night:
+                t = 0f;
+                break;
         }
 
-        // Refresh UI
-        UpdateUI();
-    }
+        sunLight.intensity = Mathf.Lerp(
+            nightLightIntensity,
+            dayLightIntensity,
+            t
+        );
 
-    /// <summary>
-    /// Updates the visible UI text
-    /// showing current cycle and clock time.
-    /// </summary>
-    void UpdateUI() {
-        // Extract hours
-        int hours =
-            Mathf.FloorToInt(timeOfDay);
+        sunLight.color = Color.Lerp(
+            nightColor,
+            dayColor,
+            t
+        );
 
-        // Extract minutes
-        int minutes =
-            Mathf.FloorToInt(
-                (timeOfDay - hours) * 60f
-            );
-
-        // Determine current state label
-        string state = isDay
-            ? $"Day {cycleNumber}"
-            : $"Night {cycleNumber}";
-
-        // Update UI text
-        timeText.text =
-            $"{state}\n{hours:00}:{minutes:00}";
-    }
-
-    /// <summary>
-    /// Starts the notification coroutine.
-    /// </summary>
-    /// <param name="message">
-    /// Message to display on screen.
-    /// </param>
-    void ShowNotification(string message) {
-        StartCoroutine(
-            NotificationRoutine(message)
+        RenderSettings.ambientIntensity = Mathf.Lerp(
+            0.2f,
+            1f,
+            t
         );
     }
 
     /// <summary>
-    /// Displays a notification message
-    /// for a short duration.
-    /// </summary>
-    /// <param name="message">
-    /// Message shown to the player.
-    /// </param>
-    /// <returns>
-    /// Coroutine enumerator.
-    /// </returns>
-    IEnumerator NotificationRoutine(string message) {
-        notificationText.text = message;
-        notificationText.gameObject.SetActive(true);
-
-        // Keep notification visible
-        yield return new WaitForSeconds(3f);
-
-        // Hide notification
-        notificationText.gameObject.SetActive(false);
-    }
-
-    /// <summary>
-    /// Public read-only access as a Getter for tests
+    /// Returns current time (read-only).
     /// </summary>
     public float TimeOfDay => timeOfDay;
 
     /// <summary>
-    /// Setter for the tests
+    /// Sets time manually (debug/testing).
     /// </summary>
-    /// <param name="time"></param>
     public void SetTime(float time) {
         timeOfDay = time;
     }

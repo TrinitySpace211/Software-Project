@@ -34,17 +34,6 @@ public class DayNightCycleTests {
         yield return null;
     }
 
-    /// <summary>
-    /// Cleans up after each test.
-    /// </summary>
-    [UnityTearDown]
-    public IEnumerator TearDown() {
-        Object.Destroy(testObject);
-        Object.Destroy(timeText.gameObject);
-        Object.Destroy(notificationText.gameObject);
-
-        yield return null;
-    }
 
     /// <summary>
     /// Ensures system starts in a valid state.
@@ -138,4 +127,78 @@ public class DayNightCycleTests {
             "UI should contain day or night label"
         );
     }
+
+    /// <summary>
+    /// Ensures that the sun light reference is correctly assigned
+    /// and not null when injected into the DayNightCycle system.
+    /// </summary>
+    [UnityTest]
+    public IEnumerator Sun_Light_Is_Assigned() {
+        var lightGO = new GameObject("Sun");
+        var light = lightGO.AddComponent<Light>();
+
+        cycle.sunLight = light;
+
+        yield return null;
+
+        Assert.IsNotNull(cycle.sunLight, "Sun light should be assigned");
+    }
+
+    /// <summary>
+    /// Verifies that the light intensity during daytime
+    /// is higher than during nighttime.
+    /// </summary>
+    [UnityTest]
+    public IEnumerator Day_Has_Higher_Light_Than_Night() {
+        var lightGO = new GameObject("Sun");
+        var light = lightGO.AddComponent<Light>();
+
+        cycle.sunLight = light;
+
+        // Day
+        cycle.SetTime(12f);
+        yield return null;
+
+        float dayIntensity = light.intensity;
+
+        // Night
+        cycle.SetTime(23f);
+        yield return null;
+
+        float nightIntensity = light.intensity;
+
+        Assert.Greater(dayIntensity, nightIntensity,
+            "Day light should be stronger than night light");
+    }
+
+    /// <summary>
+    /// Ensures that nighttime correctly reduces light intensity
+    /// and does not exceed the configured day light intensity.
+    /// </summary>
+    [UnityTest]
+    public IEnumerator Night_Reduces_Light_Intensity() {
+        var lightGO = new GameObject("Sun");
+        var light = lightGO.AddComponent<Light>();
+
+        cycle.sunLight = light;
+
+        cycle.SetTime(23f);
+        yield return null;
+
+        Assert.LessOrEqual(light.intensity, cycle.dayLightIntensity,
+            "Night intensity should not exceed day intensity");
+    }
+
+    /// <summary>
+    /// Cleans up after each test.
+    /// </summary>
+    [UnityTearDown]
+    public IEnumerator TearDown() {
+        Object.Destroy(testObject);
+        Object.Destroy(timeText.gameObject);
+        Object.Destroy(notificationText.gameObject);
+
+        yield return null;
+    }
 }
+
