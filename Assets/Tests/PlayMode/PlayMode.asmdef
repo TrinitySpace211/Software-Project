@@ -5,10 +5,9 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "Unity.TextMeshPro",
-        "UI",
-        "PlayerScripts",
         "Unity.Animation.Rigging",
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "Scripts"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

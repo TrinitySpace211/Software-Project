@@ -6,12 +6,12 @@ public class HealthBar : MonoBehaviour {
     private Image image;
     private PlayerStats playerStats;
 
-    // Cache der Image-Komponente für schnelleren Zugriff und weniger GetComponent-Aufrufe
+    // Cache der Image-Komponente fï¿½r schnelleren Zugriff und weniger GetComponent-Aufrufe
     private void Awake() {
         image = GetComponent<Image>();
     }
 
-    // Verknüpft die HealthBar mit den PlayerStats und initialisiert direkt den UI-Zustand
+    // Verknï¿½pft die HealthBar mit den PlayerStats und initialisiert direkt den UI-Zustand
     public void Initialize(PlayerStats stats) {
         playerStats = stats;
         UpdateHealthBar();
@@ -25,7 +25,7 @@ public class HealthBar : MonoBehaviour {
             return;
 
         image.fillAmount =
-            (float)playerStats.CurrentHealth /
-            playerStats.MaxHealth;
+            (float)playerStats.currentHealth /
+            playerStats.maxHealth;
     }
 }

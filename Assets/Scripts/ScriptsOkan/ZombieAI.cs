@@ -15,7 +15,7 @@ public class ZombieAI : MonoBehaviour {
     [SerializeField] private Transform target;
 
     /// <summary>Stats-ScriptableObject mit Speed, Damage, AttackRange etc.</summary>
-    public EnemyStatsSO stats;
+    public EnemyStatsSO enemyStatsSO;
 
     private PlayerHealth _targetHealth;
     private NavMeshAgent _agent;
@@ -37,8 +37,8 @@ public class ZombieAI : MonoBehaviour {
         zombieMaterial = skinnedMeshRenderer.material;
         originalColor = zombieMaterial.color;
 
-        if (stats != null)
-            _agent.speed = stats.moveSpeed;
+        if (enemyStatsSO != null)
+            _agent.speed = enemyStatsSO.moveSpeed;
 
         if (target != null)
             _targetHealth = target.GetComponent<PlayerHealth>();
@@ -54,7 +54,7 @@ public class ZombieAI : MonoBehaviour {
 
         var targetPos = target.position;
         var sqrDist = (transform.position - targetPos).sqrMagnitude;
-        var inAttackRange = stats is not null && sqrDist <= stats.attackRange * stats.attackRange;
+        var inAttackRange = enemyStatsSO is not null && sqrDist <= enemyStatsSO.attackRange * enemyStatsSO.attackRange;
 
         if (isDead) {
             _agent.isStopped = true;
@@ -76,8 +76,8 @@ public class ZombieAI : MonoBehaviour {
         if (_attackTimer <= 0f && !_isAttacking) {
             _isAttacking = true;
             _animController?.TriggerAttack();
-            _targetHealth.TakeDamage(stats.damage);
-            _attackTimer = stats.attackCooldown;
+            _targetHealth.TakeDamage(enemyStatsSO.damage);
+            _attackTimer = enemyStatsSO.attackCooldown;
         }
     }
 

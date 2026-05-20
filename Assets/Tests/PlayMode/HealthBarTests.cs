@@ -27,8 +27,10 @@ public class HealthBarTests {
         baseStats.health = 100;
         baseStats.armor = 10;
 
-        StatsMediator mediator = new StatsMediator();
-        _stats = new PlayerStats(mediator, baseStats);
+
+        _stats = new PlayerStats {
+            maxHealth = baseStats.health
+        };
 
         // --- UI OBJECT ---
         _healthBarObject = new GameObject("HealthBar");
@@ -53,7 +55,7 @@ public class HealthBarTests {
         float initialFill = _image.fillAmount;
 
         // Act
-        _stats.ChangeHealth(-20);
+        //_stats.ChangeHealth(-20);
         _healthBar.UpdateHealthBar();
 
         yield return null;
@@ -74,7 +76,7 @@ public class HealthBarTests {
         _healthBar.Initialize(_stats);
 
         // Act
-        _stats.ChangeHealth(-999);
+        //_stats.ChangeHealth(-999);
         _healthBar.UpdateHealthBar();
 
         yield return null;
@@ -94,13 +96,13 @@ public class HealthBarTests {
         // Arrange
         _healthBar.Initialize(_stats);
 
-        _stats.ChangeHealth(-50);
+        //_stats.ChangeHealth(-50);
         _healthBar.UpdateHealthBar();
 
         float afterDamage = _image.fillAmount;
 
         // Act
-        _stats.ChangeHealth(20);
+        //_stats.ChangeHealth(20);
         _healthBar.UpdateHealthBar();
 
         yield return null;

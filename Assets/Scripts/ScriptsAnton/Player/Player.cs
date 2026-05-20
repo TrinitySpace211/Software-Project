@@ -56,7 +56,7 @@ public class Player : MonoBehaviour {
         _playerState = GetComponent<CurrentPlayerState>();
 
         currentPlayerStats = new PlayerStats {
-            health = baseStats.health,
+            maxHealth = baseStats.health,
             armor = baseStats.armor
         };
     }
@@ -197,11 +197,13 @@ public class Player : MonoBehaviour {
     public void TakeDamage(int damage) {
         if (_isDead) return;
 
-        currentPlayerStats.health -= damage;
-        currentPlayerStats.health = Mathf.Max(0, currentPlayerStats.health);
-        Debug.Log($"Player HP: {currentPlayerStats.health}/{100}");
+        currentPlayerStats.maxHealth -= damage;
+        currentPlayerStats.maxHealth = Mathf.Max(0, currentPlayerStats.maxHealth);
+        Debug.Log($"Player HP: {currentPlayerStats.maxHealth}/{100}");
 
-        if (currentPlayerStats.health <= 0)
+        //Event
+
+        if (currentPlayerStats.maxHealth <= 0)
             Die();
     }
 
