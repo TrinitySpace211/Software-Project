@@ -1612,6 +1612,7 @@ GameObject:
   - component: {fileID: 8614352259884172639}
   - component: {fileID: 7690564801857946918}
   - component: {fileID: 2361470486471751108}
+  - component: {fileID: -5387112310429555302}
   - component: {fileID: 2322059663790836396}
   m_Layer: 0
   m_Name: ZombieNoSkeleton
@@ -1671,7 +1672,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44db53e7d98252c4389384d9f0efd70f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  health: 100
+  skinnedMeshRenderer: {fileID: 0}
   target: {fileID: 0}
+  stats: {fileID: 0}
+--- !u!114 &-5387112310429555302
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8829481681053086251}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 837ef56b5ea1b254b88c08ea44b58e4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!195 &2322059663790836396
 NavMeshAgent:
   m_ObjectHideFlags: 0

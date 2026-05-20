@@ -7,7 +7,9 @@ using UnityEngine;
 public class ZombieAnimationController : MonoBehaviour {
     private const string IS_WALKING = "isWalking";
     private const string IS_ATTACKING = "isAttacking";
+    private const string IS_DEAD = "isDead";
     private const string ATTACK_TRIGGER = "Attack";
+
     private Animator _animator;
 
     private void Start() {
@@ -30,5 +32,10 @@ public class ZombieAnimationController : MonoBehaviour {
     public void SetAttacking(bool value) {
         if (_animator is not null)
             _animator.SetBool(IS_ATTACKING, value);
+    }
+
+    public void SetDead(bool value) {
+        if (_animator is not null)
+            _animator.SetBool(IS_DEAD, value);
     }
 }

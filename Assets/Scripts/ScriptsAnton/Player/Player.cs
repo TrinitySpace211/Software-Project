@@ -37,7 +37,7 @@ public class Player : MonoBehaviour {
     [SerializeField] private float rotationMoveDirAmount = 10f;
 
     //Define Stats for this Player Instance
-    public PlayerStats playerStats { get; private set; }
+    public PlayerStats currentPlayerStats { get; private set; }
 
     //Player Movement Variables
     private Vector3 worldMousePos;
@@ -45,17 +45,20 @@ public class Player : MonoBehaviour {
     private float currentSpeed => walkSpeed * (playerInputHandler.SprintTriggered ? sprintMultipier : 1f);
 
     //PlayerState and Movement Checks
-    private PlayerState _playerState;
+    private CurrentPlayerState _playerState;
     private bool isWalking;
     private bool isMovingLaterally;
     private bool isSprinting;
+    private bool _isDead;
     #endregion
 
     private void Start() {
-        _playerState = GetComponent<PlayerState>();
+        _playerState = GetComponent<CurrentPlayerState>();
 
-        //playerStats.health = baseStats.health;
-        //playerStats.armor = baseStats.armor;
+        currentPlayerStats = new PlayerStats {
+            health = baseStats.health,
+            armor = baseStats.armor
+        };
     }
 
     private void Update() {
@@ -190,6 +193,22 @@ public class Player : MonoBehaviour {
         _playerState.SetPlayerMovementState(lateralState);
     }
     #endregion
+
+    public void TakeDamage(int damage) {
+        if (_isDead) return;
+
+        currentPlayerStats.health -= damage;
+        currentPlayerStats.health = Mathf.Max(0, currentPlayerStats.health);
+        Debug.Log($"Player HP: {currentPlayerStats.health}/{100}");
+
+        if (currentPlayerStats.health <= 0)
+            Die();
+    }
+
+    private void Die() {
+        _isDead = true;
+        Debug.Log("Player gestorben");
+    }
 
     #region State Checks
 

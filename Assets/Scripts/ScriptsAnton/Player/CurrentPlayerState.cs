@@ -15,7 +15,7 @@ public enum PlayerMovementState {
 /// <summary>
 /// A class to Update the Player Movement state
 /// </summary>
-public class PlayerState : MonoBehaviour {
+public class CurrentPlayerState : MonoBehaviour {
 
     [field: SerializeField] public PlayerMovementState CurrentPlayerMovementState { get; private set; } = PlayerMovementState.Idling;
 

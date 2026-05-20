@@ -12,7 +12,7 @@ public class PlayerAnimation : MonoBehaviour {
     [SerializeField] private float locomotionBlendSpeed = 10f;
 
     private Vector3 _currentBlendInput = Vector3.zero;
-    private PlayerState _playerState;
+    private CurrentPlayerState _playerState;
     bool isSprinting;
 
     private int inputXHash = Animator.StringToHash("inputX");
@@ -21,7 +21,7 @@ public class PlayerAnimation : MonoBehaviour {
     private int getHitHash = Animator.StringToHash("GetHit");
 
     private void Start() {
-        _playerState = GetComponent<PlayerState>();
+        _playerState = GetComponent<CurrentPlayerState>();
     }
 
     private void Update() {

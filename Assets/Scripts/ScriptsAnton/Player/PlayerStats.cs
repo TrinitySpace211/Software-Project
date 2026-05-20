@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class PlayerStats : MonoBehaviour {
+public class PlayerStats {
     public float health;
     public float armor;
 }
