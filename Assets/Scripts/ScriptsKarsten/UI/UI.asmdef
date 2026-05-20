@@ -1,0 +1,14 @@
+{
+  "name": "UI",
+  "rootNamespace": "",
+  "references": [
+    "Unity.TextMeshPro",
+    "Unity.UGUI"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true
+}

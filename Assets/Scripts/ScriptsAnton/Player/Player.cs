@@ -70,6 +70,7 @@ public class Player : MonoBehaviour {
         HandleMovement();
         HandleAiming();
 
+        //muss entfernt werden und mit dem Zombie connected der Schaden macht/Medikit das heilt
         if (UnityEngine.InputSystem.Keyboard.current
         .altKey.wasPressedThisFrame) {
             playerStats.ChangeHealth(-10);
