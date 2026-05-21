@@ -168,7 +168,7 @@ public class Inventory : MonoBehaviour {
     /// Starts dragging an item if the player clicks on a slot containing an item.
     /// </summary>
     private void StartDrag() {
-        if (Input.GetMouseButtonDown(0)) {
+        if (Mouse.current.leftButton.wasPressedThisFrame) {
             Slot hovered = GetHoveredSlot();
 
             if (hovered != null && hovered.HasItem()) {
@@ -187,9 +187,9 @@ public class Inventory : MonoBehaviour {
     /// the dragged item into the hovered slot.
     /// </summary>
     private void EndDrag() {
-        if (Input.GetMouseButtonUp(0) && isDragging) {
+        if (Mouse.current.leftButton.wasReleasedThisFrame && isDragging) {
             Slot hovered = GetHoveredSlot();
-
+            
             if (hovered != null) {
                 HandleDrop(draggedSlot, hovered);
 
