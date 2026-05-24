@@ -35,24 +35,12 @@ public class ZombieAI : MonoBehaviour {
         _agent = GetComponent<NavMeshAgent>();
         _animController = GetComponent<ZombieAnimationController>();
 
-        if (skinnedMeshRenderer != null) {
-            zombieMaterial = skinnedMeshRenderer.material;
-            originalColor = zombieMaterial.color;
-        }
+        zombieMaterial = skinnedMeshRenderer.material;
+        originalColor = zombieMaterial.color;
 
-        if (enemyStatsSO != null) {
-            _agent.speed = enemyStatsSO.moveSpeed;
-        }
-        if (target != null) {
-            _targetHealth = target.GetComponentInChildren<PlayerHealth>();
-        }
-
-        if (target != null)
-            _targetHealth = target.GetComponent<PlayerHealth>();
-
-        foreach (var joint in joints) {
-            joint.GetComponent<Rigidbody>().isKinematic = true;
-        }
+        _agent.speed = enemyStatsSO.moveSpeed;
+ 
+        _targetHealth = target.GetComponentInChildren<PlayerHealth>();
     }
 
     private void Update() {
