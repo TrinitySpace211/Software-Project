@@ -55,9 +55,5 @@ public class PlayerAnimation : MonoBehaviour {
         _animator.SetFloat(inputYHash, _currentBlendInput.y);
         _animator.SetFloat(inputyMagnitudeHash, _currentBlendInput.magnitude);
 
-        //Trigger die Hit Reaction wenn Space gedrückt wird
-        if (Keyboard.current.spaceKey.wasPressedThisFrame) {
-            _animator.SetTrigger(getHitHash);
-        }
     }
 }
