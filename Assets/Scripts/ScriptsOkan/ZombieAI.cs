@@ -35,11 +35,17 @@ public class ZombieAI : MonoBehaviour {
         _agent = GetComponent<NavMeshAgent>();
         _animController = GetComponent<ZombieAnimationController>();
 
-        zombieMaterial = skinnedMeshRenderer.material;
-        originalColor = zombieMaterial.color;
+        if (skinnedMeshRenderer != null) {
+            zombieMaterial = skinnedMeshRenderer.material;
+            originalColor = zombieMaterial.color;
+        }
 
-        if (enemyStatsSO != null)
+        if (enemyStatsSO != null) {
             _agent.speed = enemyStatsSO.moveSpeed;
+        }
+        if (target != null) {
+            _targetHealth = target.GetComponentInChildren<PlayerHealth>();
+        }
 
         if (target != null)
             _targetHealth = target.GetComponent<PlayerHealth>();

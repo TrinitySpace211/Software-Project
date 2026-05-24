@@ -7,7 +7,6 @@ public class PlayerHealth : MonoBehaviour {
 
     [SerializeField] private PlayerStats playerStats;
     [SerializeField] private BaseStats baseStats;
-    [SerializeField] private Animator animator;
 
     private bool isDead;
     private HealthBar healthBar;
@@ -22,9 +21,6 @@ public class PlayerHealth : MonoBehaviour {
             enabled = false;
             return;
         }
-
-        if (animator == null)
-            animator = GetComponent<Animator>();
 
         playerStats = new PlayerStats {
             maxHealth = baseStats.health,
@@ -54,9 +50,6 @@ public class PlayerHealth : MonoBehaviour {
 
         if (healthBar != null)
             healthBar.UpdateHealthBar();
-
-        if (animator != null)
-            animator.SetTrigger("GetHit");
 
         if (playerStats.currentHealth <= 0)
             Die();
