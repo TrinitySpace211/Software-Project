@@ -152,6 +152,17 @@ public class Player : MonoBehaviour {
         characterController.Move(currentMovement * Time.deltaTime);
     }
 
+    private void OnDrawGizmos() {
+        Vector3 mouseDir = CalculateMouseDirection();
+
+        Vector3 lookDir = mouseDir - transform.position;
+        lookDir.y = 0;
+
+        Ray ray = new Ray(new Vector3(transform.position.x, 1f, transform.position.z), lookDir);
+
+        Gizmos.DrawRay(ray.origin, ray.direction);
+    }
+
     /// <summary>
     /// This Method handles the Jumping, but due to the Player not having animations it is marked as deprecated for now
     /// </summary>
