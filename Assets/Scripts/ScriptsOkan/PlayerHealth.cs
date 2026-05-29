@@ -1,37 +1,69 @@
 using UnityEngine;
 
 /// <summary>
-///     Verwaltet die Lebenspunkte des Spielers.
-///     TODO: maxHealth später aus PlayerStats beziehen.
+/// Handles player health, damage and death logic.
 /// </summary>
 public class PlayerHealth : MonoBehaviour {
-    private readonly int maxHealth = 100; // Hardcoded fürs testen
-    private int _currentHealth;
-    private bool _isDead;
+
+    [SerializeField] private PlayerStats playerStats;
+    [SerializeField] private BaseStats baseStats;
+    [SerializeField] private Animator animator;
+
+    private bool isDead;
+    private HealthBar healthBar;
+
+    /// <summary>
+    /// Gets the player stats reference.
+    /// </summary>
+    public PlayerStats Stats => playerStats;
 
     private void Start() {
-        _currentHealth = maxHealth;
+        if (baseStats == null) {
+            enabled = false;
+            return;
+        }
+
+        if (animator == null)
+            animator = GetComponent<Animator>();
+
+        playerStats = new PlayerStats {
+            maxHealth = baseStats.health,
+            currentHealth = baseStats.health,
+            armor = baseStats.armor
+        };
+
+        healthBar = Object.FindFirstObjectByType<HealthBar>();
+        if (healthBar != null)
+            healthBar.Initialize(playerStats);
     }
 
     /// <summary>
-    ///     Zieht dem Spieler Schadenspunkte ab.
-    ///     Wird von ZombieAI beim Angriff aufgerufen.
+    /// Applies damage to the player.
     /// </summary>
-    /// <param name="damage">Abzuziehender Schaden.</param>
-    public void TakeDamage(int damage) {
-        if (_isDead) return; // kein Schaden mehr nach Tod
+    public void TakeDamage(float damage) {
+        if (isDead) return;
 
-        _currentHealth -= damage;
-        _currentHealth = Mathf.Max(0, _currentHealth);
-        Debug.Log($"Player HP: {_currentHealth}/{maxHealth}");
+        if (playerStats == null) {
+            return;
+        }
 
-        if (_currentHealth <= 0)
+        float finalDamage = Mathf.Max(0, damage - playerStats.armor);
+
+        playerStats.currentHealth -= finalDamage;
+        playerStats.currentHealth = Mathf.Clamp(playerStats.currentHealth, 0, playerStats.maxHealth);
+
+        if (healthBar != null)
+            healthBar.UpdateHealthBar();
+
+        if (animator != null)
+            animator.SetTrigger("GetHit");
+
+        if (playerStats.currentHealth <= 0)
             Die();
     }
 
-    // TODO: GameOver-Logik einbauen
     private void Die() {
-        _isDead = true;
-        Debug.Log("Player gestorben");
+        isDead = true;
+        Debug.Log("Player died");
     }
 }
