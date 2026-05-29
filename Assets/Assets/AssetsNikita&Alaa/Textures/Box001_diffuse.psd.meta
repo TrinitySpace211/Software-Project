@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 4fd109960784f654f93a7791dcf6c7ab
+guid: a9f05e1a790d76e43814702c92fe9b67
 timeCreated: 1473452600
 licenseType: Store
 TextureImporter:
@@ -55,10 +55,3 @@ TextureImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 70659
-  packageName: Old building
-  packageVersion: 1.0
-  assetPath: Assets/Old building/Texture/Box001_diffuse.psd
-  uploadId: 136477

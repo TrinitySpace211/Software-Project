@@ -133,5 +133,6 @@ AssetOrigin:
   productId: 321415
   packageName: Military prop pack - Defense
   packageVersion: 1.0
-  assetPath: Assets/Defensive_props/Materials/warlow_military prop pack_BaseMap.png
+  assetPath: Assets/Assets/AssetsNikita&Alaa/Defensive_props/Materials/warlow_military
+    prop pack_BaseMap.png
   uploadId: 759263

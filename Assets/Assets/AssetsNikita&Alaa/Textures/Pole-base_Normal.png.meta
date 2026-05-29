@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 058a3fcbc1b65df499fd588df334e07a
+guid: 039b31982db92d841bddae5594bad8f2
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -7,7 +7,7 @@ TextureImporter:
   mipmaps:
     mipMapMode: 0
     enableMipMap: 1
-    sRGBTexture: 1
+    sRGBTexture: 0
     linearTexture: 0
     fadeOut: 0
     borderMipMap: 0
@@ -35,9 +35,9 @@ TextureImporter:
     filterMode: -1
     aniso: -1
     mipBias: -100
-    wrapU: 2
-    wrapV: 2
-    wrapW: 2
+    wrapU: -1
+    wrapV: -1
+    wrapW: -1
   nPOTScale: 1
   lightmap: 0
   compressionQuality: 50
@@ -52,7 +52,7 @@ TextureImporter:
   alphaUsage: 1
   alphaIsTransparency: 0
   spriteTessellationDetail: -1
-  textureType: 0
+  textureType: 1
   textureShape: 1
   singleChannelComponent: 0
   maxTextureSizeSet: 0
@@ -109,5 +109,5 @@ AssetOrigin:
   productId: 192094
   packageName: Modular Lowpoly Streets (Free)
   packageVersion: 1.0
-  assetPath: Assets/Assets/AssetsNikita&Alaa/Textures/Border_AlbedoGloss.png
+  assetPath: Assets/Assets/AssetsNikita&Alaa/Textures/Pole-base_Normal.png
   uploadId: 424863
