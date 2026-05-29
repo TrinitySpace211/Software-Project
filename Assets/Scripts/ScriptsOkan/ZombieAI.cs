@@ -40,7 +40,7 @@ public class ZombieAI : MonoBehaviour {
             originalColor = zombieMaterial.color;
         }
 
-HEAD
+
         _agent.speed = enemyStatsSO.moveSpeed;
  
         _targetHealth = target.GetComponentInChildren<PlayerHealth>();
@@ -52,7 +52,7 @@ HEAD
             _targetHealth = target.GetComponentInChildren<PlayerHealth>();
         }
 
- 4da56b5 (added some code into scripts so the healthbar display the zombie damage properly)
+ //(added some code into scripts so the healthbar display the zombie damage properly)
     }
 
     private void Update() {
