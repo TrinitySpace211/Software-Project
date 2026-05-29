@@ -4,7 +4,7 @@ using UnityEngine.InputSystem.Controls;
 using UnityEngine.UI;
 
 /// <summary>
-/// Macht eine Kiste als lootbar erkennbar und erlaubt dem Spieler, sie mit E zu öffnen.
+/// Makes a chest recognizable as lootable and allows the player to open it with the E key.
 /// </summary>
 public class LootChest : MonoBehaviour
 {
@@ -12,18 +12,18 @@ public class LootChest : MonoBehaviour
     private const string OpenedText = "Geöffnet";
 
     [Header("References")]
-    // Player und Kamera können im Inspector gesetzt werden.
-    // Falls sie leer sind, sucht das Script sie automatisch.
+    // Player and camera can be assigned in the Inspector.
+    // Player and camera can be assigned in the Inspector.
     [SerializeField] private Transform player;
     [SerializeField] private Camera playerCamera;
 
     [Header("Interaction")]
-    // Entfernung und Taste für die Interaktion.
+    // Distance and key used for interaction.
     [SerializeField] private float interactionDistance = 2.5f;
     [SerializeField] private Key interactionKey = Key.E;
 
     [Header("Visual Feedback")]
-    // Position, Farbe und Stärke vom Hinweis und vom Leuchten.
+    // Position, color, and intensity of the hint and glow.
     [SerializeField] private Vector3 textOffset = new Vector3(0f, 1.6f, 0f);
     [SerializeField] private Vector3 lightOffset = new Vector3(0f, 0.7f, 0f);
     [SerializeField] private Color lootColor = new Color(1f, 0.86f, 0.18f);
@@ -56,7 +56,7 @@ public class LootChest : MonoBehaviour
 
     private void FindMissingReferences()
     {
-        // Player automatisch über den Tag "Player" suchen.
+        // Automatically find the player using the "Player" tag..
         if (player == null)
         {
             GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
@@ -66,7 +66,7 @@ public class LootChest : MonoBehaviour
             }
         }
 
-        // Kamera automatisch suchen, damit der Text zur Kamera schauen kann.
+        // Automatically find the camera so the text can face it.
         if (playerCamera == null)
         {
             playerCamera = Camera.main;
@@ -75,7 +75,7 @@ public class LootChest : MonoBehaviour
 
     private void CreateHintText()
     {
-        // Erstellt einen kleinen Text über der Kiste.
+        // Creates a small text above the chest.
         GameObject canvasObject = new GameObject("LootHint", typeof(RectTransform), typeof(Canvas));
         canvasObject.transform.SetParent(transform);
         canvasObject.transform.localPosition = textOffset;
@@ -119,7 +119,7 @@ public class LootChest : MonoBehaviour
 
     private void CreateLootLight()
     {
-        // Erstellt das Licht, damit die Kiste als lootbar auffällt.
+        // Creates the light so the chest stands out as lootable..
         GameObject lightObject = new GameObject("LootLight");
         lightObject.transform.SetParent(transform);
         lightObject.transform.localPosition = lightOffset;
@@ -135,7 +135,7 @@ public class LootChest : MonoBehaviour
 
     private void CheckPlayerDistance()
     {
-        // Prüft, ob der Spieler nah genug an der Kiste ist.
+        // Checks whether the player is close enough to the chest.
         if (player == null || isOpened)
         {
             playerInRange = false;
@@ -152,7 +152,7 @@ public class LootChest : MonoBehaviour
             return;
         }
 
-        // Der Text schaut immer zur Kamera.
+        //  The text always faces the camera.
         Transform textRoot = hintText.transform.parent;
         if (playerCamera != null)
         {
@@ -181,14 +181,14 @@ public class LootChest : MonoBehaviour
             return;
         }
 
-        // Nach dem Öffnen geht das Licht aus.
+        // Turn off the light after the chest has been opened.
         if (isOpened)
         {
             lootLight.enabled = false;
             return;
         }
 
-        // Das Licht pulsiert leicht. In Reichweite wird es grün.
+        // The light pulses slightly. It turns green when the player is in range.
         float pulse = 1f + Mathf.Sin(Time.time * pulseSpeed) * 0.25f;
         lootLight.color = playerInRange ? interactColor : lootColor;
         lootLight.range = lightRange;
@@ -197,7 +197,7 @@ public class LootChest : MonoBehaviour
 
     private void CheckInteractionInput()
     {
-        // Der Spieler kann nur in Reichweite und nur einmal öffnen.
+        // The player can only open the chest once and only while in range.
         if (isOpened || !playerInRange || Keyboard.current == null)
         {
             return;
@@ -212,14 +212,14 @@ public class LootChest : MonoBehaviour
 
     private void OpenChest()
     {
-        // Merkt sich, dass die Kiste geöffnet wurde.
+        //  Marks the chest as opened.
         isOpened = true;
         Debug.Log($"Loot chest '{name}' was opened.");
     }
 
     private void OnDrawGizmosSelected()
     {
-        // Zeigt im Editor die Interaktionsreichweite und die Text-Höhe an.
+        // Displays the interaction range and text height in the editor.
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, interactionDistance);
         Gizmos.DrawLine(transform.position, transform.position + textOffset);
