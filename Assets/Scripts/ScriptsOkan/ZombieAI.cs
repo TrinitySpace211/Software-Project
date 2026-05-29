@@ -13,6 +13,7 @@ public class ZombieAI : MonoBehaviour {
 
     /// <summary>Transform des Ziels (Player). Im Inspector setzen.</summary>
     [SerializeField] private Transform target;
+    [SerializeField] private GameObject[] joints;
 
     /// <summary>Stats-ScriptableObject mit Speed, Damage, AttackRange etc.</summary>
     public EnemyStatsSO enemyStatsSO;
@@ -42,6 +43,10 @@ public class ZombieAI : MonoBehaviour {
 
         if (target != null)
             _targetHealth = target.GetComponent<PlayerHealth>();
+
+        foreach (var joint in joints) {
+            joint.GetComponent<Rigidbody>().isKinematic = true;
+        }
     }
 
     private void Update() {
@@ -98,6 +103,13 @@ public class ZombieAI : MonoBehaviour {
         if (health <= 0) {
             isDead = true;
             _animController?.SetDead(isDead);
+
+            //Ragdoll
+            _animController.enabled = false;
+
+            foreach (var joint in joints) {
+                joint.GetComponent<Rigidbody>().isKinematic = false;
+            }
         }
     }
 

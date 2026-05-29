@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// This is the Player Class. The Player Movement, Jumping and Rotation will be calculated.
@@ -8,17 +9,19 @@ using UnityEngine.Animations.Rigging;
 /// The Player needs the Component "CharacterController" to work properly.
 /// The inputs will be handled in the "PlayerInputHandler" Script.
 /// </summary>
-[DefaultExecutionOrder(-1)]
+[DefaultExecutionOrder(-1), DisallowMultipleComponent]
 public class Player : MonoBehaviour {
 
     #region Class Variables
     [Header("References")]
     [SerializeField] private PlayerInputHandler playerInputHandler;
     [SerializeField] private CharacterController characterController;
+    [SerializeField] private PlayerAnimation playerAnimation;
     [SerializeField] private Camera playerCamera;
     [SerializeField] private LayerMask layerMask;
     [SerializeField] private Rig aimLayer;
     [SerializeField] private BaseStats baseStats;
+    [SerializeField] private PlayerGunSelector gunSelector;
 
     [Header("Movement Parameters")]
     [SerializeField] private float walkSpeed = 4f;
@@ -43,6 +46,7 @@ public class Player : MonoBehaviour {
     private Vector3 worldMousePos;
     private Vector3 currentMovement;
     private float currentSpeed => walkSpeed * (playerInputHandler.SprintTriggered ? sprintMultipier : 1f);
+    private Vector3 currentLookDir;
 
     //PlayerState and Movement Checks
     private CurrentPlayerState _playerState;
@@ -50,6 +54,10 @@ public class Player : MonoBehaviour {
     private bool isMovingLaterally;
     private bool isSprinting;
     private bool _isDead;
+
+    //Cooldown
+    private float attackCooldown;
+    [SerializeField] private float attackCooldownMax = 0.1f;
     #endregion
 
     private void Start() {
@@ -65,6 +73,14 @@ public class Player : MonoBehaviour {
         UpdateMovementState();
         HandleMovement();
         HandleAiming();
+
+        //Schusslogik
+        attackCooldown -= Time.deltaTime;
+        if (attackCooldown <= 0f) {
+            HandleShooting(currentLookDir);
+
+            attackCooldown = attackCooldownMax;
+        }
     }
 
     /// <summary>
@@ -120,6 +136,7 @@ public class Player : MonoBehaviour {
         //Blickrichtung ist die Position von der Maus subtrahiert mit der Position des Players 
         Vector3 lookDir = mouseDir - transform.position;
         lookDir.y = 0;
+        currentLookDir = lookDir;
 
         //Blickrichtung zur Bewegungsrichtung
         Vector3 moveDir = new Vector3(currentMovement.x, 0f, currentMovement.z);
@@ -129,20 +146,7 @@ public class Player : MonoBehaviour {
             Quaternion targetRotation = Quaternion.LookRotation(lookDir);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationMouseDirAmount * Time.deltaTime);
 
-            Ray ray = new Ray(new Vector3(transform.position.x, 1f, transform.position.z), lookDir);
 
-            if (playerInputHandler.AttackTriggered && playerInputHandler.AimingTriggered) {
-                if (Physics.Raycast(ray, out RaycastHit hit, 5f)) { //Hit with bullets
-                    if (hit.transform.TryGetComponent(out ZombieAI zombie)) {
-                        if (!zombie.IsDead()) {
-                            zombie.TakeDamage(50);
-                        }
-                    }
-                }
-
-                // Nur einmal pro Klick Schaden verursachen.
-                playerInputHandler.SetAttackTriggered(false);
-            }
         } else if (moveDir.sqrMagnitude > 0.1f && isSprinting) {
             Quaternion targetRotation = Quaternion.LookRotation(moveDir);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationMoveDirAmount * Time.deltaTime);
@@ -152,7 +156,7 @@ public class Player : MonoBehaviour {
         characterController.Move(currentMovement * Time.deltaTime);
     }
 
-    private void OnDrawGizmos() {
+    /* private void OnDrawGizmos() {
         Vector3 mouseDir = CalculateMouseDirection();
 
         Vector3 lookDir = mouseDir - transform.position;
@@ -161,7 +165,7 @@ public class Player : MonoBehaviour {
         Ray ray = new Ray(new Vector3(transform.position.x, 1f, transform.position.z), lookDir);
 
         Gizmos.DrawRay(ray.origin, ray.direction);
-    }
+    } */
 
     /// <summary>
     /// This Method handles the Jumping, but due to the Player not having animations it is marked as deprecated for now
@@ -183,10 +187,35 @@ public class Player : MonoBehaviour {
     /// It switches from RigLayer_WeaponPose to RigLayer_WeaponAiming
     /// </summary>
     private void HandleAiming() {
+        //Debug
+        /* aimLayer.weight = 1;
+        playerAnimation.SetAimAnimation(true); */
+
         if (playerInputHandler.AimingTriggered && !isSprinting) {
             aimLayer.weight += Time.deltaTime / aimDuration;
+            playerAnimation.SetAimAnimation(true);
         } else {
             aimLayer.weight -= Time.deltaTime / aimDuration;
+            playerAnimation.SetAimAnimation(false);
+        }
+    }
+
+    private void HandleShooting(Vector3 direction) {
+        Ray ray = new Ray(new Vector3(transform.position.x, 1f, transform.position.z), direction);
+
+        if (playerInputHandler.AttackTriggered && playerInputHandler.AimingTriggered) {
+
+            if (gunSelector.activeGun != null) {
+                gunSelector.activeGun.Shoot();
+            }
+
+            if (Physics.Raycast(ray, out RaycastHit hit, 5f)) { //Hit with bullets
+                if (hit.transform.TryGetComponent(out ZombieAI zombie)) {
+                    if (!zombie.IsDead()) {
+                        zombie.TakeDamage(50);
+                    }
+                }
+            }
         }
     }
 
