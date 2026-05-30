@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 4352a8c44e37d4e14904d4002e296329
+guid: 9e21f6b2368074fa08acb998932cd77f
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -7,7 +7,7 @@ TextureImporter:
   mipmaps:
     mipMapMode: 0
     enableMipMap: 1
-    sRGBTexture: 0
+    sRGBTexture: 1
     linearTexture: 0
     fadeOut: 0
     borderMipMap: 0
@@ -54,7 +54,7 @@ TextureImporter:
   alphaUsage: 1
   alphaIsTransparency: 0
   spriteTessellationDetail: -1
-  textureType: 1
+  textureType: 0
   textureShape: 1
   singleChannelComponent: 0
   flipbookRows: 1
@@ -120,5 +120,5 @@ AssetOrigin:
   productId: 313704
   packageName: 3D Medieval Fantasy Weapon Collection
   packageVersion: 1.0
-  assetPath: Assets/FlexUnit/MedievalWeaponPack/Textures/Normal.png
+  assetPath: Assets/FlexUnit/MedievalWeaponPack/Textures/Color_Atlas1.png
   uploadId: 742406
