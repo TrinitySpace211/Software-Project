@@ -10,7 +10,7 @@ using System.Collections;
 /// - Dynamic lighting (sun, color, intensity, ambient light)
 /// - Sunrise and sunset transitions
 /// </summary>
-public class DayNightCycle : MonoBehaviour {
+public class TimeSystem : MonoBehaviour {
     /// <summary>
     /// UI text showing current time and state.
     /// </summary>
@@ -74,17 +74,49 @@ public class DayNightCycle : MonoBehaviour {
     public Color nightColor = new Color(0.45f, 0.45f, 0.55f);
 
     /// <summary>
+    /// Player object reference for disabling controls during extraction.
+    /// </summary>
+    public GameObject playerObject;
+
+    /// <summary>
+    /// Extraction controller reference that starts the cutscene.
+    /// </summary>
+    public ExtractionController extractionController;
+
+    /// <summary>
+    /// Night number on which extraction should start.
+    /// </summary>
+    public int extractionNight = 10;
+
+    /// <summary>
+    /// Prevents the extraction from starting multiple times.
+    /// </summary>
+    private bool extractionTriggered;
+
+    /// <summary>
+    /// Cached Player script reference.
+    /// </summary>
+    private Player playerScript;
+
+    /// <summary>
     /// Initializes system and hides notification UI.
     /// </summary>
     void Start() {
         notificationText.gameObject.SetActive(false);
         currentState = GetTimeState();
+
+        if (playerObject != null) {
+            playerScript = playerObject.GetComponent<Player>();
+        }
     }
 
     /// <summary>
     /// Main update loop.
     /// </summary>
     void Update() {
+        if (extractionTriggered)
+            return;
+
         UpdateTime();
         HandleState();
         UpdateUI();
@@ -124,8 +156,30 @@ public class DayNightCycle : MonoBehaviour {
 
                 case TimeState.Night:
                     ShowNotification($"Night {cycleNumber} begins!");
+
+                    if (cycleNumber >= extractionNight) {
+                        TriggerExtraction();
+                    }
                     break;
             }
+        }
+    }
+
+    /// <summary>
+    /// Starts the extraction sequence and disables player controls.
+    /// </summary>
+    private void TriggerExtraction() {
+        if (extractionTriggered)
+            return;
+
+        extractionTriggered = true;
+
+        if (playerScript != null) {
+            playerScript.enabled = false;
+        }
+
+        if (extractionController != null) {
+            extractionController.StartExtraction();
         }
     }
 
