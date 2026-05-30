@@ -8,9 +8,11 @@ public class PlayerHealth : MonoBehaviour {
     [SerializeField] private PlayerStats playerStats;
     [SerializeField] private BaseStats baseStats;
 
+
     [SerializeField] private Animator animator;
 
 // (added some code into scripts so the healthbar display the zombie damage properly)
+
 
     private bool isDead;
     private HealthBar healthBar;
@@ -27,11 +29,16 @@ public class PlayerHealth : MonoBehaviour {
         }
 
 
+
         if (animator == null)
             animator = GetComponent<Animator>();
 
 
- // (added some code into scripts so the healthbar display the zombie damage properly)
+
+        if (animator == null)
+            animator = GetComponent<Animator>();
+
+
         playerStats = new PlayerStats {
             maxHealth = baseStats.health,
             currentHealth = baseStats.health,
@@ -62,11 +69,18 @@ public class PlayerHealth : MonoBehaviour {
             healthBar.UpdateHealthBar();
 
 
+
         if (animator != null)
             animator.SetTrigger("GetHit");
 
 
  // (added some code into scripts so the healthbar display the zombie damage properly)
+
+
+        if (animator != null)
+            animator.SetTrigger("GetHit");
+
+
         if (playerStats.currentHealth <= 0)
             Die();
     }
