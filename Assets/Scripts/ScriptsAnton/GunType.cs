@@ -1,8 +1,7 @@
 
 public enum GunType {
-
-    Pistol,
-    AssaultRifle,
-    Sniper,
-    Shotgun
+    AssaultRifle = 0,
+    Pistol = 1,
+    Sniper = 2,
+    Shotgun = 3
 }

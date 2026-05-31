@@ -13,13 +13,14 @@ public class PlayerAnimation : MonoBehaviour {
 
     private Vector3 currentBlendInput = Vector3.zero;
     private CurrentPlayerState playerState;
-    bool isSprinting;
+    private bool isSprinting;
 
     private int inputXHash = Animator.StringToHash("inputX");
     private int inputYHash = Animator.StringToHash("inputY");
     private int inputyMagnitudeHash = Animator.StringToHash("inputMagnitude");
+    private int rotationMismatchHash = Animator.StringToHash("rotationMismatch");
     private int getHitHash = Animator.StringToHash("GetHit");
-    private int isAssault = Animator.StringToHash("IsAssault");
+    private int isWeaponAiming = Animator.StringToHash("IsWeaponAiming");
 
     private void Start() {
         playerState = GetComponent<CurrentPlayerState>();
@@ -63,6 +64,10 @@ public class PlayerAnimation : MonoBehaviour {
     }
 
     public void SetAimAnimation(bool state) {
-        animator.SetBool(isAssault, state);
+        animator.SetBool(isWeaponAiming, state);
+    }
+
+    public void SetRotationMismatch(float mismatch) {
+        animator.SetFloat(rotationMismatchHash, mismatch);
     }
 }

@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class PlayerIK : MonoBehaviour {
 
+    [Header("Runtime Filled")]
     public Transform leftHandIKTarget;
     public Transform rightHandIKTarget;
     public Transform leftElbowIKTarget;
@@ -15,11 +16,19 @@ public class PlayerIK : MonoBehaviour {
     public float elbowIKAmount = 1f;
 
     private Animator animator;
+    private int gunLayer;
+    private bool hasWeapon = false;
+
+    private readonly int isWeaponHash = Animator.StringToHash("HasWeapon");
 
     private void Awake() {
         animator = GetComponent<Animator>();
     }
 
+    private void Start() {
+        gunLayer = animator.GetLayerIndex("GunLayer");
+        SetNoWeapon();
+    }
 
     private void OnAnimatorIK(int layerIndex) {
         if (leftHandIKTarget != null) {
@@ -44,22 +53,6 @@ public class PlayerIK : MonoBehaviour {
         }
     }
 
-    public void SetGunAssault() {
-        animator.SetBool("IsAssault", true);
-    }
-
-    public void SetGunToPistol() {
-        animator.SetBool("IsPistol", true);
-    }
-
-    public void SetGunToSniper() {
-        animator.SetBool("IsSniper", true);
-    }
-
-    public void SetGunToShotgun() {
-        animator.SetBool("IsShotgun", true);
-    }
-
     public void Setup(Transform gunParent) {
         Transform[] allChildren = gunParent.GetComponentsInChildren<Transform>();
         leftElbowIKTarget = allChildren.FirstOrDefault(child => child.name == "LeftElbow");
@@ -67,4 +60,25 @@ public class PlayerIK : MonoBehaviour {
         leftHandIKTarget = allChildren.FirstOrDefault(child => child.name == "LeftHand");
         rightHandIKTarget = allChildren.FirstOrDefault(child => child.name == "RightHand");
     }
+
+    public void SetNoWeapon() {
+        SetWeaponState(false);
+    }
+
+    public void SetWeapon() {
+        SetWeaponState(true);
+    }
+
+    private void SetWeaponState(bool state) {
+        hasWeapon = state;
+        animator.SetLayerWeight(gunLayer, state ? 1 : 0);
+        animator.SetBool(isWeaponHash, state);
+        //animator.SetBool(isWeaponHash, state == WeaponState.Sniper);
+        //animator.SetBool(isWeaponHash, state == WeaponState.Shotgun);
+    }
+
+    public bool GetHasWeapon() {
+        return hasWeapon;
+    }
+
 }
