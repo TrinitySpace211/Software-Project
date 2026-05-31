@@ -588,6 +588,8 @@ GameObject:
   - component: {fileID: 810042241}
   - component: {fileID: 810042240}
   - component: {fileID: 810042243}
+  - component: {fileID: 810042244}
+  - component: {fileID: 810042245}
   m_Layer: 0
   m_Name: box6 (1)
   m_TagString: Untagged
@@ -702,11 +704,75 @@ MonoBehaviour:
   interactionKey: 19
   textOffset: {x: 0, y: 1.6, z: 0}
   lightOffset: {x: 0, y: 0.7, z: 0}
-  lootColor: {r: 1, g: 0.86, b: 0.18, a: 1}
-  interactColor: {r: 0.25, g: 1, b: 0.45, a: 1}
+  neverOpenedColor: {r: 1, g: 0.86, b: 0.18, a: 1}
+  openedColor: {r: 0.25, g: 1, b: 0.45, a: 1}
   lightRange: 3
   lightIntensity: 2.5
   pulseSpeed: 4
+--- !u!114 &810042244
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 810042238}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3f45c058f9b52741b1e5ddac9e461d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 0}
+  playerCamera: {fileID: 0}
+  interactionDistance: 2.5
+  interactionKey: 19
+  textOffset: {x: 0, y: 1.6, z: 0}
+  lightOffset: {x: 0, y: 0.7, z: 0}
+  lootColor:
+    r: 1
+    g: 0.86
+    b: 0.18
+    a: 1
+  interactColor:
+    r: 0.25
+    g: 1
+    b: 0.45
+    a: 1
+  lightRange: 3
+  lightIntensity: 2.5
+  pulseSpeed: 4
+  hintText: {fileID: 0}
+  lootLight: {fileID: 0}
+  playerInRange: 0
+  textBaseScale: 0
+  lastOpenTime: 0
+--- !u!114 &810042245
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 810042238}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b793fd755347cc4bb76eeb818592747, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 5525908484786041238}
+  interactionDistance: 2.5
+  interactionKey: 19
+  lid: {fileID: 0}
+  openRotation: {x: -70, y: 0, z: 0}
+  openSpeed: 8
+  itemPrefabs:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  spawnPoint: {fileID: 0}
+  minItems: 1
+  maxItems: 3
+  spawnRadius: 0.5
+  upwardForce: 2.5
+  outwardForce: 1.5
 --- !u!1001 &965378878
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -4,16 +4,15 @@ using UnityEngine.InputSystem.Controls;
 using UnityEngine.UI;
 
 /// <summary>
-/// Makes a chest recognizable as lootable and allows the player to open it with the E key.
+/// Makes a chest recognizable as lootable and allows the player to open it multiple times with E.
 /// </summary>
 public class LootChest : MonoBehaviour
 {
     private const string PromptText = "E drücken, um Kiste zu öffnen";
-    private const string OpenedText = "Geöffnet";
 
     [Header("References")]
     // Player and camera can be assigned in the Inspector.
-    // Player and camera can be assigned in the Inspector.
+    // If they are empty, the script tries to find them automatically.
     [SerializeField] private Transform player;
     [SerializeField] private Camera playerCamera;
 
@@ -23,11 +22,11 @@ public class LootChest : MonoBehaviour
     [SerializeField] private Key interactionKey = Key.E;
 
     [Header("Visual Feedback")]
-    // Position, color, and intensity of the hint and glow.
+    // Position, color, and strength of the hint and the glow.
     [SerializeField] private Vector3 textOffset = new Vector3(0f, 1.6f, 0f);
     [SerializeField] private Vector3 lightOffset = new Vector3(0f, 0.7f, 0f);
-    [SerializeField] private Color lootColor = new Color(1f, 0.86f, 0.18f);
-    [SerializeField] private Color interactColor = new Color(0.25f, 1f, 0.45f);
+    [SerializeField] private Color neverOpenedColor = new Color(1f, 0.86f, 0.18f);
+    [SerializeField] private Color openedColor = new Color(0.25f, 1f, 0.45f);
     [SerializeField] private float lightRange = 3f;
     [SerializeField] private float lightIntensity = 2.5f;
     [SerializeField] private float pulseSpeed = 4f;
@@ -35,7 +34,8 @@ public class LootChest : MonoBehaviour
     private Text hintText;
     private Light lootLight;
     private bool playerInRange;
-    private bool isOpened;
+    private bool hasBeenOpened;
+    private bool isCurrentlyOpen;
     private float textBaseScale;
 
     private void Awake()
@@ -49,6 +49,7 @@ public class LootChest : MonoBehaviour
     {
         FindMissingReferences();
         CheckPlayerDistance();
+        ResetOpenStateAfterPlayerLeaves();
         UpdateHintText();
         UpdateLootLight();
         CheckInteractionInput();
@@ -56,7 +57,7 @@ public class LootChest : MonoBehaviour
 
     private void FindMissingReferences()
     {
-        // Automatically find the player using the "Player" tag..
+        // Automatically find the player by using the "Player" tag.
         if (player == null)
         {
             GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
@@ -111,7 +112,14 @@ public class LootChest : MonoBehaviour
         hintText.fontSize = 20;
         hintText.color = Color.white;
         hintText.raycastTarget = false;
-        hintText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+
+        Font builtInFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        if (builtInFont == null)
+        {
+            builtInFont = Resources.GetBuiltinResource<Font>("Arial.ttf");
+        }
+
+        hintText.font = builtInFont;
         hintText.horizontalOverflow = HorizontalWrapMode.Overflow;
         hintText.verticalOverflow = VerticalWrapMode.Overflow;
         hintText.gameObject.SetActive(false);
@@ -119,7 +127,7 @@ public class LootChest : MonoBehaviour
 
     private void CreateLootLight()
     {
-        // Creates the light so the chest stands out as lootable..
+        // Creates the light so the chest stands out as lootable.
         GameObject lightObject = new GameObject("LootLight");
         lightObject.transform.SetParent(transform);
         lightObject.transform.localPosition = lightOffset;
@@ -127,7 +135,7 @@ public class LootChest : MonoBehaviour
 
         lootLight = lightObject.AddComponent<Light>();
         lootLight.type = LightType.Point;
-        lootLight.color = lootColor;
+        lootLight.color = neverOpenedColor;
         lootLight.range = lightRange;
         lootLight.intensity = lightIntensity;
         lootLight.shadows = LightShadows.None;
@@ -136,13 +144,23 @@ public class LootChest : MonoBehaviour
     private void CheckPlayerDistance()
     {
         // Checks whether the player is close enough to the chest.
-        if (player == null || isOpened)
+        if (player == null)
         {
             playerInRange = false;
             return;
         }
 
         playerInRange = Vector3.Distance(player.position, transform.position) <= interactionDistance;
+    }
+
+    private void ResetOpenStateAfterPlayerLeaves()
+    {
+        // After opening, the light stays off while the player remains near the chest.
+        // Once the player leaves, the chest becomes visible and usable again.
+        if (isCurrentlyOpen && !playerInRange)
+        {
+            isCurrentlyOpen = false;
+        }
     }
 
     private void UpdateHintText()
@@ -152,7 +170,7 @@ public class LootChest : MonoBehaviour
             return;
         }
 
-        //  The text always faces the camera.
+        // The text always faces the camera.
         Transform textRoot = hintText.transform.parent;
         if (playerCamera != null)
         {
@@ -163,15 +181,8 @@ public class LootChest : MonoBehaviour
             }
         }
 
-        if (isOpened)
-        {
-            hintText.text = OpenedText;
-            hintText.gameObject.SetActive(false);
-            return;
-        }
-
         hintText.text = PromptText;
-        hintText.gameObject.SetActive(playerInRange);
+        hintText.gameObject.SetActive(playerInRange && !isCurrentlyOpen);
     }
 
     private void UpdateLootLight()
@@ -181,24 +192,26 @@ public class LootChest : MonoBehaviour
             return;
         }
 
-        // Turn off the light after the chest has been opened.
-        if (isOpened)
+        // Directly after opening, the light turns off.
+        if (isCurrentlyOpen)
         {
             lootLight.enabled = false;
             return;
         }
 
-        // The light pulses slightly. It turns green when the player is in range.
+        // Never opened before: yellow from a distance.
+        // In range or already opened once: green.
         float pulse = 1f + Mathf.Sin(Time.time * pulseSpeed) * 0.25f;
-        lootLight.color = playerInRange ? interactColor : lootColor;
+        lootLight.enabled = true;
+        lootLight.color = (playerInRange || hasBeenOpened) ? openedColor : neverOpenedColor;
         lootLight.range = lightRange;
         lootLight.intensity = lightIntensity * pulse;
     }
 
     private void CheckInteractionInput()
     {
-        // The player can only open the chest once and only while in range.
-        if (isOpened || !playerInRange || Keyboard.current == null)
+        // The player can open the chest in range as long as it is not currently open.
+        if (isCurrentlyOpen || !playerInRange || Keyboard.current == null)
         {
             return;
         }
@@ -212,14 +225,15 @@ public class LootChest : MonoBehaviour
 
     private void OpenChest()
     {
-        //  Marks the chest as opened.
-        isOpened = true;
+        // The chest has been opened at least once and is currently open.
+        hasBeenOpened = true;
+        isCurrentlyOpen = true;
         Debug.Log($"Loot chest '{name}' was opened.");
     }
 
     private void OnDrawGizmosSelected()
     {
-        // Displays the interaction range and text height in the editor.
+        // Shows the interaction range and text height in the editor.
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, interactionDistance);
         Gizmos.DrawLine(transform.position, transform.position + textOffset);
