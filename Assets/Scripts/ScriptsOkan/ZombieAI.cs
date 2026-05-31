@@ -35,18 +35,24 @@ public class ZombieAI : MonoBehaviour {
         _agent = GetComponent<NavMeshAgent>();
         _animController = GetComponent<ZombieAnimationController>();
 
-        zombieMaterial = skinnedMeshRenderer.material;
-        originalColor = zombieMaterial.color;
-
-        if (enemyStatsSO != null)
-            _agent.speed = enemyStatsSO.moveSpeed;
-
-        if (target != null)
-            _targetHealth = target.GetComponent<PlayerHealth>();
-
-        foreach (var joint in joints) {
-            joint.GetComponent<Rigidbody>().isKinematic = true;
+        if (skinnedMeshRenderer != null) {
+            zombieMaterial = skinnedMeshRenderer.material;
+            originalColor = zombieMaterial.color;
         }
+
+
+        _agent.speed = enemyStatsSO.moveSpeed;
+ 
+        _targetHealth = target.GetComponentInChildren<PlayerHealth>();
+
+        if (enemyStatsSO != null) {
+            _agent.speed = enemyStatsSO.moveSpeed;
+        }
+        if (target != null) {
+            _targetHealth = target.GetComponentInChildren<PlayerHealth>();
+        }
+
+ //(added some code into scripts so the healthbar display the zombie damage properly)
     }
 
     private void Update() {
