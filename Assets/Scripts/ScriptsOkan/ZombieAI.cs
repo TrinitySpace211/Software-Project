@@ -64,6 +64,7 @@ public class ZombieAI : MonoBehaviour {
         if (isDead) {
             _agent.isStopped = true;
             _agent.velocity = Vector3.zero;
+            return;
         } else if (!inAttackRange) {
             _agent.isStopped = false;
             _agent.SetDestination(targetPos);
@@ -79,6 +80,10 @@ public class ZombieAI : MonoBehaviour {
 
     private void HandleAttack() {
         if (_attackTimer <= 0f && !_isAttacking) {
+            if (enemyStatsSO == null || _targetHealth == null) {
+                return;
+            }
+
             _isAttacking = true;
             _animController?.TriggerAttack();
             _targetHealth.TakeDamage(enemyStatsSO.damage);
