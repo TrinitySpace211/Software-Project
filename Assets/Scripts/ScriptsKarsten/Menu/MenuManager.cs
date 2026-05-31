@@ -9,7 +9,7 @@ using UnityEngine.EventSystems;
 /// </summary>
 public class MenuManager : MonoBehaviour {
 
-    [SerializeField] private string gameSceneName = "WorldScene";
+    [SerializeField] private string gameSceneName = "MainScene";
 
     [SerializeField] private GameObject settingsPanel;
 
