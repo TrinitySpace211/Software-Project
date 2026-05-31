@@ -1,17 +1,33 @@
 using UnityEngine;
 
-public class Emmitter : MonoBehaviour // Script to creates the arrows at regular intervals
+/// <summary>
+/// Creates and shoots arrows at regular intervals.
+/// </summary>
+public class Emmitter : MonoBehaviour 
 {
-    // The bullet-Prefab which should be spawn
+    /// <summary>
+    /// The bullet-Prefab which should be spawn.
+    /// </summary>
     public GameObject bullet;
 
-    // The Time between 2 arrows
-    public float timeInterval = 0.4f; 
-  
-    private float currentTime; // Timer for the countdown until next shot
-    public FindEnemy enemy; // Variable to have a reference to the FindEnemy script to story the found enemy
+    /// <summary>
+    /// The Time between 2 arrows.
+    /// </summary>
+    public float timeInterval = 0.4f;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    /// <summary>
+    /// Timer for the countdown until next shot.
+    /// </summary>
+    private float currentTime;
+
+    /// <summary>
+    /// // Reference to the FindEnemy script that stores the currently found enemy.
+    /// </summary>
+    public FindEnemy enemy;
+
+    /// <summary>
+    /// Initializes the shooting timer and gets the FindEnemy component from the parent GameObject.
+    /// </summary>
     private void Start()
     {
         // To set the Timer from the inspector (timeInterval is global and public)
@@ -21,7 +37,9 @@ public class Emmitter : MonoBehaviour // Script to creates the arrows at regular
         enemy = GetComponentInParent<FindEnemy>(); 
     }
 
-    // Update is called once per frame
+    /// <summary>
+    /// Counts down the timer and shoots at the current enemy when the timer reaches zero.
+    /// </summary>
     private void Update()
     {
         if (enemy == null || enemy.enemy == null)
@@ -39,6 +57,9 @@ public class Emmitter : MonoBehaviour // Script to creates the arrows at regular
         }
     }
 
+    /// <summary>
+    /// Spawns a bullet (arrow) and assigns the given target to it.
+    /// </summary>
     private void Shoot(GameObject target) {
 
         // Information for the developer

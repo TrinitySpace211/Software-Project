@@ -1,17 +1,28 @@
 using UnityEngine;
 
-public class FindEnemy : MonoBehaviour { // This script searches continously the next zomnie in a defined radius
+/// <summary>
+/// Continuously searches for the nearest enemy within a defined radius.
+/// </summary>
+public class FindEnemy : MonoBehaviour {
 
-    // Variable to store the foundet enemy, other scripts (LookAtEnemy.cs Emmitter.cs) use this value
+    /// <summary>
+    /// Stores the found enemy. Other scripts, such as LookAtEnemy.cs and Emmitter.cs, use this value.
+    /// </summary>
     public GameObject enemy; 
 
-    // The radius of the tower
+    /// <summary>
+    /// The search radius of the tower.
+    /// </summary>
     public float radius = 10f;
 
-    // To define how often a enemy will be serched, in this case in a period of 0.25 seconds
+    /// <summary>
+    /// To define how often a enemy will be searched, in this case in a period of 0.25 seconds.
+    /// </summary>
     public float searchInterval = 0.25f;
 
-    // The defined Enemy Tag to find the enemies as GameObjects
+    /// <summary>
+    /// The defined Enemy Tag to find the enemies as GameObjects.
+    /// </summary>
     public string enemyTag = "Enemy"; 
 
 
@@ -24,29 +35,34 @@ public class FindEnemy : MonoBehaviour { // This script searches continously the
         InvokeRepeating(nameof(FindNewEnemy), 0f, searchInterval); 
     }
 
-    private void OnDisable() { // If GameObject with this script deactivated, this method will be called
+    // If GameObject with this script deactivated, this method will be called
+    private void OnDisable() {
 
         // If the tower deactivated, FindNewEnemy() method should not be called anymore
         CancelInvoke(nameof(FindNewEnemy));
     }
 
+    /// <summary>
+    /// Searches for the nearest active enemy within the defined radius.
+    /// </summary>
     private void FindNewEnemy() {
 
-        // Variable to store GameObejcts with the "Enemy" Tag
-        GameObject[] enemies = GameObject.FindGameObjectsWithTag(enemyTag); 
+        // Stores all GameObjects with the "Enemy" tag
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag(enemyTag);
 
-        GameObject nearestEnemy = null; // To store the nearest Enemy to the tower
+        // Stores the nearest enemy to the tower
+        GameObject nearestEnemy = null;
 
-        // The biggest allowd distance between enemy and tower.
+        // // The maximum allowed distance between the enemy and the tower.
         // Later we use sqrMagnitude and this is square of the distance and performs better than Vector3.Distance
         float nearestDistance = radius * radius;
 
         foreach (GameObject possibleEnemy in enemies) {
             if (!possibleEnemy.activeInHierarchy)
-                continue; // Deactivated Enemies will be ignored
+                continue; // Ignore deactivated enemies
 
-            // Calculate the distance between enemy and tower
-            // sqrMagnitude -> The square of the magnitude of this vector
+            // Calculates the distance between enemy and tower
+            // sqrMagnitude returns the squared length of this vector
             float distance = (possibleEnemy.transform.position - transform.position).sqrMagnitude; 
 
             // Stores the new nearest Enemy
@@ -60,7 +76,8 @@ public class FindEnemy : MonoBehaviour { // This script searches continously the
     }
 
     /// <summary>
-    /// Gizmos = Lines or something like that are created from the developer. This function show us the gizmo if we selected the object
+    /// Gizmos = Lines or something like that are created from the developer. 
+    /// This function show us the gizmo if we selected the object.
     /// </summary>
     private void OnDrawGizmosSelected() {
         Gizmos.color = Color.yellow;
@@ -69,13 +86,11 @@ public class FindEnemy : MonoBehaviour { // This script searches continously the
 }
 
 /*
- * FindEnemy sucht den nächsten Zombie
+ * FindEnemy.cs sucht den nächsten Zombie (Dieses Skript auf crossbow parent)
         ↓
- * LookAtEnemy dreht die Armbrust zum Zombie
+ * LookAtEnemy.cs dreht die Armbrust zum Zombie (Dieses Skript auf die Armbrust)
         ↓
- * Emmitter schießt in Intervallen ein Bullet
+ * Emmitter.cs erzeugt die Pfeile in Zeitintervallen (Dieses Skript auf Emmitter und bekommt Bullet Prefab zugewiesen im Inspector)
         ↓
- * Bullet fliegt zum Zombie
-        ↓
- * Bullet trifft und ruft TakeDamage auf
+ * Bullet.cs lässt Bullet-Prefab zum enemy fliegen und macht Schaden
  */

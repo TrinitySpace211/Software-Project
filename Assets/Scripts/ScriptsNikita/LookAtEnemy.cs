@@ -1,28 +1,40 @@
 using Mono.Cecil.Cil;
 using UnityEngine;
 
-public class LookAtEnemy : MonoBehaviour // This script rotates the tower to the enemy
+/// <summary>
+/// Rotates the tower towards the currently found enemy.
+/// </summary>
+public class LookAtEnemy : MonoBehaviour 
 {
-    // Variable to have a reference to the FindEnemy script to story the found enemy
+    /// <summary>
+    ///  // Reference to the FindEnemy script that stores the currently found enemy.
+    /// </summary>
     public FindEnemy enemy;
 
-    // Rotation speed of the tower
-    public float rotationSpeed = 180f; 
+    /// <summary>
+    /// Rotation speed of the tower.
+    /// </summary>
+    public float rotationSpeed = 180f;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    /// <summary>
+    /// Gets the FindEnemy component from the parent GameObject if no reference was assigned.
+    /// </summary>
     private void Start()
     {
         if(enemy == null) {
-            enemy = GetComponentInParent<FindEnemy>(); // Searches in the parent GameObejct the FindEnemy component
+            // Searches in the parent GameObejct the FindEnemy component
+            enemy = GetComponentInParent<FindEnemy>(); 
         }
     }
 
-    // Update is called once per frame
+    /// <summary>
+    /// Rotates the tower towards the found enemy every frame.
+    /// </summary>
     private void Update()
     {
         if(enemy == null || enemy.enemy == null) {
 
-            // return if enemies not found, the tower doesnt rotate in this case
+            // return if enemies not found, the tower doesn't rotate in this case
             return; 
         }
 
@@ -32,7 +44,7 @@ public class LookAtEnemy : MonoBehaviour // This script rotates the tower to the
         // The y position component should be 0, because tower should not rotate in y-direction
         direction.y = 0f;
 
-        // If the direction is close to 0, the process is aborted
+        // If the direction variable is close to 0, the process is aborted
         // This prevents errors in Quaternion.LookRotation(direction)
         if (direction.sqrMagnitude <= 0.001f)
             return;
