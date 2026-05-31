@@ -12,7 +12,7 @@ public class Bullet : MonoBehaviour
     public GameObject target; 
 
     /// <summary>
-    /// Speed of the arrow .   
+    /// Speed of the arrow.   
     /// </summary>
     public float speed = 5f;
 
