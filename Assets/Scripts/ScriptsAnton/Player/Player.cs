@@ -29,7 +29,7 @@ public class Player : MonoBehaviour {
     [SerializeField] private float sprintMultipier = 1.5f;
     [SerializeField] private float movingThreshold = 0.01f;
 
-    [Header("Attack Parameters")]
+    [Header("Aim Parameters")]
     [SerializeField] private float aimDuration = 0.3f;
 
     [Header("Jump Parameters")]

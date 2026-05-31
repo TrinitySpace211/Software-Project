@@ -1,6 +1,8 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 using UnityEngine.InputSystem;
 
 [DisallowMultipleComponent]
@@ -9,6 +11,10 @@ public class PlayerGunSelector : MonoBehaviour {
     [SerializeField] private Transform[] gunParent;
     [SerializeField] private List<GunSO> guns;
     [SerializeField] private PlayerIK inverseKinematics;
+    [SerializeField] private Rig switchLayer;
+    [SerializeField] private Rig poseLayer;
+    [SerializeField] private float switchDuration;
+    [SerializeField] private float poseDuration;
 
     private GunType gunType;
 
@@ -19,8 +25,7 @@ public class PlayerGunSelector : MonoBehaviour {
     private void Update() {
         if (Keyboard.current.digit1Key.wasPressedThisFrame && activeGun != null) {
             //Idle no Weapon
-            inverseKinematics.SetNoWeapon();
-            DespawnActiveGun();
+            StartCoroutine(SelectNoWeapon());
         } else if (Keyboard.current.digit2Key.wasPressedThisFrame) {
             //Assault
             SelectAssaultRifle();
@@ -28,6 +33,23 @@ public class PlayerGunSelector : MonoBehaviour {
             //Pistol
             SelectPistol();
         }
+    }
+
+    public IEnumerator SelectNoWeapon() {
+        inverseKinematics.ClearSetup();
+
+        switchLayer.weight = 1;
+        poseLayer.weight = 0;
+
+        inverseKinematics.SwitchWeapon();
+
+        yield return new WaitForSeconds(0.75f);
+
+        DespawnActiveGun();
+
+        yield return new WaitForSeconds(0.3f);
+
+        inverseKinematics.SetGun(false);
     }
 
     public void SelectAssaultRifle() {
@@ -40,14 +62,12 @@ public class PlayerGunSelector : MonoBehaviour {
         }
 
         if (activeGun != null) {
-            DespawnActiveGun();
+            if (activeGun.type == GunType.AssaultRifle) {
+                return;
+            }
         }
 
-        activeGun = gun;
-        gun.Spawn(gunParent[weaponSlotIndex], this);
-
-        inverseKinematics.SetWeapon();
-        inverseKinematics.Setup(gunParent[weaponSlotIndex]);
+        StartCoroutine(SelectGun(gun, weaponSlotIndex));
     }
 
     public void SelectPistol() {
@@ -60,21 +80,44 @@ public class PlayerGunSelector : MonoBehaviour {
         }
 
         if (activeGun != null) {
+            if (activeGun.type == GunType.Pistol) {
+                return;
+            }
+        }
+
+        StartCoroutine(SelectGun(gun, weaponSlotIndex));
+    }
+
+    private IEnumerator SelectGun(GunSO gun, int weaponSlotIndex) {
+        switchLayer.weight = 1;
+        poseLayer.weight = 0;
+
+
+        inverseKinematics.ClearSetup();
+        inverseKinematics.SwitchWeapon();
+
+        yield return new WaitForSeconds(0.75f);
+
+        if (activeGun != null) {
             DespawnActiveGun();
         }
 
         activeGun = gun;
         gun.Spawn(gunParent[weaponSlotIndex], this);
 
-        inverseKinematics.SetWeapon();
+        yield return new WaitForSeconds(0.3f);
+
+        inverseKinematics.SetGun(true);
+
+        switchLayer.weight = 0;
+        poseLayer.weight = 1;
+
         inverseKinematics.Setup(gunParent[weaponSlotIndex]);
     }
 
     public void DespawnActiveGun() {
-        if (activeGun != null) {
-            activeGun.Despawn();
-            activeGun = null;
-        }
+        activeGun.Despawn();
+        activeGun = null;
     }
 
 }

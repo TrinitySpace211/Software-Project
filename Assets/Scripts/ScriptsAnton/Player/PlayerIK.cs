@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Linq;
 using UnityEngine;
 
@@ -19,7 +20,8 @@ public class PlayerIK : MonoBehaviour {
     private int gunLayer;
     private bool hasWeapon = false;
 
-    private readonly int isWeaponHash = Animator.StringToHash("HasWeapon");
+    private readonly int switchWeaponHash = Animator.StringToHash("SwitchWeapon");
+    private readonly int hasWeaponHash = Animator.StringToHash("HasWeapon");
 
     private void Awake() {
         animator = GetComponent<Animator>();
@@ -27,7 +29,6 @@ public class PlayerIK : MonoBehaviour {
 
     private void Start() {
         gunLayer = animator.GetLayerIndex("GunLayer");
-        SetNoWeapon();
     }
 
     private void OnAnimatorIK(int layerIndex) {
@@ -61,20 +62,22 @@ public class PlayerIK : MonoBehaviour {
         rightHandIKTarget = allChildren.FirstOrDefault(child => child.name == "RightHand");
     }
 
-    public void SetNoWeapon() {
-        SetWeaponState(false);
+    public void ClearSetup() {
+        leftElbowIKTarget = null;
+        rightElbowIKTarget = null;
+        leftHandIKTarget = null;
+        rightHandIKTarget = null;
     }
 
-    public void SetWeapon() {
-        SetWeaponState(true);
+    public void SwitchWeapon() {
+        animator.SetTrigger(switchWeaponHash);
     }
 
-    private void SetWeaponState(bool state) {
+    public void SetGun(bool state) {
         hasWeapon = state;
+
         animator.SetLayerWeight(gunLayer, state ? 1 : 0);
-        animator.SetBool(isWeaponHash, state);
-        //animator.SetBool(isWeaponHash, state == WeaponState.Sniper);
-        //animator.SetBool(isWeaponHash, state == WeaponState.Shotgun);
+        animator.SetBool(hasWeaponHash, state);
     }
 
     public bool GetHasWeapon() {
