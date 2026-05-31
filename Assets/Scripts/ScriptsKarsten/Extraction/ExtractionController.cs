@@ -26,12 +26,16 @@ public class ExtractionController : MonoBehaviour {
     [Header("Buttons")]
     public Button retryButton;
     public Button mainMenuButton;
+    public Button exitButton;
+
 
     public float buttonFadeDuration = 1.5f;
 
     // CanvasGroups für die Buttons
     private CanvasGroup retryButtonCanvasGroup;
     private CanvasGroup mainMenuButtonCanvasGroup;
+    private CanvasGroup exitButtonCanvasGroup;
+
 
     private Player playerScript;
     private PlayerInputHandler playerInputHandler;
@@ -84,6 +88,17 @@ public class ExtractionController : MonoBehaviour {
             mainMenuButtonCanvasGroup.interactable = false;
             mainMenuButtonCanvasGroup.blocksRaycasts = false;
             mainMenuButton.gameObject.SetActive(true);
+        }
+
+        if (exitButton != null) {
+            exitButtonCanvasGroup = exitButton.GetComponent<CanvasGroup>();
+            if (exitButtonCanvasGroup == null)
+                exitButtonCanvasGroup = exitButton.gameObject.AddComponent<CanvasGroup>();
+
+            exitButtonCanvasGroup.alpha = 0f;
+            exitButtonCanvasGroup.interactable = false;
+            exitButtonCanvasGroup.blocksRaycasts = false;
+            exitButton.gameObject.SetActive(true);
         }
     }
 
@@ -143,6 +158,9 @@ public class ExtractionController : MonoBehaviour {
 
         if (mainMenuButtonCanvasGroup != null)
             StartCoroutine(FadeButton(mainMenuButtonCanvasGroup, 0f, 0.9f));
+
+        if (exitButtonCanvasGroup != null)
+            StartCoroutine(FadeButton(exitButtonCanvasGroup, 0f, 0.9f));
 
         yield return new WaitForSeconds(endTextVisibleTime);
     }
@@ -211,6 +229,14 @@ public class ExtractionController : MonoBehaviour {
         group.blocksRaycasts = true;
     }
 
+    public void OnExitClicked() {
+
+        #if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+        #else
+            Application.Quit();
+        #endif
+    }
     public void OnRetryClicked() {
         UnityEngine.SceneManagement.SceneManager.LoadScene("MainScene");
     }
