@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// This is the Player Class. The Player Movement, Jumping and Rotation will be calculated.
@@ -8,33 +9,46 @@ using UnityEngine.Animations.Rigging;
 /// The Player needs the Component "CharacterController" to work properly.
 /// The inputs will be handled in the "PlayerInputHandler" Script.
 /// </summary>
-[DefaultExecutionOrder(-1)]
+[DefaultExecutionOrder(-1), DisallowMultipleComponent]
 public class Player : MonoBehaviour {
 
     #region Class Variables
     [Header("References")]
     [SerializeField] private PlayerInputHandler playerInputHandler;
     [SerializeField] private CharacterController characterController;
+    [SerializeField] private PlayerAnimation playerAnimation;
     [SerializeField] private Camera playerCamera;
     [SerializeField] private LayerMask layerMask;
     [SerializeField] private Rig aimLayer;
     [SerializeField] private BaseStats baseStats;
+    [SerializeField] private PlayerGunSelector gunSelector;
+    //[SerializeField] private Transform headPose;
 
     [Header("Movement Parameters")]
     [SerializeField] private float walkSpeed = 4f;
     [SerializeField] private float sprintMultipier = 1.5f;
     [SerializeField] private float movingThreshold = 0.01f;
 
-    [Header("Attack Parameters")]
+    [Header("Aim Parameters")]
     [SerializeField] private float aimDuration = 0.3f;
 
     [Header("Jump Parameters")]
     [SerializeField] private float jumpForce = 5f;
     [SerializeField] private float gravityMultiplier = 1f;
 
-    [Header("Look Parameter")]
+    [Header("Animation")]
     [SerializeField] private float rotationMouseDirAmount = 10f;
     [SerializeField] private float rotationMoveDirAmount = 10f;
+    [SerializeField] private float rotateToTargetTime = 0.25f;
+    [SerializeField] private float rotationTolerance = 30f;
+
+    [Header("Debugging")]
+    [SerializeField] private bool alwaysAiming = false;
+    public float rotationMismatch { get; private set; } = 0f;
+    public bool isRotatingToTarget { get; private set; } = false;
+    private bool isRotatingClockwise = false;
+    private float rotatingToTargetTimer = 0f;
+
 
     //Define Stats for this Player Instance
     public PlayerStats currentPlayerStats { get; private set; }
@@ -43,17 +57,20 @@ public class Player : MonoBehaviour {
     private Vector3 worldMousePos;
     private Vector3 currentMovement;
     private float currentSpeed => walkSpeed * (playerInputHandler.SprintTriggered ? sprintMultipier : 1f);
+    private Vector3 currentLookDir;
 
     //PlayerState and Movement Checks
-    private CurrentPlayerState _playerState;
+    private CurrentPlayerState playerState;
+    private PlayerIK playerIK;
     private bool isWalking;
     private bool isMovingLaterally;
     private bool isSprinting;
-    private bool _isDead;
+    private bool isDead;
     #endregion
 
     private void Start() {
-        _playerState = GetComponent<CurrentPlayerState>();
+        playerState = GetComponent<CurrentPlayerState>();
+        playerIK = GetComponent<PlayerIK>();
 
         currentPlayerStats = new PlayerStats {
             maxHealth = baseStats.health,
@@ -65,6 +82,8 @@ public class Player : MonoBehaviour {
         UpdateMovementState();
         HandleMovement();
         HandleAiming();
+
+        HandleShooting(currentLookDir);
     }
 
     /// <summary>
@@ -105,6 +124,18 @@ public class Player : MonoBehaviour {
         return transform.position;
     }
 
+    private float CalculateRotationMismatch(Vector3 targetDirection) {
+        if (targetDirection.sqrMagnitude < 0.01f)
+            return 0f;
+
+        Vector3 forward = transform.forward;
+        forward.y = 0f;
+        Vector3 target = targetDirection.normalized;
+        target.y = 0f;
+
+        return Vector3.SignedAngle(forward, target, Vector3.up);
+    }
+
     /// <summary>
     /// Calculates both the Move direction and Mouse direction the Player has to turn to
     /// When the Player is sprinting then the Player will turn to the Move direction otherwise to Mouse direction
@@ -119,40 +150,58 @@ public class Player : MonoBehaviour {
 
         //Blickrichtung ist die Position von der Maus subtrahiert mit der Position des Players 
         Vector3 lookDir = mouseDir - transform.position;
-        lookDir.y = 0;
+        lookDir.y = 0f;
+        currentLookDir = lookDir;
 
         //Blickrichtung zur Bewegungsrichtung
         Vector3 moveDir = new Vector3(currentMovement.x, 0f, currentMovement.z);
 
         //Wenn der Spieler sprintet, dann dreht sich der Spieler zum Bewegungsrichtung, sonst zur Mausrichtung
-        if (lookDir.sqrMagnitude > 0.1f && !isSprinting) {
-            Quaternion targetRotation = Quaternion.LookRotation(lookDir);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationMouseDirAmount * Time.deltaTime);
+        UpdatePlayerRotation(moveDir, lookDir);
 
-            Ray ray = new Ray(new Vector3(transform.position.x, 1f, transform.position.z), lookDir);
-
-            if (playerInputHandler.AttackTriggered && playerInputHandler.AimingTriggered) {
-                if (Physics.Raycast(ray, out RaycastHit hit, 5f)) { //Hit with bullets
-                    if (hit.transform.TryGetComponent(out ZombieAI zombie)) {
-                        if (!zombie.IsDead()) {
-                            zombie.TakeDamage(50);
-                        }
-                    }
-                }
-
-                // Nur einmal pro Klick Schaden verursachen.
-                playerInputHandler.SetAttackTriggered(false);
-            }
-        } else if (moveDir.sqrMagnitude > 0.1f && isSprinting) {
-            Quaternion targetRotation = Quaternion.LookRotation(moveDir);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationMoveDirAmount * Time.deltaTime);
-        }
 
         //HandleJumping();
         characterController.Move(currentMovement * Time.deltaTime);
     }
 
-    private void OnDrawGizmos() {
+    private void UpdatePlayerRotation(Vector3 moveDir, Vector3 lookDir) {
+        bool isIdling = playerState.CurrentPlayerMovementState == PlayerMovementState.Idling;
+        isRotatingToTarget = rotatingToTargetTimer > 0;
+
+        if (moveDir.sqrMagnitude > 0.1f && (isSprinting || !playerIK.GetHasWeapon())) {
+            RotatePlayerToTarget(moveDir, rotationMoveDirAmount);
+        } else if (lookDir.sqrMagnitude > 0.1f && !isSprinting && playerIK.GetHasWeapon()) {
+            if (!isIdling) {
+                RotatePlayerToTarget(lookDir, rotationMouseDirAmount);
+            } else {
+                rotationMismatch = CalculateRotationMismatch(lookDir);
+                playerAnimation.SetRotationMismatch(rotationMismatch);
+
+                if (Mathf.Abs(rotationMismatch) > rotationTolerance || isRotatingToTarget) {
+                    //Timer
+                    if (Mathf.Abs(rotationMismatch) > rotationTolerance) {
+                        rotatingToTargetTimer = rotateToTargetTime;
+                        isRotatingClockwise = rotationMismatch > rotationTolerance;
+                    }
+
+                    rotatingToTargetTimer -= Time.deltaTime;
+
+                    //rotate Player
+                    if (isRotatingClockwise && rotationMismatch > 0f ||
+                        !isRotatingClockwise && rotationMismatch < 0f) {
+                        RotatePlayerToTarget(lookDir, rotationMouseDirAmount);
+                    }
+                }
+            }
+        }
+    }
+
+    private void RotatePlayerToTarget(Vector3 direction, float dirAmount) {
+        Quaternion targetRotation = Quaternion.LookRotation(direction);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, dirAmount * Time.deltaTime);
+    }
+
+    /* private void OnDrawGizmos() {
         Vector3 mouseDir = CalculateMouseDirection();
 
         Vector3 lookDir = mouseDir - transform.position;
@@ -161,7 +210,7 @@ public class Player : MonoBehaviour {
         Ray ray = new Ray(new Vector3(transform.position.x, 1f, transform.position.z), lookDir);
 
         Gizmos.DrawRay(ray.origin, ray.direction);
-    }
+    } */
 
     /// <summary>
     /// This Method handles the Jumping, but due to the Player not having animations it is marked as deprecated for now
@@ -183,10 +232,37 @@ public class Player : MonoBehaviour {
     /// It switches from RigLayer_WeaponPose to RigLayer_WeaponAiming
     /// </summary>
     private void HandleAiming() {
-        if (playerInputHandler.AimingTriggered && !isSprinting) {
-            aimLayer.weight += Time.deltaTime / aimDuration;
+        if (alwaysAiming) {
+            //Debug
+            aimLayer.weight = 1;
+            playerAnimation.SetAimAnimation(true);
         } else {
-            aimLayer.weight -= Time.deltaTime / aimDuration;
+            if (playerInputHandler.AimingTriggered && !isSprinting && playerIK.GetHasWeapon()) {
+                aimLayer.weight += Time.deltaTime / aimDuration;
+                playerAnimation.SetAimAnimation(true);
+            } else {
+                aimLayer.weight -= Time.deltaTime / aimDuration;
+                playerAnimation.SetAimAnimation(false);
+            }
+        }
+    }
+
+    private void HandleShooting(Vector3 direction) {
+        Ray ray = new Ray(new Vector3(transform.position.x, 1f, transform.position.z), direction);
+
+        if (playerInputHandler.AttackTriggered && playerInputHandler.AimingTriggered) {
+
+            if (gunSelector.activeGun != null) {
+                gunSelector.activeGun.Shoot();
+            }
+
+            if (Physics.Raycast(ray, out RaycastHit hit, 5f)) { //Hit with bullets
+                if (hit.transform.TryGetComponent(out ZombieAI zombie)) {
+                    if (!zombie.IsDead()) {
+                        zombie.TakeDamage(50);
+                    }
+                }
+            }
         }
     }
 
@@ -201,12 +277,12 @@ public class Player : MonoBehaviour {
 
         PlayerMovementState lateralState = isSprinting ? PlayerMovementState.Sprinting : isMovingLaterally || isWalking ? PlayerMovementState.Walking : PlayerMovementState.Idling;
 
-        _playerState.SetPlayerMovementState(lateralState);
+        playerState.SetPlayerMovementState(lateralState);
     }
     #endregion
 
     public void TakeDamage(int damage) {
-        if (_isDead) return;
+        if (isDead) return;
 
         currentPlayerStats.maxHealth -= damage;
         currentPlayerStats.maxHealth = Mathf.Max(0, currentPlayerStats.maxHealth);
@@ -219,7 +295,7 @@ public class Player : MonoBehaviour {
     }
 
     private void Die() {
-        _isDead = true;
+        isDead = true;
         Debug.Log("Player gestorben");
     }
 

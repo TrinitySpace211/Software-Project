@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 722f93a7b94e8c146801504ddbca8648, type: 3}
+  m_Name: Flesh Play Audio Effect - Bullet Impact
+  m_EditorClassIdentifier: 
+  audioSourcePrefab: {fileID: 1926129016466624914, guid: 7e28f8ce175f8ac48bb69039b566b5cd, type: 3}
+  audioClips:
+  - {fileID: 8300000, guid: 7776171e4f0ee8c40b78267a397f0a7e, type: 3}
+  - {fileID: 8300000, guid: cb340138f49b9494697ef2fb5c4b46cc, type: 3}
+  - {fileID: 8300000, guid: b9865a6511b1c0a4e892ff4b7f32237b, type: 3}
+  - {fileID: 8300000, guid: 61874e969796abf4db7015016f9f5310, type: 3}
+  volumeRange: {x: 0.5, y: 0.75}

@@ -7,21 +7,23 @@ using UnityEngine.InputSystem;
 /// </summary>
 public class PlayerAnimation : MonoBehaviour {
 
-    [SerializeField] private Animator _animator;
-    [SerializeField] private PlayerInputHandler _playerInputHandler;
+    [SerializeField] private Animator animator;
+    [SerializeField] private PlayerInputHandler playerInputHandler;
     [SerializeField] private float locomotionBlendSpeed = 10f;
 
-    private Vector3 _currentBlendInput = Vector3.zero;
-    private CurrentPlayerState _playerState;
-    bool isSprinting;
+    private Vector3 currentBlendInput = Vector3.zero;
+    private CurrentPlayerState playerState;
+    private bool isSprinting;
 
     private int inputXHash = Animator.StringToHash("inputX");
     private int inputYHash = Animator.StringToHash("inputY");
     private int inputyMagnitudeHash = Animator.StringToHash("inputMagnitude");
+    private int rotationMismatchHash = Animator.StringToHash("rotationMismatch");
     private int getHitHash = Animator.StringToHash("GetHit");
+    private int isWeaponAiming = Animator.StringToHash("IsWeaponAiming");
 
     private void Start() {
-        _playerState = GetComponent<CurrentPlayerState>();
+        playerState = GetComponent<CurrentPlayerState>();
     }
 
     private void Update() {
@@ -29,7 +31,7 @@ public class PlayerAnimation : MonoBehaviour {
     }
 
     public void Construct(PlayerInputHandler playerInputHandler) {
-        this._playerInputHandler = playerInputHandler;
+        this.playerInputHandler = playerInputHandler;
     }
 
     /// <summary>
@@ -38,9 +40,9 @@ public class PlayerAnimation : MonoBehaviour {
     /// At the end the float parameters will be updated
     /// </summary>
     private void UpdateAnimationState() {
-        isSprinting = _playerState.CurrentPlayerMovementState == PlayerMovementState.Sprinting;
+        isSprinting = playerState.CurrentPlayerMovementState == PlayerMovementState.Sprinting;
 
-        Vector2 inputTarget = isSprinting ? _playerInputHandler.MovementInput * 1.5f : _playerInputHandler.MovementInput;
+        Vector2 inputTarget = isSprinting ? playerInputHandler.MovementInput * 1.5f : playerInputHandler.MovementInput;
 
         //World-Richtung aus Eingabe
         Vector3 worldDir = new Vector3(inputTarget.x, 0f, inputTarget.y);
@@ -49,11 +51,23 @@ public class PlayerAnimation : MonoBehaviour {
         float inputX = Vector3.Dot(worldDir, transform.right);
         float inputY = Vector3.Dot(worldDir, transform.forward);
 
-        _currentBlendInput = Vector3.Lerp(_currentBlendInput, new Vector2(inputX, inputY), locomotionBlendSpeed * Time.deltaTime);
+        currentBlendInput = Vector3.Lerp(currentBlendInput, new Vector2(inputX, inputY), locomotionBlendSpeed * Time.deltaTime);
 
-        _animator.SetFloat(inputXHash, _currentBlendInput.x);
-        _animator.SetFloat(inputYHash, _currentBlendInput.y);
-        _animator.SetFloat(inputyMagnitudeHash, _currentBlendInput.magnitude);
+        animator.SetFloat(inputXHash, currentBlendInput.x);
+        animator.SetFloat(inputYHash, currentBlendInput.y);
+        animator.SetFloat(inputyMagnitudeHash, currentBlendInput.magnitude);
 
+        //Trigger die Hit Reaction wenn Space gedrückt wird
+        if (Keyboard.current.spaceKey.wasPressedThisFrame) {
+            animator.SetTrigger(getHitHash);
+        }
+    }
+
+    public void SetAimAnimation(bool state) {
+        animator.SetBool(isWeaponAiming, state);
+    }
+
+    public void SetRotationMismatch(float mismatch) {
+        animator.SetFloat(rotationMismatchHash, mismatch);
     }
 }
