@@ -12,7 +12,7 @@ public class PlayerAnimation : MonoBehaviour {
     [SerializeField] private float locomotionBlendSpeed = 10f;
 
     private Vector3 currentBlendInput = Vector3.zero;
-    private CurrentPlayerState playerState;
+    private Player player;
     private bool isSprinting;
 
     private int inputXHash = Animator.StringToHash("inputX");
@@ -20,11 +20,9 @@ public class PlayerAnimation : MonoBehaviour {
     private int inputyMagnitudeHash = Animator.StringToHash("inputMagnitude");
     private int rotationMismatchHash = Animator.StringToHash("rotationMismatch");
     private int getHitHash = Animator.StringToHash("GetHit");
+    private int isDeadHash = Animator.StringToHash("IsDead");
+    private int isDeadWithWeaponHash = Animator.StringToHash("IsDeadWithWeapon");
     private int isWeaponAiming = Animator.StringToHash("IsWeaponAiming");
-
-    private void Start() {
-        playerState = GetComponent<CurrentPlayerState>();
-    }
 
     private void Update() {
         UpdateAnimationState();
@@ -40,7 +38,7 @@ public class PlayerAnimation : MonoBehaviour {
     /// At the end the float parameters will be updated
     /// </summary>
     private void UpdateAnimationState() {
-        isSprinting = playerState.CurrentPlayerMovementState == PlayerMovementState.Sprinting;
+        isSprinting = player.GetCurrentPlayerState().CurrentPlayerMovementState == PlayerMovementState.Sprinting;
 
         Vector2 inputTarget = isSprinting ? playerInputHandler.MovementInput * 1.5f : playerInputHandler.MovementInput;
 
@@ -66,4 +64,17 @@ public class PlayerAnimation : MonoBehaviour {
     public void SetRotationMismatch(float mismatch) {
         animator.SetFloat(rotationMismatchHash, mismatch);
     }
+
+    public void SetHitTrigger() {
+        animator.SetTrigger(getHitHash);
+    }
+
+    public void SetDyingTrigger() {
+        animator.SetTrigger(isDeadHash);
+    }
+
+    public void SetDyingWithWeaponTrigger() {
+        animator.SetTrigger(isDeadWithWeaponHash);
+    }
+
 }

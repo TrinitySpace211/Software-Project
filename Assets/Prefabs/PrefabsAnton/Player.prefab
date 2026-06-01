@@ -1164,6 +1164,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5073287893444000673}
   - component: {fileID: 5881767064964011042}
+  - component: {fileID: 8828234017017753120}
   m_Layer: 0
   m_Name: Soldat
   m_TagString: Untagged
@@ -1298,6 +1299,24 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.0015356541, y: -0.09298003, z: 0.057001516}
     m_Extent: {x: 2.1297543, y: 1.9735664, z: 0.525573}
   m_DirtyAABB: 0
+--- !u!114 &8828234017017753120
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2646775550164963314}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fea29bb7c508c244a1f805a5fd3fc4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outlineMode: 2
+  outlineColor: {r: 0, g: 0.7299213, b: 0.735849, a: 1}
+  outlineWidth: 4
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
 --- !u!1 &2831235621924921743
 GameObject:
   m_ObjectHideFlags: 0
@@ -1891,7 +1910,7 @@ GameObject:
   - component: {fileID: 279455227668087941}
   - component: {fileID: 515488629726933562}
   m_Layer: 0
-  m_Name: RigLayer_WeaponSwitch
+  m_Name: RigLayer_Weapon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3869,7 +3888,7 @@ GameObject:
   - component: {fileID: 9186361813033626938}
   - component: {fileID: 9209443484949224615}
   - component: {fileID: 6734014837290629750}
-  - component: {fileID: 2278979405329887630}
+  - component: {fileID: 6517137080895184235}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -4021,7 +4040,7 @@ MonoBehaviour:
   guns:
   - {fileID: 11400000, guid: f5f185b9689eb17478c5f798fef6bb6a, type: 2}
   - {fileID: 11400000, guid: 3b953e2266b3e8148b30c65ae50e57f4, type: 2}
-  inverseKinematics: {fileID: 9186361813033626938}
+  playerIK: {fileID: 9186361813033626938}
   switchLayer: {fileID: 515488629726933562}
   poseLayer: {fileID: 3474541558812836290}
   switchDuration: 0
@@ -4078,12 +4097,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerStats:
-    maxHealth: 0
-    currentHealth: 0
+    maxHealth: 100
+    currentHealth: 100
     armor: 0
-  baseStats: {fileID: 0}
-  animator: {fileID: 0}
---- !u!114 &2278979405329887630
+  baseStats: {fileID: 11400000, guid: 7dc0e11343780ab4997ce5ebf27fbd5e, type: 2}
+  animator: {fileID: 8238083834496811590}
+--- !u!114 &6517137080895184235
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -4092,15 +4111,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 7586121502588828446}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5fea29bb7c508c244a1f805a5fd3fc4d, type: 3}
+  m_Script: {fileID: 11500000, guid: 143263074188f5c49bad9e80f2ff2908, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  outlineMode: 2
-  outlineColor: {r: 0, g: 0.7299213, b: 0.735849, a: 1}
-  outlineWidth: 4
-  precomputeOutline: 0
-  bakeKeys: []
-  bakeValues: []
 --- !u!1 &8062809720632668834
 GameObject:
   m_ObjectHideFlags: 0
