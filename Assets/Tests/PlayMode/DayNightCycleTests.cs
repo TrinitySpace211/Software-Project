@@ -6,7 +6,7 @@ using System.Collections;
 
 public class DayNightCycleTests {
     private GameObject testObject;
-    private TimeSystem cycle;
+    private DayNightCycle cycle;
 
     private TMP_Text timeText;
     private TMP_Text notificationText;
@@ -18,7 +18,7 @@ public class DayNightCycleTests {
     public IEnumerator Setup() {
         // Create system under test
         testObject = new GameObject("DayNightCycle");
-        cycle = testObject.AddComponent<TimeSystem>();
+        cycle = testObject.AddComponent<DayNightCycle>();
 
         // Mock UI elements
         GameObject timeGO = new GameObject("TimeText");
