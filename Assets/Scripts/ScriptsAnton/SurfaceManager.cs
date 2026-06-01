@@ -55,8 +55,6 @@ public class SurfaceManager : MonoBehaviour {
             if (zombie != null) {
                 Renderer renderer = zombie.GetComponentInChildren<SkinnedMeshRenderer>();
 
-                Debug.Log(renderer);
-
                 SurfaceType surfaceType = null;
                 if (renderer != null) {
                     Texture activeTexture = GetActiveTextureFromRenderer(renderer, triangleIndex);

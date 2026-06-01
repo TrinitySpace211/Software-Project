@@ -8,19 +8,17 @@ public class PlayerHealth : MonoBehaviour {
     [SerializeField] private PlayerStats playerStats;
     [SerializeField] private BaseStats baseStats;
 
-
-    [SerializeField] private Animator animator;
-
-    // (added some code into scripts so the healthbar display the zombie damage properly)
-
-
     private bool isDead;
     private HealthBar healthBar;
+    private PlayerAnimation playerAnimation;
+    private PlayerIK playerIK;
+    private PlayerGunSelector playerGunSelector;
+    private Animator animator;
 
     /// <summary>
     /// Gets the player stats reference.
     /// </summary>
-    public PlayerStats Stats => playerStats;
+    public PlayerStats stats => playerStats;
 
     private void Start() {
         if (baseStats == null) {
@@ -28,16 +26,20 @@ public class PlayerHealth : MonoBehaviour {
             return;
         }
 
-
-
         if (animator == null)
             animator = GetComponent<Animator>();
 
+        if (playerAnimation == null) {
+            playerAnimation = GetComponent<PlayerAnimation>();
+        }
 
+        if (playerIK == null) {
+            playerIK = GetComponent<PlayerIK>();
+        }
 
-        if (animator == null)
-            animator = GetComponent<Animator>();
-
+        if (playerGunSelector == null) {
+            playerGunSelector = GetComponent<PlayerGunSelector>();
+        }
 
         playerStats = new PlayerStats {
             maxHealth = baseStats.health,
@@ -65,21 +67,12 @@ public class PlayerHealth : MonoBehaviour {
         playerStats.currentHealth = Mathf.Lerp(playerStats.currentHealth, playerStats.currentHealth - finalDamage, 0.5f);
         playerStats.currentHealth = Mathf.Clamp(playerStats.currentHealth, 0, playerStats.maxHealth);
 
+        //Debug.Log($"Player HP: {playerStats.currentHealth}/{playerStats.maxHealth}");
+
         if (healthBar != null)
             healthBar.UpdateHealthBar();
 
-
-
-        if (animator != null)
-            animator.SetTrigger("GetHit");
-
-
-        // (added some code into scripts so the healthbar display the zombie damage properly)
-
-
-        if (animator != null)
-            animator.SetTrigger("GetHit");
-
+        playerAnimation.SetHitTrigger();
 
         if (playerStats.currentHealth <= 0)
             Die();
@@ -87,6 +80,16 @@ public class PlayerHealth : MonoBehaviour {
 
     private void Die() {
         isDead = true;
-        Debug.Log("Player died");
+
+        if (playerIK.GetHasWeapon()) {
+            playerGunSelector.DieWithWeapon();
+            playerAnimation.SetDyingWithWeaponTrigger();
+        } else {
+            playerAnimation.SetDyingTrigger();
+        }
+    }
+
+    public bool GetIsDead() {
+        return isDead;
     }
 }
