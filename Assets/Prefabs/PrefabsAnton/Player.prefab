@@ -3891,7 +3891,7 @@ GameObject:
   - component: {fileID: 6517137080895184235}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4102,7 +4102,7 @@ MonoBehaviour:
     armor: 0
   baseStats: {fileID: 11400000, guid: 7dc0e11343780ab4997ce5ebf27fbd5e, type: 2}
   animator: {fileID: 8238083834496811590}
---- !u!114 &6517137080895184235
+--- !u!114 &2278979405329887630
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
