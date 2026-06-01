@@ -23,7 +23,7 @@ public class PlayerGunSelector : MonoBehaviour {
     [SerializeField] public GunSO activeGun;
 
     private void Update() {
-        if (Keyboard.current.digit1Key.wasPressedThisFrame && activeGun != null) {
+        /* if (Keyboard.current.digit1Key.wasPressedThisFrame && activeGun != null) {
             //Idle no Weapon
             StartCoroutine(SelectNoWeapon());
         } else if (Keyboard.current.digit2Key.wasPressedThisFrame) {
@@ -32,10 +32,14 @@ public class PlayerGunSelector : MonoBehaviour {
         } else if (Keyboard.current.digit3Key.wasPressedThisFrame) {
             //Pistol
             SelectPistol();
-        }
+        } */
     }
 
-    public IEnumerator SelectNoWeapon() {
+    public void DequipWeapon() {
+        StartCoroutine(SelectNoWeapon());
+    }
+
+    private IEnumerator SelectNoWeapon() {
         inverseKinematics.ClearSetup();
 
         switchLayer.weight = 1;
@@ -44,6 +48,11 @@ public class PlayerGunSelector : MonoBehaviour {
         inverseKinematics.SwitchWeapon();
 
         yield return new WaitForSeconds(0.75f);
+
+        if (activeGun == null) {
+            Debug.LogError("There is no active gun in the players hand");
+            yield break;
+        }
 
         DespawnActiveGun();
 

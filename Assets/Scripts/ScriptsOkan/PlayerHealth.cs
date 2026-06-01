@@ -11,7 +11,7 @@ public class PlayerHealth : MonoBehaviour {
 
     [SerializeField] private Animator animator;
 
-// (added some code into scripts so the healthbar display the zombie damage properly)
+    // (added some code into scripts so the healthbar display the zombie damage properly)
 
 
     private bool isDead;
@@ -62,7 +62,7 @@ public class PlayerHealth : MonoBehaviour {
 
         float finalDamage = Mathf.Max(0, damage - playerStats.armor);
 
-        playerStats.currentHealth -= finalDamage;
+        playerStats.currentHealth = Mathf.Lerp(playerStats.currentHealth, playerStats.currentHealth - finalDamage, 0.5f);
         playerStats.currentHealth = Mathf.Clamp(playerStats.currentHealth, 0, playerStats.maxHealth);
 
         if (healthBar != null)
@@ -74,7 +74,7 @@ public class PlayerHealth : MonoBehaviour {
             animator.SetTrigger("GetHit");
 
 
- // (added some code into scripts so the healthbar display the zombie damage properly)
+        // (added some code into scripts so the healthbar display the zombie damage properly)
 
 
         if (animator != null)

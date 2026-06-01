@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using System;
 
 /// <summary>
 /// Represents a single inventory or hotbar slot.
@@ -12,6 +13,11 @@ public class Slot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
     /// Indicates whether the mouse cursor is currently hovering over this slot.
     /// </summary>
     public bool hovering;
+
+    /// <summary>
+    /// Indicates if a hotbar slot ist currently selected through the key buttons 1-5
+    /// </summary>
+    public bool selected;
 
     /// <summary>
     /// The item currently stored in this slot.
@@ -34,11 +40,22 @@ public class Slot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
     private TextMeshProUGUI amountTxt;
 
     /// <summary>
+    /// The RectTransform component of this slot
+    /// </summary>
+    private RectTransform rectTransform;
+
+    /// <summary>
     /// Initializes references to UI components used by the slot.
     /// </summary>
     private void Awake() {
         iconImage = transform.GetChild(0).GetComponent<Image>();
         amountTxt = transform.GetChild(1).GetComponent<TextMeshProUGUI>();
+        rectTransform = GetComponent<RectTransform>();
+    }
+
+    private void Update() {
+        float targetScale = selected ? 1.1f : 1f;
+        rectTransform.localScale = Vector3.Lerp(rectTransform.localScale, Vector3.one * targetScale, Time.deltaTime * 10f);
     }
 
     /// <summary>
@@ -76,6 +93,23 @@ public class Slot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
         itemAmount = amount;
 
         UpdateSlot();
+    }
+
+    /// <summary>
+    /// If set to true the Slot scale will be increased to 1.1 so that it gives the player the feedback, 
+    /// that this hotbar slot has been selected
+    /// </summary>
+    /// <param name="state">If the slot is selected or not</param>
+    public void SetSelected(bool state) {
+        selected = state;
+    }
+
+    /// <summary>
+    /// returns if this slot has been selected via input key 1-5
+    /// </summary>
+    /// <returns>the selected state</returns>
+    public bool GetSelected() {
+        return selected;
     }
 
     /// <summary>

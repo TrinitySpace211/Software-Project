@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -11,15 +12,20 @@ using Image = UnityEngine.UI.Image;
 /// hotbar management, drag-and-drop functionality, and inventory UI handling.
 /// </summary>
 public class Inventory : MonoBehaviour {
+    [Header("References")]
+    [SerializeField] private Player player;
+    [SerializeField] private PlayerInputHandler playerInputHandler;
+    [SerializeField] private List<RectTransform> hotbarSlotsRect;
+
     /// <summary>
     /// Test item used for adding wood to the inventory.
     /// </summary>
-    public ItemSO woodItem;
+    public ItemSO assaultRifle;
 
     /// <summary>
     /// Test item used for adding an axe to the inventory.
     /// </summary>
-    public ItemSO axeItem;
+    public ItemSO pistol;
 
     /// <summary>
     /// Reference to the hotbar object containing hotbar slots.
@@ -72,6 +78,11 @@ public class Inventory : MonoBehaviour {
     private bool isPaused = false;
 
     /// <summary>
+    /// Holds the previous selected hotbar slot number
+    /// </summary>
+    private int previousSlot = -1;
+
+    /// <summary>
     /// Initializes slot collections by retrieving
     /// inventory and hotbar slots from child objects.
     /// </summary>
@@ -87,6 +98,8 @@ public class Inventory : MonoBehaviour {
     /// Hides the inventory container at startup.
     /// </summary>
     private void Start() {
+        playerInputHandler.OnHotbarSlotPressed += PlayerInputHandler_OnHotbarSlotPressed;
+
         container.SetActive(false);
     }
 
@@ -96,9 +109,9 @@ public class Inventory : MonoBehaviour {
     /// </summary>
     private void Update() {
         if (Keyboard.current.bKey.wasPressedThisFrame) {
-            AddItem(woodItem, 3);
+            AddItem(assaultRifle, 1);
         } else if (Keyboard.current.nKey.wasPressedThisFrame) {
-            AddItem(axeItem, 1);
+            AddItem(pistol, 1);
         }
 
         if (Keyboard.current.iKey.wasPressedThisFrame) {
@@ -109,12 +122,52 @@ public class Inventory : MonoBehaviour {
             // : CursorLockMode.Locked;
 
             Cursor.visible = !Cursor.visible;
-            TogglePause();
+            //TogglePause();
+        }
+
+        for (int i = 0; i < hotbarSlots.Count; i++) {
+
         }
 
         StartDrag();
         UpdateDragItemPosition();
         EndDrag();
+    }
+
+    private void PlayerInputHandler_OnHotbarSlotPressed(int slot) {
+        ItemSO item = hotbarSlots[slot].GetItem();
+
+        if (!isDragging) {
+            if (hotbarSlots[slot].GetSelected()) {
+                hotbarSlots[slot].SetSelected(false);
+
+                if (item == assaultRifle ||
+                    item == pistol) {
+                    ToggleWeaponSelect(null);
+                }
+            } else {
+
+                if (previousSlot != -1) {
+                    hotbarSlots[previousSlot].SetSelected(false);
+                }
+
+                hotbarSlots[slot].SetSelected(true);
+
+
+                //Check for item in hotbar then equip the item
+                if (item == assaultRifle) {
+                    ToggleWeaponSelect(assaultRifle);
+                } else if (item == pistol) {
+                    ToggleWeaponSelect(pistol);
+                } else if (hotbarSlots[previousSlot].GetItem() == assaultRifle || hotbarSlots[previousSlot].GetItem() == pistol) {
+                    ToggleWeaponSelect(null);
+                }//Add more else if statements for more options
+
+
+                previousSlot = slot;
+            }
+        }
+
     }
 
     /// <summary>
@@ -127,7 +180,7 @@ public class Inventory : MonoBehaviour {
         int remaining = amount;
 
         // Fill existing stacks first
-        foreach (Slot slot in allSlots) {
+        foreach (Slot slot in inventorySlots) {
             if (slot.HasItem() && slot.GetItem() == itemToAdd) {
                 int currentAmount = slot.GetAmount();
                 int maxStack = itemToAdd.maxStackSize;
@@ -189,7 +242,7 @@ public class Inventory : MonoBehaviour {
     private void EndDrag() {
         if (Mouse.current.leftButton.wasReleasedThisFrame && isDragging) {
             Slot hovered = GetHoveredSlot();
-            
+
             if (hovered != null) {
                 HandleDrop(draggedSlot, hovered);
 
@@ -251,12 +304,35 @@ public class Inventory : MonoBehaviour {
             to.SetItem(from.GetItem(), from.GetAmount());
             from.SetItem(tempItem, tempAmount);
 
+            if (to.GetSelected()) {
+                if (to.GetItem() == assaultRifle) {
+                    ToggleWeaponSelect(assaultRifle);
+                } else if (to.GetItem() == pistol) {
+                    ToggleWeaponSelect(pistol);
+                }
+            } else if (from.GetSelected()) {
+                ToggleWeaponSelect(null);
+            }
+
             return;
         }
 
         // Move item into empty slot
         to.SetItem(from.GetItem(), from.GetAmount());
+
+        if (to.GetSelected()) {
+            if (to.GetItem() == assaultRifle) {
+                ToggleWeaponSelect(assaultRifle);
+            } else if (to.GetItem() == pistol) {
+                ToggleWeaponSelect(pistol);
+            }
+        } else if (from.GetSelected()) {
+            ToggleWeaponSelect(null);
+        }
+
         from.ClearSlot();
+
+
     }
 
     /// <summary>
@@ -264,7 +340,7 @@ public class Inventory : MonoBehaviour {
     /// </summary>
     private void UpdateDragItemPosition() {
         if (isDragging) {
-            dragIcon.transform.position = Input.mousePosition;
+            dragIcon.transform.position = Mouse.current.position.ReadValue();
         }
     }
 
@@ -278,5 +354,15 @@ public class Inventory : MonoBehaviour {
         container.SetActive(isPaused);
         Cursor.visible = isPaused;
         Time.timeScale = isPaused ? 0f : 1f;
+    }
+
+    private void ToggleWeaponSelect(ItemSO weapon) {
+        if (weapon == assaultRifle) {
+            player.GetPlayerGunSelector().SelectAssaultRifle();
+        } else if (weapon == pistol) {
+            player.GetPlayerGunSelector().SelectPistol();
+        } else if (weapon == null) {
+            player.GetPlayerGunSelector().DequipWeapon();
+        }
     }
 }
