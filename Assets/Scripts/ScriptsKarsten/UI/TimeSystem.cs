@@ -40,7 +40,15 @@ public class TimeSystem : MonoBehaviour {
     private int dayNumber = 1;
     private int nightNumber = 0;
 
-    public int SurvivedNights => nightNumber - 1;
+    /// <summary>
+    /// Number of nights the player has successfully survived.
+    /// </summary>
+    private int survivedNights = 0;
+
+    /// <summary>
+    /// Returns the amount of survived nights.
+    /// </summary>
+    public int SurvivedNights => survivedNights;
 
     /// <summary>
     /// Current time state.
@@ -181,6 +189,11 @@ public class TimeSystem : MonoBehaviour {
                     break;
 
                 case TimeState.Day:
+                    // Count a night as survived once the player reaches the next day.
+                    if (nightNumber > 0) {
+                        survivedNights++;
+                    }
+
                     ShowNotification($"Day {dayNumber} begins!");
 
                     if (dayNumber > extractionNight) {

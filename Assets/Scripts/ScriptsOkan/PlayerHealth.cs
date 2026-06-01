@@ -1,3 +1,4 @@
+using Mono.Cecil;
 using UnityEngine;
 
 /// <summary>
@@ -7,6 +8,9 @@ public class PlayerHealth : MonoBehaviour {
 
     [SerializeField] private PlayerStats playerStats;
     [SerializeField] private BaseStats baseStats;
+
+    [SerializeField] private DeathScreen deathScreen; 
+    [SerializeField] private TimeSystem timeSystem;
 
     private bool isDead;
     private HealthBar healthBar;
@@ -87,6 +91,7 @@ public class PlayerHealth : MonoBehaviour {
         } else {
             playerAnimation.SetDyingTrigger();
         }
+        deathScreen.ShowDeathScreen(timeSystem.SurvivedNights);
     }
 
     public bool GetIsDead() {
