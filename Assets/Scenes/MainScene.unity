@@ -622,23 +622,23 @@ PrefabInstance:
     - target: {fileID: 4207082910972103307, guid: e9c80db9e65b32647ae7c934dea0843c, type: 3}
       propertyPath: 'hotbarSlotsRect.Array.data[0]'
       value: 
-      objectReference: {fileID: 1735831564}
+      objectReference: {fileID: 0}
     - target: {fileID: 4207082910972103307, guid: e9c80db9e65b32647ae7c934dea0843c, type: 3}
       propertyPath: 'hotbarSlotsRect.Array.data[1]'
       value: 
-      objectReference: {fileID: 2058784190}
+      objectReference: {fileID: 0}
     - target: {fileID: 4207082910972103307, guid: e9c80db9e65b32647ae7c934dea0843c, type: 3}
       propertyPath: 'hotbarSlotsRect.Array.data[2]'
       value: 
-      objectReference: {fileID: 956516412}
+      objectReference: {fileID: 0}
     - target: {fileID: 4207082910972103307, guid: e9c80db9e65b32647ae7c934dea0843c, type: 3}
       propertyPath: 'hotbarSlotsRect.Array.data[3]'
       value: 
-      objectReference: {fileID: 1486066278}
+      objectReference: {fileID: 0}
     - target: {fileID: 4207082910972103307, guid: e9c80db9e65b32647ae7c934dea0843c, type: 3}
       propertyPath: 'hotbarSlotsRect.Array.data[4]'
       value: 
-      objectReference: {fileID: 552292530}
+      objectReference: {fileID: 0}
     - target: {fileID: 4538044287735731706, guid: e9c80db9e65b32647ae7c934dea0843c, type: 3}
       propertyPath: m_AnchorMax.x
       value: 1
@@ -1800,24 +1800,24 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4458503079190714579, guid: f80676d57d41f854793e8e43244cbc39, type: 3}
       propertyPath: surfacesTypes.Array.size
-      value: 2
+      value: 4
       objectReference: {fileID: 0}
-    - target: {fileID: 4458503079190714579, guid: f80676d57d41f854793e8e43244cbc39, type: 3}
-      propertyPath: surfacesTypes.Array.data[1].albedo
-      value: 
-      objectReference: {fileID: 2800000, guid: 102ea5ea47d624b4496c1827a0020c8c, type: 3}
     - target: {fileID: 4458503079190714579, guid: f80676d57d41f854793e8e43244cbc39, type: 3}
       propertyPath: surfacesTypes.Array.data[2].albedo
       value: 
-      objectReference: {fileID: 2800000, guid: a1abab6643db8bd40b559182c80c44a8, type: 3}
+      objectReference: {fileID: 2800000, guid: 2f40f423afe311f41881e2e98a68041e, type: 3}
     - target: {fileID: 4458503079190714579, guid: f80676d57d41f854793e8e43244cbc39, type: 3}
-      propertyPath: surfacesTypes.Array.data[1].surface
+      propertyPath: surfacesTypes.Array.data[3].albedo
       value: 
-      objectReference: {fileID: 11400000, guid: 7b1352bf697ac4a4f9a58a7fa5714fef, type: 2}
+      objectReference: {fileID: 2800000, guid: 7358ca1faef36e84a9b6fb431af5fc8d, type: 3}
     - target: {fileID: 4458503079190714579, guid: f80676d57d41f854793e8e43244cbc39, type: 3}
       propertyPath: surfacesTypes.Array.data[2].surface
       value: 
-      objectReference: {fileID: 11400000, guid: 8f5f080832ebdcd40a553d7f4f77f7d2, type: 2}
+      objectReference: {fileID: 11400000, guid: 8e575d42e1e3bca41ad2e9a9a065eeba, type: 2}
+    - target: {fileID: 4458503079190714579, guid: f80676d57d41f854793e8e43244cbc39, type: 3}
+      propertyPath: surfacesTypes.Array.data[3].surface
+      value: 
+      objectReference: {fileID: 11400000, guid: 7b1352bf697ac4a4f9a58a7fa5714fef, type: 2}
     - target: {fileID: 4950045030100506881, guid: f80676d57d41f854793e8e43244cbc39, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1971,6 +1971,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 5296701380208204284, guid: f80676d57d41f854793e8e43244cbc39, type: 3}
+      propertyPath: m_Name
+      value: SurfaceManager
+      objectReference: {fileID: 0}
     - target: {fileID: 2048716993822514676, guid: c046bf553c604cb469868eb7f1aec626, type: 3}
       propertyPath: m_Name
       value: NPC
@@ -2014,10 +2018,6 @@ PrefabInstance:
     - target: {fileID: 6919647780753462315, guid: c046bf553c604cb469868eb7f1aec626, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5296701380208204284, guid: f80676d57d41f854793e8e43244cbc39, type: 3}
-      propertyPath: m_Name
-      value: SurfaceManager
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2621,10 +2621,6 @@ PrefabInstance:
     - target: {fileID: 2999549442909087572, guid: 10cda794c28ef3a489afcf55a3d31dc7, type: 3}
       propertyPath: m_LocalPosition.y
       value: 0.17000008
-      objectReference: {fileID: 0}
-    - target: {fileID: 2999549442909087572, guid: 10cda794c28ef3a489afcf55a3d31dc7, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2999549442909087572, guid: 10cda794c28ef3a489afcf55a3d31dc7, type: 3}
       propertyPath: m_LocalPosition.z
