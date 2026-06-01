@@ -22,7 +22,6 @@ public class Player : MonoBehaviour {
     [SerializeField] private Rig aimLayer;
     [SerializeField] private BaseStats baseStats;
     [SerializeField] private PlayerGunSelector gunSelector;
-    //[SerializeField] private Transform headPose;
 
     [Header("Movement Parameters")]
     [SerializeField] private float walkSpeed = 4f;
@@ -343,6 +342,10 @@ public class Player : MonoBehaviour {
 
     public float GetAimLayerWeight() {
         return aimLayer.weight;
+    }
+
+    public PlayerGunSelector GetPlayerGunSelector() {
+        return gunSelector;
     }
     #endregion
 
