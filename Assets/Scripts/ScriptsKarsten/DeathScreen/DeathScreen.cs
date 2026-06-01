@@ -64,11 +64,6 @@ public class DeathScreen : MonoBehaviour {
         }
     }
 
-    void Update() {
-        if (Keyboard.current.kKey.wasPressedThisFrame) {
-            ShowDeathScreen(2);
-        }
-    }
     public void Retry() {
         Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
