@@ -10,20 +10,26 @@ public class PlayerGunSelector : MonoBehaviour {
 
     [SerializeField] private Transform[] gunParent;
     [SerializeField] private List<GunSO> guns;
-    [SerializeField] private PlayerIK inverseKinematics;
     [SerializeField] private Rig switchLayer;
     [SerializeField] private Rig poseLayer;
     [SerializeField] private float switchDuration;
     [SerializeField] private float poseDuration;
 
+    private Player player;
+    private PlayerIK playerIK;
     private GunType gunType;
 
     [Space]
     [Header("Runtime Filled")]
     [SerializeField] public GunSO activeGun;
 
+    private void Start() {
+        player = GetComponent<Player>();
+        playerIK = player.GetPlayerIK();
+    }
+
     private void Update() {
-        if (Keyboard.current.digit1Key.wasPressedThisFrame && activeGun != null) {
+        /* if (Keyboard.current.digit1Key.wasPressedThisFrame && activeGun != null) {
             //Idle no Weapon
             StartCoroutine(SelectNoWeapon());
         } else if (Keyboard.current.digit2Key.wasPressedThisFrame) {
@@ -32,24 +38,33 @@ public class PlayerGunSelector : MonoBehaviour {
         } else if (Keyboard.current.digit3Key.wasPressedThisFrame) {
             //Pistol
             SelectPistol();
-        }
+        } */
+    }
+
+    public void DequipWeapon() {
+        StartCoroutine(SelectNoWeapon());
     }
 
     public IEnumerator SelectNoWeapon() {
-        inverseKinematics.ClearSetup();
+        playerIK.ClearSetup();
 
         switchLayer.weight = 1;
         poseLayer.weight = 0;
 
-        inverseKinematics.SwitchWeapon();
+        playerIK.SwitchWeapon();
 
         yield return new WaitForSeconds(0.75f);
+
+        if (activeGun == null) {
+            Debug.LogError("There is no active gun in the players hand");
+            yield break;
+        }
 
         DespawnActiveGun();
 
         yield return new WaitForSeconds(0.3f);
 
-        inverseKinematics.SetGun(false);
+        playerIK.SetGun(false);
     }
 
     public void SelectAssaultRifle() {
@@ -92,9 +107,8 @@ public class PlayerGunSelector : MonoBehaviour {
         switchLayer.weight = 1;
         poseLayer.weight = 0;
 
-
-        inverseKinematics.ClearSetup();
-        inverseKinematics.SwitchWeapon();
+        playerIK.ClearSetup();
+        playerIK.SwitchWeapon();
 
         yield return new WaitForSeconds(0.75f);
 
@@ -107,12 +121,18 @@ public class PlayerGunSelector : MonoBehaviour {
 
         yield return new WaitForSeconds(0.3f);
 
-        inverseKinematics.SetGun(true);
+        playerIK.SetGun(true);
 
         switchLayer.weight = 0;
         poseLayer.weight = 1;
 
-        inverseKinematics.Setup(gunParent[weaponSlotIndex]);
+        playerIK.Setup(gunParent[weaponSlotIndex]);
+    }
+
+    public void DieWithWeapon() {
+        playerIK.ClearSetup();
+        switchLayer.weight = 1;
+        poseLayer.weight = 0;
     }
 
     public void DespawnActiveGun() {

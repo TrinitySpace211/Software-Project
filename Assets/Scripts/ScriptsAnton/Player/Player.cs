@@ -17,12 +17,14 @@ public class Player : MonoBehaviour {
     [SerializeField] private PlayerInputHandler playerInputHandler;
     [SerializeField] private CharacterController characterController;
     [SerializeField] private PlayerAnimation playerAnimation;
+    [SerializeField] private PlayerHealth playerHealth;
     [SerializeField] private Camera playerCamera;
     [SerializeField] private LayerMask layerMask;
     [SerializeField] private Rig aimLayer;
     [SerializeField] private BaseStats baseStats;
     [SerializeField] private PlayerGunSelector gunSelector;
-    //[SerializeField] private Transform headPose;
+    [SerializeField] private CurrentPlayerState playerState;
+    [SerializeField] private PlayerIK playerIK;
 
     [Header("Movement Parameters")]
     [SerializeField] private float walkSpeed = 4f;
@@ -44,11 +46,11 @@ public class Player : MonoBehaviour {
 
     [Header("Debugging")]
     [SerializeField] private bool alwaysAiming = false;
+
     public float rotationMismatch { get; private set; } = 0f;
     public bool isRotatingToTarget { get; private set; } = false;
     private bool isRotatingClockwise = false;
     private float rotatingToTargetTimer = 0f;
-
 
     //Define Stats for this Player Instance
     public PlayerStats currentPlayerStats { get; private set; }
@@ -59,19 +61,13 @@ public class Player : MonoBehaviour {
     private float currentSpeed => walkSpeed * (playerInputHandler.SprintTriggered ? sprintMultipier : 1f);
     private Vector3 currentLookDir;
 
-    //PlayerState and Movement Checks
-    private CurrentPlayerState playerState;
-    private PlayerIK playerIK;
+    //Movement Checks
     private bool isWalking;
     private bool isMovingLaterally;
     private bool isSprinting;
-    private bool isDead;
     #endregion
 
     private void Start() {
-        playerState = GetComponent<CurrentPlayerState>();
-        playerIK = GetComponent<PlayerIK>();
-
         currentPlayerStats = new PlayerStats {
             maxHealth = baseStats.health,
             armor = baseStats.armor
@@ -79,11 +75,13 @@ public class Player : MonoBehaviour {
     }
 
     private void Update() {
-        UpdateMovementState();
-        HandleMovement();
-        HandleAiming();
+        if (!playerHealth.GetIsDead()) {
+            UpdateMovementState();
+            HandleMovement();
+            HandleAiming();
 
-        HandleShooting(currentLookDir);
+            HandleShooting(currentLookDir);
+        }
     }
 
     /// <summary>
@@ -281,24 +279,6 @@ public class Player : MonoBehaviour {
     }
     #endregion
 
-    public void TakeDamage(int damage) {
-        if (isDead) return;
-
-        currentPlayerStats.maxHealth -= damage;
-        currentPlayerStats.maxHealth = Mathf.Max(0, currentPlayerStats.maxHealth);
-        Debug.Log($"Player HP: {currentPlayerStats.maxHealth}/{100}");
-
-        //Event
-
-        if (currentPlayerStats.maxHealth <= 0)
-            Die();
-    }
-
-    private void Die() {
-        isDead = true;
-        Debug.Log("Player gestorben");
-    }
-
     #region State Checks
 
     /// <summary>
@@ -343,6 +323,17 @@ public class Player : MonoBehaviour {
 
     public float GetAimLayerWeight() {
         return aimLayer.weight;
+    }
+
+    public CurrentPlayerState GetCurrentPlayerState() {
+        return playerState;
+    }
+
+    public PlayerIK GetPlayerIK() {
+        return playerIK;
+    }
+    public PlayerGunSelector GetPlayerGunSelector() {
+        return gunSelector;
     }
     #endregion
 
