@@ -24,6 +24,10 @@ public class PlayerAnimation : MonoBehaviour {
     private int isDeadWithWeaponHash = Animator.StringToHash("IsDeadWithWeapon");
     private int isWeaponAiming = Animator.StringToHash("IsWeaponAiming");
 
+    private void Start() {
+        player = GetComponent<Player>();
+    }
+
     private void Update() {
         UpdateAnimationState();
     }
