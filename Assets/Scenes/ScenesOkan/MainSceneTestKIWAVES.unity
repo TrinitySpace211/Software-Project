@@ -1339,7 +1339,7 @@ MonoBehaviour:
   - {fileID: 742024959}
   baseZombieCount: 8
   zombiesPerDay: 2
-  maxZombiesPerZone: 20
+  maxZombiesTotal: 60
 --- !u!4 &399324723
 Transform:
   m_ObjectHideFlags: 0
@@ -2104,16 +2104,36 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 758257482}
     - target: {fileID: 5427726534359471549, guid: 0c9fa39718c653b4c9b29a8aaa6e023e, type: 3}
+      propertyPath: hoursPerRealSecond
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5427726534359471549, guid: 0c9fa39718c653b4c9b29a8aaa6e023e, type: 3}
       propertyPath: onNewDayStarted.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5427726534359471549, guid: 0c9fa39718c653b4c9b29a8aaa6e023e, type: 3}
+      propertyPath: onNewDayStarted.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5427726534359471549, guid: 0c9fa39718c653b4c9b29a8aaa6e023e, type: 3}
       propertyPath: onNewDayStarted.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 399324721}
+      objectReference: {fileID: 399324722}
     - target: {fileID: 5427726534359471549, guid: 0c9fa39718c653b4c9b29a8aaa6e023e, type: 3}
       propertyPath: onNewDayStarted.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5427726534359471549, guid: 0c9fa39718c653b4c9b29a8aaa6e023e, type: 3}
+      propertyPath: onNewDayStarted.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnNewDay
+      objectReference: {fileID: 0}
+    - target: {fileID: 5427726534359471549, guid: 0c9fa39718c653b4c9b29a8aaa6e023e, type: 3}
+      propertyPath: onNewDayStarted.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: WaveManager, Scripts
+      objectReference: {fileID: 0}
+    - target: {fileID: 5427726534359471549, guid: 0c9fa39718c653b4c9b29a8aaa6e023e, type: 3}
+      propertyPath: onNewDayStarted.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
