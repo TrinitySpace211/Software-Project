@@ -64,7 +64,7 @@ public class PlayerHealth : MonoBehaviour {
 
         float finalDamage = Mathf.Max(0, damage - playerStats.armor);
 
-        playerStats.currentHealth -= finalDamage;
+        playerStats.currentHealth = Mathf.Lerp(playerStats.currentHealth, playerStats.currentHealth - finalDamage, 0.5f);
         playerStats.currentHealth = Mathf.Clamp(playerStats.currentHealth, 0, playerStats.maxHealth);
 
         //Debug.Log($"Player HP: {playerStats.currentHealth}/{playerStats.maxHealth}");

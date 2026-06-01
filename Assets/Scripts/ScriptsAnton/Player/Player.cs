@@ -332,6 +332,9 @@ public class Player : MonoBehaviour {
     public PlayerIK GetPlayerIK() {
         return playerIK;
     }
+    public PlayerGunSelector GetPlayerGunSelector() {
+        return gunSelector;
+    }
     #endregion
 
 }
