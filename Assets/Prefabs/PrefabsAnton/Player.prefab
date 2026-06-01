@@ -3888,7 +3888,7 @@ GameObject:
   - component: {fileID: 9186361813033626938}
   - component: {fileID: 9209443484949224615}
   - component: {fileID: 6734014837290629750}
-  - component: {fileID: 6517137080895184235}
+  - component: {fileID: 2278979405329887630}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -3976,6 +3976,7 @@ MonoBehaviour:
   playerInputHandler: {fileID: 0}
   characterController: {fileID: 6616283865880768969}
   playerAnimation: {fileID: 1444545788740469516}
+  playerHealth: {fileID: 0}
   playerCamera: {fileID: 0}
   layerMask:
     serializedVersion: 2
@@ -3983,6 +3984,8 @@ MonoBehaviour:
   aimLayer: {fileID: 739966560693359007}
   baseStats: {fileID: 11400000, guid: 7dc0e11343780ab4997ce5ebf27fbd5e, type: 2}
   gunSelector: {fileID: 3991829341768361164}
+  playerState: {fileID: 0}
+  playerIK: {fileID: 0}
   walkSpeed: 1.8
   sprintMultipier: 2.3
   movingThreshold: 0.01
@@ -4040,7 +4043,6 @@ MonoBehaviour:
   guns:
   - {fileID: 11400000, guid: f5f185b9689eb17478c5f798fef6bb6a, type: 2}
   - {fileID: 11400000, guid: 3b953e2266b3e8148b30c65ae50e57f4, type: 2}
-  playerIK: {fileID: 9186361813033626938}
   switchLayer: {fileID: 515488629726933562}
   poseLayer: {fileID: 3474541558812836290}
   switchDuration: 0
@@ -4101,7 +4103,6 @@ MonoBehaviour:
     currentHealth: 100
     armor: 0
   baseStats: {fileID: 11400000, guid: 7dc0e11343780ab4997ce5ebf27fbd5e, type: 2}
-  animator: {fileID: 8238083834496811590}
 --- !u!114 &2278979405329887630
 MonoBehaviour:
   m_ObjectHideFlags: 0
