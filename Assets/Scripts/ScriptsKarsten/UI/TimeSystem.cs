@@ -1,6 +1,8 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using TMPro;
 using System.Collections;
+using UnityEngine.UI;
 
 /// <summary>
 /// Controls the full day-night cycle system including:
@@ -9,6 +11,7 @@ using System.Collections;
 /// - Notifications
 /// - Dynamic lighting (sun, color, intensity, ambient light)
 /// - Sunrise and sunset transitions
+/// - Extraction after surviving a defined number of nights
 /// </summary>
 public class TimeSystem : MonoBehaviour {
     /// <summary>
@@ -32,9 +35,12 @@ public class TimeSystem : MonoBehaviour {
     private float timeOfDay = 6f;
 
     /// <summary>
-    /// Day cycle counter.
+    /// Day and Night cycle counter.
     /// </summary>
-    private int cycleNumber = 1;
+    private int dayNumber = 1;
+    private int nightNumber = 0;
+
+    public int SurvivedNights => nightNumber - 1;
 
     /// <summary>
     /// Current time state.
@@ -89,6 +95,26 @@ public class TimeSystem : MonoBehaviour {
     public int extractionNight = 10;
 
     /// <summary>
+    /// Name of the scene that will be loaded after the extraction sequence.
+    /// </summary>
+    public string extractionSceneName = "ExtractionScene";
+
+    /// <summary>
+    /// Delay before switching to the extraction scene.
+    /// </summary>
+    public float extractionSceneDelay = 3f;
+
+    /// <summary>
+    /// Fade screen used for the black transition.
+    /// </summary>
+    public CanvasGroup fadeCanvasGroup;
+
+    /// <summary>
+    /// Duration of the black fade before loading the extraction scene.
+    /// </summary>
+    public float fadeDuration = 1.5f;
+
+    /// <summary>
     /// Prevents the extraction from starting multiple times.
     /// </summary>
     private bool extractionTriggered;
@@ -102,7 +128,16 @@ public class TimeSystem : MonoBehaviour {
     /// Initializes system and hides notification UI.
     /// </summary>
     void Start() {
-        notificationText.gameObject.SetActive(false);
+        if (notificationText != null) {
+            notificationText.gameObject.SetActive(false);
+        }
+
+        if (fadeCanvasGroup != null) {
+            fadeCanvasGroup.alpha = 0f;
+            fadeCanvasGroup.interactable = false;
+            fadeCanvasGroup.blocksRaycasts = false;
+        }
+
         currentState = GetTimeState();
 
         if (playerObject != null) {
@@ -146,8 +181,12 @@ public class TimeSystem : MonoBehaviour {
                     break;
 
                 case TimeState.Day:
-                    cycleNumber = Mathf.Max(1, cycleNumber + 1);
-                    ShowNotification($"Day {cycleNumber} begins!");
+                    ShowNotification($"Day {dayNumber} begins!");
+
+                    if (dayNumber > extractionNight) {
+                        TriggerExtraction();
+                    }
+
                     break;
 
                 case TimeState.Sunset:
@@ -155,18 +194,18 @@ public class TimeSystem : MonoBehaviour {
                     break;
 
                 case TimeState.Night:
-                    ShowNotification($"Night {cycleNumber} begins!");
+                    ShowNotification($"Night {nightNumber + 1} begins!");
 
-                    if (cycleNumber >= extractionNight) {
-                        TriggerExtraction();
-                    }
+                    dayNumber++;
+                    nightNumber++;
+
                     break;
             }
         }
     }
 
     /// <summary>
-    /// Starts the extraction sequence and disables player controls.
+    /// Starts the extraction sequence, disables player controls, fades the screen to black, and loads the extraction scene.
     /// </summary>
     private void TriggerExtraction() {
         if (extractionTriggered)
@@ -181,6 +220,39 @@ public class TimeSystem : MonoBehaviour {
         if (extractionController != null) {
             extractionController.StartExtraction();
         }
+
+        StartCoroutine(LoadExtractionSceneRoutine());
+    }
+
+    /// <summary>
+    /// Loads the extraction scene after the configured delay and fade.
+    /// </summary>
+    private IEnumerator LoadExtractionSceneRoutine() {
+        yield return new WaitForSeconds(extractionSceneDelay);
+        yield return StartCoroutine(FadeToBlackRoutine());
+        SceneManager.LoadScene(extractionSceneName);
+    }
+
+    /// <summary>
+    /// Fades the screen to black using the assigned CanvasGroup.
+    /// </summary>
+    private IEnumerator FadeToBlackRoutine() {
+        if (fadeCanvasGroup == null)
+            yield break;
+
+        fadeCanvasGroup.interactable = true;
+        fadeCanvasGroup.blocksRaycasts = true;
+
+        float elapsed = 0f;
+        float startAlpha = fadeCanvasGroup.alpha;
+
+        while (elapsed < fadeDuration) {
+            elapsed += Time.deltaTime;
+            fadeCanvasGroup.alpha = Mathf.Lerp(startAlpha, 1f, elapsed / fadeDuration);
+            yield return null;
+        }
+
+        fadeCanvasGroup.alpha = 1f;
     }
 
     /// <summary>
@@ -193,13 +265,15 @@ public class TimeSystem : MonoBehaviour {
         string stateText = "";
 
         if (currentState == TimeState.Day)
-            stateText = $"Day {cycleNumber}";
+            stateText = $"Day {dayNumber}";
         else if (currentState == TimeState.Night)
-            stateText = $"Night {cycleNumber}";
+            stateText = $"Night {nightNumber}";
         else
-            stateText = $"Day {cycleNumber}";
+            stateText = $"Day {dayNumber}";
 
-        timeText.text = $"{stateText}\n{hours:00}:{minutes:00}";
+        if (timeText != null) {
+            timeText.text = $"{stateText}\n{hours:00}:{minutes:00}";
+        }
     }
 
     /// <summary>
@@ -213,6 +287,9 @@ public class TimeSystem : MonoBehaviour {
     /// Notification coroutine.
     /// </summary>
     private IEnumerator NotificationRoutine(string message) {
+        if (notificationText == null)
+            yield break;
+
         notificationText.text = message;
         notificationText.gameObject.SetActive(true);
 

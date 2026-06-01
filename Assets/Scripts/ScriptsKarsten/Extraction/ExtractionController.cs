@@ -31,7 +31,6 @@ public class ExtractionController : MonoBehaviour {
 
     public float buttonFadeDuration = 1.5f;
 
-    // CanvasGroups für die Buttons
     private CanvasGroup retryButtonCanvasGroup;
     private CanvasGroup mainMenuButtonCanvasGroup;
     private CanvasGroup exitButtonCanvasGroup;
@@ -67,7 +66,6 @@ public class ExtractionController : MonoBehaviour {
             endText.text = endMessage;
         }
 
-        // Buttons initial verstecken
         if (retryButton != null) {
             retryButtonCanvasGroup = retryButton.GetComponent<CanvasGroup>();
             if (retryButtonCanvasGroup == null)
@@ -76,7 +74,7 @@ public class ExtractionController : MonoBehaviour {
             retryButtonCanvasGroup.alpha = 0f;
             retryButtonCanvasGroup.interactable = false;
             retryButtonCanvasGroup.blocksRaycasts = false;
-            retryButton.gameObject.SetActive(true); // Objekt aktiv, aber unsichtbar
+            retryButton.gameObject.SetActive(true);
         }
 
         if (mainMenuButton != null) {
@@ -148,8 +146,7 @@ public class ExtractionController : MonoBehaviour {
             endText.text = endMessage;
         }
 
-        // Buttons sind bereits aktiv ( setActive(true) in Awake ), aber unsichtbar (alpha = 0)
-        // Jetzt 2 Sekunden warten, bevor sie reinfaden
+    
         yield return new WaitForSeconds(3f);
 
         // Buttons fadeInen
@@ -198,8 +195,7 @@ public class ExtractionController : MonoBehaviour {
         group.alpha = to;
     }
 
-    // Fade für Button-CanvasGroup (kürzer, z. B. 0.5s)
-    // Fade für Button-CanvasGroup
+
     private IEnumerator FadeButton(CanvasGroup group, float from, float to) {
         if (group == null)
             yield break;
@@ -242,6 +238,6 @@ public class ExtractionController : MonoBehaviour {
     }
 
     public void OnMainMenuClicked() {
-        UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu"); // Scene-Namen anpassen
+        UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
     }
 }
