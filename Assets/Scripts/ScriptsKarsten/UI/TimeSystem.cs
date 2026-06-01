@@ -58,7 +58,9 @@ public class DayNightCycle : MonoBehaviour {
     /// </summary>
     [Header("Wave Events")] public UnityEvent onNewDayStarted;
 
+    public UnityEvent onNightStarted; // NEU
     private TimeState currentState;
+
 
     /// <summary>
     ///     Day cycle counter.
@@ -127,6 +129,7 @@ public class DayNightCycle : MonoBehaviour {
 
                 case TimeState.Night:
                     ShowNotification($"Night {cycleNumber} begins!");
+                    onNightStarted?.Invoke();
                     break;
             }
         }

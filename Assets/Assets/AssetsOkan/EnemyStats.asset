@@ -17,4 +17,4 @@ MonoBehaviour:
   damage: 10
   attackRange: 1.5
   attackCooldown: 1
-  detectionRange: 10
+  detectionRange: 15
