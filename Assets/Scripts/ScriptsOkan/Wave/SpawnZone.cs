@@ -27,8 +27,12 @@ public class SpawnZone : MonoBehaviour {
                 transform.position.z + randomOffset.y
             );
 
-            if (Physics.Raycast(origin, Vector3.down, out var hit, 50f, groundLayer))
-                Instantiate(zombiePrefab, hit.point, Quaternion.identity);
+            if (Physics.Raycast(origin, Vector3.down, out var hit, 50f, groundLayer)) {
+                var zombie = Instantiate(zombiePrefab, hit.point, Quaternion.identity);
+                var ai = zombie.GetComponent<ZombieAI>();
+                if (ai != null)
+                    ai.target = GameObject.FindWithTag("Player").transform;
+            }
         }
     }
 }

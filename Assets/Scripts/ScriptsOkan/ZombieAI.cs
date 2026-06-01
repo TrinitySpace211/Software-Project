@@ -11,7 +11,7 @@ public class ZombieAI : MonoBehaviour {
     [SerializeField] private SkinnedMeshRenderer skinnedMeshRenderer;
 
     /// <summary>Transform des Ziels (Player). Im Inspector setzen.</summary>
-    [SerializeField] private Transform target;
+    [SerializeField] public Transform target;
 
     [SerializeField] private GameObject[] joints;
 
