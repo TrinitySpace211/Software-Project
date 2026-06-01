@@ -1,90 +1,94 @@
-using UnityEngine;
-using TMPro;
 using System.Collections;
+using TMPro;
+using UnityEngine;
+using UnityEngine.Events;
 
 /// <summary>
-/// Controls the full day-night cycle system including:
-/// - Time progression
-/// - UI display
-/// - Notifications
-/// - Dynamic lighting (sun, color, intensity, ambient light)
-/// - Sunrise and sunset transitions
+///     Controls the full day-night cycle system including:
+///     - Time progression
+///     - UI display
+///     - Notifications
+///     - Dynamic lighting (sun, color, intensity, ambient light)
+///     - Sunrise and sunset transitions
 /// </summary>
 public class DayNightCycle : MonoBehaviour {
     /// <summary>
-    /// UI text showing current time and state.
+    ///     UI text showing current time and state.
     /// </summary>
     public TMP_Text timeText;
 
     /// <summary>
-    /// UI text for transition notifications.
+    ///     UI text for transition notifications.
     /// </summary>
     public TMP_Text notificationText;
 
     /// <summary>
-    /// Speed of time progression (hours per real second).
+    ///     Speed of time progression (hours per real second).
     /// </summary>
     public float hoursPerRealSecond = 0.1f;
 
     /// <summary>
-    /// Current in-game time (0–24 hours).
-    /// </summary>
-    private float timeOfDay = 6f;
-
-    /// <summary>
-    /// Day cycle counter.
-    /// </summary>
-    private int cycleNumber = 1;
-
-    /// <summary>
-    /// Current time state.
-    /// </summary>
-    private enum TimeState {
-        Night,
-        Sunrise,
-        Day,
-        Sunset
-    }
-
-    private TimeState currentState;
-
-    /// <summary>
-    /// Directional light acting as sun/moon.
+    ///     Directional light acting as sun/moon.
     /// </summary>
     public Light sunLight;
 
     /// <summary>
-    /// Maximum light intensity during day.
+    ///     Maximum light intensity during day.
     /// </summary>
     public float dayLightIntensity = 1.2f;
 
     /// <summary>
-    /// Minimum light intensity during night.
+    ///     Minimum light intensity during night.
     /// </summary>
     public float nightLightIntensity = 0.5f;
 
     /// <summary>
-    /// Color during daytime.
+    ///     Color during daytime.
     /// </summary>
     public Color dayColor = Color.white;
 
     /// <summary>
-    /// Color during nighttime.
+    ///     Color during nighttime.
     /// </summary>
-    public Color nightColor = new Color(0.45f, 0.45f, 0.55f);
+    public Color nightColor = new(0.45f, 0.45f, 0.55f);
 
     /// <summary>
-    /// Initializes system and hides notification UI.
+    ///     Event fired when a new day begins.
+    ///     Connect to WaveManager.OnNewDay() via the Inspector.
     /// </summary>
-    void Start() {
+    [Header("Wave Events")] public UnityEvent onNewDayStarted;
+
+    public UnityEvent onNightStarted; // NEU
+    private TimeState currentState;
+
+
+    /// <summary>
+    ///     Day cycle counter.
+    /// </summary>
+    private int cycleNumber = 1;
+
+    /// <summary>
+    ///     Current in-game time (0ï¿½24 hours).
+    /// </summary>
+    private float timeOfDay = 6f;
+
+    /// <summary>
+    ///     Returns current time (read-only).
+    /// </summary>
+    public float TimeOfDay => timeOfDay;
+
+    /// <summary>
+    ///     Initializes system and hides notification UI.
+    /// </summary>
+    private void Start() {
         notificationText.gameObject.SetActive(false);
         currentState = GetTimeState();
     }
 
     /// <summary>
-    /// Main update loop.
+    ///     Main update loop.
     /// </summary>
-    void Update() {
+    private void Update() {
         UpdateTime();
         HandleState();
         UpdateUI();
@@ -92,7 +96,7 @@ public class DayNightCycle : MonoBehaviour {
     }
 
     /// <summary>
-    /// Advances in-game time.
+    ///     Advances in-game time.
     /// </summary>
     private void UpdateTime() {
         timeOfDay += Time.deltaTime * hoursPerRealSecond;
@@ -100,10 +104,10 @@ public class DayNightCycle : MonoBehaviour {
     }
 
     /// <summary>
-    /// Determines current time state and handles transitions.
+    ///     Determines current time state and handles transitions.
     /// </summary>
     private void HandleState() {
-        TimeState newState = GetTimeState();
+        var newState = GetTimeState();
 
         if (newState != currentState) {
             currentState = newState;
@@ -116,6 +120,7 @@ public class DayNightCycle : MonoBehaviour {
                 case TimeState.Day:
                     cycleNumber = Mathf.Max(1, cycleNumber + 1);
                     ShowNotification($"Day {cycleNumber} begins!");
+                    onNewDayStarted?.Invoke();
                     break;
 
                 case TimeState.Sunset:
@@ -124,19 +129,20 @@ public class DayNightCycle : MonoBehaviour {
 
                 case TimeState.Night:
                     ShowNotification($"Night {cycleNumber} begins!");
+                    onNightStarted?.Invoke();
                     break;
             }
         }
     }
 
     /// <summary>
-    /// Updates UI clock display.
+    ///     Updates UI clock display.
     /// </summary>
     private void UpdateUI() {
-        int hours = Mathf.FloorToInt(timeOfDay);
-        int minutes = Mathf.FloorToInt((timeOfDay - hours) * 60f);
+        var hours = Mathf.FloorToInt(timeOfDay);
+        var minutes = Mathf.FloorToInt((timeOfDay - hours) * 60f);
 
-        string stateText = "";
+        var stateText = "";
 
         if (currentState == TimeState.Day)
             stateText = $"Day {cycleNumber}";
@@ -149,14 +155,14 @@ public class DayNightCycle : MonoBehaviour {
     }
 
     /// <summary>
-    /// Shows a temporary notification.
+    ///     Shows a temporary notification.
     /// </summary>
     private void ShowNotification(string message) {
         StartCoroutine(NotificationRoutine(message));
     }
 
     /// <summary>
-    /// Notification coroutine.
+    ///     Notification coroutine.
     /// </summary>
     private IEnumerator NotificationRoutine(string message) {
         notificationText.text = message;
@@ -168,15 +174,15 @@ public class DayNightCycle : MonoBehaviour {
     }
 
     /// <summary>
-    /// Determines the current time state based on the in-game time.
-    /// The day is divided into four phases:
-    /// - Sunrise (05:00–06:00)
-    /// - Day (06:00–20:00)
-    /// - Sunset (20:00–22:00)
-    /// - Night (22:00–05:00)
+    ///     Determines the current time state based on the in-game time.
+    ///     The day is divided into four phases:
+    ///     - Sunrise (05:00ï¿½06:00)
+    ///     - Day (06:00ï¿½20:00)
+    ///     - Sunset (20:00ï¿½22:00)
+    ///     - Night (22:00ï¿½05:00)
     /// </summary>
     /// <returns>
-    /// The current TimeState from enum based on timeOfDay.
+    ///     The current TimeState from enum based on timeOfDay.
     /// </returns>
     private TimeState GetTimeState() {
         if (timeOfDay >= 5f && timeOfDay < 6f)
@@ -192,13 +198,13 @@ public class DayNightCycle : MonoBehaviour {
     }
 
     /// <summary>
-    /// Updates sun rotation, intensity, color and ambient lighting.
+    ///     Updates sun rotation, intensity, color and ambient lighting.
     /// </summary>
     private void UpdateLighting() {
         if (sunLight == null)
             return;
 
-        float normalizedTime = timeOfDay / 24f;
+        var normalizedTime = timeOfDay / 24f;
 
         sunLight.transform.rotation = Quaternion.Euler(
             normalizedTime * 360f - 90f,
@@ -206,7 +212,7 @@ public class DayNightCycle : MonoBehaviour {
             0f
         );
 
-        float t = 0f;
+        var t = 0f;
 
         switch (currentState) {
             case TimeState.Sunrise:
@@ -246,14 +252,19 @@ public class DayNightCycle : MonoBehaviour {
     }
 
     /// <summary>
-    /// Returns current time (read-only).
-    /// </summary>
-    public float TimeOfDay => timeOfDay;
-
-    /// <summary>
-    /// Sets time manually (debug/testing).
+    ///     Sets time manually (debug/testing).
     /// </summary>
     public void SetTime(float time) {
         timeOfDay = time;
+    }
+
+    /// <summary>
+    ///     Current time state.
+    /// </summary>
+    private enum TimeState {
+        Night,
+        Sunrise,
+        Day,
+        Sunset
     }
 }

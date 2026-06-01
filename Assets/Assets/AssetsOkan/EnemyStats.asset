@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHealth: 100
   moveSpeed: 1
-  damage: 100
-  attackRange: 1
+  damage: 10
+  attackRange: 1.5
   attackCooldown: 1
+  detectionRange: 15
