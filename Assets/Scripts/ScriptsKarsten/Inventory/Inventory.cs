@@ -151,15 +151,17 @@ public class Inventory : MonoBehaviour {
                 hotbarSlots[slot].SetSelected(true);
 
 
-                if (previousSlot != -1) {//Check for item in hotbar then equip the item
-                    if (item == assaultRifle) {
-                        ToggleWeaponSelect(assaultRifle);
-                    } else if (item == pistol) {
-                        ToggleWeaponSelect(pistol);
-                    } else if (hotbarSlots[previousSlot].GetItem() == assaultRifle || hotbarSlots[previousSlot].GetItem() == pistol) {
+                //Check for item in hotbar then equip the item
+                if (item == assaultRifle) {
+                    ToggleWeaponSelect(assaultRifle);
+                } else if (item == pistol) {
+                    ToggleWeaponSelect(pistol);
+                } else if (previousSlot != -1) {
+                    if (hotbarSlots[previousSlot].GetItem() == assaultRifle || hotbarSlots[previousSlot].GetItem() == pistol) {
                         ToggleWeaponSelect(null);
-                    }//Add more else if statements for more options
-                }
+                    }
+                }//Add more else if statements for more options
+
 
                 previousSlot = slot;
 

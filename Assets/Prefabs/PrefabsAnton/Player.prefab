@@ -3976,7 +3976,7 @@ MonoBehaviour:
   playerInputHandler: {fileID: 0}
   characterController: {fileID: 6616283865880768969}
   playerAnimation: {fileID: 1444545788740469516}
-  playerHealth: {fileID: 0}
+  playerHealth: {fileID: 6734014837290629750}
   playerCamera: {fileID: 0}
   layerMask:
     serializedVersion: 2
@@ -3984,8 +3984,8 @@ MonoBehaviour:
   aimLayer: {fileID: 739966560693359007}
   baseStats: {fileID: 11400000, guid: 7dc0e11343780ab4997ce5ebf27fbd5e, type: 2}
   gunSelector: {fileID: 3991829341768361164}
-  playerState: {fileID: 0}
-  playerIK: {fileID: 0}
+  playerState: {fileID: 8176537642730218114}
+  playerIK: {fileID: 9186361813033626938}
   walkSpeed: 1.8
   sprintMultipier: 2.3
   movingThreshold: 0.01
@@ -4103,6 +4103,8 @@ MonoBehaviour:
     currentHealth: 100
     armor: 0
   baseStats: {fileID: 11400000, guid: 7dc0e11343780ab4997ce5ebf27fbd5e, type: 2}
+  deathScreen: {fileID: 0}
+  dayNightCycle: {fileID: 0}
 --- !u!114 &2278979405329887630
 MonoBehaviour:
   m_ObjectHideFlags: 0
