@@ -7,6 +7,8 @@ public class PlayerHealth : MonoBehaviour {
 
     [SerializeField] private PlayerStats playerStats;
     [SerializeField] private BaseStats baseStats;
+    [SerializeField] private DeathScreen deathScreen;
+    [SerializeField] private DayNightCycle dayNightCycle;
 
     private bool isDead;
     private HealthBar healthBar;
@@ -64,7 +66,7 @@ public class PlayerHealth : MonoBehaviour {
 
         float finalDamage = Mathf.Max(0, damage - playerStats.armor);
 
-        playerStats.currentHealth = Mathf.Lerp(playerStats.currentHealth, playerStats.currentHealth - finalDamage, 0.5f);
+        playerStats.currentHealth -= finalDamage;
         playerStats.currentHealth = Mathf.Clamp(playerStats.currentHealth, 0, playerStats.maxHealth);
 
         //Debug.Log($"Player HP: {playerStats.currentHealth}/{playerStats.maxHealth}");
@@ -87,6 +89,8 @@ public class PlayerHealth : MonoBehaviour {
         } else {
             playerAnimation.SetDyingTrigger();
         }
+
+        deathScreen.ShowDeathScreen(dayNightCycle.SurvivedNights);
     }
 
     public bool GetIsDead() {
