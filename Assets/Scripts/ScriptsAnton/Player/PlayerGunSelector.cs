@@ -18,6 +18,7 @@ public class PlayerGunSelector : MonoBehaviour {
     private Player player;
     private PlayerIK playerIK;
     private GunType gunType;
+    private Coroutine selectCoroutine;
 
     [Space]
     [Header("Runtime Filled")]
@@ -29,20 +30,19 @@ public class PlayerGunSelector : MonoBehaviour {
     }
 
     private void Update() {
-        /* if (Keyboard.current.digit1Key.wasPressedThisFrame && activeGun != null) {
-            //Idle no Weapon
-            StartCoroutine(SelectNoWeapon());
-        } else if (Keyboard.current.digit2Key.wasPressedThisFrame) {
-            //Assault
-            SelectAssaultRifle();
-        } else if (Keyboard.current.digit3Key.wasPressedThisFrame) {
-            //Pistol
-            SelectPistol();
-        } */
+
+    }
+
+    private void StopActiveSelectionCoroutine() {
+        if (selectCoroutine != null) {
+            StopCoroutine(selectCoroutine);
+            selectCoroutine = null;
+        }
     }
 
     public void DequipWeapon() {
-        StartCoroutine(SelectNoWeapon());
+        StopActiveSelectionCoroutine();
+        selectCoroutine = StartCoroutine(SelectNoWeapon());
     }
 
     public IEnumerator SelectNoWeapon() {
@@ -57,6 +57,7 @@ public class PlayerGunSelector : MonoBehaviour {
 
         if (activeGun == null) {
             Debug.LogError("There is no active gun in the players hand");
+            selectCoroutine = null;
             yield break;
         }
 
@@ -65,6 +66,7 @@ public class PlayerGunSelector : MonoBehaviour {
         yield return new WaitForSeconds(0.3f);
 
         playerIK.SetGun(false);
+        selectCoroutine = null;
     }
 
     public void SelectAssaultRifle() {
@@ -82,7 +84,8 @@ public class PlayerGunSelector : MonoBehaviour {
             }
         }
 
-        StartCoroutine(SelectGun(gun, weaponSlotIndex));
+        StopActiveSelectionCoroutine();
+        selectCoroutine = StartCoroutine(SelectGun(gun, weaponSlotIndex));
     }
 
     public void SelectPistol() {
@@ -100,7 +103,8 @@ public class PlayerGunSelector : MonoBehaviour {
             }
         }
 
-        StartCoroutine(SelectGun(gun, weaponSlotIndex));
+        StopActiveSelectionCoroutine();
+        selectCoroutine = StartCoroutine(SelectGun(gun, weaponSlotIndex));
     }
 
     private IEnumerator SelectGun(GunSO gun, int weaponSlotIndex) {
@@ -127,6 +131,7 @@ public class PlayerGunSelector : MonoBehaviour {
         poseLayer.weight = 1;
 
         playerIK.Setup(gunParent[weaponSlotIndex]);
+        selectCoroutine = null;
     }
 
     public void DieWithWeapon() {

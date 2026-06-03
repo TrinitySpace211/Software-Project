@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4733197454648745399}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: GroundTerrain
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -60,7 +60,7 @@ Transform:
   m_GameObject: {fileID: 8652738360515917477}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -104.2, y: 0, z: -103.9}
+  m_LocalPosition: {x: -104.2, y: 0.3, z: -103.9}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -156,5 +156,5 @@ MonoBehaviour:
   m_OverrideVoxelSize: 0
   m_VoxelSize: 0.16666667
   m_MinRegionArea: 2
-  m_NavMeshData: {fileID: 23800000, guid: aea4fc4cfa80c4844a93a628b5663922, type: 2}
+  m_NavMeshData: {fileID: 23800000, guid: 36472e36a16d9db4ea279979da49420c, type: 2}
   m_BuildHeightMesh: 0
