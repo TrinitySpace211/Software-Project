@@ -27,6 +27,12 @@ public class NPCDialog : MonoBehaviour {
     public Transform towerSpawnPoint;
 
     /// <summary>
+    /// True while the NPC dialog is open.
+    /// Can be read by other scripts, but can only be changed inside NPCDialog.
+    /// </summary>
+    public bool IsDialogOpen { get; private set; }
+
+    /// <summary>
     /// Prepares the UI panels by briefly activating them and then disabling them again.
     /// This helps avoid visual stuttering when switching between panels.
     /// </summary>
@@ -48,6 +54,8 @@ public class NPCDialog : MonoBehaviour {
     /// Opens the NPC dialog panel and unlocks the cursor for UI interaction.
     /// </summary>
     public void OpenDialog() {
+        IsDialogOpen = true;
+
         // Show the dialog panel and hide the functions panel
         dialogPanel.SetActive(true);
         functionsPanel.SetActive(false);
@@ -64,6 +72,8 @@ public class NPCDialog : MonoBehaviour {
     /// Closes both NPC UI panels and keeps the cursor visible.
     /// </summary>
     public void CloseDialog() {
+        IsDialogOpen = false;
+
         // Hide both panels
         dialogPanel.SetActive(false);
         functionsPanel.SetActive(false);
