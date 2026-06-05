@@ -12,7 +12,6 @@ public class PlayerInputHandler : MonoBehaviour {
     public Vector2 MovementInput { get; private set; }
     public bool AttackTriggered { get; private set; }
     public bool AimingTriggered { get; private set; }
-    public bool JumpTriggered { get; private set; }
     public bool SprintTriggered { get; private set; }
     public Vector2 MousePosition { get; private set; }
 
@@ -53,9 +52,6 @@ public class PlayerInputHandler : MonoBehaviour {
 
         playerInputActions.Player.Aiming.performed += _ => AimingTriggered = true;
         playerInputActions.Player.Aiming.canceled += _ => AimingTriggered = false;
-
-        playerInputActions.Player.Jump.performed += _ => JumpTriggered = true;
-        playerInputActions.Player.Jump.canceled += _ => JumpTriggered = false;
 
         playerInputActions.Player.Sprint.performed += _ => SprintTriggered = true;
         playerInputActions.Player.Sprint.canceled += _ => SprintTriggered = false;

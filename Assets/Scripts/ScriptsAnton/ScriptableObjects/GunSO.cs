@@ -37,28 +37,22 @@ public class GunSO : ScriptableObject {
         if (Time.time > shootConfigSO.fireRate + lastShootTime) {
             lastShootTime = Time.time;
             shootSystem.Play();
-            Vector3 shootDirection = shootSystem.transform.forward
-                + new Vector3(
-                        Random.Range(
-                        -shootConfigSO.spread.x,
-                        shootConfigSO.spread.x
-                        ),
-                        Random.Range(
-                        -shootConfigSO.spread.y,
-                        shootConfigSO.spread.y
-                        ),
-                        Random.Range(
-                        -shootConfigSO.spread.z,
-                        shootConfigSO.spread.z
-                        )
-                    );
-            shootDirection.Normalize();
+            for (int i = 0; i < shootConfigSO.bulletsPerShoot; i++) {
+                Vector3 shootDirection = shootSystem.transform.forward
+                    + new Vector3(
+                            Random.Range(-shootConfigSO.spread.x, shootConfigSO.spread.x),
+                            Random.Range(-shootConfigSO.spread.y, shootConfigSO.spread.y),
+                            Random.Range(-shootConfigSO.spread.z, shootConfigSO.spread.z)
+                        );
+                shootDirection.Normalize();
 
-            if (Physics.Raycast(shootSystem.transform.position, shootDirection, out RaycastHit hit, 100f, shootConfigSO.hitMask)) {
-                activeMonoBehaviour.StartCoroutine(PlayTrail(shootSystem.transform.position, hit.point, hit));
-            } else {
-                activeMonoBehaviour.StartCoroutine(PlayTrail(shootSystem.transform.position, shootSystem.transform.position + (shootDirection * trailConfigSO.missDistance), new RaycastHit()));
+                if (Physics.Raycast(shootSystem.transform.position, shootDirection, out RaycastHit hit, 100f, shootConfigSO.hitMask)) {
+                    activeMonoBehaviour.StartCoroutine(PlayTrail(shootSystem.transform.position, hit.point, hit));
+                } else {
+                    activeMonoBehaviour.StartCoroutine(PlayTrail(shootSystem.transform.position, shootSystem.transform.position + (shootDirection * trailConfigSO.missDistance), new RaycastHit()));
+                }
             }
+
         }
     }
 
@@ -89,6 +83,8 @@ public class GunSO : ScriptableObject {
 
         if (hit.collider != null) {
             SurfaceManager.Instance.HandleImpact(hit.transform.gameObject, endPoint, hit.normal, impactType, hit.triangleIndex);
+
+            HitEnemy(hit);
         }
 
         yield return new WaitForSeconds(trailConfigSO.duration);
@@ -125,5 +121,15 @@ public class GunSO : ScriptableObject {
         trailPool.Clear();
 
         shootSystem = null;
+    }
+
+    private void HitEnemy(RaycastHit hit) {
+        ZombieAI zombie = hit.transform.GetComponentInParent<ZombieAI>();
+
+        if (zombie != null) {
+            if (!zombie.IsDead()) {
+                zombie.TakeDamage(shootConfigSO.damage);
+            }
+        }
     }
 }

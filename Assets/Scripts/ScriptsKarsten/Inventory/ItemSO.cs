@@ -28,10 +28,4 @@ public class ItemSO : ScriptableObject {
     /// (e.g., dropped on the ground).
     /// </summary>
     public GameObject itemPrefab;
-
-    /// <summary>
-    /// The prefab displayed in the player's hand
-    /// when the item is equipped or held.
-    /// </summary>
-    public GameObject handItemPrefab;
 }
