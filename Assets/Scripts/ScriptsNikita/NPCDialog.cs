@@ -9,12 +9,18 @@ public class NPCDialog : MonoBehaviour {
     /// <summary>
     /// The main dialog panel shown when the player interacts with the NPC.
     /// </summary>
-    public GameObject dialogPanel;
+    public CanvasGroup dialogPanel;
 
     /// <summary>
     /// The panel that contains additional NPC functions or options.
     /// </summary>
-    public GameObject functionsPanel;
+    public CanvasGroup functionsPanel;
+
+    /// <summary>
+    /// CanvasGroup for the tower information panel.
+    /// This panel shows details about the tower.
+    /// </summary>
+    public CanvasGroup towerInfoPanel;
 
     /// <summary>
     /// The tower prefab that will be spawned.
@@ -38,16 +44,14 @@ public class NPCDialog : MonoBehaviour {
     /// </summary>
     public void start() {
 
-        // Briefly activate both panels and then deactivate them again to avoid stuttering when switching panels
-        dialogPanel.SetActive(true);
-        functionsPanel.SetActive(true);
+        HidePanel(dialogPanel);
+        HidePanel(functionsPanel);
+        HidePanel(towerInfoPanel);
 
         // Force Unity to update the canvas layout immediately
         Canvas.ForceUpdateCanvases();
 
-        // Hide both panels after the canvas has been updated
-        dialogPanel.SetActive(false);
-        functionsPanel.SetActive(false);
+        
     }
 
     /// <summary>
@@ -56,9 +60,9 @@ public class NPCDialog : MonoBehaviour {
     public void OpenDialog() {
         IsDialogOpen = true;
 
-        // Show the dialog panel and hide the functions panel
-        dialogPanel.SetActive(true);
-        functionsPanel.SetActive(false);
+        ShowPanel(dialogPanel);
+        HidePanel(functionsPanel);
+        HidePanel(towerInfoPanel);
 
         // Unlock and show the cursor so the player can interact with the UI
         Cursor.lockState = CursorLockMode.None;
@@ -74,9 +78,9 @@ public class NPCDialog : MonoBehaviour {
     public void CloseDialog() {
         IsDialogOpen = false;
 
-        // Hide both panels
-        dialogPanel.SetActive(false);
-        functionsPanel.SetActive(false);
+        HidePanel(dialogPanel);
+        HidePanel(functionsPanel);
+        HidePanel(towerInfoPanel);
 
         // Unlock and show the cursor
         Cursor.lockState = CursorLockMode.None;
@@ -91,8 +95,9 @@ public class NPCDialog : MonoBehaviour {
     /// </summary>
     public void Back() {
         // Hide the functions panel and show the dialog panel again
-        functionsPanel.SetActive(false);
-        dialogPanel.SetActive(true);
+        ShowPanel(dialogPanel);
+        HidePanel(functionsPanel);
+        HidePanel(towerInfoPanel);
 
         // Clear the currently selected UI element
         EventSystem.current.SetSelectedGameObject(null);
@@ -110,12 +115,17 @@ public class NPCDialog : MonoBehaviour {
     /// Handles the functions option selected by the player.
     /// </summary>
     public void Functions() {
-        // Hide the dialog panel and show the functions panel
-        dialogPanel.SetActive(false);
-        functionsPanel.SetActive(true);
+        HidePanel(dialogPanel);
+        ShowPanel(functionsPanel);
+        HidePanel(towerInfoPanel);
 
         // Clear the currently selected UI element
         EventSystem.current.SetSelectedGameObject(null);
+    }
+
+    public void OpenTowerInfo() {
+        ShowPanel(functionsPanel);
+        ShowPanel(towerInfoPanel);
     }
 
     /// <summary>
@@ -130,4 +140,44 @@ public class NPCDialog : MonoBehaviour {
         // Clear the currently selected UI element
         EventSystem.current.SetSelectedGameObject(null);
     }
+
+    /// <summary>
+    /// Makes a panel visible and allows the player to interact with it.
+    /// This is used instead of SetActive(true), so the UI does not need to be rebuilt every time.
+    /// </summary>
+    private void ShowPanel(CanvasGroup panel) {
+        // If no panel was assigned in the Inspector, stop the function.
+        if (panel == null)
+            return;
+
+        // Makes the panel visible.
+        panel.alpha = 1f;
+
+        // Allows buttons and other UI elements inside the panel to be clicked.
+        panel.interactable = true;
+
+        // Allows the panel to receive mouse / UI raycasts.
+        panel.blocksRaycasts = true;
+    }
+
+    /// <summary>
+    /// Makes a panel invisible and disables interaction with it.
+    /// The GameObject stays active, but the player cannot see or click it.
+    /// </summary>
+    private void HidePanel(CanvasGroup panel) {
+        // If no panel was assigned in the Inspector, stop the function.
+        if (panel == null)
+            return;
+
+        // Makes the panel invisible.
+        panel.alpha = 0f;
+
+        // Prevents buttons and other UI elements inside the panel from being clicked.
+        panel.interactable = false;
+
+        // Prevents the invisible panel from blocking clicks on other UI elements.
+        panel.blocksRaycasts = false;
+    }
 }
+
+

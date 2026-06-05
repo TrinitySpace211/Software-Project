@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8447120823422752307}
   - component: {fileID: 7235127792891322789}
+  - component: {fileID: -5825029728297004082}
   m_Layer: 0
   m_Name: CrossbowDefense
   m_TagString: Untagged
@@ -50,6 +51,27 @@ MonoBehaviour:
   radius: 8
   searchInterval: 0.25
   enemyTag: Enemy
+--- !u!65 &-5825029728297004082
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1593874124051117735}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &7096176833815683096
 GameObject:
   m_ObjectHideFlags: 0
