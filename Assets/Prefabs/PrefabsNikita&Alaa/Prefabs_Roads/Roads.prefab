@@ -7964,6 +7964,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 3113316391701298865}
     m_Modifications:
+    - target: {fileID: 1881272191790192353, guid: 2e83eef97cb263443ab4183a548e559e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.047
+      objectReference: {fileID: 0}
     - target: {fileID: 2007484494471050936, guid: 2e83eef97cb263443ab4183a548e559e, type: 3}
       propertyPath: m_Name
       value: Destroyed_Pole
