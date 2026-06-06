@@ -39,6 +39,8 @@ public class Player : MonoBehaviour {
     [Header("Debugging")]
     [SerializeField] private bool alwaysAiming = false;
 
+    private Transform setupWeaponParent;
+
     //Define Stats for this Player Instance
     public PlayerStats currentPlayerStats { get; private set; }
 
@@ -67,6 +69,7 @@ public class Player : MonoBehaviour {
             HandleAiming();
 
             HandleShooting();
+            HandleReload();
         }
     }
 
@@ -156,7 +159,7 @@ public class Player : MonoBehaviour {
             aimLayer.weight = 1;
             playerAnimation.SetAimAnimation(true);
         } else {
-            if (playerInputHandler.AimingTriggered && !isSprinting && playerIK.GetHasWeapon()) {
+            if (playerInputHandler.AimingTriggered && !isSprinting && playerIK.GetHasWeapon() && !playerAnimation.GetIsReloading()) {
                 aimLayer.weight += Time.deltaTime / aimDuration;
                 playerAnimation.SetAimAnimation(true);
             } else {
@@ -170,8 +173,24 @@ public class Player : MonoBehaviour {
         if (playerInputHandler.AttackTriggered && playerInputHandler.AimingTriggered) {
             if (gunSelector.activeGun != null) {
                 gunSelector.activeGun.Shoot();
+
+                if (gunSelector.activeGun.GetEmptyMagazine() && !playerAnimation.GetIsReloading()) {
+                    setupWeaponParent = playerIK.GetParent();
+                    gunSelector.ClearSetupCurrentWeapon();
+                    playerAnimation.SetReloadTrigger();
+                }
             }
         }
+    }
+
+    private void HandleReload() {
+        if (gunSelector.activeGun != null) {
+            if (!gunSelector.activeGun.GetEmptyMagazine() && !playerAnimation.GetIsReloading() && setupWeaponParent != null) {
+                gunSelector.SetupCurrentWeapon(setupWeaponParent);
+                setupWeaponParent = null;
+            }
+        }
+
     }
 
     /// <summary>

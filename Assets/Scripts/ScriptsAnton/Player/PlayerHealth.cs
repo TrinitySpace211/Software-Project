@@ -84,7 +84,7 @@ public class PlayerHealth : MonoBehaviour {
         isDead = true;
 
         if (playerIK.GetHasWeapon()) {
-            playerGunSelector.DieWithWeapon();
+            playerGunSelector.ClearSetupCurrentWeapon();
             playerAnimation.SetDyingWithWeaponTrigger();
         } else {
             playerAnimation.SetDyingTrigger();

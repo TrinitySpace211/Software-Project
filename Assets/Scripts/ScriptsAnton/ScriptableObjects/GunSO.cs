@@ -21,20 +21,32 @@ public class GunSO : ScriptableObject {
     private ParticleSystem shootSystem;
     private ObjectPool<TrailRenderer> trailPool;
 
-    public void Spawn(Transform parent, MonoBehaviour activeMonoBehaviour) {
-        this.activeMonoBehaviour = activeMonoBehaviour;
-        lastShootTime = 0f;
-        trailPool = new ObjectPool<TrailRenderer>(CreateTrail);
-        model = Instantiate(modelPrefab);
-        model.transform.SetParent(parent, false);
-        model.transform.localPosition = spawnPoint;
-        model.transform.localRotation = Quaternion.Euler(spawnRotation);
+    private int currentAmmo;
+    private int savedAmmo;
+    private bool emptyMagazine = false;
 
+    public void Spawn(Transform parent, MonoBehaviour activeMonoBehaviour) {
+        if (model == null) {
+            this.activeMonoBehaviour = activeMonoBehaviour;
+            lastShootTime = 0f;
+
+            model = Instantiate(modelPrefab);
+            model.transform.SetParent(parent, false);
+            model.transform.localPosition = spawnPoint;
+            model.transform.localRotation = Quaternion.Euler(spawnRotation);
+
+            currentAmmo = shootConfigSO.maxAmmo;
+        } else {
+            currentAmmo = savedAmmo;
+        }
+
+        trailPool = new ObjectPool<TrailRenderer>(CreateTrail);
         shootSystem = model.GetComponentInChildren<ParticleSystem>();
     }
 
     public void Shoot() {
-        if (Time.time > shootConfigSO.fireRate + lastShootTime) {
+        if (Time.time > shootConfigSO.fireRate + lastShootTime && currentAmmo > 0) {
+            emptyMagazine = false;
             lastShootTime = Time.time;
             shootSystem.Play();
             for (int i = 0; i < shootConfigSO.bulletsPerShoot; i++) {
@@ -52,10 +64,14 @@ public class GunSO : ScriptableObject {
                     activeMonoBehaviour.StartCoroutine(PlayTrail(shootSystem.transform.position, shootSystem.transform.position + (shootDirection * trailConfigSO.missDistance), new RaycastHit()));
                 }
             }
-
+            currentAmmo--;
+        } else if (currentAmmo == 0) {
+            emptyMagazine = true;
         }
+
     }
 
+    #region Trail Creation and Trail Update
     /// <summary>
     /// Plays the path of the "bullets" and if it hits and object it plays the corresponding texture impact particle effect
     /// </summary>
@@ -113,11 +129,12 @@ public class GunSO : ScriptableObject {
 
         return trail;
     }
+    #endregion
 
     public void Despawn() {
         // We do a bunch of other stuff on the same frame, so we really want it to be immediately destroyed, not at Unity's convenience.
+        savedAmmo = currentAmmo;
         model.SetActive(false);
-        Destroy(model);
         trailPool.Clear();
 
         shootSystem = null;
@@ -131,5 +148,14 @@ public class GunSO : ScriptableObject {
                 zombie.TakeDamage(shootConfigSO.damage);
             }
         }
+    }
+
+    public void SetFullMagazine() {
+        emptyMagazine = false;
+        currentAmmo = shootConfigSO.maxAmmo;
+    }
+
+    public bool GetEmptyMagazine() {
+        return emptyMagazine;
     }
 }

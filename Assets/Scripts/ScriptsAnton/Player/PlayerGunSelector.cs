@@ -34,7 +34,9 @@ public class PlayerGunSelector : MonoBehaviour {
 
     public void DequipWeapon() {
         StopActiveSelectionCoroutine();
-        selectCoroutine = StartCoroutine(SelectNoWeapon());
+        if (activeGun != null) {
+            selectCoroutine = StartCoroutine(SelectNoWeapon());
+        }
     }
 
     public IEnumerator SelectNoWeapon() {
@@ -164,10 +166,16 @@ public class PlayerGunSelector : MonoBehaviour {
         selectCoroutine = null;
     }
 
-    public void DieWithWeapon() {
+    public void ClearSetupCurrentWeapon() {
         playerIK.ClearSetup();
         switchLayer.weight = 1;
         poseLayer.weight = 0;
+    }
+
+    public void SetupCurrentWeapon(Transform gunParent) {
+        playerIK.Setup(gunParent);
+        switchLayer.weight = 0;
+        poseLayer.weight = 1;
     }
 
     public void DespawnActiveGun() {

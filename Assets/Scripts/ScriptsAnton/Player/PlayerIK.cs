@@ -17,6 +17,7 @@ public class PlayerIK : MonoBehaviour {
     public float elbowIKAmount = 1f;
 
     private Animator animator;
+    private Transform gunParent;
     private int gunLayer;
     private bool hasWeapon = false;
 
@@ -55,6 +56,7 @@ public class PlayerIK : MonoBehaviour {
     }
 
     public void Setup(Transform gunParent) {
+        this.gunParent = gunParent;
         Transform[] allChildren = gunParent.GetComponentsInChildren<Transform>();
         leftElbowIKTarget = allChildren.FirstOrDefault(child => child.name == "LeftElbow");
         rightElbowIKTarget = allChildren.FirstOrDefault(child => child.name == "RightElbow");
@@ -82,6 +84,10 @@ public class PlayerIK : MonoBehaviour {
 
     public bool GetHasWeapon() {
         return hasWeapon;
+    }
+
+    public Transform GetParent() {
+        return gunParent;
     }
 
 }
