@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
@@ -60,6 +61,8 @@ public class Player : MonoBehaviour {
             maxHealth = baseStats.health,
             armor = baseStats.armor
         };
+
+        playerInputHandler.OnReloadAction += PlayerInputHandler_OnReloadAction;
     }
 
     private void Update() {
@@ -69,7 +72,7 @@ public class Player : MonoBehaviour {
             HandleAiming();
 
             HandleShooting();
-            HandleReload();
+            HandleReloadFinished();
         }
     }
 
@@ -81,6 +84,12 @@ public class Player : MonoBehaviour {
     public void Construct(PlayerInputHandler playerInputHandler, Camera playerCamera) {
         this.playerInputHandler = playerInputHandler;
         this.playerCamera = playerCamera;
+    }
+
+    private void PlayerInputHandler_OnReloadAction(object sender, EventArgs e) {
+        if (!playerHealth.GetIsDead()) {
+            HandleReloadButton();
+        }
     }
 
     #region Movement
@@ -178,20 +187,35 @@ public class Player : MonoBehaviour {
                     setupWeaponParent = playerIK.GetParent();
                     gunSelector.ClearSetupCurrentWeapon();
                     playerAnimation.SetReloadTrigger();
+                    playerAnimation.StartReloading();
                 }
             }
         }
     }
 
-    private void HandleReload() {
+    private void HandleReloadButton() {
         if (gunSelector.activeGun != null) {
-            if (!gunSelector.activeGun.GetEmptyMagazine() && !playerAnimation.GetIsReloading() && setupWeaponParent != null) {
-                gunSelector.SetupCurrentWeapon(setupWeaponParent);
-                setupWeaponParent = null;
+            if (!gunSelector.activeGun.MagazineIsFull() && !playerAnimation.GetIsReloading()) {
+                setupWeaponParent = playerIK.GetParent();
+                gunSelector.ClearSetupCurrentWeapon();
+                playerAnimation.SetReloadTrigger();
+                playerAnimation.StartReloading();
             }
         }
-
     }
+
+    private void HandleReloadFinished() {
+        if (gunSelector.activeGun != null) {
+            if (setupWeaponParent != null) {
+                if ((!gunSelector.activeGun.GetEmptyMagazine() || !gunSelector.activeGun.MagazineIsFull()) && !playerAnimation.GetIsReloading()) {
+                    gunSelector.SetupCurrentWeapon(setupWeaponParent);
+                    setupWeaponParent = null;
+                }
+            }
+        }
+    }
+
+    #endregion
 
     /// <summary>
     /// Updates the State of the Player Movement not the Movement itself
@@ -206,7 +230,6 @@ public class Player : MonoBehaviour {
 
         playerState.SetPlayerMovementState(lateralState);
     }
-    #endregion
 
     #region State Checks
 

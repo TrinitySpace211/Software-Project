@@ -158,4 +158,8 @@ public class GunSO : ScriptableObject {
     public bool GetEmptyMagazine() {
         return emptyMagazine;
     }
+
+    public bool MagazineIsFull() {
+        return currentAmmo == shootConfigSO.maxAmmo;
+    }
 }
