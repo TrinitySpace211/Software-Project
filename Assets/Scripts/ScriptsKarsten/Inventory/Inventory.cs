@@ -141,6 +141,12 @@ public class Inventory : MonoBehaviour {
         EndDrag();
     }
 
+    /// <summary>
+    /// Triggers when the Keys 1-5 are pressed.
+    /// The Hotbars get selected and if there is a Weapon or Equipment then
+    /// the Player will change to this item
+    /// </summary>
+    /// <param name="slot">the key which represents the Hotbarslot</param>
     private void PlayerInputHandler_OnHotbarSlotPressed(int slot) {
         ItemSO item = hotbarSlots[slot].GetItem();
 

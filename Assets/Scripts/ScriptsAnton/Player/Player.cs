@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
@@ -39,6 +40,8 @@ public class Player : MonoBehaviour {
     [Header("Debugging")]
     [SerializeField] private bool alwaysAiming = false;
 
+    private Transform setupWeaponParent;
+
     //Define Stats for this Player Instance
     public PlayerStats currentPlayerStats { get; private set; }
 
@@ -58,6 +61,8 @@ public class Player : MonoBehaviour {
             maxHealth = baseStats.health,
             armor = baseStats.armor
         };
+
+        playerInputHandler.OnReloadAction += PlayerInputHandler_OnReloadAction;
     }
 
     private void Update() {
@@ -67,6 +72,7 @@ public class Player : MonoBehaviour {
             HandleAiming();
 
             HandleShooting();
+            HandleReloadFinished();
         }
     }
 
@@ -78,6 +84,12 @@ public class Player : MonoBehaviour {
     public void Construct(PlayerInputHandler playerInputHandler, Camera playerCamera) {
         this.playerInputHandler = playerInputHandler;
         this.playerCamera = playerCamera;
+    }
+
+    private void PlayerInputHandler_OnReloadAction(object sender, EventArgs e) {
+        if (!playerHealth.GetIsDead()) {
+            HandleReloadButton();
+        }
     }
 
     #region Movement
@@ -156,7 +168,7 @@ public class Player : MonoBehaviour {
             aimLayer.weight = 1;
             playerAnimation.SetAimAnimation(true);
         } else {
-            if (playerInputHandler.AimingTriggered && !isSprinting && playerIK.GetHasWeapon()) {
+            if (playerInputHandler.AimingTriggered && !isSprinting && playerIK.GetHasWeapon() && !playerAnimation.GetIsReloading()) {
                 aimLayer.weight += Time.deltaTime / aimDuration;
                 playerAnimation.SetAimAnimation(true);
             } else {
@@ -170,9 +182,40 @@ public class Player : MonoBehaviour {
         if (playerInputHandler.AttackTriggered && playerInputHandler.AimingTriggered) {
             if (gunSelector.activeGun != null) {
                 gunSelector.activeGun.Shoot();
+
+                if (gunSelector.activeGun.GetEmptyMagazine() && !playerAnimation.GetIsReloading()) {
+                    setupWeaponParent = playerIK.GetParent();
+                    gunSelector.ClearSetupCurrentWeapon();
+                    playerAnimation.SetReloadTrigger();
+                    playerAnimation.StartReloading();
+                }
             }
         }
     }
+
+    private void HandleReloadButton() {
+        if (gunSelector.activeGun != null) {
+            if (!gunSelector.activeGun.MagazineIsFull() && !playerAnimation.GetIsReloading()) {
+                setupWeaponParent = playerIK.GetParent();
+                gunSelector.ClearSetupCurrentWeapon();
+                playerAnimation.SetReloadTrigger();
+                playerAnimation.StartReloading();
+            }
+        }
+    }
+
+    private void HandleReloadFinished() {
+        if (gunSelector.activeGun != null) {
+            if (setupWeaponParent != null) {
+                if ((!gunSelector.activeGun.GetEmptyMagazine() || !gunSelector.activeGun.MagazineIsFull()) && !playerAnimation.GetIsReloading()) {
+                    gunSelector.SetupCurrentWeapon(setupWeaponParent);
+                    setupWeaponParent = null;
+                }
+            }
+        }
+    }
+
+    #endregion
 
     /// <summary>
     /// Updates the State of the Player Movement not the Movement itself
@@ -187,7 +230,6 @@ public class Player : MonoBehaviour {
 
         playerState.SetPlayerMovementState(lateralState);
     }
-    #endregion
 
     #region State Checks
 

@@ -1,4 +1,5 @@
 using System;
+using UnityEditor.Animations;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -14,6 +15,7 @@ public class PlayerAnimation : MonoBehaviour {
     private Vector3 currentBlendInput = Vector3.zero;
     private Player player;
     private bool isSprinting;
+    private bool isReloading = false;
 
     private int inputXHash = Animator.StringToHash("inputX");
     private int inputYHash = Animator.StringToHash("inputY");
@@ -23,6 +25,7 @@ public class PlayerAnimation : MonoBehaviour {
     private int isDeadHash = Animator.StringToHash("IsDead");
     private int isDeadWithWeaponHash = Animator.StringToHash("IsDeadWithWeapon");
     private int isWeaponAiming = Animator.StringToHash("IsWeaponAiming");
+    private int reload = Animator.StringToHash("Reload");
 
     private void Start() {
         player = GetComponent<Player>();
@@ -78,6 +81,27 @@ public class PlayerAnimation : MonoBehaviour {
 
     public void SetDyingWithWeaponTrigger() {
         animator.SetTrigger(isDeadWithWeaponHash);
+    }
+
+    public void SetReloadTrigger() {
+        animator.SetTrigger(reload);
+    }
+
+    public void StartReloading() {
+        isReloading = true;
+    }
+
+    public void FinishedReloading() {
+        isReloading = false;
+
+        GunSO activeGun = player.GetPlayerGunSelector().activeGun;
+        if (activeGun != null) {
+            activeGun.SetFullMagazine();
+        }
+    }
+
+    public bool GetIsReloading() {
+        return isReloading;
     }
 
 }
