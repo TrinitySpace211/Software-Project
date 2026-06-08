@@ -193,7 +193,7 @@ TextureImporter:
         width: 415
         height: 79
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -202,6 +202,28 @@ TextureImporter:
       bones: []
       spriteID: c25acae5de3e1684eb3ae43306ec6495
       internalID: 1763964081
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WarningText
+      rect:
+        serializedVersion: 2
+        x: 485
+        y: 269
+        width: 414
+        height: 77
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b220e2884e5a58e40863dd34c62c3c45
+      internalID: 1738827375
       vertices: []
       indices: 
       edges: []
@@ -225,6 +247,7 @@ TextureImporter:
       Buttons_Pressed: 475602084
       Buttons_Red: -2048695499
       Panels: -114710904
+      WarningText: 1738827375
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
