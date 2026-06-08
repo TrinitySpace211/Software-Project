@@ -19,3 +19,4 @@ MonoBehaviour:
   fireRate: 0.3
   bulletsPerShoot: 1
   damage: 15
+  maxAmmo: 10

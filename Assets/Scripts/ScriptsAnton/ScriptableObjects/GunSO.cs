@@ -25,12 +25,13 @@ public class GunSO : ScriptableObject {
     private int savedAmmo;
     private bool emptyMagazine = false;
 
-    public void Spawn(Transform parent, MonoBehaviour activeMonoBehaviour) {
+    public void SpawnModel(Transform parent, MonoBehaviour activeMonoBehaviour) {
         if (model == null) {
             this.activeMonoBehaviour = activeMonoBehaviour;
             lastShootTime = 0f;
 
             model = Instantiate(modelPrefab);
+
             model.transform.SetParent(parent, false);
             model.transform.localPosition = spawnPoint;
             model.transform.localRotation = Quaternion.Euler(spawnRotation);
@@ -135,9 +136,18 @@ public class GunSO : ScriptableObject {
         // We do a bunch of other stuff on the same frame, so we really want it to be immediately destroyed, not at Unity's convenience.
         savedAmmo = currentAmmo;
         model.SetActive(false);
-        trailPool.Clear();
 
         shootSystem = null;
+    }
+
+    public void Spawn(Transform parent, MonoBehaviour activeMonoBehaviour) {
+        if (model == null) {
+            SpawnModel(parent, activeMonoBehaviour);
+        } else {
+            model.SetActive(true);
+
+            shootSystem = model.GetComponentInChildren<ParticleSystem>();
+        }
     }
 
     private void HitEnemy(RaycastHit hit) {

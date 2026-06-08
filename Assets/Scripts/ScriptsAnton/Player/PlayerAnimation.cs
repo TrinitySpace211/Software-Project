@@ -1,7 +1,4 @@
-using System;
-using UnityEditor.Animations;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 /// <summary>
 /// The PlayerAnimation Script handles the animations for the Player by updating the float parameters inputX, inputY and inputMagnitude
