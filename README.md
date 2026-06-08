@@ -2,6 +2,10 @@
 
 A survival game where players must endure increasingly dangerous days while managing resources and fighting enemies.
 
+# Download
+
+➡️ [Download the latest version](https://github.com/TrinitySpace211/Software-Project/releases/download/v0.1.0/10Dayz.zip)
+
 ## Playtest Information
 
 Thank you for participating in our playtest!
