@@ -11,6 +11,12 @@ public class DeathScreen : MonoBehaviour {
     public CanvasGroup buttonCanvas;
     public TMP_Text nightsText;
 
+    [Header("Disable On Death")]
+    public GameObject inventoryUI;
+    public GameObject crosshair;
+    public GameObject timeDisplay;
+    public GameObject healthBar;
+
     [Header("Audio")]
     public AudioSource audioSource;
     public AudioClip deathSound;
@@ -19,12 +25,26 @@ public class DeathScreen : MonoBehaviour {
     public string mainMenuScene = "MainMenu";
     public string gameScene = "MainScene";
 
+
     public void ShowDeathScreen(int survivedNights) {
         StartCoroutine(DeathRoutine(survivedNights));
     }
 
     private IEnumerator DeathRoutine(int survivedNights) {
         Time.timeScale = 0f;
+
+        // Inventory, Text, Healthbar und Crosshair ausblenden
+        if (inventoryUI != null)
+            inventoryUI.SetActive(false);
+
+        if (crosshair != null)
+            crosshair.SetActive(false);
+
+        if (timeDisplay != null)
+            timeDisplay.SetActive(false);
+
+        if (healthBar != null)
+            healthBar.SetActive(false);
 
         deathCanvas.gameObject.SetActive(true);
         buttonCanvas.gameObject.SetActive(true);
@@ -76,6 +96,7 @@ public class DeathScreen : MonoBehaviour {
 
     public void Exit() {
         Time.timeScale = 1f;
+
         #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
         #else
