@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f24a2496fb45af4fad3e4ff145e0fcf, type: 3}
+  m_Name: Sword
+  m_EditorClassIdentifier: 
+  impactType: {fileID: 11400000, guid: 79068c90613712849ab3ac0bf15e0aec, type: 2}
+  type: 5
+  meleeName: Sword
+  modelPrefab: {fileID: 1963830353856765976, guid: 7886e80c327fe034e9a3bb73150f41ca, type: 3}
+  weaponSlot: 3
+  attackSpeed: 0.5
+  damage: 60
+  swingVolume: 0.6

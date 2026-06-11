@@ -14,8 +14,11 @@ public class UpdateCursor : MonoBehaviour {
     [SerializeField] private float minRange = 0.8f;
     [SerializeField] private float maxRange = 1.2f;
 
-    private void LateUpdate() {
+    private void Start() {
         Cursor.visible = cursorVisible;
+    }
+
+    private void LateUpdate() {
         LookAt();
     }
 

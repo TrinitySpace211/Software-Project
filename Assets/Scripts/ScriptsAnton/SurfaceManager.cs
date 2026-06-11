@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Pool;
 
@@ -54,8 +55,27 @@ public class SurfaceManager : MonoBehaviour {
             ZombieAI zombie = hitObject.GetComponentInParent<ZombieAI>();
             if (zombie != null) {
                 Renderer renderer = zombie.GetComponentInChildren<SkinnedMeshRenderer>();
-
                 SurfaceType surfaceType = null;
+                Texture activeTexture = null;
+                if (renderer != null) {
+                    activeTexture = GetActiveTextureFromRenderer(renderer, triangleIndex);
+                    surfaceType = surfacesTypes.Find(surface => surface.albedo == activeTexture);
+                }
+                if (surfaceType != null) {
+                    foreach (Surface.SurfaceImpactTypeEffect typeEffect in surfaceType.surface.impactTypeEffects) {
+                        if (typeEffect.impactType == impact) {
+                            PlayEffects(hitPoint, hitNormal, typeEffect.surfaceEffect, 1);
+                        }
+                    }
+                } else {
+                    foreach (Surface.SurfaceImpactTypeEffect typeEffect in defaultSurface.impactTypeEffects) {
+                        if (typeEffect.impactType == impact) {
+                            PlayEffects(hitPoint, hitNormal, typeEffect.surfaceEffect, 1);
+                        }
+                    }
+                }
+
+                /*SurfaceType surfaceType = null;
                 if (renderer != null) {
                     Texture activeTexture = GetActiveTextureFromRenderer(renderer, triangleIndex);
                     surfaceType = surfacesTypes.Find(surface => surface.albedo == activeTexture);
@@ -73,7 +93,7 @@ public class SurfaceManager : MonoBehaviour {
                             PlayAudioOnlyEffects(hitPoint, typeEffect.surfaceEffect, 1);
                         }
                     }
-                }
+                } */
             } else {
                 Renderer renderer = hitObject.GetComponent<Renderer>();
                 if (renderer == null) {
@@ -212,20 +232,22 @@ public class SurfaceManager : MonoBehaviour {
     /// <param name="surfaceEffect">ScriptableObject with the a list of object effects and sound effects</param>
     /// <param name="soundOffset">random sound volume</param>
     private void PlayEffects(Vector3 hitPoint, Vector3 hitNormal, SurfaceEffect surfaceEffect, float soundOffset) {
-        foreach (SpawnObjectEffects spawnObjectEffect in surfaceEffect.spawnObjectEffects) {
-            if (spawnObjectEffect.probability > Random.value) {
-                ObjectPool pool = ObjectPool.CreateInstance(spawnObjectEffect.prefab.GetComponent<PoolableObject>(), defaultPoolSizes);
-                PoolableObject instance = pool.GetObject(hitPoint + hitNormal * 0.001f, Quaternion.LookRotation(hitNormal));
+        if (surfaceEffect.spawnObjectEffects.Count > 0) {
+            foreach (SpawnObjectEffects spawnObjectEffect in surfaceEffect.spawnObjectEffects) {
+                if (spawnObjectEffect.probability > Random.value) {
+                    ObjectPool pool = ObjectPool.CreateInstance(spawnObjectEffect.prefab.GetComponent<PoolableObject>(), defaultPoolSizes);
+                    PoolableObject instance = pool.GetObject(hitPoint + hitNormal * 0.001f, Quaternion.LookRotation(hitNormal));
 
-                instance.transform.forward = hitNormal;
-                if (spawnObjectEffect.randomizeRotation) {
+                    instance.transform.forward = hitNormal;
+                    if (spawnObjectEffect.randomizeRotation) {
 
-                    Vector3 offset = new Vector3(
-                        Random.Range(0, 180 * spawnObjectEffect.randomizedRotationMultiplier.x),
-                        Random.Range(0, 180 * spawnObjectEffect.randomizedRotationMultiplier.y),
-                        Random.Range(0, 180 * spawnObjectEffect.randomizedRotationMultiplier.z)
-                    );
-                    instance.transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles + offset);
+                        Vector3 offset = new Vector3(
+                            Random.Range(0, 180 * spawnObjectEffect.randomizedRotationMultiplier.x),
+                            Random.Range(0, 180 * spawnObjectEffect.randomizedRotationMultiplier.y),
+                            Random.Range(0, 180 * spawnObjectEffect.randomizedRotationMultiplier.z)
+                        );
+                        instance.transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles + offset);
+                    }
                 }
             }
         }
@@ -240,6 +262,12 @@ public class SurfaceManager : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Plays only audio without the impact effect
+    /// </summary>
+    /// <param name="hitPoint">Position of the hit</param>
+    /// <param name="surfaceEffect">ScriptableObject with the a list of object effects and sound effects</param>
+    /// <param name="soundOffset">random sound volume</param>
     private void PlayAudioOnlyEffects(Vector3 hitPoint, SurfaceEffect surfaceEffect, float soundOffset) {
         foreach (PlayAudioEffect playAudioEffect in surfaceEffect.playAudioEffects) {
             AudioClip clip = playAudioEffect.audioClips[Random.Range(0, playAudioEffect.audioClips.Count)];
@@ -252,12 +280,20 @@ public class SurfaceManager : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Disables the Sound after "time" in seconds has past
+    /// </summary>
+    /// <param name="audioSource">the audio source</param>
+    /// <param name="Time">the time before the sound gets disabled</param>
     private IEnumerator DisableAudioSource(AudioSource audioSource, float Time) {
         yield return new WaitForSeconds(Time);
 
         audioSource.gameObject.SetActive(false);
     }
 
+    /// <summary>
+    /// Has the alpha and the Texture
+    /// </summary>
     private class TextureAlpha {
         public float alpha;
         public Texture texture;

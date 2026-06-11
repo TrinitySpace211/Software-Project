@@ -16,7 +16,7 @@ public class ZombieAI : MonoBehaviour {
     /// <summary>Transform of the target (player). Assign via Inspector or Init().</summary>
     [SerializeField] public Transform target;
 
-    [SerializeField] private GameObject[] joints;
+    [SerializeField] private Rigidbody[] joints;
     [SerializeField] private Transform[] patrolPoints;
     [SerializeField] private float patrolWaitTime = 2f;
 

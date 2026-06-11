@@ -8,4 +8,5 @@ public class ShootConfigSO : ScriptableObject {
     public float fireRate = 0.25f;
     public float bulletsPerShoot;
     public int damage;
+    public float shootVolume;
 }

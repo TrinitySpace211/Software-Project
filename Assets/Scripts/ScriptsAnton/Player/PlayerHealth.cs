@@ -14,7 +14,7 @@ public class PlayerHealth : MonoBehaviour {
     private HealthBar healthBar;
     private PlayerAnimation playerAnimation;
     private PlayerIK playerIK;
-    private PlayerGunSelector playerGunSelector;
+    private PlayerWeaponSelector playerGunSelector;
     private Animator animator;
 
     /// <summary>
@@ -40,7 +40,7 @@ public class PlayerHealth : MonoBehaviour {
         }
 
         if (playerGunSelector == null) {
-            playerGunSelector = GetComponent<PlayerGunSelector>();
+            playerGunSelector = GetComponent<PlayerWeaponSelector>();
         }
 
         playerStats = new PlayerStats {

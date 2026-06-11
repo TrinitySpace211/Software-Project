@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 722f93a7b94e8c146801504ddbca8648, type: 3}
+  m_Name: Footsteps Concrete Audio Effect
+  m_EditorClassIdentifier: 
+  audioSourcePrefab: {fileID: 7920627168369331545, guid: 3f8b131fe6e17194e8096fbf3fc2612b, type: 3}
+  audioClips:
+  - {fileID: 8300000, guid: 341f841043da34a48ab18c97b03aac1e, type: 3}
+  - {fileID: 8300000, guid: cafd4c09d3f7357418382271371d6cf0, type: 3}
+  - {fileID: 8300000, guid: 5a0b6ca096c33af4aa5721758b2a6d1c, type: 3}
+  - {fileID: 8300000, guid: ca6860dda93efe94891c77b5bfaedf45, type: 3}
+  - {fileID: 8300000, guid: 690d2f976547de546973fe5cb2eda986, type: 3}
+  - {fileID: 8300000, guid: 2dc643e26330f334cbc031bee947b879, type: 3}
+  - {fileID: 8300000, guid: a9960081fc64f7e429f8f4029832a2e1, type: 3}
+  - {fileID: 8300000, guid: 5b010d539779dce40b4d434f6a33972f, type: 3}
+  - {fileID: 8300000, guid: bce668c6f2067f648a57e9a279c1eb71, type: 3}
+  - {fileID: 8300000, guid: 323c81c3428769142aecff5ffaf4ed31, type: 3}
+  volumeRange: {x: 0.5, y: 0.75}

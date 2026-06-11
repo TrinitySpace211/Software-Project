@@ -91,6 +91,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hovering: 0
+  selected: 0
 --- !u!1 &143155663382973096
 GameObject:
   m_ObjectHideFlags: 0
@@ -182,6 +183,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hovering: 0
+  selected: 0
 --- !u!1 &841382239949615818
 GameObject:
   m_ObjectHideFlags: 0
@@ -348,6 +350,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hovering: 0
+  selected: 0
 --- !u!1 &900034757562452347
 GameObject:
   m_ObjectHideFlags: 0
@@ -1137,6 +1140,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hovering: 0
+  selected: 0
 --- !u!1 &2133935216580192031
 GameObject:
   m_ObjectHideFlags: 0
@@ -1652,6 +1656,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hovering: 0
+  selected: 0
 --- !u!1 &2812457491081110063
 GameObject:
   m_ObjectHideFlags: 0
@@ -1751,7 +1756,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2901428669615462473}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1.8, y: 1.8, z: 1.8}
   m_ConstrainProportionsScale: 0
@@ -1778,8 +1783,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5232943d3ec9d6441a06f1b4fd340b6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  woodItem: {fileID: 11400000, guid: 7154105a0f5529a429d8ee5be28596f8, type: 2}
-  axeItem: {fileID: 11400000, guid: 52ee554cccf091649900fe44fa098a76, type: 2}
+  player: {fileID: 0}
+  playerInputHandler: {fileID: 0}
+  hotbarSlotsRect:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  guns:
+  - {fileID: 11400000, guid: f4a4d9eb33a1d56478dfe29c92044a34, type: 2}
+  - {fileID: 11400000, guid: 664bf7447e46c084fbd94c955f5edd87, type: 2}
+  - {fileID: 11400000, guid: e818501920951aa47b2ae0b9d97a70e4, type: 2}
+  - {fileID: 11400000, guid: 75c0175b8fcd5d047b371333c28b7728, type: 2}
+  melees:
+  - {fileID: 11400000, guid: bd819045d4d242e4c899c24736876320, type: 2}
+  - {fileID: 11400000, guid: 3c95339fd77108b459009dd07c4a1cf7, type: 2}
+  - {fileID: 11400000, guid: a6d8b0b38dcfc844aaba8eddba1cc72d, type: 2}
+  - {fileID: 11400000, guid: 017373c6049138f49b26c24b7dd58dbe, type: 2}
+  - {fileID: 11400000, guid: e3fad8f38e73cb649841514b71eeec57, type: 2}
+  - {fileID: 11400000, guid: abdfe617a49b7d944895c1ad5c305438, type: 2}
+  debugItems:
+  - {fileID: 11400000, guid: f4a4d9eb33a1d56478dfe29c92044a34, type: 2}
+  - {fileID: 11400000, guid: 664bf7447e46c084fbd94c955f5edd87, type: 2}
+  - {fileID: 11400000, guid: e818501920951aa47b2ae0b9d97a70e4, type: 2}
+  - {fileID: 11400000, guid: 75c0175b8fcd5d047b371333c28b7728, type: 2}
+  - {fileID: 11400000, guid: bd819045d4d242e4c899c24736876320, type: 2}
+  - {fileID: 11400000, guid: 3c95339fd77108b459009dd07c4a1cf7, type: 2}
+  - {fileID: 11400000, guid: a6d8b0b38dcfc844aaba8eddba1cc72d, type: 2}
+  - {fileID: 11400000, guid: 017373c6049138f49b26c24b7dd58dbe, type: 2}
+  - {fileID: 11400000, guid: e3fad8f38e73cb649841514b71eeec57, type: 2}
+  - {fileID: 11400000, guid: abdfe617a49b7d944895c1ad5c305438, type: 2}
   hotbarObj: {fileID: 7144540948442173002}
   inventorySlotParent: {fileID: 8809286365784227324}
   container: {fileID: 2921163554298670276}
@@ -1819,8 +1853,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -20, y: 20}
-  m_SizeDelta: {x: -150, y: 200}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 1, y: 0}
 --- !u!222 &720111043599399130
 CanvasRenderer:
@@ -1951,6 +1985,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hovering: 0
+  selected: 0
 --- !u!1 &3444194251416626110
 GameObject:
   m_ObjectHideFlags: 0
@@ -2042,6 +2077,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hovering: 0
+  selected: 0
 --- !u!1 &3461325088220752614
 GameObject:
   m_ObjectHideFlags: 0
@@ -2557,6 +2593,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hovering: 0
+  selected: 0
 --- !u!1 &4444712291218261981
 GameObject:
   m_ObjectHideFlags: 0
@@ -3072,6 +3109,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hovering: 0
+  selected: 0
 --- !u!1 &5477912265551320242
 GameObject:
   m_ObjectHideFlags: 0
@@ -3587,6 +3625,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hovering: 0
+  selected: 0
 --- !u!1 &6409192321822991196
 GameObject:
   m_ObjectHideFlags: 0
@@ -3815,6 +3854,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hovering: 0
+  selected: 0
 --- !u!1 &6673803648659120757
 GameObject:
   m_ObjectHideFlags: 0
@@ -3906,6 +3946,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hovering: 0
+  selected: 0
 --- !u!1 &6833095216183291876
 GameObject:
   m_ObjectHideFlags: 0
@@ -3997,6 +4038,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hovering: 0
+  selected: 0
 --- !u!1 &6891820298210488982
 GameObject:
   m_ObjectHideFlags: 0
@@ -4460,7 +4502,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 400, y: 90}
+  m_SizeDelta: {x: 430, y: 105}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &235358345839768983
 MonoBehaviour:
@@ -4479,7 +4521,7 @@ MonoBehaviour:
     m_Right: 0
     m_Top: 0
     m_Bottom: 0
-  m_ChildAlignment: 0
+  m_ChildAlignment: 4
   m_StartCorner: 0
   m_StartAxis: 0
   m_CellSize: {x: 80, y: 80}
@@ -4727,6 +4769,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hovering: 0
+  selected: 0
 --- !u!1 &7987945436241934345
 GameObject:
   m_ObjectHideFlags: 0
@@ -5030,6 +5073,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hovering: 0
+  selected: 0
 --- !u!1 &8324989181741680648
 GameObject:
   m_ObjectHideFlags: 0
@@ -5285,11 +5329,11 @@ RectTransform:
   - {fileID: 6825301620187735891}
   m_Father: {fileID: 4538044287735731706}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 1, y: 0}
+  m_AnchorMax: {x: 1, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 630, y: 450}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_SizeDelta: {x: 280, y: 360}
+  m_Pivot: {x: 1, y: 0}
 --- !u!114 &8103142027075639826
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5307,7 +5351,7 @@ MonoBehaviour:
     m_Right: 0
     m_Top: 0
     m_Bottom: 0
-  m_ChildAlignment: 0
+  m_ChildAlignment: 4
   m_StartCorner: 0
   m_StartAxis: 0
   m_CellSize: {x: 80, y: 80}
@@ -5405,6 +5449,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hovering: 0
+  selected: 0
 --- !u!1 &9123305891662977960
 GameObject:
   m_ObjectHideFlags: 0
@@ -5496,3 +5541,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hovering: 0
+  selected: 0

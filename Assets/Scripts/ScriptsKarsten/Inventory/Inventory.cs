@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
@@ -13,26 +14,25 @@ public class Inventory : MonoBehaviour {
     [SerializeField] private Player player;
     [SerializeField] private PlayerInputHandler playerInputHandler;
     [SerializeField] private List<RectTransform> hotbarSlotsRect;
+    [SerializeField] private GameObject crosshair;
 
-    /// <summary>
-    /// Item used for adding an assaultRifle to the inventory.
-    /// </summary>
-    public ItemSO assaultRifle;
+    [Header("Item References")]
+    [SerializeField] private ItemSO[] guns;
+    [SerializeField] private ItemSO[] melees;
+    [SerializeField] private ItemSO[] debugItems;
 
-    /// <summary>
-    /// Item used for adding an pistol to the inventory.
-    /// </summary>
-    public ItemSO pistol;
-
-    /// <summary>
-    /// Item used for adding an shotgun to the inventory.
-    /// </summary>
-    public ItemSO shotgun;
-
-    /// <summary>
-    /// Item used for adding an sniper to the inventory.
-    /// </summary>
-    public ItemSO sniper;
+    private static readonly Key[] debugKeys = new Key[] {
+        Key.B,
+        Key.N,
+        Key.M,
+        Key.V,
+        Key.C,
+        Key.Digit7,
+        Key.Digit8,
+        Key.Digit9,
+        Key.Digit0,
+        Key.X
+    };
 
     /// <summary>
     /// Reference to the hotbar object containing hotbar slots.
@@ -90,6 +90,11 @@ public class Inventory : MonoBehaviour {
     private int previousSlot = -1;
 
     /// <summary>
+    /// Saves the Time were the Player selected a hotbar
+    /// </summary>
+    private float lastTimeSelected;
+
+    /// <summary>
     /// Initializes slot collections by retrieving
     /// inventory and hotbar slots from child objects.
     /// </summary>
@@ -115,14 +120,10 @@ public class Inventory : MonoBehaviour {
     /// and drag-and-drop interactions.
     /// </summary>
     private void Update() {
-        if (Keyboard.current.bKey.wasPressedThisFrame) {
-            AddItem(assaultRifle, 1);
-        } else if (Keyboard.current.nKey.wasPressedThisFrame) {
-            AddItem(pistol, 1);
-        } else if (Keyboard.current.mKey.wasPressedThisFrame) {
-            AddItem(shotgun, 1);
-        } else if (Keyboard.current.vKey.wasPressedThisFrame) {
-            AddItem(sniper, 1);
+        for (int i = 0; i < debugItems.Length && i < debugKeys.Length; i++) {
+            if (Keyboard.current[debugKeys[i]].wasPressedThisFrame) {
+                AddItem(debugItems[i], 1);
+            }
         }
 
         if (Keyboard.current.iKey.wasPressedThisFrame) {
@@ -131,9 +132,14 @@ public class Inventory : MonoBehaviour {
             // Cursor.lockState = Cursor.lockState == CursorLockMode.Locked
             // ? CursorLockMode.None
             // : CursorLockMode.Locked;
-
             Cursor.visible = !Cursor.visible;
+            crosshair.SetActive(!crosshair.activeSelf);
+
             //TogglePause();
+        }
+
+        if (EventSystem.current.IsPointerOverGameObject()) {
+
         }
 
         StartDrag();
@@ -145,44 +151,29 @@ public class Inventory : MonoBehaviour {
         ItemSO item = hotbarSlots[slot].GetItem();
 
         if (!isDragging) {
-            if (hotbarSlots[slot].GetSelected()) {
-                hotbarSlots[slot].SetSelected(false);
-
-                if (item == assaultRifle
-                    || item == pistol
-                    || item == shotgun
-                    || item == sniper) {
-                    ToggleWeaponSelect(null);
-                }
-            } else {
-
+            if (Time.time > 1f + lastTimeSelected) {
+                lastTimeSelected = Time.time;
                 if (previousSlot != -1) {
                     hotbarSlots[previousSlot].SetSelected(false);
                 }
 
                 hotbarSlots[slot].SetSelected(true);
 
-                //Check for item in hotbar then equip the item
-                if (item == assaultRifle) {
-                    ToggleWeaponSelect(assaultRifle);
-                } else if (item == pistol) {
-                    ToggleWeaponSelect(pistol);
-                } else if (item == shotgun) {
-                    ToggleWeaponSelect(shotgun);
-                } else if (item == sniper) {
-                    ToggleWeaponSelect(sniper);
-                } else if (previousSlot != -1) {
-                    if (hotbarSlots[previousSlot].GetItem() == assaultRifle
-                        || hotbarSlots[previousSlot].GetItem() == pistol
-                        || hotbarSlots[previousSlot].GetItem() == shotgun
-                        || hotbarSlots[previousSlot].GetItem() == sniper) {
-                        ToggleWeaponSelect(null);
+                if (item == null) {
+                    if (previousSlot != -1) {
+                        ClearPreviousSelectionIfNeeded(hotbarSlots[previousSlot].GetItem());
                     }
-                }//Add more else if statements for more options health kit, grenade
+                } else if (item != null) {
+                    if (IsWeapon(item)) {
+                        ToggleWeaponSelect(item);
+                    } else if (IsMelee(item)) {
+                        ToggleMeleeSelect(item);
+                    }
+                }
 
                 previousSlot = slot;
-
             }
+
         }
     }
 
@@ -321,17 +312,13 @@ public class Inventory : MonoBehaviour {
             from.SetItem(tempItem, tempAmount);
 
             if (to.GetSelected()) {
-                if (to.GetItem() == assaultRifle) {
-                    ToggleWeaponSelect(assaultRifle);
-                } else if (to.GetItem() == pistol) {
-                    ToggleWeaponSelect(pistol);
-                } else if (to.GetItem() == shotgun) {
-                    ToggleWeaponSelect(shotgun);
-                } else if (to.GetItem() == sniper) {
-                    ToggleWeaponSelect(sniper);
+                if (IsWeapon(to.GetItem())) {
+                    ToggleWeaponSelect(to.GetItem());
+                } else if (IsMelee(to.GetItem())) {
+                    ToggleMeleeSelect(to.GetItem());
                 }
             } else if (from.GetSelected()) {
-                ToggleWeaponSelect(null);
+                ClearPreviousSelectionIfNeeded(from.GetItem());
             }
 
             return;
@@ -341,22 +328,16 @@ public class Inventory : MonoBehaviour {
         to.SetItem(from.GetItem(), from.GetAmount());
 
         if (to.GetSelected()) {
-            if (to.GetItem() == assaultRifle) {
-                ToggleWeaponSelect(assaultRifle);
-            } else if (to.GetItem() == pistol) {
-                ToggleWeaponSelect(pistol);
-            } else if (to.GetItem() == shotgun) {
-                ToggleWeaponSelect(shotgun);
-            } else if (to.GetItem() == sniper) {
-                ToggleWeaponSelect(sniper);
+            if (IsWeapon(to.GetItem())) {
+                ToggleWeaponSelect(to.GetItem());
+            } else if (IsMelee(to.GetItem())) {
+                ToggleMeleeSelect(to.GetItem());
             }
         } else if (from.GetSelected()) {
-            ToggleWeaponSelect(null);
+            ClearPreviousSelectionIfNeeded(from.GetItem());
         }
 
         from.ClearSlot();
-
-
     }
 
     /// <summary>
@@ -381,16 +362,74 @@ public class Inventory : MonoBehaviour {
     }
 
     private void ToggleWeaponSelect(ItemSO weapon) {
-        if (weapon == assaultRifle) {
-            player.GetPlayerGunSelector().SelectAssaultRifle();
-        } else if (weapon == pistol) {
-            player.GetPlayerGunSelector().SelectPistol();
-        } else if (weapon == shotgun) {
-            player.GetPlayerGunSelector().SelectShotgun();
-        } else if (weapon == sniper) {
-            player.GetPlayerGunSelector().SelectSniper();
-        } else if (weapon == null) {
+        if (weapon == null) {
             player.GetPlayerGunSelector().DequipWeapon();
+            return;
+        }
+
+        switch (weapon.gunType) {
+            case GunType.AssaultRifle:
+                player.GetPlayerGunSelector().SelectAssaultRifle();
+                break;
+            case GunType.Pistol:
+                player.GetPlayerGunSelector().SelectPistol();
+                break;
+            case GunType.Shotgun:
+                player.GetPlayerGunSelector().SelectShotgun();
+                break;
+            case GunType.Sniper:
+                player.GetPlayerGunSelector().SelectSniper();
+                break;
+            default:
+                player.GetPlayerGunSelector().DequipWeapon();
+                break;
+        }
+    }
+
+    private void ToggleMeleeSelect(ItemSO weapon) {
+        if (weapon == null) {
+            player.GetPlayerGunSelector().DequipMelee();
+            return;
+        }
+
+        switch (weapon.meleeType) {
+            case MeleeType.Knife:
+                player.GetPlayerGunSelector().SelectKnife();
+                break;
+            case MeleeType.Baseball_Bat:
+                player.GetPlayerGunSelector().SelectBaseball();
+                break;
+            case MeleeType.Crowbar:
+                player.GetPlayerGunSelector().SelectCrowbar();
+                break;
+            case MeleeType.Hatchet:
+                player.GetPlayerGunSelector().SelectHatchet();
+                break;
+            case MeleeType.Sword:
+                player.GetPlayerGunSelector().SelectSword();
+                break;
+            case MeleeType.Tomahawk:
+                player.GetPlayerGunSelector().SelectTomahawk();
+                break;
+            default:
+                player.GetPlayerGunSelector().DequipMelee();
+                break;
+        }
+    }
+
+    private bool IsWeapon(ItemSO item) {
+        return item != null && item.itemType == ItemType.Gun;
+    }
+
+    private bool IsMelee(ItemSO item) {
+        return item != null && item.itemType == ItemType.Melee;
+    }
+
+    private void ClearPreviousSelectionIfNeeded(ItemSO item) {
+        if (IsWeapon(item)) {
+            ToggleWeaponSelect(null);
+        } else if (IsMelee(item)) {
+            ToggleMeleeSelect(null);
         }
     }
 }

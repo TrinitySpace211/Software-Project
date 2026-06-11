@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c6920647df18714c96950275172f655, type: 3}
+  m_Name: AudioClipRefsSO
+  m_EditorClassIdentifier: 
+  assaultRifleSounds:
+  - {fileID: 8300000, guid: 53fe7e2b21622a545b70f0bc026673e9, type: 3}
+  - {fileID: 8300000, guid: f926cba00817c4e43a311751682e33d0, type: 3}
+  - {fileID: 8300000, guid: cf5820722edd6b74a958f2f748682f81, type: 3}
+  - {fileID: 8300000, guid: 5c43116e96fc3e74b9759b425a4eb9cc, type: 3}
+  pistolSounds:
+  - {fileID: 8300000, guid: 3ab8ed505e3925146a212f9e76650f3a, type: 3}
+  - {fileID: 8300000, guid: f4d4f053b1f02f2438046578fae7a89d, type: 3}
+  - {fileID: 8300000, guid: c6d1a0c1d3422f048a4e68ac189f6d2b, type: 3}
+  - {fileID: 8300000, guid: 16545ece9b8b7294692e825a4cc3a057, type: 3}
+  shotgunSounds:
+  - {fileID: 8300000, guid: 14c7e164977986f42afb3a04cf782fec, type: 3}
+  - {fileID: 8300000, guid: beefef55590cbf444abcaf34734cb0ab, type: 3}
+  - {fileID: 8300000, guid: b1956c4494432164fb75b45dd14ffd0b, type: 3}
+  - {fileID: 8300000, guid: a9ec7b1385509b74497843ab268ec977, type: 3}
+  sniperSounds:
+  - {fileID: 8300000, guid: 7a79365fa7b92164e8690d727700e052, type: 3}
+  assaultRifleReloadSounds:
+  - {fileID: 8300000, guid: d43fe812d6d81f84aa8b47baee8a7c98, type: 3}
+  pistolReloadSounds:
+  - {fileID: 8300000, guid: 220870ce594efaa4c947508bdeebac51, type: 3}
+  shotgunReloadSounds:
+  - {fileID: 8300000, guid: 29c26078f186d6343a9c6f651cd55adc, type: 3}
+  sniperReloadSounds:
+  - {fileID: 8300000, guid: d43fe812d6d81f84aa8b47baee8a7c98, type: 3}
+  meleeSwing:
+  - {fileID: 8300000, guid: efcab393c3a5d4e4da38058d284a2005, type: 3}
+  - {fileID: 8300000, guid: 2901e574db7bb7c4ea7253f22cbb6fb4, type: 3}
+  - {fileID: 8300000, guid: a6a507248bcbdd04da8c8ae20021da04, type: 3}
+  - {fileID: 8300000, guid: bcabe2e86bac2bf4d95a102117cfeeea, type: 3}

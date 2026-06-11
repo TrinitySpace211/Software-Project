@@ -19,3 +19,4 @@ MonoBehaviour:
   fireRate: 0.1
   bulletsPerShoot: 1
   damage: 10
+  shootVolume: 0.2

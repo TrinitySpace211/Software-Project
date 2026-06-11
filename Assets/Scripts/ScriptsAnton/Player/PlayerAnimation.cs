@@ -22,7 +22,10 @@ public class PlayerAnimation : MonoBehaviour {
     private int getHitHash = Animator.StringToHash("GetHit");
     private int isDeadHash = Animator.StringToHash("IsDead");
     private int isDeadWithWeaponHash = Animator.StringToHash("IsDeadWithWeapon");
-    private int isWeaponAiming = Animator.StringToHash("IsWeaponAiming");
+    private int isWeaponAimingHash = Animator.StringToHash("IsWeaponAiming");
+    private int meleeAttack1Hash = Animator.StringToHash("MeleeAttack1");
+    private int meleeAttack2Hash = Animator.StringToHash("MeleeAttack2");
+    private int meleeAttckSpeedMultHash = Animator.StringToHash("MeleeAttackSpeedMult");
 
     private void Start() {
         player = GetComponent<Player>();
@@ -61,7 +64,7 @@ public class PlayerAnimation : MonoBehaviour {
     }
 
     public void SetAimAnimation(bool state) {
-        animator.SetBool(isWeaponAiming, state);
+        animator.SetBool(isWeaponAimingHash, state);
     }
 
     public void SetRotationMismatch(float mismatch) {
@@ -78,6 +81,23 @@ public class PlayerAnimation : MonoBehaviour {
 
     public void SetDyingWithWeaponTrigger() {
         animator.SetTrigger(isDeadWithWeaponHash);
+    }
+
+    public void SetOneHandMeleeAttack() {
+        int attackVariant = UnityEngine.Random.Range(1, 3); // 1 oder 2
+        if (attackVariant == 1) {
+            animator.SetTrigger(meleeAttack1Hash);
+        } else if (attackVariant == 2) {
+            animator.SetTrigger(meleeAttack2Hash);
+        }
+    }
+
+    public void SetTwoHandMeleeAttack() {
+        animator.SetTrigger(meleeAttack1Hash);
+    }
+
+    public void SetMeleeAttackSpeed(float value) {
+        animator.SetFloat(meleeAttckSpeedMultHash, value);
     }
 
 }
