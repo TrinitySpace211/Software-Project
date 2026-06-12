@@ -1,7 +1,6 @@
 using System;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
-using UnityEngine.InputSystem;
 
 /// <summary>
 /// This is the Player Class. The Player Movement, Jumping and Rotation will be calculated.
@@ -34,23 +33,14 @@ public class Player : MonoBehaviour {
     [Header("Aim Parameters")]
     [SerializeField] private float aimDuration = 0.3f;
 
-    [Header("Jump Parameters")]
-    [SerializeField] private float jumpForce = 5f;
-    [SerializeField] private float gravityMultiplier = 1f;
-
     [Header("Animation")]
     [SerializeField] private float rotationMouseDirAmount = 10f;
     [SerializeField] private float rotationMoveDirAmount = 10f;
-    [SerializeField] private float rotateToTargetTime = 0.25f;
-    [SerializeField] private float rotationTolerance = 30f;
 
     [Header("Debugging")]
     [SerializeField] private bool alwaysAiming = false;
 
-    public float rotationMismatch { get; private set; } = 0f;
-    public bool isRotatingToTarget { get; private set; } = false;
-    private bool isRotatingClockwise = false;
-    private float rotatingToTargetTimer = 0f;
+    private Transform setupWeaponParent;
 
     //Define Stats for this Player Instance
     public PlayerStats currentPlayerStats { get; private set; }
@@ -59,7 +49,6 @@ public class Player : MonoBehaviour {
     private Vector3 worldMousePos;
     private Vector3 currentMovement;
     private float currentSpeed => walkSpeed * (playerInputHandler.SprintTriggered ? sprintMultipier : 1f);
-    private Vector3 currentLookDir;
 
     //Movement Checks
     private bool isWalking;
@@ -72,6 +61,8 @@ public class Player : MonoBehaviour {
             maxHealth = baseStats.health,
             armor = baseStats.armor
         };
+
+        playerInputHandler.OnReloadAction += PlayerInputHandler_OnReloadAction;
     }
 
     private void Update() {
@@ -80,7 +71,8 @@ public class Player : MonoBehaviour {
             HandleMovement();
             HandleAiming();
 
-            HandleShooting(currentLookDir);
+            HandleShooting();
+            HandleReloadFinished();
         }
     }
 
@@ -92,6 +84,12 @@ public class Player : MonoBehaviour {
     public void Construct(PlayerInputHandler playerInputHandler, Camera playerCamera) {
         this.playerInputHandler = playerInputHandler;
         this.playerCamera = playerCamera;
+    }
+
+    private void PlayerInputHandler_OnReloadAction(object sender, EventArgs e) {
+        if (!playerHealth.GetIsDead()) {
+            HandleReloadButton();
+        }
     }
 
     #region Movement
@@ -122,18 +120,6 @@ public class Player : MonoBehaviour {
         return transform.position;
     }
 
-    private float CalculateRotationMismatch(Vector3 targetDirection) {
-        if (targetDirection.sqrMagnitude < 0.01f)
-            return 0f;
-
-        Vector3 forward = transform.forward;
-        forward.y = 0f;
-        Vector3 target = targetDirection.normalized;
-        target.y = 0f;
-
-        return Vector3.SignedAngle(forward, target, Vector3.up);
-    }
-
     /// <summary>
     /// Calculates both the Move direction and Mouse direction the Player has to turn to
     /// When the Player is sprinting then the Player will turn to the Move direction otherwise to Mouse direction
@@ -149,7 +135,6 @@ public class Player : MonoBehaviour {
         //Blickrichtung ist die Position von der Maus subtrahiert mit der Position des Players 
         Vector3 lookDir = mouseDir - transform.position;
         lookDir.y = 0f;
-        currentLookDir = lookDir;
 
         //Blickrichtung zur Bewegungsrichtung
         Vector3 moveDir = new Vector3(currentMovement.x, 0f, currentMovement.z);
@@ -157,72 +142,20 @@ public class Player : MonoBehaviour {
         //Wenn der Spieler sprintet, dann dreht sich der Spieler zum Bewegungsrichtung, sonst zur Mausrichtung
         UpdatePlayerRotation(moveDir, lookDir);
 
-
-        //HandleJumping();
         characterController.Move(currentMovement * Time.deltaTime);
     }
 
     private void UpdatePlayerRotation(Vector3 moveDir, Vector3 lookDir) {
-        bool isIdling = playerState.CurrentPlayerMovementState == PlayerMovementState.Idling;
-        isRotatingToTarget = rotatingToTargetTimer > 0;
-
         if (moveDir.sqrMagnitude > 0.1f && (isSprinting || !playerIK.GetHasWeapon())) {
             RotatePlayerToTarget(moveDir, rotationMoveDirAmount);
         } else if (lookDir.sqrMagnitude > 0.1f && !isSprinting && playerIK.GetHasWeapon()) {
-            if (!isIdling) {
-                RotatePlayerToTarget(lookDir, rotationMouseDirAmount);
-            } else {
-                rotationMismatch = CalculateRotationMismatch(lookDir);
-                playerAnimation.SetRotationMismatch(rotationMismatch);
-
-                if (Mathf.Abs(rotationMismatch) > rotationTolerance || isRotatingToTarget) {
-                    //Timer
-                    if (Mathf.Abs(rotationMismatch) > rotationTolerance) {
-                        rotatingToTargetTimer = rotateToTargetTime;
-                        isRotatingClockwise = rotationMismatch > rotationTolerance;
-                    }
-
-                    rotatingToTargetTimer -= Time.deltaTime;
-
-                    //rotate Player
-                    if (isRotatingClockwise && rotationMismatch > 0f ||
-                        !isRotatingClockwise && rotationMismatch < 0f) {
-                        RotatePlayerToTarget(lookDir, rotationMouseDirAmount);
-                    }
-                }
-            }
+            RotatePlayerToTarget(lookDir, rotationMouseDirAmount);
         }
     }
 
     private void RotatePlayerToTarget(Vector3 direction, float dirAmount) {
         Quaternion targetRotation = Quaternion.LookRotation(direction);
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, dirAmount * Time.deltaTime);
-    }
-
-    /* private void OnDrawGizmos() {
-        Vector3 mouseDir = CalculateMouseDirection();
-
-        Vector3 lookDir = mouseDir - transform.position;
-        lookDir.y = 0;
-
-        Ray ray = new Ray(new Vector3(transform.position.x, 1f, transform.position.z), lookDir);
-
-        Gizmos.DrawRay(ray.origin, ray.direction);
-    } */
-
-    /// <summary>
-    /// This Method handles the Jumping, but due to the Player not having animations it is marked as deprecated for now
-    /// </summary>
-    [Obsolete("There are no Animations right now for the Player Jumping", true)]
-    private void HandleJumping() {
-        if (characterController.isGrounded) {
-            currentMovement.y = -0.5f;
-            if (playerInputHandler.JumpTriggered) {
-                currentMovement.y = jumpForce;
-            }
-        } else {
-            currentMovement.y += Physics.gravity.y * gravityMultiplier * Time.deltaTime;
-        }
     }
 
     /// <summary>
@@ -235,7 +168,7 @@ public class Player : MonoBehaviour {
             aimLayer.weight = 1;
             playerAnimation.SetAimAnimation(true);
         } else {
-            if (playerInputHandler.AimingTriggered && !isSprinting && playerIK.GetHasWeapon()) {
+            if (playerInputHandler.AimingTriggered && !isSprinting && playerIK.GetHasWeapon() && !playerAnimation.GetIsReloading()) {
                 aimLayer.weight += Time.deltaTime / aimDuration;
                 playerAnimation.SetAimAnimation(true);
             } else {
@@ -245,24 +178,44 @@ public class Player : MonoBehaviour {
         }
     }
 
-    private void HandleShooting(Vector3 direction) {
-        Ray ray = new Ray(new Vector3(transform.position.x, 1f, transform.position.z), direction);
-
+    private void HandleShooting() {
         if (playerInputHandler.AttackTriggered && playerInputHandler.AimingTriggered) {
-
             if (gunSelector.activeGun != null) {
                 gunSelector.activeGun.Shoot();
-            }
 
-            if (Physics.Raycast(ray, out RaycastHit hit, 5f)) { //Hit with bullets
-                if (hit.transform.TryGetComponent(out ZombieAI zombie)) {
-                    if (!zombie.IsDead()) {
-                        zombie.TakeDamage(50);
-                    }
+                if (gunSelector.activeGun.GetEmptyMagazine() && !playerAnimation.GetIsReloading()) {
+                    setupWeaponParent = playerIK.GetParent();
+                    gunSelector.ClearSetupCurrentWeapon();
+                    playerAnimation.SetReloadTrigger();
+                    playerAnimation.StartReloading();
                 }
             }
         }
     }
+
+    private void HandleReloadButton() {
+        if (gunSelector.activeGun != null) {
+            if (!gunSelector.activeGun.MagazineIsFull() && !playerAnimation.GetIsReloading()) {
+                setupWeaponParent = playerIK.GetParent();
+                gunSelector.ClearSetupCurrentWeapon();
+                playerAnimation.SetReloadTrigger();
+                playerAnimation.StartReloading();
+            }
+        }
+    }
+
+    private void HandleReloadFinished() {
+        if (gunSelector.activeGun != null) {
+            if (setupWeaponParent != null) {
+                if ((!gunSelector.activeGun.GetEmptyMagazine() || !gunSelector.activeGun.MagazineIsFull()) && !playerAnimation.GetIsReloading()) {
+                    gunSelector.SetupCurrentWeapon(setupWeaponParent);
+                    setupWeaponParent = null;
+                }
+            }
+        }
+    }
+
+    #endregion
 
     /// <summary>
     /// Updates the State of the Player Movement not the Movement itself
@@ -277,7 +230,6 @@ public class Player : MonoBehaviour {
 
         playerState.SetPlayerMovementState(lateralState);
     }
-    #endregion
 
     #region State Checks
 

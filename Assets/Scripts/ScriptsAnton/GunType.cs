@@ -1,7 +1,12 @@
 
 public enum GunType {
-    AssaultRifle = 0,
-    Pistol = 1,
-    Sniper = 2,
-    Shotgun = 3
+    AssaultRifle,
+    Pistol,
+    Shotgun,
+    Sniper
+}
+
+public enum GunSlot {
+    Primary = 0,
+    Secondary = 1,
 }

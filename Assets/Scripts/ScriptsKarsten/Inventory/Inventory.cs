@@ -15,14 +15,24 @@ public class Inventory : MonoBehaviour {
     [SerializeField] private List<RectTransform> hotbarSlotsRect;
 
     /// <summary>
-    /// Test item used for adding wood to the inventory.
+    /// Item used for adding an assaultRifle to the inventory.
     /// </summary>
     public ItemSO assaultRifle;
 
     /// <summary>
-    /// Test item used for adding an axe to the inventory.
+    /// Item used for adding an pistol to the inventory.
     /// </summary>
     public ItemSO pistol;
+
+    /// <summary>
+    /// Item used for adding an shotgun to the inventory.
+    /// </summary>
+    public ItemSO shotgun;
+
+    /// <summary>
+    /// Item used for adding an sniper to the inventory.
+    /// </summary>
+    public ItemSO sniper;
 
     /// <summary>
     /// Reference to the hotbar object containing hotbar slots.
@@ -109,6 +119,10 @@ public class Inventory : MonoBehaviour {
             AddItem(assaultRifle, 1);
         } else if (Keyboard.current.nKey.wasPressedThisFrame) {
             AddItem(pistol, 1);
+        } else if (Keyboard.current.mKey.wasPressedThisFrame) {
+            AddItem(shotgun, 1);
+        } else if (Keyboard.current.vKey.wasPressedThisFrame) {
+            AddItem(sniper, 1);
         }
 
         if (Keyboard.current.iKey.wasPressedThisFrame) {
@@ -122,15 +136,17 @@ public class Inventory : MonoBehaviour {
             //TogglePause();
         }
 
-        for (int i = 0; i < hotbarSlots.Count; i++) {
-
-        }
-
         StartDrag();
         UpdateDragItemPosition();
         EndDrag();
     }
 
+    /// <summary>
+    /// Triggers when the Keys 1-5 are pressed.
+    /// The Hotbars get selected and if there is a Weapon or Equipment then
+    /// the Player will change to this item
+    /// </summary>
+    /// <param name="slot">the key which represents the Hotbarslot</param>
     private void PlayerInputHandler_OnHotbarSlotPressed(int slot) {
         ItemSO item = hotbarSlots[slot].GetItem();
 
@@ -138,8 +154,10 @@ public class Inventory : MonoBehaviour {
             if (hotbarSlots[slot].GetSelected()) {
                 hotbarSlots[slot].SetSelected(false);
 
-                if (item == assaultRifle ||
-                    item == pistol) {
+                if (item == assaultRifle
+                    || item == pistol
+                    || item == shotgun
+                    || item == sniper) {
                     ToggleWeaponSelect(null);
                 }
             } else {
@@ -150,18 +168,23 @@ public class Inventory : MonoBehaviour {
 
                 hotbarSlots[slot].SetSelected(true);
 
-
                 //Check for item in hotbar then equip the item
                 if (item == assaultRifle) {
                     ToggleWeaponSelect(assaultRifle);
                 } else if (item == pistol) {
                     ToggleWeaponSelect(pistol);
+                } else if (item == shotgun) {
+                    ToggleWeaponSelect(shotgun);
+                } else if (item == sniper) {
+                    ToggleWeaponSelect(sniper);
                 } else if (previousSlot != -1) {
-                    if (hotbarSlots[previousSlot].GetItem() == assaultRifle || hotbarSlots[previousSlot].GetItem() == pistol) {
+                    if (hotbarSlots[previousSlot].GetItem() == assaultRifle
+                        || hotbarSlots[previousSlot].GetItem() == pistol
+                        || hotbarSlots[previousSlot].GetItem() == shotgun
+                        || hotbarSlots[previousSlot].GetItem() == sniper) {
                         ToggleWeaponSelect(null);
                     }
-                }//Add more else if statements for more options
-
+                }//Add more else if statements for more options health kit, grenade
 
                 previousSlot = slot;
 
@@ -308,6 +331,10 @@ public class Inventory : MonoBehaviour {
                     ToggleWeaponSelect(assaultRifle);
                 } else if (to.GetItem() == pistol) {
                     ToggleWeaponSelect(pistol);
+                } else if (to.GetItem() == shotgun) {
+                    ToggleWeaponSelect(shotgun);
+                } else if (to.GetItem() == sniper) {
+                    ToggleWeaponSelect(sniper);
                 }
             } else if (from.GetSelected()) {
                 ToggleWeaponSelect(null);
@@ -324,6 +351,10 @@ public class Inventory : MonoBehaviour {
                 ToggleWeaponSelect(assaultRifle);
             } else if (to.GetItem() == pistol) {
                 ToggleWeaponSelect(pistol);
+            } else if (to.GetItem() == shotgun) {
+                ToggleWeaponSelect(shotgun);
+            } else if (to.GetItem() == sniper) {
+                ToggleWeaponSelect(sniper);
             }
         } else if (from.GetSelected()) {
             ToggleWeaponSelect(null);
@@ -360,6 +391,10 @@ public class Inventory : MonoBehaviour {
             player.GetPlayerGunSelector().SelectAssaultRifle();
         } else if (weapon == pistol) {
             player.GetPlayerGunSelector().SelectPistol();
+        } else if (weapon == shotgun) {
+            player.GetPlayerGunSelector().SelectShotgun();
+        } else if (weapon == sniper) {
+            player.GetPlayerGunSelector().SelectSniper();
         } else if (weapon == null) {
             player.GetPlayerGunSelector().DequipWeapon();
         }

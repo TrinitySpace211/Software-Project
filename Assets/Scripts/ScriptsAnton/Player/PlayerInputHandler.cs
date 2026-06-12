@@ -12,7 +12,6 @@ public class PlayerInputHandler : MonoBehaviour {
     public Vector2 MovementInput { get; private set; }
     public bool AttackTriggered { get; private set; }
     public bool AimingTriggered { get; private set; }
-    public bool JumpTriggered { get; private set; }
     public bool SprintTriggered { get; private set; }
     public Vector2 MousePosition { get; private set; }
 
@@ -21,6 +20,7 @@ public class PlayerInputHandler : MonoBehaviour {
 
     //public event EventHandler OnInteractAction;
     //public event EventHandler OnPauseAction;
+    public event EventHandler OnReloadAction;
 
     private void OnEnable() {
         playerInputActions = new InputSystem_Actions();
@@ -54,14 +54,12 @@ public class PlayerInputHandler : MonoBehaviour {
         playerInputActions.Player.Aiming.performed += _ => AimingTriggered = true;
         playerInputActions.Player.Aiming.canceled += _ => AimingTriggered = false;
 
-        playerInputActions.Player.Jump.performed += _ => JumpTriggered = true;
-        playerInputActions.Player.Jump.canceled += _ => JumpTriggered = false;
-
         playerInputActions.Player.Sprint.performed += _ => SprintTriggered = true;
         playerInputActions.Player.Sprint.canceled += _ => SprintTriggered = false;
 
         playerInputActions.Player.Interact.performed += Interact_performed;
         playerInputActions.Player.Pause.performed += Pause_performed;
+        playerInputActions.Player.Reloading.performed += Reloading_performed;
     }
 
     /// <summary>
@@ -78,7 +76,7 @@ public class PlayerInputHandler : MonoBehaviour {
     }
 
     /// <summary>
-    /// Sends an Event when the interact key is triggered
+    /// Sends an Event when the interact Key is triggered
     /// </summary>
     /// <param name="context">The context that got send from the input key</param>
     private void Interact_performed(InputAction.CallbackContext context) {
@@ -86,11 +84,19 @@ public class PlayerInputHandler : MonoBehaviour {
     }
 
     /// <summary>
-    /// Sends an Event when the pause key is triggered
+    /// Sends an Event when the pause Key is triggered
     /// </summary>
     /// <param name="context">The context that got send from the input key</param>
     private void Pause_performed(InputAction.CallbackContext context) {
         //OnPauseAction?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>
+    /// Sends an Event when the Reload Key is triggered
+    /// </summary>
+    /// <param name="context">The context that got send from the input key</param>
+    private void Reloading_performed(InputAction.CallbackContext context) {
+        OnReloadAction?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>

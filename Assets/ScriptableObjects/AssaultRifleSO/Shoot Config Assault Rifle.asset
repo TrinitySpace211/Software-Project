@@ -17,3 +17,6 @@ MonoBehaviour:
     m_Bits: 193
   spread: {x: 0.05, y: 0.05, z: 0.05}
   fireRate: 0.1
+  bulletsPerShoot: 1
+  damage: 10
+  maxAmmo: 30
