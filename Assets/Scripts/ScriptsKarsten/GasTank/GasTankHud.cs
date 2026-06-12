@@ -2,6 +2,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Displays the gas tank health and visual feedback.
+/// </summary>
 public class GasTankHUD : MonoBehaviour {
     [SerializeField] private GasTankHealth gasTank;
 
@@ -11,6 +14,9 @@ public class GasTankHUD : MonoBehaviour {
 
     private float damageFlashTimer;
 
+    /// <summary>
+    /// Updates the health bar and UI effects.
+    /// </summary>
     private void Update() {
         if (gasTank == null)
             return;
@@ -55,6 +61,10 @@ public class GasTankHUD : MonoBehaviour {
                 Vector3.Lerp(transform.localScale, Vector3.one, Time.deltaTime * 8f);
         }
     }
+
+    /// <summary>
+    /// Triggers the damage flash effect.
+    /// </summary>
     public void OnTankDamaged() {
         damageFlashTimer = 0.2f;
     }
