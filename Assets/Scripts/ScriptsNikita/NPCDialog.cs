@@ -75,21 +75,134 @@ public class NPCDialog : MonoBehaviour {
     /// </summary>
     public Button buildTowerButton;
 
+    /// <summary>
+    /// Bullet script used by the tower projectile.
+    /// The damage value is read from this bullet.
+    /// </summary>
+    public Bullet towerBullet;
+
+    /// <summary>
+    /// Text element that displays the damage value of the tower projectile.
+    /// </summary>
+    public TMP_Text towerDamageText;
+
+    /// <summary>
+    /// Panel where the player can choose between ranged combat and close combat weapons.
+    /// </summary>
     public CanvasGroup weaponTypePanel;
+
+    /// <summary>
+    /// Panel that contains all ranged weapon buttons.
+    /// </summary>
     public CanvasGroup weaponPanelRanged;
+
+    /// <summary>
+    /// Panel that contains all close combat weapon buttons.
+    /// </summary>
     public CanvasGroup weaponPanelClose;
+
+    /// <summary>
+    /// Panel that displays detailed information about the currently selected weapon.
+    /// </summary>
     public CanvasGroup weaponInfoPanel;
 
+    /// <summary>
+    /// Text element that displays the name of the selected weapon.
+    /// </summary>
     public TMP_Text weaponTitleText;
+
+    /// <summary>
+    /// Text element that displays the description of the selected weapon.
+    /// </summary>
     public TMP_Text weaponDescriptionText;
+
+    /// <summary>
+    /// Text element that displays the current scrap amount and the required scrap cost.
+    /// </summary>
     public TMP_Text weaponScrapAmountText;
+
+    /// <summary>
+    /// Text element that displays the damage value of the selected weapon.
+    /// </summary>
+    public TMP_Text weaponDamageText;
+
+    /// <summary>
+    /// UI object that contains the warning message.
+    /// It is shown when the player does not have enough scrap to buy the selected weapon.
+    /// </summary>
     public GameObject weaponWarningBox;
+
+    /// <summary>
+    /// Button used to buy the currently selected weapon.
+    /// It is only interactable when the player has enough scrap.
+    /// </summary>
     public Button buyWeaponButton;
 
-    // Stores the currently selected weapon cost.
+
+    /// <summary>
+    /// Item definition for the shotgun.
+    /// This ItemSO is added to the inventory when the player buys the shotgun.
+    /// </summary>
+    public ItemSO shotgunItem;
+
+    /// <summary>
+    /// Item definition for the assault rifle.
+    /// This ItemSO is added to the inventory when the player buys the assault rifle.
+    /// </summary>
+    public ItemSO assaultRifleItem;
+
+    /// <summary>
+    /// Item definition for the sniper rifle.
+    /// This ItemSO is added to the inventory when the player buys the sniper rifle.
+    /// </summary>
+    public ItemSO sniperItem;
+
+    /// <summary>
+    /// Item definition for the baseball bat.
+    /// This ItemSO is added to the inventory when the player buys the baseball bat.
+    /// </summary>
+    public ItemSO baseballBatItem;
+
+    /// <summary>
+    /// Item definition for the crowbar.
+    /// This ItemSO is added to the inventory when the player buys the crowbar.
+    /// </summary>
+    public ItemSO crowbarItem;
+
+    /// <summary>
+    /// Item definition for the sword.
+    /// This ItemSO is added to the inventory when the player buys the sword.
+    /// </summary>
+    public ItemSO swordItem;
+
+    /// <summary>
+    /// Item definition for the knife.
+    /// This ItemSO is added to the inventory when the player buys the knife.
+    /// </summary>
+    public ItemSO knifeItem;
+
+    /// <summary>
+    /// Item definition for the axe.
+    /// This ItemSO is added to the inventory when the player buys the axe.
+    /// </summary>
+    public ItemSO axeItem;
+
+    /// <summary>
+    /// Item definition for the tomahawk.
+    /// This ItemSO is added to the inventory when the player buys the tomahawk.
+    /// </summary>
+    public ItemSO tomahawkItem;
+
+    /// <summary>
+    /// Stores the scrap cost of the currently selected weapon.
+    /// This amount of scrap will be removed from the inventory when the player buys the weapon.
+    /// </summary>
     private int selectedWeaponCost;
 
-    // Stores the currently selected weapon item.
+    /// <summary>
+    /// Stores the currently selected weapon item.
+    /// This item will be added to the inventory when the player clicks the buy button.
+    /// </summary>
     private ItemSO selectedWeaponItem;
 
     /// <summary>
@@ -112,6 +225,8 @@ public class NPCDialog : MonoBehaviour {
     /// Opens the NPC dialog panel and unlocks the cursor for UI interaction.
     /// </summary>
     public void OpenDialog() {
+        // Stores that the NPC dialog is currently open.
+        // Other scripts can use this value to check if the player is already talking to the NPC
         IsDialogOpen = true;
 
         ShowPanel(dialogPanel);
@@ -130,6 +245,8 @@ public class NPCDialog : MonoBehaviour {
     /// Closes both NPC UI panels and keeps the cursor visible.
     /// </summary>
     public void CloseDialog() {
+        // Stores that the NPC dialog is currently open.
+        // Other scripts can use this value to check if the player is already talking to the NPC
         IsDialogOpen = false;
 
         HidePanel(dialogPanel);
@@ -198,41 +315,80 @@ public class NPCDialog : MonoBehaviour {
     /// </summary>
     private void UpdateTowerInfo() {
         if (playerInventory == null || scrapItem == null) {
+            // If the inventory or the scrap item is missing,
+            // the current scrap amount cannot be checked.
             scrapAmountText.text = "SCRAP: ? / " + scrapCost;
-            warningBox.SetActive(true);
-            buildTowerButton.interactable = false;
-            return;
-        }
 
+            if (towerDamageText != null && towerBullet != null) {
+                // Show the damage value from the assigned tower bullet.
+                towerDamageText.text = "" + towerBullet.damage;
+            } else if (towerDamageText != null) {
+                // Show unknown damage if no tower bullet was assigned.
+                towerDamageText.text = "?";
+            }
+
+            // Show the warning box because building is not possible.
+            warningBox.SetActive(true);
+
+            // Disable the build button to prevent errors.
+            buildTowerButton.interactable = false;
+
+            return;
+            }
+
+        // Get the current amount of scrap from the player's inventory.
         int currentScrap = playerInventory.GetItemAmount(scrapItem);
+
+        // Check if the player has enough scrap to build the tower.
         bool hasEnoughScrap = currentScrap >= scrapCost;
 
+        // Show current scrap amount and required scrap cost.
         scrapAmountText.text = "SCRAP: " + currentScrap + " / " + scrapCost;
 
+        if (towerDamageText != null && towerBullet != null) {
+            // Show the damage value from the assigned tower bullet.
+            towerDamageText.text = "" + towerBullet.damage;
+        } else if (towerDamageText != null) {
+            // Show unknown damage if no tower bullet was assigned.
+            towerDamageText.text = "?";
+        }
+
+        // Show the warning box only if the player does not have enough scrap.
         warningBox.SetActive(!hasEnoughScrap);
+
+        // Enable the build button only if the player has enough scrap.
         buildTowerButton.interactable = hasEnoughScrap;
-    }
+        }
 
     /// <summary>
     /// Spawns a tower at the assigned spawn point.
     /// </summary>
     public void SpawnTower() {
         if (playerInventory == null || scrapItem == null) {
+            // If the inventory or the scrap item is missing,
+            // the tower cannot be built correctly.
             Debug.LogError("Inventory oder Scrap Item fehlt!");
             return;
         }
 
+        // Check if the player has enough scrap to build the tower.
         if (!playerInventory.HasItemAmount(scrapItem, scrapCost)) {
+            // Stop building if the player does not have enough scrap.
             Debug.Log("Nicht genug Scrap.");
+
+            // Update the tower info panel so the warning and button state are correct.
             UpdateTowerInfo();
+
             return;
         }
 
+        // Remove the required scrap amount from the player's inventory.
         playerInventory.RemoveItem(scrapItem, scrapCost);
 
         // Create a tower at the spawn point position and rotation
         Instantiate(towerPrefab, towerSpawnPoint.position, towerSpawnPoint.rotation);
 
+        // Update the tower info panel after the scrap amount has changed.
         UpdateTowerInfo();
 
         // Clear the currently selected UI element
@@ -307,6 +463,14 @@ public class NPCDialog : MonoBehaviour {
         // show an unknown scrap amount and disable buying.
         if (playerInventory == null || scrapItem == null) {
             weaponScrapAmountText.text = "SCRAP: ? / " + selectedWeaponCost;
+
+            // Show the damage value of the selected weapon
+            if (selectedWeaponItem != null) {
+                weaponDamageText.text = "" + selectedWeaponItem.baseDamage;
+            } else {
+                weaponDamageText.text = "?";
+            }
+
             weaponWarningBox.SetActive(true);
             buyWeaponButton.interactable = false;
             return;
@@ -320,6 +484,13 @@ public class NPCDialog : MonoBehaviour {
 
         // Update the scrap amount text in the weapon information panel.
         weaponScrapAmountText.text = "SCRAP: " + currentScrap + " / " + selectedWeaponCost;
+
+        // Show the damage value of the selected weapon
+        if (selectedWeaponItem != null) {
+            weaponDamageText.text = "" + selectedWeaponItem.baseDamage;
+        } else {
+            weaponDamageText.text = "?";
+        }
 
         // Show the warning box only if the player does not have enough scrap.
         weaponWarningBox.SetActive(!hasEnoughScrap);
@@ -337,6 +508,7 @@ public class NPCDialog : MonoBehaviour {
         weaponTitleText.text = "ASSAULT RIFLE";
         weaponDescriptionText.text = "A fast automatic weapon with good damage and high fire rate.";
 
+        selectedWeaponItem = assaultRifleItem;
         selectedWeaponCost = 300;
 
         UpdateWeaponInfo();
@@ -349,8 +521,9 @@ public class NPCDialog : MonoBehaviour {
         ShowPanel(weaponInfoPanel);
 
         weaponTitleText.text = "SHOTGUN";
-        weaponDescriptionText.text = "Reliable close-range weapon with high stopping power.";
+        weaponDescriptionText.text = "Reliable close-range weapon with high power.";
 
+        selectedWeaponItem = shotgunItem;
         selectedWeaponCost = 200;
 
         UpdateWeaponInfo();
@@ -365,6 +538,7 @@ public class NPCDialog : MonoBehaviour {
         weaponTitleText.text = "SNIPER";
         weaponDescriptionText.text = "A powerful long-range weapon for precise shots against zombies.";
 
+        selectedWeaponItem = sniperItem;
         selectedWeaponCost = 250;
 
         UpdateWeaponInfo();
@@ -381,6 +555,7 @@ public class NPCDialog : MonoBehaviour {
         weaponTitleText.text = "BASEBALL BAT";
         weaponDescriptionText.text = "A simple close combat weapon. Useful for basic defense against nearby zombies.";
 
+        selectedWeaponItem = baseballBatItem;
         selectedWeaponCost = 75;
 
         UpdateWeaponInfo();
@@ -397,6 +572,7 @@ public class NPCDialog : MonoBehaviour {
         weaponTitleText.text = "CROWBAR";
         weaponDescriptionText.text = "A solid close combat weapon with good impact damage and practical survival use.";
 
+        selectedWeaponItem = crowbarItem;
         selectedWeaponCost = 100;
 
         UpdateWeaponInfo();
@@ -413,6 +589,7 @@ public class NPCDialog : MonoBehaviour {
         weaponTitleText.text = "SWORD";
         weaponDescriptionText.text = "A sharp close combat weapon with high damage and good reach.";
 
+        selectedWeaponItem = swordItem;
         selectedWeaponCost = 180;
 
         UpdateWeaponInfo();
@@ -429,6 +606,7 @@ public class NPCDialog : MonoBehaviour {
         weaponTitleText.text = "KNIFE";
         weaponDescriptionText.text = "A light close combat weapon. Fast, cheap and useful in emergency situations.";
 
+        selectedWeaponItem = knifeItem;
         selectedWeaponCost = 50;
 
         UpdateWeaponInfo();
@@ -443,26 +621,96 @@ public class NPCDialog : MonoBehaviour {
         weaponInfoPanel.transform.SetAsLastSibling();
 
         weaponTitleText.text = "AXE";
-        weaponDescriptionText.text = "A heavy close combat weapon with strong damage against zombies.";
+        weaponDescriptionText.text = "A close combat weapon with strong damage against zombies.";
 
+        selectedWeaponItem = axeItem;
         selectedWeaponCost = 150;
 
         UpdateWeaponInfo();
     }
 
     /// <summary>
-    /// Selects the iron axe and displays its information in the weapon info panel.
+    /// Selects the tomahawk and displays its information in the weapon info panel.
     /// </summary>
-    public void SelectIronAxe() {
+    public void SelectTomahawk() {
         ShowPanel(weaponInfoPanel);
 
         weaponInfoPanel.transform.SetAsLastSibling();
 
-        weaponTitleText.text = "IRON AXE";
-        weaponDescriptionText.text = "A reinforced axe with very high close combat damage and durability.";
+        weaponTitleText.text = "TOMAHAWK";
+        weaponDescriptionText.text = "A compact close combat weapon with high damage. Useful for attacks against nearby zombies.";
 
+        selectedWeaponItem = tomahawkItem;
         selectedWeaponCost = 220;
 
+        UpdateWeaponInfo();
+    }
+
+    /// <summary>
+    /// Buys the currently selected weapon if the player has enough scrap.
+    /// The required scrap amount is removed from the inventory and the weapon item is added.
+    /// </summary>
+    public void BuySelectedWeapon() {
+        if (playerInventory == null) {
+            // If the player inventory is missing,
+            // the weapon cannot be added and scrap cannot be removed.
+            Debug.LogError("Player Inventory is missing!");
+            return;
+        }
+
+        if (scrapItem == null) {
+            // If the scrap item is missing,
+            // the script cannot check or remove the required scrap amount.
+            Debug.LogError("Scrap Item is missing!");
+            return;
+        }
+
+        if (selectedWeaponItem == null) {
+            // If no weapon was selected before clicking the buy button,
+            // there is no item that can be added to the inventory.
+            Debug.LogError("No weapon item selected!");
+            return;
+        }
+
+        if (selectedWeaponCost <= 0) {
+            // If the selected weapon cost is zero or negative,
+            // the weapon setup is invalid.
+            Debug.LogError("Selected weapon cost is invalid!");
+            return;
+        }
+
+        // Check if the player has enough scrap to buy the selected weapon.
+        if (!playerInventory.HasItemAmount(scrapItem, selectedWeaponCost)) {
+            // Stop buying if the player does not have enough scrap.
+            Debug.Log("Not enough scrap to buy weapon.");
+
+            // Update the weapon info panel so the warning and button state are correct.
+            UpdateWeaponInfo();
+
+            return;
+        }
+
+        // Remove the required scrap amount from the player's inventory.
+        bool removedScrap = playerInventory.RemoveItem(scrapItem, selectedWeaponCost);
+
+        if (!removedScrap) {
+            // If scrap could not be removed, stop the buying process.
+            // This prevents the weapon from being added for free.
+            Debug.LogError("Could not remove scrap from inventory.");
+
+            // Update the weapon info panel after the failed remove attempt.
+            UpdateWeaponInfo();
+
+            return;
+        }
+
+        // Add the selected weapon item to the player's inventory.
+        playerInventory.AddItem(selectedWeaponItem, 1);
+
+        // Print the bought weapon name to the console for testing.
+        Debug.Log("Bought weapon: " + selectedWeaponItem.name);
+
+        // Update the weapon info panel after the scrap amount has changed.
         UpdateWeaponInfo();
     }
 

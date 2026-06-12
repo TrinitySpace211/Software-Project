@@ -34,4 +34,9 @@ public class ItemSO : ScriptableObject {
     /// when the item is equipped or held.
     /// </summary>
     public GameObject handItemPrefab;
+
+    /// <summary>
+    /// Damage value of the item if it is used as a weapon.
+    /// </summary>
+    public int baseDamage;
 }
