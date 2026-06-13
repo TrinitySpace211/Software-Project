@@ -1,0 +1,61 @@
+using System;
+using UnityEngine;
+using Random = UnityEngine.Random;
+
+/// <summary>
+///     Manages all objectives in the scene.
+///     Called by DayNightCycle events to switch zombie targets at night and back to player during day.
+/// </summary>
+public class ObjectiveManager : MonoBehaviour {
+    [Header("Objectives")] public ObjectiveHealth[] objectives;
+
+    [Header("Player")] [SerializeField] private Transform player;
+
+    public static ObjectiveManager Instance { get; private set; }
+
+    private void Awake() {
+        if (Instance != null && Instance != this) {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+    }
+
+    /// <summary>
+    ///     Returns a random active (non-destroyed) objective.
+    ///     Returns null if all objectives are destroyed.
+    /// </summary>
+    public Transform GetRandomActiveObjective() {
+        var active = Array.FindAll(objectives, o => o != null && !o.IsDestroyed());
+        if (active.Length == 0) return null;
+        return active[Random.Range(0, active.Length)].transform;
+    }
+
+    /// <summary>
+    ///     Called by DayNightCycle.onNightStarted.
+    ///     Redirects all active zombies to attack a random objective.
+    /// </summary>
+    public void OnNightStarted() {
+        var zombies = FindObjectsByType<ZombieAI>(FindObjectsSortMode.None);
+        var redirected = 0;
+
+        foreach (var zombie in zombies) {
+            if (zombie.IsDead()) continue;
+            var objective = GetRandomActiveObjective();
+            if (objective == null) break;
+            zombie.SetTarget(objective, true);
+            redirected++;
+        }
+
+        Debug.Log($"[ObjectiveManager] Nacht: {redirected} Zombies greifen Objectives an.");
+    }
+
+    /// <summary>
+    ///     Called byS DayNightCycle.onNewDayStarted.
+    ///     was supposed to: Redirects all zombies back to the player.
+    /// </summary>
+    public void OnDayStarted() {
+        // Zombies behalten ihr Ziel bis sie sterben.
+    }
+}

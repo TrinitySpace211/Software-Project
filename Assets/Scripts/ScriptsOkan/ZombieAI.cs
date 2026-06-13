@@ -31,15 +31,19 @@ public class ZombieAI : MonoBehaviour {
     private float _attackTimer;
     private Vector3 _currentPatrolTarget;
     private Vector3 _homePosition;
-
-
     private bool _initialized;
     private bool _isAggro;
     private bool _isAttacking;
+    private bool _isTargetingObjective;
     private int _patrolIndex;
     private float _patrolRadius;
     private float _patrolWaitTimer;
+    private PlayerHealth _playerHealthRef;
+
+    private Transform _playerTransform;
     private PlayerHealth _targetHealth;
+
+    private ObjectiveHealth _targetObjectiveHealth;
     private bool isDead;
     private Color originalColor;
 
@@ -56,67 +60,123 @@ public class ZombieAI : MonoBehaviour {
 
         if (enemyStatsSO != null) _agent.speed = enemyStatsSO.moveSpeed;
 
-        if (target != null)
+        if (target != null) {
             _targetHealth = target.GetComponentInChildren<PlayerHealth>();
+            _initialized = true;
+        }
     }
 
     /// <summary>
-    ///     Evaluated every frame. Manages state transitions between
-    ///     Patrol, Chase, and Attack based on distance to the player.
+    ///     Evaluated every frame. Routes behaviour to either objective or player mode
+    ///     depending on the current night state.
     /// </summary>
     private void Update() {
-        if (!_initialized || target is null || !_agent.isOnNavMesh) return;
+        if (!_initialized || !_agent.isOnNavMesh) return;
 
         _attackTimer -= Time.deltaTime;
-
-        if (_isAttacking) return;
-
-        if (isDead) {
+        if (_isAttacking || isDead) {
             _agent.isStopped = true;
             _agent.velocity = Vector3.zero;
             return;
         }
 
-        var targetPos = target.position;
-        var flatSelf = new Vector3(transform.position.x, 0f, transform.position.z);
-        var flatTarget = new Vector3(targetPos.x, 0f, targetPos.z);
-        var sqrDist = (flatSelf - flatTarget).sqrMagnitude;
-        var inAttackRange = enemyStatsSO is not null && sqrDist <= enemyStatsSO.attackRange * enemyStatsSO.attackRange;
-        var inDetectionRange = enemyStatsSO is not null &&
-                               sqrDist <= enemyStatsSO.detectionRange * enemyStatsSO.detectionRange;
-        var leashRange = enemyStatsSO is not null ? enemyStatsSO.detectionRange * 1.5f : 0f;
-        var beyondLeash = sqrDist > leashRange * leashRange;
-
-        if (inDetectionRange) _isAggro = true;
-
-        if (beyondLeash) _isAggro = false;
-
-        if (inAttackRange) {
-            _agent.isStopped = true;
-            _agent.velocity = Vector3.zero;
-            _agent.ResetPath();
-            _animController?.SetWalking(false);
-            HandleAttack();
-        } else if (_isAggro) {
-            _agent.isStopped = false;
-            _agent.SetDestination(new Vector3(targetPos.x, transform.position.y, targetPos.z));
-            _animController?.SetWalking(_agent.velocity.magnitude > 0.1f);
-        } else {
-            Patrol();
-        }
+        if (_isTargetingObjective)
+            HandleObjectiveMode();
+        else
+            HandlePlayerMode();
     }
 
     /// <summary>
-    ///     Deals damage to the player if the attack cooldown has elapsed
-    ///     and no attack animation is currently playing.
+    ///     Objective mode: moves towards the assigned objective.
+    ///     If the player enters detection range, temporarily prioritises the player.
+    /// </summary>
+    private void HandleObjectiveMode() {
+        if (_playerTransform != null) {
+            var sqrToPlayer = SqrDistFlat(transform.position, _playerTransform.position);
+            var detection = enemyStatsSO.detectionRange * enemyStatsSO.detectionRange;
+
+            if (sqrToPlayer <= detection) {
+                MoveTo(_playerTransform.position);
+                if (sqrToPlayer <= enemyStatsSO.attackRange * enemyStatsSO.attackRange)
+                    StopAndAttack(_playerHealthRef, null);
+                return;
+            }
+        }
+
+        MoveTo(target.position);
+    }
+
+    /// <summary>
+    ///     Player mode: manages Patrol → Chase → Attack transitions
+    ///     based on detection and leash range.
+    /// </summary>
+    private void HandlePlayerMode() {
+        var sqrToTarget = SqrDistFlat(transform.position, target.position);
+        var detection = enemyStatsSO.detectionRange * enemyStatsSO.detectionRange;
+        var leash = enemyStatsSO.detectionRange * 1.5f;
+
+        if (sqrToTarget <= detection) _isAggro = true;
+        if (sqrToTarget > leash * leash) _isAggro = false;
+
+        if (sqrToTarget <= enemyStatsSO.attackRange * enemyStatsSO.attackRange)
+            StopAndAttack(_targetHealth, _targetObjectiveHealth);
+        else if (_isAggro)
+            MoveTo(target.position);
+        else
+            Patrol();
+    }
+
+    /// <summary>
+    ///     Returns the squared flat (XZ) distance between two points.
+    ///     Avoids a square root for cheaper distance comparisons.
+    /// </summary>
+    private float SqrDistFlat(Vector3 a, Vector3 b) {
+        var dx = a.x - b.x;
+        var dz = a.z - b.z;
+        return dx * dx + dz * dz;
+    }
+
+    /// <summary>
+    ///     Moves the zombie towards a target position on the XZ plane.
+    ///     Updates the walking animation based on actual agent velocity.
+    /// </summary>
+    private void MoveTo(Vector3 pos) {
+        _agent.isStopped = false;
+        _agent.SetDestination(new Vector3(pos.x, transform.position.y, pos.z));
+        _animController?.SetWalking(_agent.velocity.magnitude > 0.1f);
+    }
+
+    /// <summary>
+    ///     Stops the agent and triggers an attack against the given target.
+    ///     Pass <c>null</c> for whichever target type is not relevant.
+    /// </summary>
+    private void StopAndAttack(PlayerHealth ph, ObjectiveHealth oh) {
+        _agent.isStopped = true;
+        _agent.velocity = Vector3.zero;
+        _agent.ResetPath();
+        _animController?.SetWalking(false);
+        _targetHealth = ph;
+        _targetObjectiveHealth = oh;
+        HandleAttack();
+    }
+
+    /// <summary>
+    ///     Deals damage to the current target (player or objective) if the attack cooldown
+    ///     has elapsed and no attack animation is currently playing.
     /// </summary>
     private void HandleAttack() {
         if (_attackTimer <= 0f && !_isAttacking) {
-            if (enemyStatsSO == null || _targetHealth == null) return;
+            if (enemyStatsSO == null) return;
+            if (_targetHealth == null && _targetObjectiveHealth == null) return;
 
             _isAttacking = true;
             _animController?.TriggerAttack();
-            _targetHealth.TakeDamage(enemyStatsSO.damage);
+
+            if (_targetObjectiveHealth != null)
+                _targetObjectiveHealth.TakeDamage(enemyStatsSO.damage);
+            else if (_targetHealth != null)
+                _targetHealth.TakeDamage(enemyStatsSO.damage);
+
             _attackTimer = enemyStatsSO.attackCooldown;
         }
     }
@@ -161,8 +221,28 @@ public class ZombieAI : MonoBehaviour {
         _currentPatrolTarget = GetRandomPatrolPoint();
         _patrolWaitTimer = patrolWaitTime;
         target = player;
+        _playerTransform = player; // <-- neu
         _targetHealth = player?.GetComponentInChildren<PlayerHealth>();
+        _playerHealthRef = _targetHealth; // <-- neu
         _initialized = true;
+    }
+
+    /// <summary>
+    ///     Sets a new target for this zombie.
+    ///     Used by ObjectiveManager to switch between player and objectives at night.
+    /// </summary>
+    public void SetTarget(Transform newTarget, bool isObjective = false) {
+        target = newTarget;
+        _isTargetingObjective = isObjective;
+        _isAggro = true;
+
+        if (isObjective) {
+            _targetHealth = null;
+            _targetObjectiveHealth = newTarget.GetComponent<ObjectiveHealth>();
+        } else {
+            _targetObjectiveHealth = null;
+            _targetHealth = newTarget?.GetComponentInChildren<PlayerHealth>();
+        }
     }
 
     /// <summary>
