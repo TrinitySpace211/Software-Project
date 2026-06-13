@@ -3,8 +3,7 @@ using UnityEngine;
 /// <summary>
 /// The PlayerAnimation Script handles the animations for the Player by updating the float parameters inputX, inputY and inputMagnitude
 /// </summary>
-public class PlayerAnimation : MonoBehaviour
-{
+public class PlayerAnimation : MonoBehaviour {
 
     [SerializeField] private Animator animator;
     [SerializeField] private PlayerInputHandler playerInputHandler;
@@ -19,27 +18,23 @@ public class PlayerAnimation : MonoBehaviour
     private int inputXHash = Animator.StringToHash("inputX");
     private int inputYHash = Animator.StringToHash("inputY");
     private int inputyMagnitudeHash = Animator.StringToHash("inputMagnitude");
-    private int rotationMismatchHash = Animator.StringToHash("rotationMismatch");
     private int getHitHash = Animator.StringToHash("GetHit");
     private int isDeadHash = Animator.StringToHash("IsDead");
     private int isDeadWithWeaponHash = Animator.StringToHash("IsDeadWithWeapon");
-    private int reload = Animator.StringToHash("Reload");
+    private int isReloadingHash = Animator.StringToHash("IsReloading");
     private int isWeaponAimingHash = Animator.StringToHash("IsWeaponAiming");
     private int meleeAttack1Hash = Animator.StringToHash("MeleeAttack1");
     private int meleeAttack2Hash = Animator.StringToHash("MeleeAttack2");
     private int meleeAttckSpeedMultHash = Animator.StringToHash("MeleeAttackSpeedMult");
 
-    private void Start()
-    {
+    private void Start() {
         player = GetComponent<Player>();
     }
-    private void Update()
-    {
+    private void Update() {
         UpdateAnimationState();
     }
 
-    public void Construct(PlayerInputHandler playerInputHandler)
-    {
+    public void Construct(PlayerInputHandler playerInputHandler) {
         this.playerInputHandler = playerInputHandler;
     }
 
@@ -48,16 +43,14 @@ public class PlayerAnimation : MonoBehaviour
     /// Then it calculates the direction relative to the camera orientation and transforms it into the Player's local space
     /// for animation blending. At the end the float parameters will be updated.
     /// </summary>
-    private void UpdateAnimationState()
-    {
+    private void UpdateAnimationState() {
         isSprinting = player.GetCurrentPlayerState().CurrentPlayerMovementState == PlayerMovementState.Sprinting;
 
         // Get raw input and apply sprint multiplier
         float inputX = playerInputHandler.MovementInput.x;
         float inputY = playerInputHandler.MovementInput.y;
 
-        if (isSprinting)
-        {
+        if (isSprinting) {
             inputX *= 1.5f;
             inputY *= 1.5f;
         }
@@ -86,77 +79,55 @@ public class PlayerAnimation : MonoBehaviour
         animator.SetFloat(inputyMagnitudeHash, currentBlendInput.magnitude);
     }
 
-    public void SetAimAnimation(bool state)
-    {
+    public void SetAimAnimation(bool state) {
         animator.SetBool(isWeaponAimingHash, state);
     }
 
-    public void SetRotationMismatch(float mismatch)
-    {
-        animator.SetFloat(rotationMismatchHash, mismatch);
-    }
-
-    public void SetHitTrigger()
-    {
+    public void SetHitTrigger() {
         animator.SetTrigger(getHitHash);
     }
 
-    public void SetDyingTrigger()
-    {
+    public void SetDyingTrigger() {
         animator.SetTrigger(isDeadHash);
     }
 
-    public void SetDyingWithWeaponTrigger()
-    {
+    public void SetDyingWithWeaponTrigger() {
         animator.SetTrigger(isDeadWithWeaponHash);
     }
 
-    public void SetReloadTrigger()
-    {
-        animator.SetTrigger(reload);
-    }
-
-    public void StartReloading()
-    {
+    public void StartReloading() {
         isReloading = true;
+        animator.SetBool(isReloadingHash, isReloading);
     }
 
-    public void FinishedReloading()
-    {
+    public void FinishedReloading() {
         isReloading = false;
+        animator.SetBool(isReloadingHash, isReloading);
 
         GunSO activeGun = player.GetPlayerGunSelector().activeGun;
-        if (activeGun != null)
-        {
+        if (activeGun != null) {
             activeGun.SetFullMagazine();
         }
     }
 
-    public bool GetIsReloading()
-    {
+    public bool GetIsReloading() {
         return isReloading;
     }
 
-    public void SetOneHandMeleeAttack()
-    {
+    public void SetOneHandMeleeAttack() {
         int attackVariant = UnityEngine.Random.Range(1, 3); // 1 oder 2
-        if (attackVariant == 1)
-        {
+        if (attackVariant == 1) {
             animator.SetTrigger(meleeAttack1Hash);
-        }
-        else if (attackVariant == 2)
-        {
+        } else if (attackVariant == 2) {
             animator.SetTrigger(meleeAttack2Hash);
         }
     }
 
-    public void SetTwoHandMeleeAttack()
-    {
+    public void SetTwoHandMeleeAttack() {
         animator.SetTrigger(meleeAttack1Hash);
     }
 
-    public void SetMeleeAttackSpeed(float value)
-    {
+    public void SetMeleeAttackSpeed(float value) {
         animator.SetFloat(meleeAttckSpeedMultHash, value);
     }
 

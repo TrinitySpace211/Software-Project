@@ -65,7 +65,7 @@ public class PlayerWeaponSelector : MonoBehaviour {
 
         yield return new WaitForSeconds(0.3f);
 
-        playerIK.SetWeapon(false);
+        playerIK.SetGun(false);
         selectCoroutine = null;
     }
 
@@ -91,7 +91,7 @@ public class PlayerWeaponSelector : MonoBehaviour {
         yield return new WaitForSeconds(0.3f);
 
         playerIK.SetMelee(false, weaponSlotIndex);
-        playerIK.SetWeapon(false);
+        playerIK.SetGun(false);
         selectCoroutine = null;
     }
     #endregion
@@ -327,7 +327,7 @@ public class PlayerWeaponSelector : MonoBehaviour {
         yield return new WaitForSeconds(0.3f);
 
         playerIK.SetMelee(true, weaponSlotIndex);
-        playerIK.SetWeapon(true);
+        playerIK.SetGun(true);
 
         switchLayer.weight = 0;
         meleeLayer.weight = 1;
@@ -362,7 +362,7 @@ public class PlayerWeaponSelector : MonoBehaviour {
         //Continue waiting before snapping the IKs to the Weapon again
         yield return new WaitForSeconds(0.3f);
 
-        playerIK.SetWeapon(true);
+        playerIK.SetGun(true);
 
         switchLayer.weight = 0;
         poseLayer.weight = 1;
@@ -371,10 +371,36 @@ public class PlayerWeaponSelector : MonoBehaviour {
         selectCoroutine = null;
     }
 
-    public void DieWithWeapon() {
+    public void ClearSetupCurrentWeapon() {
         playerIK.ClearSetup();
         switchLayer.weight = 1;
         poseLayer.weight = 0;
+    }
+
+    public void SetupCurrentWeapon(Transform gunParent) {
+        if (activeGun != null) {
+            switch (activeGun.weaponSlot) {
+                case WeaponSlot.Primary:
+                    playerIK.Setup(gunParent, (int)WeaponSlot.Primary);
+                    break;
+                case WeaponSlot.Secondary:
+                    playerIK.Setup(gunParent, (int)WeaponSlot.Secondary);
+                    break;
+                case WeaponSlot.MeleeOneHanded:
+                    playerIK.Setup(gunParent, (int)WeaponSlot.MeleeOneHanded);
+                    break;
+                case WeaponSlot.MeleeTwoHanded:
+                    playerIK.Setup(gunParent, (int)WeaponSlot.MeleeTwoHanded);
+                    break;
+            }
+        }
+
+        switchLayer.weight = 0;
+        poseLayer.weight = 1;
+    }
+
+    public bool IsSelecting() {
+        return selectCoroutine != null;
     }
 
     public void DespawnActiveGun() {

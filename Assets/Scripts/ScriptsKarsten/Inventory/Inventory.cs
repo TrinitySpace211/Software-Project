@@ -21,6 +21,9 @@ public class Inventory : MonoBehaviour {
     [SerializeField] private ItemSO[] melees;
     [SerializeField] private ItemSO[] debugItems;
 
+    [Header("Hotbar Swap Speed")]
+    [SerializeField] private float swapSpeed = 0.8f;
+
     private static readonly Key[] debugKeys = new Key[] {
         Key.B,
         Key.N,
@@ -138,10 +141,6 @@ public class Inventory : MonoBehaviour {
             //TogglePause();
         }
 
-        if (EventSystem.current.IsPointerOverGameObject()) {
-
-        }
-
         StartDrag();
         UpdateDragItemPosition();
         EndDrag();
@@ -157,7 +156,7 @@ public class Inventory : MonoBehaviour {
         ItemSO item = hotbarSlots[slot].GetItem();
 
         if (!isDragging) {
-            if (Time.time > 1f + lastTimeSelected) {
+            if (Time.time > swapSpeed + lastTimeSelected && !player.GetPlayerAnimation().GetIsReloading()) {
                 lastTimeSelected = Time.time;
                 if (previousSlot != -1) {
                     hotbarSlots[previousSlot].SetSelected(false);
