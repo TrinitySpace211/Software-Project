@@ -1,9 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
-using UnityEngine.InputSystem;
 
 [DisallowMultipleComponent]
 public class PlayerGunSelector : MonoBehaviour {
@@ -12,12 +10,11 @@ public class PlayerGunSelector : MonoBehaviour {
     [SerializeField] private List<GunSO> guns;
     [SerializeField] private Rig switchLayer;
     [SerializeField] private Rig poseLayer;
-    [SerializeField] private float switchDuration;
-    [SerializeField] private float poseDuration;
 
     private Player player;
     private PlayerIK playerIK;
     private GunType gunType;
+    private Coroutine selectCoroutine;
 
     [Space]
     [Header("Runtime Filled")]
@@ -28,21 +25,18 @@ public class PlayerGunSelector : MonoBehaviour {
         playerIK = player.GetPlayerIK();
     }
 
-    private void Update() {
-        /* if (Keyboard.current.digit1Key.wasPressedThisFrame && activeGun != null) {
-            //Idle no Weapon
-            StartCoroutine(SelectNoWeapon());
-        } else if (Keyboard.current.digit2Key.wasPressedThisFrame) {
-            //Assault
-            SelectAssaultRifle();
-        } else if (Keyboard.current.digit3Key.wasPressedThisFrame) {
-            //Pistol
-            SelectPistol();
-        } */
+    private void StopActiveSelectionCoroutine() {
+        if (selectCoroutine != null) {
+            StopCoroutine(selectCoroutine);
+            selectCoroutine = null;
+        }
     }
 
     public void DequipWeapon() {
-        StartCoroutine(SelectNoWeapon());
+        StopActiveSelectionCoroutine();
+        if (activeGun != null) {
+            selectCoroutine = StartCoroutine(SelectNoWeapon());
+        }
     }
 
     public IEnumerator SelectNoWeapon() {
@@ -57,6 +51,7 @@ public class PlayerGunSelector : MonoBehaviour {
 
         if (activeGun == null) {
             Debug.LogError("There is no active gun in the players hand");
+            selectCoroutine = null;
             yield break;
         }
 
@@ -65,11 +60,12 @@ public class PlayerGunSelector : MonoBehaviour {
         yield return new WaitForSeconds(0.3f);
 
         playerIK.SetGun(false);
+        selectCoroutine = null;
     }
 
     public void SelectAssaultRifle() {
         GunSO gun = guns.Find(gun => gun.type == GunType.AssaultRifle);
-        int weaponSlotIndex = (int)GunType.AssaultRifle;
+        int weaponSlotIndex = (int)GunSlot.Primary;
 
         if (gun == null) {
             Debug.LogError($"No GunSO found for GunType: {gunType}");
@@ -82,12 +78,13 @@ public class PlayerGunSelector : MonoBehaviour {
             }
         }
 
-        StartCoroutine(SelectGun(gun, weaponSlotIndex));
+        StopActiveSelectionCoroutine();
+        selectCoroutine = StartCoroutine(SelectGun(gun, weaponSlotIndex));
     }
 
     public void SelectPistol() {
         GunSO gun = guns.Find(gun => gun.type == GunType.Pistol);
-        int weaponSlotIndex = (int)GunType.Pistol;
+        int weaponSlotIndex = (int)GunSlot.Secondary;
 
         if (gun == null) {
             Debug.LogError($"No GunSO found for GunType: {gunType}");
@@ -100,7 +97,46 @@ public class PlayerGunSelector : MonoBehaviour {
             }
         }
 
-        StartCoroutine(SelectGun(gun, weaponSlotIndex));
+        StopActiveSelectionCoroutine();
+        selectCoroutine = StartCoroutine(SelectGun(gun, weaponSlotIndex));
+    }
+
+    public void SelectShotgun() {
+        GunSO gun = guns.Find(gun => gun.type == GunType.Shotgun);
+        int weaponSlotIndex = (int)GunSlot.Primary;
+
+        if (gun == null) {
+            Debug.LogError($"No GunSO found for GunType: {gunType}");
+            return;
+        }
+
+        if (activeGun != null) {
+            if (activeGun.type == GunType.Shotgun) {
+                return;
+            }
+        }
+
+        StopActiveSelectionCoroutine();
+        selectCoroutine = StartCoroutine(SelectGun(gun, weaponSlotIndex));
+    }
+
+    public void SelectSniper() {
+        GunSO gun = guns.Find(gun => gun.type == GunType.Sniper);
+        int weaponSlotIndex = (int)GunSlot.Primary;
+
+        if (gun == null) {
+            Debug.LogError($"No GunSO found for GunType: {gunType}");
+            return;
+        }
+
+        if (activeGun != null) {
+            if (activeGun.type == GunType.Sniper) {
+                return;
+            }
+        }
+
+        StopActiveSelectionCoroutine();
+        selectCoroutine = StartCoroutine(SelectGun(gun, weaponSlotIndex));
     }
 
     private IEnumerator SelectGun(GunSO gun, int weaponSlotIndex) {
@@ -127,12 +163,19 @@ public class PlayerGunSelector : MonoBehaviour {
         poseLayer.weight = 1;
 
         playerIK.Setup(gunParent[weaponSlotIndex]);
+        selectCoroutine = null;
     }
 
-    public void DieWithWeapon() {
+    public void ClearSetupCurrentWeapon() {
         playerIK.ClearSetup();
         switchLayer.weight = 1;
         poseLayer.weight = 0;
+    }
+
+    public void SetupCurrentWeapon(Transform gunParent) {
+        playerIK.Setup(gunParent);
+        switchLayer.weight = 0;
+        poseLayer.weight = 1;
     }
 
     public void DespawnActiveGun() {

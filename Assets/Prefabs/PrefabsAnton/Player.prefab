@@ -122,11 +122,11 @@ MonoBehaviour:
         transform: {fileID: 0}
         weight: 0
     m_Offset: {x: 0, y: 0, z: 0}
-    m_MinLimit: -30
-    m_MaxLimit: 30
+    m_MinLimit: -10
+    m_MaxLimit: 10
     m_AimAxis: 4
     m_UpAxis: 2
-    m_WorldUpType: 0
+    m_WorldUpType: 1
     m_WorldUpObject: {fileID: 0}
     m_WorldUpAxis: 2
     m_MaintainOffset: 0
@@ -474,14 +474,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e3c430f382484144e925c097c2d33cfe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Weight: 1
+  m_Weight: 0.2
   m_Data:
     m_ConstrainedObject: {fileID: 7004083646906191696}
     m_SourceObjects:
       m_Length: 1
       m_Item0:
         transform: {fileID: 0}
-        weight: 1
+        weight: 0.5
       m_Item1:
         transform: {fileID: 0}
         weight: 0
@@ -504,11 +504,11 @@ MonoBehaviour:
         transform: {fileID: 0}
         weight: 0
     m_Offset: {x: 0, y: 0, z: 0}
-    m_MinLimit: -30
-    m_MaxLimit: 30
+    m_MinLimit: 0
+    m_MaxLimit: 0
     m_AimAxis: 4
     m_UpAxis: 2
-    m_WorldUpType: 0
+    m_WorldUpType: 1
     m_WorldUpObject: {fileID: 0}
     m_WorldUpAxis: 2
     m_MaintainOffset: 0
@@ -655,7 +655,7 @@ GameObject:
   - component: {fileID: 4305616082299116262}
   - component: {fileID: 4956098072309768166}
   m_Layer: 0
-  m_Name: WeaponPose_Pistole
+  m_Name: WeaponPose_Secondary
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1101,7 +1101,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8970582831101045154}
   m_Layer: 0
-  m_Name: WeaponPivot_Assault
+  m_Name: WeaponPivot_Primary
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1164,7 +1164,6 @@ GameObject:
   m_Component:
   - component: {fileID: 5073287893444000673}
   - component: {fileID: 5881767064964011042}
-  - component: {fileID: 8828234017017753120}
   m_Layer: 0
   m_Name: Soldat
   m_TagString: Untagged
@@ -1299,24 +1298,6 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.0015356541, y: -0.09298003, z: 0.057001516}
     m_Extent: {x: 2.1297543, y: 1.9735664, z: 0.525573}
   m_DirtyAABB: 0
---- !u!114 &8828234017017753120
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2646775550164963314}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5fea29bb7c508c244a1f805a5fd3fc4d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  outlineMode: 2
-  outlineColor: {r: 0, g: 0.7299213, b: 0.735849, a: 1}
-  outlineWidth: 4
-  precomputeOutline: 0
-  bakeKeys: []
-  bakeValues: []
 --- !u!1 &2831235621924921743
 GameObject:
   m_ObjectHideFlags: 0
@@ -1393,7 +1374,7 @@ GameObject:
   - component: {fileID: 3008891137364880101}
   - component: {fileID: 6597623697563077582}
   m_Layer: 0
-  m_Name: WeaponPose_Assault
+  m_Name: WeaponPose_Primary
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1680,7 +1661,7 @@ GameObject:
   m_Component:
   - component: {fileID: 243396009050639086}
   m_Layer: 0
-  m_Name: WeaponPivot_Pistol
+  m_Name: WeaponPivot_Secondary
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2253,14 +2234,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e3c430f382484144e925c097c2d33cfe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Weight: 1
+  m_Weight: 0.2
   m_Data:
     m_ConstrainedObject: {fileID: 7004083646906191696}
     m_SourceObjects:
       m_Length: 1
       m_Item0:
         transform: {fileID: 0}
-        weight: 1
+        weight: 0.5
       m_Item1:
         transform: {fileID: 0}
         weight: 0
@@ -2287,7 +2268,7 @@ MonoBehaviour:
     m_MaxLimit: 45
     m_AimAxis: 4
     m_UpAxis: 2
-    m_WorldUpType: 0
+    m_WorldUpType: 1
     m_WorldUpObject: {fileID: 0}
     m_WorldUpAxis: 2
     m_MaintainOffset: 0
@@ -2707,7 +2688,7 @@ GameObject:
   - component: {fileID: 6184375227429409645}
   - component: {fileID: 1360024498302992537}
   m_Layer: 0
-  m_Name: WeaponFollow_Pistol
+  m_Name: WeaponFollow_Secondary
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3062,8 +3043,8 @@ MonoBehaviour:
         transform: {fileID: 0}
         weight: 0
     m_Offset: {x: 0, y: 0, z: 0}
-    m_MinLimit: -30
-    m_MaxLimit: 30
+    m_MinLimit: -5
+    m_MaxLimit: 5
     m_AimAxis: 4
     m_UpAxis: 2
     m_WorldUpType: 1
@@ -3073,7 +3054,7 @@ MonoBehaviour:
     m_ConstrainedAxes:
       x: 1
       y: 1
-      z: 1
+      z: 0
 --- !u!114 &6398221225629645631
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3976,7 +3957,7 @@ MonoBehaviour:
   playerInputHandler: {fileID: 0}
   characterController: {fileID: 6616283865880768969}
   playerAnimation: {fileID: 1444545788740469516}
-  playerHealth: {fileID: 0}
+  playerHealth: {fileID: 6734014837290629750}
   playerCamera: {fileID: 0}
   layerMask:
     serializedVersion: 2
@@ -3984,18 +3965,14 @@ MonoBehaviour:
   aimLayer: {fileID: 739966560693359007}
   baseStats: {fileID: 11400000, guid: 7dc0e11343780ab4997ce5ebf27fbd5e, type: 2}
   gunSelector: {fileID: 3991829341768361164}
-  playerState: {fileID: 0}
-  playerIK: {fileID: 0}
+  playerState: {fileID: 8176537642730218114}
+  playerIK: {fileID: 9186361813033626938}
   walkSpeed: 1.8
   sprintMultipier: 2.3
   movingThreshold: 0.01
   aimDuration: 0.15
-  jumpForce: 5
-  gravityMultiplier: 1
   rotationMouseDirAmount: 10
   rotationMoveDirAmount: 10
-  rotateToTargetTime: 0.25
-  rotationTolerance: 45
   alwaysAiming: 0
 --- !u!114 &1444545788740469516
 MonoBehaviour:
@@ -4043,10 +4020,10 @@ MonoBehaviour:
   guns:
   - {fileID: 11400000, guid: f5f185b9689eb17478c5f798fef6bb6a, type: 2}
   - {fileID: 11400000, guid: 3b953e2266b3e8148b30c65ae50e57f4, type: 2}
+  - {fileID: 11400000, guid: fe8c164c47cedda4cbc0c00deb09224c, type: 2}
+  - {fileID: 11400000, guid: a62e8dbc9409ba342a8a90a25d0ecd92, type: 2}
   switchLayer: {fileID: 515488629726933562}
   poseLayer: {fileID: 3474541558812836290}
-  switchDuration: 0
-  poseDuration: 0
   activeGun: {fileID: 0}
 --- !u!114 &9186361813033626938
 MonoBehaviour:
@@ -4103,6 +4080,8 @@ MonoBehaviour:
     currentHealth: 100
     armor: 0
   baseStats: {fileID: 11400000, guid: 7dc0e11343780ab4997ce5ebf27fbd5e, type: 2}
+  deathScreen: {fileID: 0}
+  dayNightCycle: {fileID: 0}
 --- !u!114 &2278979405329887630
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4126,7 +4105,7 @@ GameObject:
   - component: {fileID: 2388409567929258754}
   - component: {fileID: 5434007406746433119}
   m_Layer: 0
-  m_Name: WeaponFollow_Assault
+  m_Name: WeaponFollow_Primary
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4308,7 +4287,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c10bdb03db33fb148b858a4a3b646cea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Weight: 1
+  m_Weight: 0.5
   m_Data:
     m_ConstrainedObject: {fileID: 6771863282060689649}
     m_SourceObjects:
@@ -4355,14 +4334,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e3c430f382484144e925c097c2d33cfe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Weight: 1
+  m_Weight: 0.4
   m_Data:
     m_ConstrainedObject: {fileID: 7332277743811208420}
     m_SourceObjects:
       m_Length: 1
       m_Item0:
         transform: {fileID: 0}
-        weight: 1
+        weight: 0.5
       m_Item1:
         transform: {fileID: 0}
         weight: 0
@@ -4385,8 +4364,8 @@ MonoBehaviour:
         transform: {fileID: 0}
         weight: 0
     m_Offset: {x: 0, y: 0, z: 0}
-    m_MinLimit: -20
-    m_MaxLimit: 20
+    m_MinLimit: -10
+    m_MaxLimit: 10
     m_AimAxis: 4
     m_UpAxis: 2
     m_WorldUpType: 0

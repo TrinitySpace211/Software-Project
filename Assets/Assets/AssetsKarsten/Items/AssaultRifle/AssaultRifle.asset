@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: AssaultRifle
   m_EditorClassIdentifier: 
   itemName: Assault Rifle
-  icon: {fileID: 21300000, guid: 9b9fce6c023fa404aa443b52fb235ffc, type: 3}
+  icon: {fileID: 21300000, guid: 08c951c6edd0d0d419ee7436aecac45e, type: 3}
   maxStackSize: 1
-  itemPrefab: {fileID: 0}
-  handItemPrefab: {fileID: 0}
+  itemPrefab: {fileID: 1752352189776943642, guid: 53e44d279923b9441b531cc46df7e77e, type: 3}

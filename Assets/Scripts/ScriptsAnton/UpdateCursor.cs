@@ -1,4 +1,3 @@
-using Obscure.SDC;
 using UnityEngine;
 
 /// <summary>
@@ -9,7 +8,7 @@ public class UpdateCursor : MonoBehaviour {
     [SerializeField] private Camera mainCamera;
     [SerializeField] private Player player;
     [SerializeField] private PlayerInputHandler playerInputHandler;
-    [SerializeField] private Crosshair crosshair;
+    [SerializeField] private RectTransform crosshair;
     [SerializeField] private bool cursorVisible = false;
     [SerializeField] private float cursorMinDistanceFromPlayer = 1f;
     [SerializeField] private float minRange = 0.8f;
@@ -30,8 +29,7 @@ public class UpdateCursor : MonoBehaviour {
         transform.position = UpdatePositionAroundPlayer(new Vector3(mouseWorldPos.x, Mathf.Clamp(mouseWorldPos.y, minRange, maxRange), mouseWorldPos.z));
 
         //Crosshair position vom Canvas anpassen
-        RectTransform crosshairPos = crosshair.GetComponent<RectTransform>();
-        crosshairPos.GetComponent<RectTransform>().position = playerInputHandler.MousePosition;
+        crosshair.GetComponent<RectTransform>().position = playerInputHandler.MousePosition;
     }
 
     private Vector3 UpdatePositionAroundPlayer(Vector3 targetPosition) {
