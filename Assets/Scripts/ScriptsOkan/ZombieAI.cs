@@ -103,7 +103,13 @@ public class ZombieAI : MonoBehaviour {
             }
         }
 
-        MoveTo(target.position);
+        // Objective-Health immer frisch holen
+        var objHealth = target.GetComponent<ObjectiveHealth>();
+        var sqrToObj = SqrDistFlat(transform.position, target.position);
+        if (sqrToObj <= enemyStatsSO.attackRange * enemyStatsSO.attackRange)
+            StopAndAttack(null, objHealth);
+        else
+            MoveTo(target.position);
     }
 
     /// <summary>
