@@ -4,23 +4,27 @@ public class Melee : MonoBehaviour {
 
     private bool isAttacking = false;
     private MeleeSO meleeSO;
-    private ParticleSystem hitParticle;
 
-    public void InitMeleeSO(MeleeSO meleeSO, ParticleSystem hitParticle) {
+
+    public void InitMeleeSO(MeleeSO meleeSO) {
         this.meleeSO = meleeSO;
-        this.hitParticle = hitParticle;
     }
 
-    private void OnTriggerEnter(Collider other) {
+    private void Update() {
         if (meleeSO.CanSwing() && isAttacking) {
-            ZombieAI zombie = other.transform.GetComponentInParent<ZombieAI>();
 
-            //Debug.Log(other);
+            Collider[] hits = Physics.OverlapSphere(transform.position, 0.7f);
 
-            if (zombie != null) {
-                if (!zombie.IsDead()) {
-                    zombie.TakeDamage(meleeSO.damage);
-                    //hitParticle.Play();
+            foreach (Collider hit in hits) {
+                ZombieAI zombie = hit.GetComponentInParent<ZombieAI>();
+                if (zombie != null) {
+                    if (!zombie.IsDead()) {
+                        zombie.TakeDamage(meleeSO.damage);
+
+                        StartCoroutine(meleeSO.PlayHitEffect(hit.transform.position));
+                        meleeSO.RecordSwing();
+                        break;
+                    }
                 }
             }
         }
@@ -29,4 +33,9 @@ public class Melee : MonoBehaviour {
     public void SetAttacking(bool isAttacking) {
         this.isAttacking = isAttacking;
     }
+
+    /* private void OnDrawGizmos() {
+        Gizmos.color = Color.red;
+        Gizmos.DrawSphere(transform.position, 0.7f);
+    } */
 }

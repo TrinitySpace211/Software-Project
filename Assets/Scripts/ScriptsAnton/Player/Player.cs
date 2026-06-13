@@ -91,11 +91,27 @@ public class Player : MonoBehaviour {
     #region Movement
 
     /// <summary>
-    /// Calculates the normalized Direction of the input.
+    /// Calculates the normalized Direction of the input relative to the camera's orientation.
+    /// This ensures that "forward" always means towards where the camera is looking.
     /// </summary>
-    /// <returns>The normalized Direction of the Movement input</returns>
-    private Vector3 CalculateWorldDirection() {
-        Vector3 inputDirection = new Vector3(playerInputHandler.MovementInput.x, 0f, playerInputHandler.MovementInput.y);
+    /// <returns>The normalized Direction of the Movement input in world space</returns>
+    public Vector3 CalculateWorldDirection() {
+        // Get camera's forward and right directions
+        Vector3 cameraForward = playerCamera.transform.forward;
+        Vector3 cameraRight = playerCamera.transform.right;
+
+        // Remove vertical component to keep movement on the ground plane
+        cameraForward.y = 0f;
+        cameraRight.y = 0f;
+
+        // Normalize to avoid diagonal movement being faster
+        cameraForward = cameraForward.normalized;
+        cameraRight = cameraRight.normalized;
+
+        // Build movement direction relative to camera orientation
+        Vector3 inputDirection = (cameraRight * playerInputHandler.MovementInput.x +
+                                  cameraForward * playerInputHandler.MovementInput.y);
+
         return inputDirection.normalized;
     }
 
@@ -272,10 +288,17 @@ public class Player : MonoBehaviour {
     #endregion
 
     #region Animation Event
+
+    /// <summary>
+    /// Used to allow a hit only at a certain point in the melee animations
+    /// </summary>
     private void MeleeIsAttacking() {
         weaponSelector.activeMelee.SetMeleeModelAttacking(true);
     }
 
+    /// <summary>
+    /// Does not allow to hit the enemy anymore if the animation was finished
+    /// </summary>
     private void MeleeIsNotAttacking() {
         weaponSelector.activeMelee.SetMeleeModelAttacking(false);
     }

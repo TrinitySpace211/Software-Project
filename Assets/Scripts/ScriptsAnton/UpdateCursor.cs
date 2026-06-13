@@ -11,8 +11,7 @@ public class UpdateCursor : MonoBehaviour {
     [SerializeField] private RectTransform crosshair;
     [SerializeField] private bool cursorVisible = false;
     [SerializeField] private float cursorMinDistanceFromPlayer = 1f;
-    [SerializeField] private float minRange = 0.8f;
-    [SerializeField] private float maxRange = 1.2f;
+    [SerializeField] private float yOffset = 1.5f;
 
     private void Start() {
         Cursor.visible = cursorVisible;
@@ -29,7 +28,7 @@ public class UpdateCursor : MonoBehaviour {
     private void LookAt() {
         //Bewegung des Objekts zum 3D-Raum der Maus
         Vector3 mouseWorldPos = player.GetMouseDirection();
-        transform.position = UpdatePositionAroundPlayer(new Vector3(mouseWorldPos.x, Mathf.Clamp(mouseWorldPos.y, minRange, maxRange), mouseWorldPos.z));
+        transform.position = UpdatePositionAroundPlayer(new Vector3(mouseWorldPos.x, yOffset, mouseWorldPos.z));
 
         //Crosshair position vom Canvas anpassen
         crosshair.GetComponent<RectTransform>().position = playerInputHandler.MousePosition;

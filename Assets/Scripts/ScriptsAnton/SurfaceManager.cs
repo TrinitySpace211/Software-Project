@@ -4,6 +4,11 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Pool;
 
+/// <summary>
+/// The Surface Manager can be used to play different 
+/// Object and Sound Effects like a Particle System and Impact Sounds 
+/// on different Textures that got hit by something (a Raycast or a Collider)
+/// </summary>
 public class SurfaceManager : MonoBehaviour {
     public static SurfaceManager Instance { get; private set; }
 
@@ -74,26 +79,6 @@ public class SurfaceManager : MonoBehaviour {
                         }
                     }
                 }
-
-                /*SurfaceType surfaceType = null;
-                if (renderer != null) {
-                    Texture activeTexture = GetActiveTextureFromRenderer(renderer, triangleIndex);
-                    surfaceType = surfacesTypes.Find(surface => surface.albedo == activeTexture);
-                }
-
-                if (surfaceType != null) {
-                    foreach (Surface.SurfaceImpactTypeEffect typeEffect in surfaceType.surface.impactTypeEffects) {
-                        if (typeEffect.impactType == impact) {
-                            PlayAudioOnlyEffects(hitPoint, typeEffect.surfaceEffect, 1);
-                        }
-                    }
-                } else {
-                    foreach (Surface.SurfaceImpactTypeEffect typeEffect in defaultSurface.impactTypeEffects) {
-                        if (typeEffect.impactType == impact) {
-                            PlayAudioOnlyEffects(hitPoint, typeEffect.surfaceEffect, 1);
-                        }
-                    }
-                } */
             } else {
                 Renderer renderer = hitObject.GetComponent<Renderer>();
                 if (renderer == null) {
@@ -230,7 +215,7 @@ public class SurfaceManager : MonoBehaviour {
     /// <param name="hitPoint">Position of the hit</param>
     /// <param name="hitNormal">the normal of the hit surface</param>
     /// <param name="surfaceEffect">ScriptableObject with the a list of object effects and sound effects</param>
-    /// <param name="soundOffset">random sound volume</param>
+    /// <param name="soundOffset">Sound Multiplier</param>
     private void PlayEffects(Vector3 hitPoint, Vector3 hitNormal, SurfaceEffect surfaceEffect, float soundOffset) {
         if (surfaceEffect.spawnObjectEffects.Count > 0) {
             foreach (SpawnObjectEffects spawnObjectEffect in surfaceEffect.spawnObjectEffects) {
@@ -251,24 +236,6 @@ public class SurfaceManager : MonoBehaviour {
                 }
             }
         }
-        foreach (PlayAudioEffect playAudioEffect in surfaceEffect.playAudioEffects) {
-            AudioClip clip = playAudioEffect.audioClips[Random.Range(0, playAudioEffect.audioClips.Count)];
-            ObjectPool pool = ObjectPool.CreateInstance(playAudioEffect.audioSourcePrefab.GetComponent<PoolableObject>(), defaultPoolSizes);
-            AudioSource audioSource = pool.GetObject().GetComponent<AudioSource>();
-
-            audioSource.transform.position = hitPoint;
-            audioSource.PlayOneShot(clip, soundOffset * Random.Range(playAudioEffect.volumeRange.x, playAudioEffect.volumeRange.y));
-            StartCoroutine(DisableAudioSource(audioSource, clip.length));
-        }
-    }
-
-    /// <summary>
-    /// Plays only audio without the impact effect
-    /// </summary>
-    /// <param name="hitPoint">Position of the hit</param>
-    /// <param name="surfaceEffect">ScriptableObject with the a list of object effects and sound effects</param>
-    /// <param name="soundOffset">random sound volume</param>
-    private void PlayAudioOnlyEffects(Vector3 hitPoint, SurfaceEffect surfaceEffect, float soundOffset) {
         foreach (PlayAudioEffect playAudioEffect in surfaceEffect.playAudioEffects) {
             AudioClip clip = playAudioEffect.audioClips[Random.Range(0, playAudioEffect.audioClips.Count)];
             ObjectPool pool = ObjectPool.CreateInstance(playAudioEffect.audioSourcePrefab.GetComponent<PoolableObject>(), defaultPoolSizes);

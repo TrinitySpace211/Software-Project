@@ -20,3 +20,4 @@ MonoBehaviour:
   attackSpeed: 1.5
   damage: 20
   swingVolume: 0.6
+  hitParticle: {fileID: 5391622811999901345, guid: 8f1cb69bbb9bc364598abadd54ef60e7, type: 3}

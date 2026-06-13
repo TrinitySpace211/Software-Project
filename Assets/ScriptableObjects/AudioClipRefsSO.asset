@@ -42,3 +42,14 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 2901e574db7bb7c4ea7253f22cbb6fb4, type: 3}
   - {fileID: 8300000, guid: a6a507248bcbdd04da8c8ae20021da04, type: 3}
   - {fileID: 8300000, guid: bcabe2e86bac2bf4d95a102117cfeeea, type: 3}
+  zombieHurt:
+  - {fileID: 8300000, guid: 7244c2022bfb99248a9feab2e8df771d, type: 3}
+  - {fileID: 8300000, guid: 1e0e06c241f75aa45baf3d0cf6a7e2e5, type: 3}
+  - {fileID: 8300000, guid: 41cd8168bd2a46c46a9aaa462ac51fef, type: 3}
+  zombieHurtVolume: 0.9
+  playerHurt:
+  - {fileID: 8300000, guid: e96f0ba57c8754c43ae69b509c5d352d, type: 3}
+  - {fileID: 8300000, guid: c80356b852407474ebeaced2c688fb05, type: 3}
+  playerHurtVolume: 0.25
+  playerDeath: {fileID: 8300000, guid: 1ad9ac127580a4c4993e31e52fc66849, type: 3}
+  playerDeathVolume: 1

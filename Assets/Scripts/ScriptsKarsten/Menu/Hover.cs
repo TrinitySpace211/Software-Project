@@ -8,6 +8,9 @@ using UnityEngine.UI;
 /// </summary>
 public class ButtonHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
 
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip selectSound;
+
     [SerializeField] private RectTransform buttonRoot;
     [SerializeField] private Image hoverOverlay;
 
@@ -58,6 +61,11 @@ public class ButtonHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
         if (buttonRoot != null)
             buttonRoot.localScale = hoverScale;
+
+        if (selectSound != null) {
+            audioSource.PlayOneShot(selectSound);
+        }
+
     }
 
     /// <summary>

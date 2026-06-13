@@ -2,6 +2,9 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Pool;
 
+/// <summary>
+/// Creates a Sciptable Object for the Guns with Logic so every Weapon is the same
+/// </summary>
 [CreateAssetMenu(fileName = "Gun", menuName = "Guns/Gun", order = 0)]
 public class GunSO : ScriptableObject {
 
@@ -23,7 +26,12 @@ public class GunSO : ScriptableObject {
     private ObjectPool<TrailRenderer> trailPool;
     private GameObject poolParent;
 
-    public void SpawnModel(Transform parent, MonoBehaviour activeMonoBehaviour) {
+    /// <summary>
+    /// Instantiates the Model of the Gun first then it will just turn it of and on
+    /// </summary>
+    /// <param name="parent">The Position of the Parent where it should spawn</param>
+    /// <param name="activeMonoBehaviour">The Instance which spawned the Weapon so that a Coroutine can be used</param>
+    public void Spawn(Transform parent, MonoBehaviour activeMonoBehaviour) {
         if (model == null) {
             this.activeMonoBehaviour = activeMonoBehaviour;
             lastShootTime = 0f;
@@ -33,11 +41,18 @@ public class GunSO : ScriptableObject {
             model.transform.SetParent(parent, false);
             model.transform.localPosition = spawnPoint;
             model.transform.localRotation = Quaternion.Euler(spawnRotation);
+        } else {
+            model.SetActive(true);
         }
-
         shootSystem = model.GetComponentInChildren<ParticleSystem>();
     }
 
+    /// <summary>
+    /// The Shoot Function which is played depending of the firerate.
+    /// It plays a Sound and Particle Effect at the Muzzle of the gun
+    /// When the Weapon shoots then it will Shoot a Raycast and if it hits then it will play the bullet trail normally,
+    /// otherwise the trail will be rendered until it reaches a certain duration
+    /// </summary>
     public void Shoot() {
         if (Time.time > shootConfigSO.fireRate + lastShootTime) {
             lastShootTime = Time.time;
@@ -123,13 +138,19 @@ public class GunSO : ScriptableObject {
         return trail;
     }
 
+    /// <summary>
+    /// Deactivates the Weapon and sets the shoot Particle to null
+    /// </summary>
     public void Despawn() {
-        // We do a bunch of other stuff on the same frame, so we really want it to be immediately destroyed, not at Unity's convenience.
         model.SetActive(false);
 
         shootSystem = null;
     }
 
+    /// <summary>
+    /// The Damage logic so Zombies can be damaged
+    /// </summary>
+    /// <param name="hit">The hit info of the Raycast</param>
     private void HitEnemy(RaycastHit hit) {
         ZombieAI zombie = hit.transform.GetComponentInParent<ZombieAI>();
 
@@ -140,29 +161,23 @@ public class GunSO : ScriptableObject {
         }
     }
 
-    public void Spawn(Transform parent, MonoBehaviour activeMonoBehaviour) {
-        if (model == null) {
-            SpawnModel(parent, activeMonoBehaviour);
-        } else {
-            model.SetActive(true);
-
-            shootSystem = model.GetComponentInChildren<ParticleSystem>();
-        }
-    }
-
+    /// <summary>
+    /// Plays the shoot Sound Effect depending on Weapon Type
+    /// </summary>
+    /// <param name="position">The Position it should be played at</param>
     private void ShootByWeaponType(Vector3 position) {
         switch (type) {
             case GunType.AssaultRifle:
-                WeaponSoundManager.Instance.AssaultRilfe_ShootSound(position, shootConfigSO.shootVolume);
+                SoundManager.Instance.AssaultRilfe_ShootSound(position, shootConfigSO.shootVolume);
                 break;
             case GunType.Pistol:
-                WeaponSoundManager.Instance.Pistol_ShootSound(position, shootConfigSO.shootVolume);
+                SoundManager.Instance.Pistol_ShootSound(position, shootConfigSO.shootVolume);
                 break;
             case GunType.Shotgun:
-                WeaponSoundManager.Instance.Shotgun_ShootSound(position, shootConfigSO.shootVolume);
+                SoundManager.Instance.Shotgun_ShootSound(position, shootConfigSO.shootVolume);
                 break;
             case GunType.Sniper:
-                WeaponSoundManager.Instance.Sniper_ShootSound(position, shootConfigSO.shootVolume);
+                SoundManager.Instance.Sniper_ShootSound(position, shootConfigSO.shootVolume);
                 break;
         }
 
