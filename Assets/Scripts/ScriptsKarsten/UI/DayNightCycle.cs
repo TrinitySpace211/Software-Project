@@ -165,6 +165,7 @@ public class DayNightCycle : MonoBehaviour {
         if (playerObject != null) {
             playerScript = playerObject.GetComponent<Player>();
         }
+        ShowNotification("Protect the Fuel Tank. Hold out until Night 10.");
     }
 
     /// <summary>
@@ -322,7 +323,7 @@ public class DayNightCycle : MonoBehaviour {
         notificationText.text = message;
         notificationText.gameObject.SetActive(true);
 
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(6f);
 
         notificationText.gameObject.SetActive(false);
     }
