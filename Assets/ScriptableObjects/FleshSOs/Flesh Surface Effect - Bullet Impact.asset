@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: Flesh Surface Effect - Bullet Impact
   m_EditorClassIdentifier: 
   spawnObjectEffects:
-  - {fileID: 11400000, guid: 9063826dcfc84924792a04cdb6167b97, type: 2}
   - {fileID: 11400000, guid: 4d5cceb1ccacd1e478bbc4b55910fb34, type: 2}
   playAudioEffects:
   - {fileID: 11400000, guid: a714c98053d469d4e9c76fbd50b6af57, type: 2}

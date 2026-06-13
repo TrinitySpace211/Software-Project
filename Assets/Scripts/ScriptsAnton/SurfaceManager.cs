@@ -1,8 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Pool;
 
+/// <summary>
+/// The Surface Manager can be used to play different 
+/// Object and Sound Effects like a Particle System and Impact Sounds 
+/// on different Textures that got hit by something (a Raycast or a Collider)
+/// </summary>
 public class SurfaceManager : MonoBehaviour {
     public static SurfaceManager Instance { get; private set; }
 
@@ -54,23 +60,22 @@ public class SurfaceManager : MonoBehaviour {
             ZombieAI zombie = hitObject.GetComponentInParent<ZombieAI>();
             if (zombie != null) {
                 Renderer renderer = zombie.GetComponentInChildren<SkinnedMeshRenderer>();
-
                 SurfaceType surfaceType = null;
+                Texture activeTexture = null;
                 if (renderer != null) {
-                    Texture activeTexture = GetActiveTextureFromRenderer(renderer, triangleIndex);
+                    activeTexture = GetActiveTextureFromRenderer(renderer, triangleIndex);
                     surfaceType = surfacesTypes.Find(surface => surface.albedo == activeTexture);
                 }
-
                 if (surfaceType != null) {
                     foreach (Surface.SurfaceImpactTypeEffect typeEffect in surfaceType.surface.impactTypeEffects) {
                         if (typeEffect.impactType == impact) {
-                            PlayAudioOnlyEffects(hitPoint, typeEffect.surfaceEffect, 1);
+                            PlayEffects(hitPoint, hitNormal, typeEffect.surfaceEffect, 1);
                         }
                     }
                 } else {
                     foreach (Surface.SurfaceImpactTypeEffect typeEffect in defaultSurface.impactTypeEffects) {
                         if (typeEffect.impactType == impact) {
-                            PlayAudioOnlyEffects(hitPoint, typeEffect.surfaceEffect, 1);
+                            PlayEffects(hitPoint, hitNormal, typeEffect.surfaceEffect, 1);
                         }
                     }
                 }
@@ -210,22 +215,24 @@ public class SurfaceManager : MonoBehaviour {
     /// <param name="hitPoint">Position of the hit</param>
     /// <param name="hitNormal">the normal of the hit surface</param>
     /// <param name="surfaceEffect">ScriptableObject with the a list of object effects and sound effects</param>
-    /// <param name="soundOffset">random sound volume</param>
+    /// <param name="soundOffset">Sound Multiplier</param>
     private void PlayEffects(Vector3 hitPoint, Vector3 hitNormal, SurfaceEffect surfaceEffect, float soundOffset) {
-        foreach (SpawnObjectEffects spawnObjectEffect in surfaceEffect.spawnObjectEffects) {
-            if (spawnObjectEffect.probability > Random.value) {
-                ObjectPool pool = ObjectPool.CreateInstance(spawnObjectEffect.prefab.GetComponent<PoolableObject>(), defaultPoolSizes);
-                PoolableObject instance = pool.GetObject(hitPoint + hitNormal * 0.001f, Quaternion.LookRotation(hitNormal));
+        if (surfaceEffect.spawnObjectEffects.Count > 0) {
+            foreach (SpawnObjectEffects spawnObjectEffect in surfaceEffect.spawnObjectEffects) {
+                if (spawnObjectEffect.probability > Random.value) {
+                    ObjectPool pool = ObjectPool.CreateInstance(spawnObjectEffect.prefab.GetComponent<PoolableObject>(), defaultPoolSizes);
+                    PoolableObject instance = pool.GetObject(hitPoint + hitNormal * 0.001f, Quaternion.LookRotation(hitNormal));
 
-                instance.transform.forward = hitNormal;
-                if (spawnObjectEffect.randomizeRotation) {
+                    instance.transform.forward = hitNormal;
+                    if (spawnObjectEffect.randomizeRotation) {
 
-                    Vector3 offset = new Vector3(
-                        Random.Range(0, 180 * spawnObjectEffect.randomizedRotationMultiplier.x),
-                        Random.Range(0, 180 * spawnObjectEffect.randomizedRotationMultiplier.y),
-                        Random.Range(0, 180 * spawnObjectEffect.randomizedRotationMultiplier.z)
-                    );
-                    instance.transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles + offset);
+                        Vector3 offset = new Vector3(
+                            Random.Range(0, 180 * spawnObjectEffect.randomizedRotationMultiplier.x),
+                            Random.Range(0, 180 * spawnObjectEffect.randomizedRotationMultiplier.y),
+                            Random.Range(0, 180 * spawnObjectEffect.randomizedRotationMultiplier.z)
+                        );
+                        instance.transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles + offset);
+                    }
                 }
             }
         }
@@ -240,24 +247,20 @@ public class SurfaceManager : MonoBehaviour {
         }
     }
 
-    private void PlayAudioOnlyEffects(Vector3 hitPoint, SurfaceEffect surfaceEffect, float soundOffset) {
-        foreach (PlayAudioEffect playAudioEffect in surfaceEffect.playAudioEffects) {
-            AudioClip clip = playAudioEffect.audioClips[Random.Range(0, playAudioEffect.audioClips.Count)];
-            ObjectPool pool = ObjectPool.CreateInstance(playAudioEffect.audioSourcePrefab.GetComponent<PoolableObject>(), defaultPoolSizes);
-            AudioSource audioSource = pool.GetObject().GetComponent<AudioSource>();
-
-            audioSource.transform.position = hitPoint;
-            audioSource.PlayOneShot(clip, soundOffset * Random.Range(playAudioEffect.volumeRange.x, playAudioEffect.volumeRange.y));
-            StartCoroutine(DisableAudioSource(audioSource, clip.length));
-        }
-    }
-
+    /// <summary>
+    /// Disables the Sound after "time" in seconds has past
+    /// </summary>
+    /// <param name="audioSource">the audio source</param>
+    /// <param name="Time">the time before the sound gets disabled</param>
     private IEnumerator DisableAudioSource(AudioSource audioSource, float Time) {
         yield return new WaitForSeconds(Time);
 
         audioSource.gameObject.SetActive(false);
     }
 
+    /// <summary>
+    /// Has the alpha and the Texture
+    /// </summary>
     private class TextureAlpha {
         public float alpha;
         public Texture texture;

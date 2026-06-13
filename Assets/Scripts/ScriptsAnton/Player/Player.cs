@@ -9,7 +9,8 @@ using UnityEngine.Animations.Rigging;
 /// The inputs will be handled in the "PlayerInputHandler" Script.
 /// </summary>
 [DefaultExecutionOrder(-1), DisallowMultipleComponent]
-public class Player : MonoBehaviour {
+public class Player : MonoBehaviour
+{
 
     #region Class Variables
     [Header("References")]
@@ -21,9 +22,14 @@ public class Player : MonoBehaviour {
     [SerializeField] private LayerMask layerMask;
     [SerializeField] private Rig aimLayer;
     [SerializeField] private BaseStats baseStats;
-    [SerializeField] private PlayerGunSelector gunSelector;
+    [SerializeField] private PlayerWeaponSelector weaponSelector;
     [SerializeField] private CurrentPlayerState playerState;
     [SerializeField] private PlayerIK playerIK;
+
+    [Header("Footsteps Reference")]
+    [SerializeField] private ImpactType impactType;
+    [SerializeField, Range(0, 1)] private float footstepSoundSpeed;
+    [SerializeField] private float footstepSprintOffset = 0.5f;
 
     [Header("Movement Parameters")]
     [SerializeField] private float walkSpeed = 4f;
@@ -54,10 +60,13 @@ public class Player : MonoBehaviour {
     private bool isWalking;
     private bool isMovingLaterally;
     private bool isSprinting;
+    private float lastFootPlaced = 0f;
     #endregion
 
-    private void Start() {
-        currentPlayerStats = new PlayerStats {
+    private void Start()
+    {
+        currentPlayerStats = new PlayerStats
+        {
             maxHealth = baseStats.health,
             armor = baseStats.armor
         };
@@ -65,15 +74,19 @@ public class Player : MonoBehaviour {
         playerInputHandler.OnReloadAction += PlayerInputHandler_OnReloadAction;
     }
 
-    private void Update() {
-        if (!playerHealth.GetIsDead()) {
+    private void Update()
+    {
+        if (!playerHealth.GetIsDead())
+        {
             UpdateMovementState();
             HandleMovement();
             HandleAiming();
 
             HandleShooting();
             HandleReloadFinished();
+            HandleMeleeAttack();
         }
+
     }
 
     /// <summary>
@@ -81,13 +94,16 @@ public class Player : MonoBehaviour {
     /// </summary>
     /// <param name="playerInputHandler">Needs the PlayerInputHandler class so the Movement can be calculated</param>
     /// <param name="playerCamera">Needs the Main Camera to calculate the Mouse Direction</param>
-    public void Construct(PlayerInputHandler playerInputHandler, Camera playerCamera) {
+    public void Construct(PlayerInputHandler playerInputHandler, Camera playerCamera)
+    {
         this.playerInputHandler = playerInputHandler;
         this.playerCamera = playerCamera;
     }
 
-    private void PlayerInputHandler_OnReloadAction(object sender, EventArgs e) {
-        if (!playerHealth.GetIsDead()) {
+    private void PlayerInputHandler_OnReloadAction(object sender, EventArgs e)
+    {
+        if (!playerHealth.GetIsDead())
+        {
             HandleReloadButton();
         }
     }
@@ -95,11 +111,28 @@ public class Player : MonoBehaviour {
     #region Movement
 
     /// <summary>
-    /// Calculates the normalized Direction of the input.
+    /// Calculates the normalized Direction of the input relative to the camera's orientation.
+    /// This ensures that "forward" always means towards where the camera is looking.
     /// </summary>
-    /// <returns>The normalized Direction of the Movement input</returns>
-    private Vector3 CalculateWorldDirection() {
-        Vector3 inputDirection = new Vector3(playerInputHandler.MovementInput.x, 0f, playerInputHandler.MovementInput.y);
+    /// <returns>The normalized Direction of the Movement input in world space</returns>
+    public Vector3 CalculateWorldDirection()
+    {
+        // Get camera's forward and right directions
+        Vector3 cameraForward = playerCamera.transform.forward;
+        Vector3 cameraRight = playerCamera.transform.right;
+
+        // Remove vertical component to keep movement on the ground plane
+        cameraForward.y = 0f;
+        cameraRight.y = 0f;
+
+        // Normalize to avoid diagonal movement being faster
+        cameraForward = cameraForward.normalized;
+        cameraRight = cameraRight.normalized;
+
+        // Build movement direction relative to camera orientation
+        Vector3 inputDirection = (cameraRight * playerInputHandler.MovementInput.x +
+                                  cameraForward * playerInputHandler.MovementInput.y);
+
         return inputDirection.normalized;
     }
 
@@ -109,10 +142,12 @@ public class Player : MonoBehaviour {
     /// If it hit something, that new point will be the position the Player has to rotate to.
     /// </summary>
     /// <returns>A Vector3 with the Position where the Mouse is pointing at </returns>
-    private Vector3 CalculateMouseDirection() {
+    private Vector3 CalculateMouseDirection()
+    {
         Ray ray = playerCamera.ScreenPointToRay(playerInputHandler.MousePosition);
 
-        if (Physics.Raycast(ray, out RaycastHit hit, 50f, layerMask)) {
+        if (Physics.Raycast(ray, out RaycastHit hit, 50f, layerMask))
+        {
             worldMousePos = hit.point;
             return worldMousePos;
         }
@@ -125,77 +160,126 @@ public class Player : MonoBehaviour {
     /// When the Player is sprinting then the Player will turn to the Move direction otherwise to Mouse direction
     /// The Movement for the next frame will be calculated via CharacterController.Move()
     /// </summary>
-    private void HandleMovement() {
+    private void HandleMovement()
+    {
+        //Calculation of the current Player Direction multiplied with the current Speed (Walk Speed or Sprint Speed)
         Vector3 worldDirectionNorm = CalculateWorldDirection();
         currentMovement.x = worldDirectionNorm.x * currentSpeed;
         currentMovement.z = worldDirectionNorm.z * currentSpeed;
 
-        Vector3 mouseDir = CalculateMouseDirection();
+        //Mouse Position in the World
+        Vector3 mousePos = CalculateMouseDirection();
 
-        //Blickrichtung ist die Position von der Maus subtrahiert mit der Position des Players 
-        Vector3 lookDir = mouseDir - transform.position;
+        //Direction of the mouse subtracted from the player position
+        Vector3 lookDir = mousePos - transform.position;
         lookDir.y = 0f;
 
-        //Blickrichtung zur Bewegungsrichtung
+        //Direction of the Movement Input
         Vector3 moveDir = new Vector3(currentMovement.x, 0f, currentMovement.z);
 
-        //Wenn der Spieler sprintet, dann dreht sich der Spieler zum Bewegungsrichtung, sonst zur Mausrichtung
+        //If the Player is sprinting, then the player will turn to the move direction, otherwise the player will look to the mouse
         UpdatePlayerRotation(moveDir, lookDir);
 
+        //Moves the Character
         characterController.Move(currentMovement * Time.deltaTime);
+
+        // Footstep Sound
+        float walkFootstepDelay = 1f / walkSpeed * footstepSoundSpeed;
+        float sprintFootstepDelay = 1f / (walkSpeed * sprintMultipier) * footstepSprintOffset;
+
+        if (playerInputHandler.MovementInput != Vector2.zero)
+        {
+            if (!isSprinting && Time.time > walkFootstepDelay + lastFootPlaced)
+            {
+                lastFootPlaced = Time.time;
+                if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 0.2f, layerMask))
+                {
+                    SurfaceManager.Instance.HandleImpact(hit.transform.gameObject, hit.point, hit.normal, impactType, hit.triangleIndex);
+                }
+            }
+            else if (isSprinting && Time.time > sprintFootstepDelay + lastFootPlaced)
+            {
+                lastFootPlaced = Time.time;
+                if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 0.2f, layerMask))
+                {
+                    SurfaceManager.Instance.HandleImpact(hit.transform.gameObject, hit.point, hit.normal, impactType, hit.triangleIndex);
+                }
+            }
+        }
     }
 
-    private void UpdatePlayerRotation(Vector3 moveDir, Vector3 lookDir) {
-        if (moveDir.sqrMagnitude > 0.1f && (isSprinting || !playerIK.GetHasWeapon())) {
+    private void UpdatePlayerRotation(Vector3 moveDir, Vector3 lookDir)
+    {
+        if (moveDir.sqrMagnitude > 0.1f && (isSprinting || (!playerIK.GetHasWeapon() && !playerIK.GetHasOneHanded())))
+        {
             RotatePlayerToTarget(moveDir, rotationMoveDirAmount);
-        } else if (lookDir.sqrMagnitude > 0.1f && !isSprinting && playerIK.GetHasWeapon()) {
+        }
+        else if (lookDir.sqrMagnitude > 0.1f && !isSprinting && (playerIK.GetHasWeapon() || playerIK.GetHasOneHanded()))
+        {
             RotatePlayerToTarget(lookDir, rotationMouseDirAmount);
         }
     }
 
-    private void RotatePlayerToTarget(Vector3 direction, float dirAmount) {
+    private void RotatePlayerToTarget(Vector3 direction, float dirAmount)
+    {
         Quaternion targetRotation = Quaternion.LookRotation(direction);
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, dirAmount * Time.deltaTime);
     }
+    #endregion
 
+    #region Weapon Aiming, Shooting & Melee Attack 
     /// <summary>
     /// Handles the Aiming of the Player by increasing/decreasing the weight of the Rig Layer
     /// It switches from RigLayer_WeaponPose to RigLayer_WeaponAiming
     /// </summary>
-    private void HandleAiming() {
-        if (alwaysAiming) {
+    private void HandleAiming()
+    {
+        if (alwaysAiming)
+        {
             //Debug
             aimLayer.weight = 1;
             playerAnimation.SetAimAnimation(true);
-        } else {
-            if (playerInputHandler.AimingTriggered && !isSprinting && playerIK.GetHasWeapon() && !playerAnimation.GetIsReloading()) {
+        }
+        else
+        {
+            if (playerInputHandler.AimingTriggered && !isSprinting && playerIK.GetHasWeapon() && weaponSelector.activeGun != null && !playerAnimation.GetIsReloading())
+            {
                 aimLayer.weight += Time.deltaTime / aimDuration;
                 playerAnimation.SetAimAnimation(true);
-            } else {
+            }
+            else
+            {
                 aimLayer.weight -= Time.deltaTime / aimDuration;
                 playerAnimation.SetAimAnimation(false);
             }
         }
     }
 
-    private void HandleShooting() {
-        if (playerInputHandler.AttackTriggered && playerInputHandler.AimingTriggered) {
-            if (gunSelector.activeGun != null) {
-                gunSelector.activeGun.Shoot();
+    /// <summary>
+    /// When the Player has a gun and is pressing right click (aim) and left click (shoot) the gun will shoot
+    /// </summary>
+    private void HandleShooting()
+    {
+        if (playerInputHandler.AttackTriggered && playerInputHandler.AimingTriggered && weaponSelector.activeGun != null)
+        {
+            weaponSelector.activeGun.Shoot();
 
-                if (gunSelector.activeGun.GetEmptyMagazine() && !playerAnimation.GetIsReloading()) {
-                    setupWeaponParent = playerIK.GetParent();
-                    gunSelector.ClearSetupCurrentWeapon();
-                    playerAnimation.SetReloadTrigger();
-                    playerAnimation.StartReloading();
-                }
+            if (weaponSelector.activeGun.GetEmptyMagazine() && !playerAnimation.GetIsReloading())
+            {
+                setupWeaponParent = playerIK.GetParent();
+                weaponSelector.ClearSetupCurrentWeapon();
+                playerAnimation.SetReloadTrigger();
+                playerAnimation.StartReloading();
             }
         }
     }
 
-    private void HandleReloadButton() {
-        if (gunSelector.activeGun != null) {
-            if (!gunSelector.activeGun.MagazineIsFull() && !playerAnimation.GetIsReloading()) {
+    private void HandleReloadButton()
+    {
+        if (gunSelector.activeGun != null)
+        {
+            if (!gunSelector.activeGun.MagazineIsFull() && !playerAnimation.GetIsReloading())
+            {
                 setupWeaponParent = playerIK.GetParent();
                 gunSelector.ClearSetupCurrentWeapon();
                 playerAnimation.SetReloadTrigger();
@@ -204,10 +288,14 @@ public class Player : MonoBehaviour {
         }
     }
 
-    private void HandleReloadFinished() {
-        if (gunSelector.activeGun != null) {
-            if (setupWeaponParent != null) {
-                if ((!gunSelector.activeGun.GetEmptyMagazine() || !gunSelector.activeGun.MagazineIsFull()) && !playerAnimation.GetIsReloading()) {
+    private void HandleReloadFinished()
+    {
+        if (gunSelector.activeGun != null)
+        {
+            if (setupWeaponParent != null)
+            {
+                if ((!gunSelector.activeGun.GetEmptyMagazine() || !gunSelector.activeGun.MagazineIsFull()) && !playerAnimation.GetIsReloading())
+                {
                     gunSelector.SetupCurrentWeapon(setupWeaponParent);
                     setupWeaponParent = null;
                 }
@@ -218,9 +306,39 @@ public class Player : MonoBehaviour {
     #endregion
 
     /// <summary>
+    /// When the Player has a melee and is pressing left click (attack) the player swings the weapon 
+    /// based on if it is a one handed or two handed
+    /// </summary>
+    private void HandleMeleeAttack()
+    {
+        if (playerInputHandler.AttackTriggered)
+        {
+            MeleeSO melee = weaponSelector.activeMelee;
+            if (melee != null)
+            {
+                if (melee.weaponSlot == WeaponSlot.MeleeOneHanded && melee.CanSwing())
+                {
+                    melee.RecordSwing();
+                    playerAnimation.SetOneHandMeleeAttack();
+                    playerAnimation.SetMeleeAttackSpeed(melee.attackSpeed);
+                }
+                else if (melee.weaponSlot == WeaponSlot.MeleeTwoHanded && melee.CanSwing())
+                {
+                    melee.RecordSwing();
+                    playerAnimation.SetTwoHandMeleeAttack();
+                    playerAnimation.SetMeleeAttackSpeed(melee.attackSpeed);
+                }
+            }
+        }
+    }
+
+
+    #region State Checks
+    /// <summary>
     /// Updates the State of the Player Movement not the Movement itself
     /// </summary>
-    private void UpdateMovementState() {
+    private void UpdateMovementState()
+    {
         //Wenn der Input sich ändert, dann bewegt sich der Spieler
         isWalking = playerInputHandler.MovementInput != Vector2.zero;
         isMovingLaterally = IsMovingLaterally();
@@ -231,13 +349,12 @@ public class Player : MonoBehaviour {
         playerState.SetPlayerMovementState(lateralState);
     }
 
-    #region State Checks
-
     /// <summary>
     /// Checks if the Player moves
     /// </summary>
     /// <returns>True when the Player moves, false if he stands still</returns>
-    public bool IsWalking() {
+    public bool IsWalking()
+    {
         return isWalking;
     }
 
@@ -245,7 +362,8 @@ public class Player : MonoBehaviour {
     /// Checks the Players current Movement
     /// </summary>
     /// <returns>True if the Player moved in the last frame and false if he stands still</returns>
-    public bool IsMovingLaterally() {
+    public bool IsMovingLaterally()
+    {
         Vector3 lateralMovement = new Vector3(currentMovement.x, 0f, currentMovement.z);
         return lateralMovement.magnitude > movingThreshold;
     }
@@ -254,38 +372,65 @@ public class Player : MonoBehaviour {
     /// Checks if the Player is pressing the Sprint key and if he moves
     /// </summary>
     /// <returns>True while he is in the Sprinting state, false otherwise</returns>
-    public bool IsSprinting() {
+    public bool IsSprinting()
+    {
         return isSprinting;
+    }
+    #endregion
+
+    #region Animation Event
+
+    /// <summary>
+    /// Used to allow a hit only at a certain point in the melee animations
+    /// </summary>
+    private void MeleeIsAttacking()
+    {
+        weaponSelector.activeMelee.SetMeleeModelAttacking(true);
+    }
+
+    /// <summary>
+    /// Does not allow to hit the enemy anymore if the animation was finished
+    /// </summary>
+    private void MeleeIsNotAttacking()
+    {
+        weaponSelector.activeMelee.SetMeleeModelAttacking(false);
     }
     #endregion
 
     #region Setter and Getter
 
-    public Vector3 GetMouseDirection() {
+    public Vector3 GetMouseDirection()
+    {
         return worldMousePos;
     }
 
-    public Vector3 GetCurrentPlayerMovement() {
+    public Vector3 GetCurrentPlayerMovement()
+    {
         return currentMovement;
     }
 
-    public float GetCurrentSpeed() {
+    public float GetCurrentSpeed()
+    {
         return currentSpeed;
     }
 
-    public float GetAimLayerWeight() {
+    public float GetAimLayerWeight()
+    {
         return aimLayer.weight;
     }
 
-    public CurrentPlayerState GetCurrentPlayerState() {
+    public CurrentPlayerState GetCurrentPlayerState()
+    {
         return playerState;
     }
 
-    public PlayerIK GetPlayerIK() {
+    public PlayerIK GetPlayerIK()
+    {
         return playerIK;
     }
-    public PlayerGunSelector GetPlayerGunSelector() {
-        return gunSelector;
+    public PlayerWeaponSelector GetPlayerGunSelector()
+    {
+        return weaponSelector;
     }
     #endregion
 
