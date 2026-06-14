@@ -30,9 +30,32 @@ public class NPCDialog : MonoBehaviour {
     public GameObject towerPrefab;
 
     /// <summary>
-    /// The position and rotation where the tower should be spawned.
+    /// Spawn points where towers can be built.
+    /// Each tower is placed at the next free spawn point.
     /// </summary>
-    public Transform towerSpawnPoint;
+    public Transform[] towerSpawnPoints;
+
+    /// <summary>
+    /// Text element that displays how many towers have already been built.
+    /// </summary>
+    public TMP_Text builtTowerText;
+
+    /// <summary>
+    /// Text element inside the tower warning box.
+    /// It displays why the tower cannot be built, for example not enough scrap or maximum towers reached.
+    /// </summary>
+    public TMP_Text towerWarningText;
+
+    /// <summary>
+    /// Number of towers that have already been built.
+    /// This is used to select the next spawn point.
+    /// </summary>
+    private int builtTowerCount = 0;
+
+    /// <summary>
+    /// Maximum number of towers that can be built.
+    /// </summary>
+    private const int maxTowerCount = 8;
 
     /// <summary>
     /// True while the NPC dialog is open.
@@ -327,6 +350,11 @@ public class NPCDialog : MonoBehaviour {
                 towerDamageText.text = "?";
             }
 
+            if (builtTowerText != null) {
+                // Show how many towers have already been built.
+                builtTowerText.text = "" + builtTowerCount + " / " + maxTowerCount;
+            }
+
             // Show the warning box because building is not possible.
             warningBox.SetActive(true);
 
@@ -339,8 +367,16 @@ public class NPCDialog : MonoBehaviour {
         // Get the current amount of scrap from the player's inventory.
         int currentScrap = playerInventory.GetItemAmount(scrapItem);
 
-        // Check if the player has enough scrap to build the tower.
+        // Check if another tower can still be built.
+        // This is only true while the number of built towers is below the maximum tower count.
+        bool canBuildMoreTowers = builtTowerCount < maxTowerCount;
+
+        // Check if the player has enough scrap to pay the tower cost.
         bool hasEnoughScrap = currentScrap >= scrapCost;
+
+        // The tower can only be built if the player has enough scrap
+        // and the maximum tower amount has not been reached yet.
+        bool canBuildTower = hasEnoughScrap && canBuildMoreTowers;
 
         // Show current scrap amount and required scrap cost.
         scrapAmountText.text = "SCRAP: " + currentScrap + " / " + scrapCost;
@@ -353,11 +389,37 @@ public class NPCDialog : MonoBehaviour {
             towerDamageText.text = "?";
         }
 
-        // Show the warning box only if the player does not have enough scrap.
-        warningBox.SetActive(!hasEnoughScrap);
+        if (builtTowerText != null) {
+            // Show how many towers have already been built.
+            builtTowerText.text = "" + builtTowerCount + " / " + maxTowerCount;
+        }
 
-        // Enable the build button only if the player has enough scrap.
-        buildTowerButton.interactable = hasEnoughScrap;
+        // Clear the warning text before creating a new warning message.
+        towerWarningText.text = "";
+
+        // Add a warning message if the player does not have enough scrap.
+        if (!hasEnoughScrap) {
+            towerWarningText.text += "NOT ENOUGH RESOURCES";
+        }
+
+        // Add a warning message if the maximum tower amount has been reached.
+        if (!canBuildMoreTowers) {
+            // If there is already another warning message,
+            // add a line break before adding the next message.
+            if (towerWarningText.text != "") {
+                towerWarningText.text += "\n";
+            }
+
+            // Add the tower limit warning message.
+            towerWarningText.text += "MAX TOWERS REACHED";
+        }
+
+        // Show the warning box only if the player does not have enough scrap.
+        warningBox.SetActive(!canBuildTower);
+
+        // Enable the build button only if the player has enough scrap
+        // and the maximum tower count has not been reached.
+        buildTowerButton.interactable = canBuildTower;
         }
 
     /// <summary>
@@ -370,6 +432,16 @@ public class NPCDialog : MonoBehaviour {
             Debug.LogError("Inventory oder Scrap Item fehlt!");
             return;
         }
+
+        if (builtTowerCount >= maxTowerCount || builtTowerCount >= towerSpawnPoints.Length) {
+            // Stop if all possible tower positions are already used.
+            Debug.Log("Maximale Anzahl an Towern erreicht.");
+            UpdateTowerInfo();
+            return;
+        }
+
+        // Get the next free spawn point.
+        Transform selectedSpawnPoint = towerSpawnPoints[builtTowerCount];
 
         // Check if the player has enough scrap to build the tower.
         if (!playerInventory.HasItemAmount(scrapItem, scrapCost)) {
@@ -385,8 +457,11 @@ public class NPCDialog : MonoBehaviour {
         // Remove the required scrap amount from the player's inventory.
         playerInventory.RemoveItem(scrapItem, scrapCost);
 
-        // Create a tower at the spawn point position and rotation
-        Instantiate(towerPrefab, towerSpawnPoint.position, towerSpawnPoint.rotation);
+        // Create a tower at the selected spawn point position and rotation.
+        Instantiate(towerPrefab, selectedSpawnPoint.position, selectedSpawnPoint.rotation);
+
+        // Increase the built tower count so the next tower uses the next spawn point.
+        builtTowerCount++;
 
         // Update the tower info panel after the scrap amount has changed.
         UpdateTowerInfo();
