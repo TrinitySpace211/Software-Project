@@ -1,7 +1,8 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "ShootConfigSO", menuName = "Guns/Shoot Config SO", order = 2)]
-public class ShootConfigSO : ScriptableObject {
+public class ShootConfigSO : ScriptableObject
+{
 
     public LayerMask hitMask;
     public Vector3 spread = new Vector3(0.1f, 0.1f, 0.1f);
@@ -9,4 +10,5 @@ public class ShootConfigSO : ScriptableObject {
     public float bulletsPerShoot;
     public int damage;
     public int maxAmmo;
+    public float shootVolume;
 }

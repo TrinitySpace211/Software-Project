@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   surfacesTypes:
-  - albedo: {fileID: 2800000, guid: a1abab6643db8bd40b559182c80c44a8, type: 3}
+  - albedo: {fileID: 2800000, guid: ca94e88c35119b24591251b735dd682e, type: 3}
     surface: {fileID: 11400000, guid: 8f5f080832ebdcd40a553d7f4f77f7d2, type: 2}
   - albedo: {fileID: 2800000, guid: 102ea5ea47d624b4496c1827a0020c8c, type: 3}
     surface: {fileID: 11400000, guid: 7b1352bf697ac4a4f9a58a7fa5714fef, type: 2}
@@ -53,5 +53,13 @@ MonoBehaviour:
     surface: {fileID: 11400000, guid: 8e575d42e1e3bca41ad2e9a9a065eeba, type: 2}
   - albedo: {fileID: 2800000, guid: 7358ca1faef36e84a9b6fb431af5fc8d, type: 3}
     surface: {fileID: 11400000, guid: 7b1352bf697ac4a4f9a58a7fa5714fef, type: 2}
+  - albedo: {fileID: 2800000, guid: 7358ca1faef36e84a9b6fb431af5fc8d, type: 3}
+    surface: {fileID: 11400000, guid: 5ede3ae50440db84cbfb1b5fb1f33fe6, type: 2}
+  - albedo: {fileID: 2800000, guid: b5d6ea746cf26e04dafb3c3c7876a343, type: 3}
+    surface: {fileID: 11400000, guid: 5ede3ae50440db84cbfb1b5fb1f33fe6, type: 2}
+  - albedo: {fileID: 2800000, guid: 102ea5ea47d624b4496c1827a0020c8c, type: 3}
+    surface: {fileID: 11400000, guid: 67b047c4d9c44a9478508130fdd2abc4, type: 2}
+  - albedo: {fileID: 2800000, guid: 7407d73a62bba1a4b8b183b3caf851c3, type: 3}
+    surface: {fileID: 11400000, guid: f0e83e94d3f64484ca414a487d5aa04a, type: 2}
   defaultPoolSizes: 10
   defaultSurface: {fileID: 11400000, guid: fc67312ea14e028488f6acb3938966a6, type: 2}

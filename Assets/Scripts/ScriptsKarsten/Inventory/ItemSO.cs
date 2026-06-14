@@ -1,5 +1,13 @@
 using UnityEngine;
 
+public enum ItemType {
+    None,
+    Gun,
+    Melee,
+    Consumable,
+    Misc
+}
+
 /// <summary>
 /// Represents an item definition stored as a ScriptableObject.
 /// Contains item-related data such as visuals, stack size,
@@ -7,6 +15,9 @@ using UnityEngine;
 /// </summary>
 [CreateAssetMenu(fileName = "Item", menuName = "NewItem")]
 public class ItemSO : ScriptableObject {
+    public ItemType itemType;
+    public GunType gunType;
+    public MeleeType meleeType;
     /// <summary>
     /// The display name of the item.
     /// </summary>

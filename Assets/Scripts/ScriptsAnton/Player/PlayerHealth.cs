@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -14,13 +15,16 @@ public class PlayerHealth : MonoBehaviour {
     private HealthBar healthBar;
     private PlayerAnimation playerAnimation;
     private PlayerIK playerIK;
-    private PlayerGunSelector playerGunSelector;
+    private PlayerWeaponSelector playerGunSelector;
     private Animator animator;
 
     /// <summary>
     /// Gets the player stats reference.
     /// </summary>
     public PlayerStats stats => playerStats;
+
+    public static Action<Vector3> OnTakeDamage;
+    public static Action<Vector3> OnDeath;
 
     private void Start() {
         if (baseStats == null) {
@@ -40,7 +44,7 @@ public class PlayerHealth : MonoBehaviour {
         }
 
         if (playerGunSelector == null) {
-            playerGunSelector = GetComponent<PlayerGunSelector>();
+            playerGunSelector = GetComponent<PlayerWeaponSelector>();
         }
 
         playerStats = new PlayerStats {
@@ -49,7 +53,7 @@ public class PlayerHealth : MonoBehaviour {
             armor = baseStats.armor
         };
 
-        healthBar = Object.FindFirstObjectByType<HealthBar>();
+        healthBar = FindFirstObjectByType<HealthBar>();
         if (healthBar != null)
             healthBar.Initialize(playerStats);
     }
@@ -65,6 +69,8 @@ public class PlayerHealth : MonoBehaviour {
         }
 
         float finalDamage = Mathf.Max(0, damage - playerStats.armor);
+
+        OnTakeDamage?.Invoke(transform.position);
 
         playerStats.currentHealth -= finalDamage;
         playerStats.currentHealth = Mathf.Clamp(playerStats.currentHealth, 0, playerStats.maxHealth);
@@ -90,7 +96,8 @@ public class PlayerHealth : MonoBehaviour {
             playerAnimation.SetDyingTrigger();
         }
 
-        deathScreen.ShowDeathScreen(dayNightCycle.SurvivedNights);
+        OnDeath?.Invoke(transform.position);
+        //deathScreen.ShowDeathScreen(dayNightCycle.SurvivedNights);
     }
 
     public bool GetIsDead() {
