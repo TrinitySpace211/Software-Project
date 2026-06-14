@@ -1364,10 +1364,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 630836307}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -211, y: -390}
+  m_SizeDelta: {x: 1500, y: 300}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &654316765
 MonoBehaviour:
@@ -1382,7 +1382,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.50980395}
+  m_Color: {r: 0.13207549, g: 0.13207549, b: 0.13207549, a: 0.9529412}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -2624,14 +2624,14 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 56
-  m_fontSizeBase: 56
+  m_fontSize: 36
+  m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 17
-  m_HorizontalAlignment: 2
+  m_HorizontalAlignment: 1
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -2663,7 +2663,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 25.728516, y: 0, z: 445.09595, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -2693,7 +2693,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: 4}
+  m_AnchoredPosition: {x: 0, y: -390}
   m_SizeDelta: {x: 1920, y: 1080}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!4 &1754680684 stripped
@@ -3107,6 +3107,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1984383734}
     - target: {fileID: 582196051590256123, guid: 79f7817e938e3de45b8dfd67d1d9060c, type: 3}
+      propertyPath: messageDelay
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 582196051590256123, guid: 79f7817e938e3de45b8dfd67d1d9060c, type: 3}
       propertyPath: playerObject
       value: 
       objectReference: {fileID: 185319823}
@@ -3118,6 +3122,50 @@ PrefabInstance:
       propertyPath: playerAnimator
       value: 
       objectReference: {fileID: 185319824}
+    - target: {fileID: 582196051590256123, guid: 79f7817e938e3de45b8dfd67d1d9060c, type: 3}
+      propertyPath: playerMoveSpeed
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 582196051590256123, guid: 79f7817e938e3de45b8dfd67d1d9060c, type: 3}
+      propertyPath: tutorialMessages.Array.size
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 582196051590256123, guid: 79f7817e938e3de45b8dfd67d1d9060c, type: 3}
+      propertyPath: 'tutorialMessages.Array.data[0]'
+      value: "You made it out of the tunnel. The city ahead is silent\u2026 but not
+        empty.  "
+      objectReference: {fileID: 0}
+    - target: {fileID: 582196051590256123, guid: 79f7817e938e3de45b8dfd67d1d9060c, type: 3}
+      propertyPath: 'tutorialMessages.Array.data[1]'
+      value: "A final transmission warned you: in ten days, a rescue helicopter will
+        arrive. But only if the city\u2019s fuel tank is still intact. It\u2019s
+        the last refueling point in range. If it\u2019s destroyed, the helicopter
+        can\u2019t reach you or make it back.  "
+      objectReference: {fileID: 0}
+    - target: {fileID: 582196051590256123, guid: 79f7817e938e3de45b8dfd67d1d9060c, type: 3}
+      propertyPath: 'tutorialMessages.Array.data[2]'
+      value: "You\u2019re not alone. Someone else survived here. He knows how to
+        turn scrap into weapons, upgrades and defenses. Earn his trust, and he\u2019ll
+        help you stay alive.  "
+      objectReference: {fileID: 0}
+    - target: {fileID: 582196051590256123, guid: 79f7817e938e3de45b8dfd67d1d9060c, type: 3}
+      propertyPath: 'tutorialMessages.Array.data[3]'
+      value: During the day, search the city. Abandoned containers may still hold
+        scrap. Collect it and prepare.
+      objectReference: {fileID: 0}
+    - target: {fileID: 582196051590256123, guid: 79f7817e938e3de45b8dfd67d1d9060c, type: 3}
+      propertyPath: 'tutorialMessages.Array.data[4]'
+      value: 'At night, the infected come. They will attack the fuel tank. If it
+        falls, your escape is gone.  '
+      objectReference: {fileID: 0}
+    - target: {fileID: 582196051590256123, guid: 79f7817e938e3de45b8dfd67d1d9060c, type: 3}
+      propertyPath: 'tutorialMessages.Array.data[5]'
+      value: 'You have ten days. Protect the fuel tank. Be ready.  '
+      objectReference: {fileID: 0}
+    - target: {fileID: 582196051590256123, guid: 79f7817e938e3de45b8dfd67d1d9060c, type: 3}
+      propertyPath: 'tutorialMessages.Array.data[6]'
+      value: 'You have ten days. Protect the fuel tank. Be ready.  '
+      objectReference: {fileID: 0}
     - target: {fileID: 6454820765956040808, guid: 79f7817e938e3de45b8dfd67d1d9060c, type: 3}
       propertyPath: m_Name
       value: TutorialManager
