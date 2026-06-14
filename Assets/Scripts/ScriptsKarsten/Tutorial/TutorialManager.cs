@@ -3,26 +3,45 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Animations.Rigging;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 /// <summary>
-/// Steuert das Tutorial: Spieler läuft zu einem Zielpunkt,
-/// während nacheinander Texte angezeigt werden.
-/// Am Ende werden Steuerung und Aim-Layer wieder aktiviert.
+/// Controls the tutorial flow: player movement, messages, and scene transition.
+/// Supports skipping and fade-out to next scene.
 /// </summary>
 public class TutorialManager : MonoBehaviour {
     [Header("Player")]
     public GameObject playerObject;
     public Animator playerAnimator;
-    public Transform playerMoveTarget;
+    public Transform point1;
+    public Transform point2;
+    public Transform point3;
+    public Transform point4;
     public float playerMoveSpeed = 1.5f;
+
+    [Header("Rotation")]
+    public float rotationDuration = 0.5f;
+    public float pauseAfterRotation = 0.2f;
 
     [Header("Rig")]
     public Rig aimLayer;
 
     [Header("Text")]
-    public TMP_Text tutorialText;
+    public TextMeshProUGUI tutorialText;
     public string[] tutorialMessages;
     public float messageDelay = 5f;
+
+    [Header("Scene Transition")]
+    public Image fadeImage;
+    public float fadeDuration = 2f;
+    public string nextSceneName;
+
+    [Header("UI")]
+    public Button skipButton;
+
+    private bool isSkipping;
+    private bool isRunning;
 
     private Player playerScript;
     private PlayerInputHandler playerInputHandler;
@@ -31,12 +50,15 @@ public class TutorialManager : MonoBehaviour {
     private CharacterController characterController;
     private Rigidbody playerRigidbody;
 
-    private bool isRunning;
-
     private static readonly int inputXHash = Animator.StringToHash("inputX");
     private static readonly int inputYHash = Animator.StringToHash("inputY");
     private static readonly int inputMagnitudeHash = Animator.StringToHash("inputMagnitude");
 
+    private Coroutine messageCoroutine;
+
+    /// <summary>
+    /// Initializes references and UI state.
+    /// </summary>
     private void Awake() {
         if (playerObject != null) {
             playerScript = playerObject.GetComponent<Player>();
@@ -47,120 +69,205 @@ public class TutorialManager : MonoBehaviour {
             playerRigidbody = playerObject.GetComponent<Rigidbody>();
         }
 
-        if (tutorialText != null)
-            tutorialText.text = "";
+        if (fadeImage != null) {
+            Color c = fadeImage.color;
+            c.a = 0f;
+            fadeImage.color = c;
+        }
+
+        if (skipButton != null)
+            skipButton.onClick.AddListener(SkipTutorial);
     }
 
     /// <summary>
-    /// Startet die Tutorial-Sequenz, falls sie noch nicht läuft.
+    /// Starts the tutorial sequence.
     /// </summary>
     public void StartTutorial() {
-        if (isRunning)
-            return;
-
+        if (isRunning) return;
         StartCoroutine(TutorialRoutine());
     }
 
     /// <summary>
-    /// Voller Ablauf: Steuerung deaktivieren, Spieler laufen lassen,
-    /// Messages anzeigen, Steuerung wieder aktivieren.
+    /// Main tutorial flow controlling movement, messages, and transitions.
     /// </summary>
     private IEnumerator TutorialRoutine() {
         isRunning = true;
 
-        // Aim-Layer aus
-        if (aimLayer != null)
-            aimLayer.weight = 0f;
+        DisablePlayer();
 
-        // Steuerung / Scripts aus
-        if (playerInputHandler != null)
-            playerInputHandler.enabled = false;
-
-        if (playerAnimation != null)
-            playerAnimation.enabled = false;
-
-        if (playerScript != null)
-            playerScript.enabled = false;
-
-        if (playerInput != null)
-            playerInput.enabled = false;
-
-        if (characterController != null)
-            characterController.enabled = false;
-
-        if (playerRigidbody != null) {
-            playerRigidbody.linearVelocity = Vector3.zero;
-            playerRigidbody.angularVelocity = Vector3.zero;
-            playerRigidbody.isKinematic = true;
-        }
-
-        // Laufanimation erzwingen (wie im ExtractionController)
         if (playerAnimator != null) {
             playerAnimator.SetFloat(inputXHash, 0f);
             playerAnimator.SetFloat(inputYHash, 1f);
             playerAnimator.SetFloat(inputMagnitudeHash, 1f);
         }
 
-        // Spieler zum Ziel bewegen
-        yield return MovePlayerToTarget();
+        messageCoroutine = StartCoroutine(MessageRoutine());
 
-        // Nach Erreichen des Ziels Animation auf Idle zurück
-        if (playerAnimator != null) {
-            playerAnimator.SetFloat(inputMagnitudeHash, 0f);
-            playerAnimator.SetFloat(inputXHash, 0f);
-            playerAnimator.SetFloat(inputYHash, 0f);
-        }
+        yield return MovePlayer(point1);
+        yield return MovePlayer(point2);
+        yield return MovePlayer(point3);
 
-        // Tutorial-Messages anzeigen
-        yield return ShowMessages();
+        yield return RotateLeft90();
+        yield return new WaitForSeconds(pauseAfterRotation);
 
-        // Steuerung wieder aktivieren
-        EnablePlayerControl();
+        yield return MovePlayer(point4);
 
-        // Text leeren
-        if (tutorialText != null)
-            tutorialText.text = "";
+        StopMessage();
+        StopAnimation();
 
-        isRunning = false;
+        if (tutorialText != null && tutorialMessages.Length > 0)
+            tutorialText.text = tutorialMessages[tutorialMessages.Length - 1];
+
+        yield return new WaitForSeconds(2f);
+
+        yield return FadeToScene(nextSceneName);
     }
 
     /// <summary>
-    /// Bewegt den Spieler SMOOTH zum Zielpunkt.
+    /// Moves the player to a target position.
     /// </summary>
-    private IEnumerator MovePlayerToTarget() {
-        if (playerObject == null || playerMoveTarget == null)
-            yield break;
+    private IEnumerator MovePlayer(Transform target) {
+        if (target == null || playerObject == null) yield break;
 
-        while (Vector3.Distance(playerObject.transform.position, playerMoveTarget.position) > 0.05f) {
+        while (Vector3.Distance(playerObject.transform.position, target.position) > 0.05f) {
             playerObject.transform.position = Vector3.MoveTowards(
                 playerObject.transform.position,
-                playerMoveTarget.position,
+                target.position,
                 playerMoveSpeed * Time.deltaTime
             );
 
             yield return null;
         }
 
-        playerObject.transform.position = playerMoveTarget.position;
+        playerObject.transform.position = target.position;
     }
 
     /// <summary>
-    /// Zeigt alle Tutorial-Texte nacheinander an.
+    /// Rotates the player 90 degrees to the left.
     /// </summary>
-    private IEnumerator ShowMessages() {
-        if (tutorialText == null || tutorialMessages == null)
-            yield break;
+    private IEnumerator RotateLeft90() {
+        Quaternion start = playerObject.transform.rotation;
+        Quaternion target = start * Quaternion.Euler(0f, -90f, 0f);
 
-        foreach (string msg in tutorialMessages) {
+        float t = 0f;
+
+        while (t < rotationDuration) {
+            t += Time.deltaTime;
+            float lerp = t / rotationDuration;
+
+            playerObject.transform.rotation = Quaternion.Slerp(start, target, lerp);
+            yield return null;
+        }
+
+        playerObject.transform.rotation = target;
+    }
+
+    /// <summary>
+    /// Displays tutorial messages sequentially.
+    /// </summary>
+    private IEnumerator MessageRoutine() {
+        foreach (var msg in tutorialMessages) {
             tutorialText.text = msg;
             yield return new WaitForSeconds(messageDelay);
         }
     }
 
     /// <summary>
-    /// Aktiviert nach dem Tutorial wieder alle relevanten Komponenten.
+    /// Stops the message coroutine.
     /// </summary>
-    private void EnablePlayerControl() {
+    private void StopMessage() {
+        if (messageCoroutine != null)
+            StopCoroutine(messageCoroutine);
+    }
+
+    /// <summary>
+    /// Resets animator movement values.
+    /// </summary>
+    private void StopAnimation() {
+        if (playerAnimator == null) return;
+
+        playerAnimator.SetFloat(inputXHash, 0f);
+        playerAnimator.SetFloat(inputYHash, 0f);
+        playerAnimator.SetFloat(inputMagnitudeHash, 0f);
+    }
+
+    /// <summary>
+    /// Disables player control during tutorial.
+    /// </summary>
+    private void DisablePlayer() {
+        if (aimLayer != null) aimLayer.weight = 0f;
+        if (playerInputHandler != null) playerInputHandler.enabled = false;
+        if (playerAnimation != null) playerAnimation.enabled = false;
+        if (playerScript != null) playerScript.enabled = false;
+        if (playerInput != null) playerInput.enabled = false;
+        if (characterController != null) characterController.enabled = false;
+
+        if (playerRigidbody != null) {
+            playerRigidbody.linearVelocity = Vector3.zero;
+            playerRigidbody.angularVelocity = Vector3.zero;
+            playerRigidbody.isKinematic = true;
+        }
+    }
+
+    /// <summary>
+    /// Skips the tutorial and starts scene transition immediately.
+    /// </summary>
+    public void SkipTutorial() {
+        if (isSkipping) return;
+        StartCoroutine(SkipRoutine());
+    }
+
+    /// <summary>
+    /// Handles tutorial skip flow.
+    /// </summary>
+    private IEnumerator SkipRoutine() {
+        isSkipping = true;
+        isRunning = false;
+
+        StopAnimation();
+
+        if (tutorialText != null)
+            tutorialText.text = "";
+
+        if (skipButton != null)
+            skipButton.gameObject.SetActive(false);
+
+        RestorePlayerControlState();
+
+        yield return null;
+
+        yield return FadeToScene(nextSceneName);
+    }
+
+    /// <summary>
+    /// Fades out and loads a new scene.
+    /// </summary>
+    private IEnumerator FadeToScene(string sceneName) {
+        if (fadeImage == null) {
+            SceneManager.LoadScene(sceneName);
+            yield break;
+        }
+
+        float t = 0f;
+        Color c = fadeImage.color;
+
+        while (t < fadeDuration) {
+            t += Time.deltaTime;
+            c.a = Mathf.Lerp(0f, 1f, t / fadeDuration);
+            fadeImage.color = c;
+            yield return null;
+        }
+
+        c.a = 1f;
+        fadeImage.color = c;
+
+        SceneManager.LoadScene(sceneName);
+    }
+
+    /// <summary>
+    /// Restores player control after skipping.
+    /// </summary>
+    private void RestorePlayerControlState() {
         if (aimLayer != null)
             aimLayer.weight = 1f;
 
@@ -179,7 +286,10 @@ public class TutorialManager : MonoBehaviour {
         if (characterController != null)
             characterController.enabled = true;
 
-        if (playerRigidbody != null)
+        if (playerRigidbody != null) {
             playerRigidbody.isKinematic = false;
+            playerRigidbody.linearVelocity = Vector3.zero;
+            playerRigidbody.angularVelocity = Vector3.zero;
+        }
     }
 }
