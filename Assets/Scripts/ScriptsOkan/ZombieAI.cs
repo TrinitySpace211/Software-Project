@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
@@ -16,14 +17,15 @@ public class ZombieAI : MonoBehaviour {
     /// <summary>Transform of the target (player). Assign via Inspector or Init().</summary>
     [SerializeField] public Transform target;
 
-    [SerializeField] private GameObject[] joints;
+    [SerializeField] private Rigidbody[] joints;
+    [SerializeField] private GameObject attackPoint;
     [SerializeField] private Transform[] patrolPoints;
     [SerializeField] private float patrolWaitTime = 2f;
 
     /// <summary>ScriptableObject containing speed, damage, attack range, and detection range.</summary>
     public EnemyStatsSO enemyStatsSO;
 
-    private readonly Color hitColor = Color.red;
+    private Color hitColor = Color.red;
 
     private NavMeshAgent _agent;
     private ZombieAnimationController _animController;
@@ -31,7 +33,6 @@ public class ZombieAI : MonoBehaviour {
     private float _attackTimer;
     private Vector3 _currentPatrolTarget;
     private Vector3 _homePosition;
-
 
     private bool _initialized;
     private bool _isAggro;
@@ -44,6 +45,9 @@ public class ZombieAI : MonoBehaviour {
     private Color originalColor;
 
     private Material zombieMaterial;
+
+    //Event
+    public static Action<Vector3> OnTakeDamage;
 
     private void Start() {
         _agent = GetComponent<NavMeshAgent>();
@@ -58,6 +62,8 @@ public class ZombieAI : MonoBehaviour {
 
         if (target != null)
             _targetHealth = target.GetComponentInChildren<PlayerHealth>();
+
+        foreach (var joint in joints) joint.GetComponent<Rigidbody>().isKinematic = true;
     }
 
     /// <summary>
@@ -104,6 +110,8 @@ public class ZombieAI : MonoBehaviour {
         } else {
             Patrol();
         }
+
+        CheckDeath();
     }
 
     /// <summary>
@@ -116,7 +124,15 @@ public class ZombieAI : MonoBehaviour {
 
             _isAttacking = true;
             _animController?.TriggerAttack();
-            _targetHealth.TakeDamage(enemyStatsSO.damage);
+
+            Collider[] hits = Physics.OverlapSphere(attackPoint.transform.position, enemyStatsSO.attackRange);
+
+            foreach (Collider hit in hits) {
+                if (hit.GetComponent<Player>()) {
+                    _targetHealth.TakeDamage(enemyStatsSO.damage);
+                }
+            }
+
             _attackTimer = enemyStatsSO.attackCooldown;
         }
     }
@@ -169,7 +185,7 @@ public class ZombieAI : MonoBehaviour {
     ///     Returns a random NavMesh-reachable point within the patrol radius around the home position.
     /// </summary>
     private Vector3 GetRandomPatrolPoint() {
-        var randomOffset = Random.insideUnitCircle * _patrolRadius;
+        var randomOffset = UnityEngine.Random.insideUnitCircle * _patrolRadius;
         return new Vector3(
             _homePosition.x + randomOffset.x,
             _homePosition.y,
@@ -190,24 +206,32 @@ public class ZombieAI : MonoBehaviour {
     /// </summary>
     /// <param name="damage">Amount of health points to subtract.</param>
     public void TakeDamage(int damage) {
+        if (isDead) return;
+
         health -= damage;
+        OnTakeDamage?.Invoke(transform.position);
+
+        if (health <= 0) {
+            Die();
+            return;
+        }
 
         StopAllCoroutines();
         StartCoroutine(HitFeedback());
+    }
 
-        if (health <= 0) {
-            isDead = true;
-            ZombieLootDrop lootDrop = GetComponent<ZombieLootDrop>();
-            if (lootDrop == null) {
-                lootDrop = gameObject.AddComponent<ZombieLootDrop>();
-            }
-
-            lootDrop.GiveLoot(target);
-            _animController?.SetDead(isDead);
-
-            _animController.enabled = false;
-            foreach (var joint in joints) joint.GetComponent<Rigidbody>().isKinematic = false;
+    private void CheckDeath() {
+        if (health <= 0 && !isDead) {
+            Die();
         }
+    }
+
+    private void Die() {
+        isDead = true;
+        _animController?.SetDead(true);
+
+        _animController.enabled = false;
+        foreach (var joint in joints) joint.GetComponent<Rigidbody>().isKinematic = false;
     }
 
     /// <summary>

@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 722f93a7b94e8c146801504ddbca8648, type: 3}
+  m_Name: Footsteps Ground Audio Effect
+  m_EditorClassIdentifier: 
+  audioSourcePrefab: {fileID: 7920627168369331545, guid: 3f8b131fe6e17194e8096fbf3fc2612b, type: 3}
+  audioClips:
+  - {fileID: 8300000, guid: 33c4c8389a7ca474387ffda80398a21b, type: 3}
+  - {fileID: 8300000, guid: 8016468f13dcea54488947540b1245ba, type: 3}
+  - {fileID: 8300000, guid: c518b05610a9828488652ed7e5175d61, type: 3}
+  - {fileID: 8300000, guid: 186caf7524d9e764894e7d0069ff708b, type: 3}
+  - {fileID: 8300000, guid: 49caba0b687a760479473ed8f2f14615, type: 3}
+  - {fileID: 8300000, guid: 65767868e75f1ad4ba9e60073798fba3, type: 3}
+  - {fileID: 8300000, guid: 7fd1afe9a20943549b0c04e353c76d2b, type: 3}
+  - {fileID: 8300000, guid: f37778f99ecbbc1458b40c774ea8a802, type: 3}
+  - {fileID: 8300000, guid: 34e9c5cd4a42ab0419282ecddd32d264, type: 3}
+  - {fileID: 8300000, guid: bf46c4e9185eb8a4c88805990218fbd7, type: 3}
+  volumeRange: {x: 0.2, y: 0.3}

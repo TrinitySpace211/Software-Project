@@ -50,4 +50,11 @@ public class HealthBar : MonoBehaviour {
             playerStats.currentHealth /
             playerStats.maxHealth;
     }
+    /// <summary>
+    /// Assigns the UI Image used by the health bar for visual updates.
+    /// </summary>
+    /// <param name="img">The Image component that will display the health fill.</param>
+    public void SetImage(Image img) {
+        image = img;
+    }
 }

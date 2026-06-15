@@ -17,11 +17,19 @@ public class PlayerIK : MonoBehaviour {
     public float elbowIKAmount = 1f;
 
     private Animator animator;
+    private Transform gunParent;
     private int gunLayer;
+    private int meleeLayer;
     private bool hasWeapon = false;
+    private bool hasOneHanded = false;
+    private bool hasTwoHanded = false;
+    private bool isFinishedSwitching = true;
 
     private readonly int switchWeaponHash = Animator.StringToHash("SwitchWeapon");
+    private readonly int switchMeleeHash = Animator.StringToHash("SwitchMelee");
     private readonly int hasWeaponHash = Animator.StringToHash("HasWeapon");
+    private readonly int hasMeleeOneHandedHash = Animator.StringToHash("HasMeleeOneHand");
+    private readonly int hasMeleeTwoHandedHash = Animator.StringToHash("HasMeleeTwoHand");
 
     private void Awake() {
         animator = GetComponent<Animator>();
@@ -29,6 +37,7 @@ public class PlayerIK : MonoBehaviour {
 
     private void Start() {
         gunLayer = animator.GetLayerIndex("GunLayer");
+        meleeLayer = animator.GetLayerIndex("MeleeLayer");
     }
 
     private void OnAnimatorIK(int layerIndex) {
@@ -37,29 +46,45 @@ public class PlayerIK : MonoBehaviour {
             animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, handIKAmount);
             animator.SetIKRotation(AvatarIKGoal.LeftHand, leftHandIKTarget.rotation);
             animator.SetIKPosition(AvatarIKGoal.LeftHand, leftHandIKTarget.position);
+        } else {
+            animator.SetIKRotationWeight(AvatarIKGoal.LeftHand, 0);
+            animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, 0);
         }
         if (rightHandIKTarget != null) {
             animator.SetIKRotationWeight(AvatarIKGoal.RightHand, handIKAmount);
             animator.SetIKPositionWeight(AvatarIKGoal.RightHand, handIKAmount);
             animator.SetIKRotation(AvatarIKGoal.RightHand, rightHandIKTarget.rotation);
             animator.SetIKPosition(AvatarIKGoal.RightHand, rightHandIKTarget.position);
+        } else {
+            animator.SetIKRotationWeight(AvatarIKGoal.RightHand, 0);
+            animator.SetIKPositionWeight(AvatarIKGoal.RightHand, 0);
         }
         if (leftElbowIKTarget != null) {
             animator.SetIKHintPosition(AvatarIKHint.LeftElbow, leftElbowIKTarget.position);
             animator.SetIKHintPositionWeight(AvatarIKHint.LeftElbow, elbowIKAmount);
+        } else {
+            animator.SetIKHintPositionWeight(AvatarIKHint.LeftElbow, 0);
         }
         if (rightElbowIKTarget != null) {
             animator.SetIKHintPosition(AvatarIKHint.RightElbow, rightElbowIKTarget.position);
             animator.SetIKHintPositionWeight(AvatarIKHint.RightElbow, elbowIKAmount);
+        } else {
+            animator.SetIKHintPositionWeight(AvatarIKHint.RightElbow, 0);
         }
     }
 
-    public void Setup(Transform gunParent) {
+    public void Setup(Transform gunParent, int weaponSlotIndex) {
+        this.gunParent = gunParent;
         Transform[] allChildren = gunParent.GetComponentsInChildren<Transform>();
-        leftElbowIKTarget = allChildren.FirstOrDefault(child => child.name == "LeftElbow");
-        rightElbowIKTarget = allChildren.FirstOrDefault(child => child.name == "RightElbow");
-        leftHandIKTarget = allChildren.FirstOrDefault(child => child.name == "LeftHand");
-        rightHandIKTarget = allChildren.FirstOrDefault(child => child.name == "RightHand");
+        if (weaponSlotIndex == (int)WeaponSlot.Primary || weaponSlotIndex == (int)WeaponSlot.Secondary || weaponSlotIndex == (int)WeaponSlot.MeleeTwoHanded) {
+            leftElbowIKTarget = allChildren.FirstOrDefault(child => child.name == "LeftElbow");
+            rightElbowIKTarget = allChildren.FirstOrDefault(child => child.name == "RightElbow");
+            leftHandIKTarget = allChildren.FirstOrDefault(child => child.name == "LeftHand");
+            rightHandIKTarget = allChildren.FirstOrDefault(child => child.name == "RightHand");
+        } else if (weaponSlotIndex == (int)WeaponSlot.MeleeOneHanded) {
+            rightElbowIKTarget = allChildren.FirstOrDefault(child => child.name == "RightElbow");
+            rightHandIKTarget = allChildren.FirstOrDefault(child => child.name == "RightHand");
+        }
     }
 
     public void ClearSetup() {
@@ -73,6 +98,34 @@ public class PlayerIK : MonoBehaviour {
         animator.SetTrigger(switchWeaponHash);
     }
 
+    public void SwitchMelee() {
+        animator.SetTrigger(switchMeleeHash);
+    }
+
+    public void SetMelee(bool state, int weaponSlotIndex) {
+        animator.SetLayerWeight(meleeLayer, state ? 1 : 0);
+
+        if (state) {
+            if (weaponSlotIndex == (int)WeaponSlot.MeleeOneHanded) {
+                hasTwoHanded = !state;
+                hasOneHanded = state;
+                animator.SetBool(hasMeleeTwoHandedHash, !state);
+                animator.SetBool(hasMeleeOneHandedHash, state);
+            } else if (weaponSlotIndex == (int)WeaponSlot.MeleeTwoHanded) {
+                hasOneHanded = !state;
+                hasTwoHanded = state;
+                animator.SetBool(hasMeleeOneHandedHash, !state);
+                animator.SetBool(hasMeleeTwoHandedHash, state);
+            }
+        } else {
+            hasOneHanded = state;
+            hasTwoHanded = state;
+            animator.SetBool(hasMeleeOneHandedHash, state);
+            animator.SetBool(hasMeleeTwoHandedHash, state);
+        }
+
+    }
+
     public void SetGun(bool state) {
         hasWeapon = state;
 
@@ -82,6 +135,17 @@ public class PlayerIK : MonoBehaviour {
 
     public bool GetHasWeapon() {
         return hasWeapon;
+    }
+
+    public Transform GetParent() {
+        return gunParent;
+    }
+    public bool GetHasOneHanded() {
+        return hasOneHanded;
+    }
+
+    public bool GetHasTwoHanded() {
+        return hasTwoHanded;
     }
 
 }

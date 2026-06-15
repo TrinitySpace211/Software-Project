@@ -9,11 +9,14 @@ EditorBuildSettings:
     path: Assets/Scenes/MainMenu.unity
     guid: 0c1fd4c8c4c52e34288901bce1795d48
   - enabled: 1
-    path: Assets/Scenes/MainScene.unity
+    path: Assets/Scenes/MainScene_MeleeTest.unity
     guid: 8b0f767487905cc46b43ed0406aba400
   - enabled: 1
     path: Assets/Scenes/ExtractionScene.unity
     guid: 2d5f075f3499d1b49b26a1ba39578f8c
+  - enabled: 1
+    path: Assets/Scenes/MainScene.unity
+    guid: 17162263500a9194ead2d545f218de36
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0
