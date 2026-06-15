@@ -7,9 +7,8 @@ using Random = UnityEngine.Random;
 ///     Called by DayNightCycle events to switch zombie targets at night and back to player during day.
 /// </summary>
 public class ObjectiveManager : MonoBehaviour {
-    [Header("Objectives")] public ObjectiveHealth[] objectives;
-
     [Header("Player")] [SerializeField] private Transform player;
+    [Header("Objectives")] public GasTankHealth[] objectives;
 
     public static ObjectiveManager Instance { get; private set; }
 
@@ -27,7 +26,7 @@ public class ObjectiveManager : MonoBehaviour {
     ///     Returns null if all objectives are destroyed.
     /// </summary>
     public Transform GetRandomActiveObjective() {
-        var active = Array.FindAll(objectives, o => o != null && !o.IsDestroyed());
+        var active = Array.FindAll(objectives, o => o != null && o.CurrentHP > 0);
         if (active.Length == 0) return null;
         return active[Random.Range(0, active.Length)].transform;
     }
