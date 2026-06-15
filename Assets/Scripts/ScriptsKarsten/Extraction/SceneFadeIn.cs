@@ -1,10 +1,17 @@
 using UnityEngine;
 using System.Collections;
 
+/// <summary>
+/// Handles a fade-in effect at the start of a scene,
+/// gradually making a CanvasGroup transparent.
+/// </summary>
 public class SceneFadeIn : MonoBehaviour {
     [SerializeField] private CanvasGroup fadeGroup;
     [SerializeField] private float fadeDuration = 1.5f;
 
+    /// <summary>
+    /// Initializes the fade-in effect and starts the fade coroutine.
+    /// </summary>
     private void Start() {
         if (fadeGroup == null)
             fadeGroup = GetComponentInChildren<CanvasGroup>();
@@ -15,6 +22,9 @@ public class SceneFadeIn : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Gradually fades the CanvasGroup from opaque to transparent.
+    /// </summary>
     private IEnumerator FadeToTransparent() {
         float t = 0f;
 

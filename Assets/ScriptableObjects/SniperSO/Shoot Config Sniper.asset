@@ -20,3 +20,4 @@ MonoBehaviour:
   bulletsPerShoot: 1
   damage: 80
   maxAmmo: 5
+  shootVolume: 0.5

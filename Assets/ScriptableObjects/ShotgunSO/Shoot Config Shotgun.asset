@@ -16,7 +16,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 193
   spread: {x: 0.1, y: 0.1, z: 0.1}
-  fireRate: 0.25
+  fireRate: 1.2
   bulletsPerShoot: 8
   damage: 5
   maxAmmo: 8
+  shootVolume: 0.5

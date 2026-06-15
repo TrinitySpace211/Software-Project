@@ -13,10 +13,12 @@ MonoBehaviour:
   m_Name: Shotgun
   m_EditorClassIdentifier: 
   impactType: {fileID: 11400000, guid: bf165e4fffbc43c44b5a52f06a7c05f2, type: 2}
-  type: 2
+  type: 3
+  weaponSlot: 0
   gunName: Shotgun
   modelPrefab: {fileID: 1893640954530389767, guid: 1a89ed81f8fea634ea42f93bf148d770, type: 3}
   spawnPoint: {x: 0, y: 0, z: 0}
   spawnRotation: {x: 0, y: 0, z: 0}
+  shootVolume: 0.8
   shootConfigSO: {fileID: 11400000, guid: a805b2bc68abbe340aeffbbbb46a29ee, type: 2}
   trailConfigSO: {fileID: 11400000, guid: b1e0b09f055d99c4b83cba82cfb5c211, type: 2}

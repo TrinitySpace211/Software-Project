@@ -13,10 +13,12 @@ MonoBehaviour:
   m_Name: Assault Rifle
   m_EditorClassIdentifier: 
   impactType: {fileID: 11400000, guid: bf165e4fffbc43c44b5a52f06a7c05f2, type: 2}
-  type: 0
+  type: 1
+  weaponSlot: 0
   gunName: Assault Rifle
   modelPrefab: {fileID: 1752352189776943642, guid: 53e44d279923b9441b531cc46df7e77e, type: 3}
   spawnPoint: {x: 0, y: 0.00209, z: 0.01441}
   spawnRotation: {x: 0, y: 0, z: 0}
+  shootVolume: 0.35
   shootConfigSO: {fileID: 11400000, guid: 39ff4d6ba4144774ea2ef54b9f5672b5, type: 2}
   trailConfigSO: {fileID: 11400000, guid: 7e4b124e012e625458c12440c926f8fe, type: 2}

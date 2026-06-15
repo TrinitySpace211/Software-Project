@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 /// <summary>
 /// Manages the main menu logic including scene loading, settings UI,
@@ -15,6 +16,7 @@ public class MenuManager : MonoBehaviour {
 
     [SerializeField] private AudioClip clickSound;
     [SerializeField] private AudioClip musicClip;
+    [SerializeField] private AudioClip buttonSelect;
 
     [SerializeField] private GameObject firstSelectedButton;
     [SerializeField] private CanvasGroup fadeGroup;
@@ -31,6 +33,7 @@ public class MenuManager : MonoBehaviour {
     private void Awake() {
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.playOnAwake = false;
+        audioSource.volume = 0.5f;
 
         musicSource = gameObject.AddComponent<AudioSource>();
         musicSource.clip = musicClip;
@@ -60,6 +63,7 @@ public class MenuManager : MonoBehaviour {
         // Ensure settings panel starts hidden
         if (settingsPanel != null)
             settingsPanel.SetActive(false);
+
     }
 
     /// <summary>
@@ -141,11 +145,11 @@ public class MenuManager : MonoBehaviour {
     public void ExitGame() {
         PlayClick();
 
-        #if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-        #else
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
             Application.Quit();
-        #endif
+#endif
     }
 
     /// <summary>
@@ -178,7 +182,9 @@ public class MenuManager : MonoBehaviour {
     private IEnumerator SelectNextFrame(GameObject target) {
         yield return null;
 
-        if (EventSystem.current != null && target != null)
+        if (EventSystem.current != null && target != null) {
             EventSystem.current.SetSelectedGameObject(target);
+        }
     }
+
 }
