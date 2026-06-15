@@ -197,6 +197,12 @@ public class ZombieAI : MonoBehaviour {
 
         if (health <= 0) {
             isDead = true;
+            ZombieLootDrop lootDrop = GetComponent<ZombieLootDrop>();
+            if (lootDrop == null) {
+                lootDrop = gameObject.AddComponent<ZombieLootDrop>();
+            }
+
+            lootDrop.GiveLoot(target);
             _animController?.SetDead(isDead);
 
             _animController.enabled = false;
