@@ -2605,6 +2605,7 @@ GameObject:
   - component: {fileID: 2361470486471751108}
   - component: {fileID: -5387112310429555302}
   - component: {fileID: 2322059663790836396}
+  - component: {fileID: -7248929446526361467}
   m_Layer: 7
   m_Name: ZombieNoSkeleton
   m_TagString: Untagged
@@ -2716,6 +2717,24 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &-7248929446526361467
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8829481681053086251}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d28fa25fc0156c4eb5fcbed6387b87a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scrapItem: {fileID: 0}
+  scrapAmount: 1
+  deliveryMode: 0
+  scrapPickupPrefab: {fileID: 0}
+  fallbackScrapIcon: {fileID: 0}
+  pickupSpawnHeight: 0.35
 --- !u!1 &8868056909011058339
 GameObject:
   m_ObjectHideFlags: 0

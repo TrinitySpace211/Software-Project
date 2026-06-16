@@ -382,7 +382,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_TargetDisplay: 0
 --- !u!114 &9124169546250397732
 MonoBehaviour:
@@ -12264,8 +12264,8 @@ MonoBehaviour:
   builtTowerText: {fileID: 8253515480423755642}
   towerWarningText: {fileID: 782487764465471935}
   playerInventory: {fileID: 0}
-  scrapItem: {fileID: 11400000, guid: 563912a21258ac1489f2c798f3ebee7f, type: 2}
-  scrapCost: 50
+  scrapItem: {fileID: 11400000, guid: dd4350791c348774dac3b2d39042056f, type: 2}
+  scrapCost: 5
   scrapAmountText: {fileID: 1539940840712039499}
   warningBox: {fileID: 8736228844962927432}
   buildTowerButton: {fileID: 4873100470348914474}

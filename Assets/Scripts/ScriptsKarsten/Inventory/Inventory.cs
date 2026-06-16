@@ -156,7 +156,7 @@ public class Inventory : MonoBehaviour {
         ItemSO item = hotbarSlots[slot].GetItem();
 
         if (!isDragging) {
-            if (Time.time > swapSpeed + lastTimeSelected && !player.GetPlayerAnimation().GetIsReloading()) {
+            if (Time.time > swapSpeed + lastTimeSelected && !player.GetPlayerAnimation().GetIsReloading() && item.itemType != ItemType.Misc) {
                 lastTimeSelected = Time.time;
                 if (previousSlot != -1) {
                     hotbarSlots[previousSlot].SetSelected(false);

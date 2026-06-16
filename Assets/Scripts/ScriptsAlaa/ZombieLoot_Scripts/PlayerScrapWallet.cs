@@ -29,6 +29,8 @@ public class PlayerScrapWallet : MonoBehaviour {
     }
 
     private void Update() {
+        SyncScrapFromInventory();
+
         // Wenn keine Meldung aktiv ist, muss nichts gemacht werden.
         if (scrapMessageText == null || !scrapMessageText.gameObject.activeSelf) {
             return;
@@ -68,6 +70,13 @@ public class PlayerScrapWallet : MonoBehaviour {
         // Schrott abziehen, wenn genug vorhanden ist.
         currentScrap -= amount;
         return true;
+    }
+
+    private void SyncScrapFromInventory() {
+        // Wenn Scrap im Inventar geaendert wurde, wird die Wallet angepasst.
+        if (ScrapInventorySaver.TryGetScrapAmount(out int inventoryScrap)) {
+            currentScrap = inventoryScrap;
+        }
     }
 
     private void ShowScrapMessage(int amount) {
