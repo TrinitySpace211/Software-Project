@@ -20,16 +20,19 @@ public class PlayerIK : MonoBehaviour {
     private Transform gunParent;
     private int gunLayer;
     private int meleeLayer;
+    private int consumableLayer;
     private bool hasWeapon = false;
     private bool hasOneHanded = false;
     private bool hasTwoHanded = false;
-    private bool isFinishedSwitching = true;
 
     private readonly int switchWeaponHash = Animator.StringToHash("SwitchWeapon");
     private readonly int switchMeleeHash = Animator.StringToHash("SwitchMelee");
     private readonly int hasWeaponHash = Animator.StringToHash("HasWeapon");
     private readonly int hasMeleeOneHandedHash = Animator.StringToHash("HasMeleeOneHand");
     private readonly int hasMeleeTwoHandedHash = Animator.StringToHash("HasMeleeTwoHand");
+    private readonly int hasGrenadeHash = Animator.StringToHash("HasGrenade");
+    private readonly int hasHealthPackHash = Animator.StringToHash("HasHealthPack");
+
 
     private void Awake() {
         animator = GetComponent<Animator>();
@@ -38,6 +41,7 @@ public class PlayerIK : MonoBehaviour {
     private void Start() {
         gunLayer = animator.GetLayerIndex("GunLayer");
         meleeLayer = animator.GetLayerIndex("MeleeLayer");
+        consumableLayer = animator.GetLayerIndex("Consumable");
     }
 
     private void OnAnimatorIK(int layerIndex) {
@@ -81,7 +85,7 @@ public class PlayerIK : MonoBehaviour {
             rightElbowIKTarget = allChildren.FirstOrDefault(child => child.name == "RightElbow");
             leftHandIKTarget = allChildren.FirstOrDefault(child => child.name == "LeftHand");
             rightHandIKTarget = allChildren.FirstOrDefault(child => child.name == "RightHand");
-        } else if (weaponSlotIndex == (int)WeaponSlot.MeleeOneHanded) {
+        } else if (weaponSlotIndex == (int)WeaponSlot.MeleeOneHanded || weaponSlotIndex == (int)WeaponSlot.Consumable) {
             rightElbowIKTarget = allChildren.FirstOrDefault(child => child.name == "RightElbow");
             rightHandIKTarget = allChildren.FirstOrDefault(child => child.name == "RightHand");
         }
@@ -131,6 +135,23 @@ public class PlayerIK : MonoBehaviour {
 
         animator.SetLayerWeight(gunLayer, state ? 1 : 0);
         animator.SetBool(hasWeaponHash, state);
+    }
+
+    public void SetConsumable<T>(bool state, T item) {
+        animator.SetLayerWeight(consumableLayer, state ? 1 : 0);
+
+        if (item is not null) {
+            if (item.GetType() == typeof(HealthItemSO)) {
+                animator.SetBool(hasGrenadeHash, !state);
+                animator.SetBool(hasHealthPackHash, state);
+            } else if (item.GetType() == typeof(Grenade)) {
+                animator.SetBool(hasHealthPackHash, !state);
+                animator.SetBool(hasGrenadeHash, state);
+            } else {
+                Debug.LogError("Type not found!");
+                return;
+            }
+        }
     }
 
     public bool GetHasWeapon() {

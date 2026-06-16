@@ -37,11 +37,20 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 29c26078f186d6343a9c6f651cd55adc, type: 3}
   sniperReloadSounds:
   - {fileID: 8300000, guid: d43fe812d6d81f84aa8b47baee8a7c98, type: 3}
+  reloadSoundVolume: 0.3
   meleeSwing:
   - {fileID: 8300000, guid: efcab393c3a5d4e4da38058d284a2005, type: 3}
   - {fileID: 8300000, guid: 2901e574db7bb7c4ea7253f22cbb6fb4, type: 3}
   - {fileID: 8300000, guid: a6a507248bcbdd04da8c8ae20021da04, type: 3}
   - {fileID: 8300000, guid: bcabe2e86bac2bf4d95a102117cfeeea, type: 3}
+  grenadePin:
+  - {fileID: 8300000, guid: 415b5865e82b72f4eb3f2b021aca994d, type: 3}
+  grenadePinVolume: 1
+  explosionSounds:
+  - {fileID: 8300000, guid: a2bdbe8bfc9e1874aa3e50a036057c48, type: 3}
+  - {fileID: 8300000, guid: 841c48f4049eb1440adaf47fbdf89da7, type: 3}
+  - {fileID: 8300000, guid: 8cbfc50dcdcfa3c40b833a2dfa8412ae, type: 3}
+  explosionSoundsVolume: 1
   zombieHurt:
   - {fileID: 8300000, guid: 7244c2022bfb99248a9feab2e8df771d, type: 3}
   - {fileID: 8300000, guid: 1e0e06c241f75aa45baf3d0cf6a7e2e5, type: 3}
@@ -53,3 +62,5 @@ MonoBehaviour:
   playerHurtVolume: 0.25
   playerDeath: {fileID: 8300000, guid: 1ad9ac127580a4c4993e31e52fc66849, type: 3}
   playerDeathVolume: 1
+  playerHeal: {fileID: 8300000, guid: 972ac064c9dbb1f40a319e00e0e6fc35, type: 3}
+  playerHealVolume: 1

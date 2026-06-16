@@ -18,4 +18,4 @@ MonoBehaviour:
   itemName: Knife
   icon: {fileID: 21300000, guid: 51f65e36b7270a745b79e9d0c95460c8, type: 3}
   maxStackSize: 1
-  itemPrefab: {fileID: 0}
+  itemPrefab: {fileID: 7532257924388312432, guid: 02d2a1c83d71ebb44bf3db02d4ff627b, type: 3}

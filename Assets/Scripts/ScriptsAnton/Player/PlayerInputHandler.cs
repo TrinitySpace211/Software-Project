@@ -9,18 +9,21 @@ using UnityEngine.InputSystem;
 public class PlayerInputHandler : MonoBehaviour {
     public InputSystem_Actions playerInputActions { get; private set; }
 
+    public Vector2 MousePosition { get; private set; }
     public Vector2 MovementInput { get; private set; }
     public bool AttackTriggered { get; private set; }
     public bool AimingTriggered { get; private set; }
     public bool SprintTriggered { get; private set; }
-    public Vector2 MousePosition { get; private set; }
+    public bool InteractTriggered { get; private set; }
+    public bool ThrowTriggered { get; private set; }
+    public bool UseTriggered { get; private set; }
 
     //Hotbar Key Events
     public event Action<int> OnHotbarSlotPressed;
 
-    //public event EventHandler OnInteractAction;
-    //public event EventHandler OnPauseAction;
-    public event EventHandler OnReloadAction;
+    public static event Action OnInteractAction;
+    public static event Action OnPauseAction;
+    public static event Action OnReloadAction;
 
     private void OnEnable() {
         playerInputActions = new InputSystem_Actions();
@@ -35,6 +38,7 @@ public class PlayerInputHandler : MonoBehaviour {
     private void OnDestroy() {
         playerInputActions.Player.Interact.performed -= Interact_performed;
         playerInputActions.Player.Pause.performed -= Pause_performed;
+        playerInputActions.Player.Reloading.performed -= Reloading_performed;
 
         playerInputActions.Dispose();
     }
@@ -57,7 +61,15 @@ public class PlayerInputHandler : MonoBehaviour {
         playerInputActions.Player.Sprint.performed += _ => SprintTriggered = true;
         playerInputActions.Player.Sprint.canceled += _ => SprintTriggered = false;
 
-        playerInputActions.Player.Interact.performed += Interact_performed;
+        playerInputActions.Player.Interact.performed += _ => InteractTriggered = true;
+        playerInputActions.Player.Interact.canceled += _ => InteractTriggered = false;
+
+        playerInputActions.Player.Throw.performed += _ => ThrowTriggered = true;
+        playerInputActions.Player.Throw.canceled += _ => ThrowTriggered = false;
+
+        playerInputActions.Player.Use.performed += _ => UseTriggered = true;
+        playerInputActions.Player.Use.canceled += _ => UseTriggered = false;
+
         playerInputActions.Player.Pause.performed += Pause_performed;
         playerInputActions.Player.Reloading.performed += Reloading_performed;
     }
@@ -80,7 +92,7 @@ public class PlayerInputHandler : MonoBehaviour {
     /// </summary>
     /// <param name="context">The context that got send from the input key</param>
     private void Interact_performed(InputAction.CallbackContext context) {
-        //OnInteractAction?.Invoke(this, EventArgs.Empty);
+        OnInteractAction?.Invoke();
     }
 
     /// <summary>
@@ -88,7 +100,7 @@ public class PlayerInputHandler : MonoBehaviour {
     /// </summary>
     /// <param name="context">The context that got send from the input key</param>
     private void Pause_performed(InputAction.CallbackContext context) {
-        //OnPauseAction?.Invoke(this, EventArgs.Empty);
+        OnPauseAction?.Invoke();
     }
 
     /// <summary>
@@ -96,7 +108,7 @@ public class PlayerInputHandler : MonoBehaviour {
     /// </summary>
     /// <param name="context">The context that got send from the input key</param>
     private void Reloading_performed(InputAction.CallbackContext context) {
-        OnReloadAction?.Invoke(this, EventArgs.Empty);
+        OnReloadAction?.Invoke();
     }
 
     /// <summary>
@@ -137,4 +149,11 @@ public class PlayerInputHandler : MonoBehaviour {
         this.SprintTriggered = SprintTriggered;
     }
 
+    public void SetInteractInput(bool InteractTriggered) {
+        this.InteractTriggered = InteractTriggered;
+    }
+
+    public void SetUseTriggered(bool UseTriggered) {
+        this.UseTriggered = UseTriggered;
+    }
 }

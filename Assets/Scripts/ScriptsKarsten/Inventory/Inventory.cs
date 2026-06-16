@@ -10,6 +10,8 @@ using UnityEngine.UI;
 /// hotbar management, drag-and-drop functionality, and inventory UI handling.
 /// </summary>
 public class Inventory : MonoBehaviour {
+    public static Inventory Instance { get; private set; }
+
     [Header("References")]
     [SerializeField] private Player player;
     [SerializeField] private PlayerInputHandler playerInputHandler;
@@ -19,7 +21,10 @@ public class Inventory : MonoBehaviour {
     [Header("Item References")]
     [SerializeField] private ItemSO[] guns;
     [SerializeField] private ItemSO[] melees;
+    [SerializeField] private ItemSO grenade;
+    [SerializeField] private ItemSO[] healthItems;
     [SerializeField] private ItemSO[] debugItems;
+
 
     [Header("Hotbar Swap Speed")]
     [SerializeField] private float swapSpeed = 0.8f;
@@ -34,7 +39,12 @@ public class Inventory : MonoBehaviour {
         Key.Digit8,
         Key.Digit9,
         Key.Digit0,
-        Key.X
+        Key.X,
+        Key.L,
+        Key.Y,
+        Key.U,
+        Key.O,
+        Key.P
     };
 
     /// <summary>
@@ -98,10 +108,17 @@ public class Inventory : MonoBehaviour {
     private float lastTimeSelected;
 
     /// <summary>
+    /// Saves the Slot that got selected in the hotbar
+    /// </summary>
+    private Slot selectedSlot = null;
+
+    /// <summary>
     /// Initializes slot collections by retrieving
     /// inventory and hotbar slots from child objects.
     /// </summary>
     private void Awake() {
+        Instance = this;
+
         inventorySlots.AddRange(inventorySlotParent.GetComponentsInChildren<Slot>());
         hotbarSlots.AddRange(hotbarObj.GetComponentsInChildren<Slot>());
 
@@ -114,6 +131,7 @@ public class Inventory : MonoBehaviour {
     /// </summary>
     private void Start() {
         playerInputHandler.OnHotbarSlotPressed += PlayerInputHandler_OnHotbarSlotPressed;
+        Item.OnItemCollected += Item_OnItemCollected;
 
         container.SetActive(false);
     }
@@ -156,13 +174,14 @@ public class Inventory : MonoBehaviour {
         ItemSO item = hotbarSlots[slot].GetItem();
 
         if (!isDragging) {
-            if (Time.time > swapSpeed + lastTimeSelected && !player.GetPlayerAnimation().GetIsReloading()) {
+            if (Time.time > swapSpeed + lastTimeSelected && !player.GetPlayerAnimation().GetIsReloading() && !player.GetPlayerAnimation().GetIsThrowingGrenade()) {
                 lastTimeSelected = Time.time;
                 if (previousSlot != -1) {
                     hotbarSlots[previousSlot].SetSelected(false);
                 }
 
                 hotbarSlots[slot].SetSelected(true);
+                selectedSlot = hotbarSlots[slot];
 
                 if (item == null) {
                     if (previousSlot != -1) {
@@ -173,12 +192,36 @@ public class Inventory : MonoBehaviour {
                         ToggleWeaponSelect(item);
                     } else if (IsMelee(item)) {
                         ToggleMeleeSelect(item);
+                    } else if (IsGrenade(item)) {
+                        ToggleGrenade(item);
+                    } else if (IsConsumable(item)) {
+                        ToggleConsumable(item);
                     }
                 }
 
                 previousSlot = slot;
             }
 
+        }
+    }
+
+    private void Item_OnItemCollected(Item item) {
+        GunType collectedGun = item.GetItemType<GunType>();
+        MeleeType collectedMelee = item.GetItemType<MeleeType>();
+        if (collectedGun != GunType.None) {
+            foreach (ItemSO gun in guns) {
+                if (gun.gunType == collectedGun) {
+                    AddItem(gun, 1);
+                    return;
+                }
+            }
+        } else if (collectedMelee != MeleeType.None) {
+            foreach (ItemSO melee in melees) {
+                if (melee.meleeType == collectedMelee) {
+                    AddItem(melee, 1);
+                    return;
+                }
+            }
         }
     }
 
@@ -226,6 +269,49 @@ public class Inventory : MonoBehaviour {
             Debug.Log(
                 $"Inventory is full. Could not add {remaining}x {itemToAdd.itemName}."
             );
+        }
+    }
+
+    /* /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="itemToAdd"></param>
+    /// <param name="amount"></param>
+    public void RemoveItem(ItemSO itemToRemove, int amount) {
+        int remaining = amount;
+
+        // Remove from existing stacks first
+        foreach (Slot slot in inventorySlots) {
+            if (slot.HasItem() && slot.GetItem() == itemToAdd) {
+                int currentAmount = slot.GetAmount();
+                int maxStack = itemToAdd.maxStackSize;
+
+                if (currentAmount < maxStack) {
+                    int spaceLeft = maxStack - currentAmount;
+                    int amountToAdd = Mathf.Min(spaceLeft, remaining);
+
+                    slot.SetItem(itemToAdd, currentAmount + amountToAdd);
+                    remaining -= amountToAdd;
+
+                    if (remaining <= 0)
+                        return;
+                }
+            }
+        }
+    } */
+
+    public void ConsumeEquippedItem(int amount = 1) {
+        if (selectedSlot == null) return;
+
+        if (!selectedSlot.HasItem()) return;
+
+        int newAmount = selectedSlot.GetAmount() - amount;
+
+        if (newAmount <= 0) {
+            selectedSlot.ClearSlot();
+            player.GetPlayerGunSelector().ResetItem();
+        } else {
+            selectedSlot.SetItem(selectedSlot.GetItem(), newAmount);
         }
     }
 
@@ -321,6 +407,10 @@ public class Inventory : MonoBehaviour {
                     ToggleWeaponSelect(to.GetItem());
                 } else if (IsMelee(to.GetItem())) {
                     ToggleMeleeSelect(to.GetItem());
+                } else if (IsGrenade(to.GetItem())) {
+                    ToggleGrenade(to.GetItem());
+                } else if (IsConsumable(to.GetItem())) {
+                    ToggleConsumable(to.GetItem());
                 }
             } else if (from.GetSelected()) {
                 ClearPreviousSelectionIfNeeded(from.GetItem());
@@ -337,6 +427,10 @@ public class Inventory : MonoBehaviour {
                 ToggleWeaponSelect(to.GetItem());
             } else if (IsMelee(to.GetItem())) {
                 ToggleMeleeSelect(to.GetItem());
+            } else if (IsGrenade(to.GetItem())) {
+                ToggleGrenade(to.GetItem());
+            } else if (IsConsumable(to.GetItem())) {
+                ToggleConsumable(to.GetItem());
             }
         } else if (from.GetSelected()) {
             ClearPreviousSelectionIfNeeded(from.GetItem());
@@ -422,6 +516,27 @@ public class Inventory : MonoBehaviour {
         }
     }
 
+    private void ToggleGrenade(ItemSO grenade) {
+        if (grenade == null) {
+            player.GetPlayerGunSelector().DequipGrenade();
+        } else {
+            switch (grenade.itemType) {
+                case ItemType.Grenade:
+                    player.GetPlayerGunSelector().SelectGrenade();
+                    break;
+
+            }
+        }
+    }
+
+    private void ToggleConsumable(ItemSO consumable) {
+        if (consumable == null) {
+            player.GetPlayerGunSelector().DequipHealthPack();
+        } else {
+            player.GetPlayerGunSelector().SelectHealthPack(consumable.healthItemType);
+        }
+    }
+
     private bool IsWeapon(ItemSO item) {
         return item != null && item.itemType == ItemType.Gun;
     }
@@ -430,11 +545,30 @@ public class Inventory : MonoBehaviour {
         return item != null && item.itemType == ItemType.Melee;
     }
 
+    private bool IsGrenade(ItemSO item) {
+        return item != null && item.itemType == ItemType.Grenade;
+    }
+
+    private bool IsConsumable(ItemSO item) {
+        return item != null && item.itemType == ItemType.Consumable;
+    }
+
     private void ClearPreviousSelectionIfNeeded(ItemSO item) {
         if (IsWeapon(item)) {
             ToggleWeaponSelect(null);
         } else if (IsMelee(item)) {
             ToggleMeleeSelect(null);
+        } else if (IsGrenade(item)) {
+            ToggleGrenade(null);
+        } else if (IsConsumable(item)) {
+            ToggleConsumable(null);
         }
+    }
+
+    public int GetSelectedItemAmount() {
+        if (selectedSlot != null) {
+            return selectedSlot.GetAmount();
+        }
+        return -1;
     }
 }

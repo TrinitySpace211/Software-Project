@@ -18,4 +18,4 @@ MonoBehaviour:
   itemName: Sniper
   icon: {fileID: 21300000, guid: 350accaa7d7f49849b15cce410b15e48, type: 3}
   maxStackSize: 1
-  itemPrefab: {fileID: 0}
+  itemPrefab: {fileID: 3123053952441689808, guid: 9253c81ee7e6c844caa39c25ceafff2e, type: 3}

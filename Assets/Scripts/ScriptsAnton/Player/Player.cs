@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
@@ -42,6 +43,12 @@ public class Player : MonoBehaviour {
     [SerializeField] private float rotationMouseDirAmount = 10f;
     [SerializeField] private float rotationMoveDirAmount = 10f;
 
+    [Header("Collect Radius")]
+    [SerializeField] private float collectRadius = 10f;
+
+    [Header("Grenade Throw")]
+    [SerializeField] private float grenadeThrowForce = 10f;
+
     [Header("Debugging")]
     [SerializeField] private bool alwaysAiming = false;
 
@@ -60,6 +67,13 @@ public class Player : MonoBehaviour {
     private bool isMovingLaterally;
     private bool isSprinting;
     private float lastFootPlaced = 0f;
+
+    private List<Item> itemsInRange = new();
+
+    //Event
+    public static event Action<Vector3, GunSO> OnReload;
+    public static event Action<Vector3> OnGrenadeThrow;
+    public static event Action<Vector3> OnHeal;
     #endregion
 
     private void Start() {
@@ -68,7 +82,8 @@ public class Player : MonoBehaviour {
             armor = baseStats.armor
         };
 
-        playerInputHandler.OnReloadAction += PlayerInputHandler_OnReloadAction;
+        PlayerInputHandler.OnReloadAction += PlayerInputHandler_OnReloadAction;
+        Item.OnItemCollected += Item_OnItemCollected;
     }
 
     private void Update() {
@@ -80,12 +95,31 @@ public class Player : MonoBehaviour {
             HandleShooting();
             HandleReloadFinished();
             HandleMeleeAttack();
+            HandleGrenade();
+            HandleHealingKits();
         }
+    }
 
+    private void LateUpdate() {
+        if (playerInputHandler != null && !playerHealth.GetIsDead()) {
+            if (playerInputHandler.InteractTriggered) {
+                Collider[] hits = Physics.OverlapSphere(transform.position, collectRadius);
+
+                foreach (Collider hit in hits) {
+                    Item item = hit.GetComponent<Item>();
+                    if (item != null) {
+                        itemsInRange.Add(item);
+                    }
+                }
+
+                HandleInteract();
+                playerInputHandler.SetInteractInput(false);
+            }
+        }
     }
 
     /// <summary>
-    /// Constructor for testing purposes
+    /// Constructor for testing
     /// </summary>
     /// <param name="playerInputHandler">Needs the PlayerInputHandler class so the Movement can be calculated</param>
     /// <param name="playerCamera">Needs the Main Camera to calculate the Mouse Direction</param>
@@ -94,9 +128,19 @@ public class Player : MonoBehaviour {
         this.playerCamera = playerCamera;
     }
 
-    private void PlayerInputHandler_OnReloadAction(object sender, EventArgs e) {
+    /// <summary>
+    /// If the Player pressed the "R" Key and is not Dead then HandleReloadButton() will be called
+    /// and the Player is going to Reload
+    /// </summary>
+    private void PlayerInputHandler_OnReloadAction() {
         if (!playerHealth.GetIsDead()) {
-            HandleReloadButton();
+            HandleReloadStart();
+        }
+    }
+
+    private void Item_OnItemCollected(Item item) {
+        if (itemsInRange.Contains(item)) {
+            itemsInRange.Remove(item);
         }
     }
 
@@ -190,6 +234,12 @@ public class Player : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Updates the Player Rotation to the Movement Input direction 
+    /// if the Player is sprinting or has no Weapon
+    /// </summary>
+    /// <param name="moveDir">The Direction of the Movement Input</param>
+    /// <param name="lookDir">The Direction to the Mouse Position in World Space</param>
     private void UpdatePlayerRotation(Vector3 moveDir, Vector3 lookDir) {
         if (moveDir.sqrMagnitude > 0.1f && (isSprinting || (!playerIK.GetHasWeapon() && !playerIK.GetHasOneHanded()))) {
             RotatePlayerToTarget(moveDir, rotationMoveDirAmount);
@@ -198,6 +248,11 @@ public class Player : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Rotates the Player to a given target direction
+    /// </summary>
+    /// <param name="direction">The direction to turn to</param>
+    /// <param name="dirAmount">for smoother transition</param>
     private void RotatePlayerToTarget(Vector3 direction, float dirAmount) {
         Quaternion targetRotation = Quaternion.LookRotation(direction);
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, dirAmount * Time.deltaTime);
@@ -229,27 +284,39 @@ public class Player : MonoBehaviour {
     /// When the Player has a gun and is pressing right click (aim) and left click (shoot) the gun will shoot
     /// </summary>
     private void HandleShooting() {
-        if (playerInputHandler.AttackTriggered && playerInputHandler.AimingTriggered && weaponSelector.activeGun != null && !playerAnimation.GetIsReloading() && !weaponSelector.IsSelecting()) {
-            weaponSelector.activeGun.Shoot();
+        GunSO activeGun = weaponSelector.activeGun;
 
-            if (weaponSelector.activeGun.GetEmptyMagazine()) {
+        if (playerInputHandler.AttackTriggered && playerInputHandler.AimingTriggered && activeGun != null && !playerAnimation.GetIsReloading() && !weaponSelector.IsSelecting()) {
+            activeGun.Shoot();
+
+            if (activeGun.GetEmptyMagazine()) {
                 setupWeaponParent = playerIK.GetParent();
                 weaponSelector.ClearSetupCurrentWeapon();
                 playerAnimation.StartReloading();
+                OnReload?.Invoke(transform.position, weaponSelector.activeGun);
             }
         }
     }
 
-    private void HandleReloadButton() {
-        if (weaponSelector.activeGun != null) {
-            if (!weaponSelector.activeGun.MagazineIsFull() && !playerAnimation.GetIsReloading()) {
+    /// <summary>
+    /// Handles the Start of the Reload Animation
+    /// </summary>
+    private void HandleReloadStart() {
+        GunSO activeGun = weaponSelector.activeGun;
+
+        if (activeGun != null) {
+            if (!activeGun.MagazineIsFull() && !playerAnimation.GetIsReloading()) {
                 setupWeaponParent = playerIK.GetParent();
                 weaponSelector.ClearSetupCurrentWeapon();
                 playerAnimation.StartReloading();
+                OnReload?.Invoke(transform.position, weaponSelector.activeGun);
             }
         }
     }
 
+    /// <summary>
+    /// Handles the Setup of the Weapon after Reloading
+    /// </summary>
     private void HandleReloadFinished() {
         if (weaponSelector.activeGun != null) {
             if (setupWeaponParent != null) {
@@ -260,8 +327,6 @@ public class Player : MonoBehaviour {
             }
         }
     }
-
-    #endregion
 
     /// <summary>
     /// When the Player has a melee and is pressing left click (attack) the player swings the weapon 
@@ -283,7 +348,98 @@ public class Player : MonoBehaviour {
             }
         }
     }
+    #endregion
+    /// <summary>
+    /// Handles the Interact Input to collect Items that are dropped via the Loot Chests.
+    /// The Item that is closest to the Player is going to be collected first.
+    /// </summary>
+    private void HandleInteract() {
+        if (itemsInRange.Count > 0) {
+            Item closestItem = null;
+            float closestDistance = float.MaxValue;
 
+            foreach (Item item in itemsInRange) {
+                if (item == null) continue;
+
+                float distance = Vector3.Distance(transform.position, item.transform.position);
+
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    closestItem = item;
+                }
+            }
+
+            if (closestItem != null) {
+                closestItem.Collect();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Handles the Input of the Grenade Throw, starts the animation and Sound Effect
+    /// </summary>
+    private void HandleGrenade() {
+        Grenade grenade = weaponSelector.activeGrenade;
+        if (grenade != null) {
+            if (playerInputHandler.ThrowTriggered && !playerAnimation.GetIsThrowingGrenade()) {
+                playerAnimation.SetGrenadeAnimation();
+                playerAnimation.SetIsThrowingGrenade(true);
+
+                OnGrenadeThrow?.Invoke(grenade.transform.position);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Is getting activated via Animation Event.
+    /// The Player cuts the connection to the inverse Kinematics so that the Grenade can be moved.
+    /// It plays the Throw-Animation and consumes it in the Inventory
+    /// </summary>
+    private void ThrowGrenade() {
+        Grenade grenade = weaponSelector.activeGrenade;
+        if (grenade != null) {
+            Vector3 throwDirection = (transform.forward + Vector3.up * 0.25f).normalized * grenadeThrowForce;
+            grenade.Throw(throwDirection);
+            playerIK.ClearSetup();
+            weaponSelector.SetGrenadeNull();
+            playerAnimation.SetIsThrowingGrenade(false);
+
+            Inventory.Instance.ConsumeEquippedItem(1);
+        }
+    }
+
+    /// <summary>
+    /// Is getting activated via Animation Event.
+    /// After the grenade got thrown if the Player still has 
+    /// some grenades left in the Inventor it will spawn more.
+    /// </summary>
+    private void TakeNewGrenade() {
+        if (Inventory.Instance.GetSelectedItemAmount() > 0) {
+            weaponSelector.SelectGrenade();
+        }
+    }
+
+    /// <summary>
+    /// Player is getting healed when the "Use" Key is pressed, default "F"
+    /// </summary>
+    private void HandleHealingKits() {
+        HealthItemSO healthItem = weaponSelector.activeHealthItem;
+        if (healthItem != null) {
+            if (playerInputHandler.UseTriggered) {
+                healthItem.Heal(this);
+
+                OnHeal?.Invoke(transform.position);
+
+                Inventory.Instance.ConsumeEquippedItem(1);
+                if (Inventory.Instance.GetSelectedItemAmount() <= 0) {
+                    weaponSelector.ResetItem();
+                    healthItem.DestroySelf();
+                }
+
+                playerInputHandler.SetUseTriggered(false);
+            }
+        }
+    }
 
     #region State Checks
     /// <summary>
@@ -374,6 +530,14 @@ public class Player : MonoBehaviour {
 
     public PlayerAnimation GetPlayerAnimation() {
         return playerAnimation;
+    }
+
+    public PlayerInputHandler GetPlayerInputHandler() {
+        return playerInputHandler;
+    }
+
+    public PlayerHealth GetPlayerHealth() {
+        return playerHealth;
     }
     #endregion
 

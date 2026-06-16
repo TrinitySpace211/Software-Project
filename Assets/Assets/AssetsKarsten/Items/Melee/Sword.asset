@@ -18,4 +18,4 @@ MonoBehaviour:
   itemName: Sword
   icon: {fileID: 21300000, guid: 63c9b0e5b77bc2a4c86ad8f5b0b019cb, type: 3}
   maxStackSize: 1
-  itemPrefab: {fileID: 0}
+  itemPrefab: {fileID: 1963830353856765976, guid: 1486d7b724fee2f41aa239f10ec338ff, type: 3}

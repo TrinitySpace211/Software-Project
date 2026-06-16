@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -6,8 +7,7 @@ using UnityEngine.Pool;
 /// Creates a Sciptable Object for the Guns with Logic so every Weapon is the same
 /// </summary>
 [CreateAssetMenu(fileName = "Gun", menuName = "Guns/Gun", order = 0)]
-public class GunSO : ScriptableObject
-{
+public class GunSO : ScriptableObject {
 
     public ImpactType impactType;
     public GunType type;
@@ -20,14 +20,17 @@ public class GunSO : ScriptableObject
     public ShootConfigSO shootConfigSO;
     public TrailConfigSO trailConfigSO;
 
+    public AudioClip[] shootSoundClips;
+
     private MonoBehaviour activeMonoBehaviour;
     private GameObject model;
     private float lastShootTime;
     private ParticleSystem shootSystem;
+    private AudioSource shootSound;
     private ObjectPool<TrailRenderer> trailPool;
     private GameObject poolParent;
 
-    private int currentAmmo;
+    public int currentAmmo { get; private set; }
     private int savedAmmo;
     private bool emptyMagazine = false;
 
@@ -36,10 +39,8 @@ public class GunSO : ScriptableObject
     /// </summary>
     /// <param name="parent">The Position of the Parent where it should spawn</param>
     /// <param name="activeMonoBehaviour">The Instance which spawned the Weapon so that a Coroutine can be used</param>
-    public void Spawn(Transform parent, MonoBehaviour activeMonoBehaviour)
-    {
-        if (model == null)
-        {
+    public void Spawn(Transform parent, MonoBehaviour activeMonoBehaviour) {
+        if (model == null) {
             this.activeMonoBehaviour = activeMonoBehaviour;
             lastShootTime = 0f;
             trailPool = new ObjectPool<TrailRenderer>(CreateTrail);
@@ -50,13 +51,12 @@ public class GunSO : ScriptableObject
             model.transform.localRotation = Quaternion.Euler(spawnRotation);
 
             currentAmmo = shootConfigSO.maxAmmo;
-        }
-        else
-        {
-            model.SetActive(true);
+        } else {
+            model.gameObject.SetActive(true);
 
             currentAmmo = savedAmmo;
         }
+        shootSound = model.GetComponentInChildren<AudioSource>();
         shootSystem = model.GetComponentInChildren<ParticleSystem>();
     }
 
@@ -66,39 +66,34 @@ public class GunSO : ScriptableObject
     /// When the Weapon shoots then it will Shoot a Raycast and if it hits then it will play the bullet trail normally,
     /// otherwise the trail will be rendered until it reaches a certain duration
     /// </summary>
-    public void Shoot()
-    {
-        if (Time.time > shootConfigSO.fireRate + lastShootTime && currentAmmo > 0)
-        {
+    public void Shoot() {
+        if (Time.time > shootConfigSO.fireRate + lastShootTime && currentAmmo > 0) {
             emptyMagazine = false;
             lastShootTime = Time.time;
 
             shootSystem.Play();
-            ShootByWeaponType(shootSystem.transform.position);
 
-            for (int i = 0; i < shootConfigSO.bulletsPerShoot; i++)
-            {
+            shootSound.clip = shootSoundClips[UnityEngine.Random.Range(0, shootSoundClips.Length)];
+            shootSound.volume = shootConfigSO.shootVolume;
+            shootSound.Play();
+
+            for (int i = 0; i < shootConfigSO.bulletsPerShoot; i++) {
                 Vector3 shootDirection = shootSystem.transform.forward
                     + new Vector3(
-                            Random.Range(-shootConfigSO.spread.x, shootConfigSO.spread.x),
-                            Random.Range(-shootConfigSO.spread.y, shootConfigSO.spread.y),
-                            Random.Range(-shootConfigSO.spread.z, shootConfigSO.spread.z)
+                            UnityEngine.Random.Range(-shootConfigSO.spread.x, shootConfigSO.spread.x),
+                            UnityEngine.Random.Range(-shootConfigSO.spread.y, shootConfigSO.spread.y),
+                            UnityEngine.Random.Range(-shootConfigSO.spread.z, shootConfigSO.spread.z)
                         );
                 shootDirection.Normalize();
 
-                if (Physics.Raycast(shootSystem.transform.position, shootDirection, out RaycastHit hit, 100f, shootConfigSO.hitMask))
-                {
+                if (Physics.Raycast(shootSystem.transform.position, shootDirection, out RaycastHit hit, 100f, shootConfigSO.hitMask)) {
                     activeMonoBehaviour.StartCoroutine(PlayTrail(shootSystem.transform.position, hit.point, hit));
-                }
-                else
-                {
+                } else {
                     activeMonoBehaviour.StartCoroutine(PlayTrail(shootSystem.transform.position, shootSystem.transform.position + (shootDirection * trailConfigSO.missDistance), new RaycastHit()));
                 }
             }
             currentAmmo--;
-        }
-        else if (currentAmmo == 0)
-        {
+        } else if (currentAmmo == 0) {
             emptyMagazine = true;
         }
 
@@ -111,8 +106,7 @@ public class GunSO : ScriptableObject
     /// <param name="startPoint">The starting position of the "bullets"</param>
     /// <param name="endPoint">The end position of the "bullets"</param>
     /// <param name="hit">The hit object</param>
-    private IEnumerator PlayTrail(Vector3 startPoint, Vector3 endPoint, RaycastHit hit)
-    {
+    private IEnumerator PlayTrail(Vector3 startPoint, Vector3 endPoint, RaycastHit hit) {
         TrailRenderer instance = trailPool.Get();
         instance.transform.SetParent(poolParent.transform, false);
         instance.gameObject.SetActive(true);
@@ -123,8 +117,7 @@ public class GunSO : ScriptableObject
 
         float distance = Vector3.Distance(startPoint, endPoint);
         float remainingDistance = distance;
-        while (remainingDistance > 0f)
-        {
+        while (remainingDistance > 0f) {
             instance.transform.position = Vector3.Lerp(startPoint, endPoint, Mathf.Clamp01(1 - (remainingDistance / distance)));
             remainingDistance -= trailConfigSO.simulationSpeed * Time.deltaTime;
 
@@ -133,8 +126,7 @@ public class GunSO : ScriptableObject
 
         instance.transform.position = endPoint;
 
-        if (hit.collider != null)
-        {
+        if (hit.collider != null) {
             SurfaceManager.Instance.HandleImpact(hit.transform.gameObject, endPoint, hit.normal, impactType, hit.triangleIndex);
 
             HitEnemy(hit);
@@ -152,8 +144,7 @@ public class GunSO : ScriptableObject
     /// Creates the bullet path trail
     /// </summary>
     /// <returns>the rendered trail</returns>
-    private TrailRenderer CreateTrail()
-    {
+    private TrailRenderer CreateTrail() {
         GameObject instance = new GameObject("Bullet Trail");
         TrailRenderer trail = instance.AddComponent<TrailRenderer>();
         trail.colorGradient = trailConfigSO.color;
@@ -172,10 +163,9 @@ public class GunSO : ScriptableObject
     /// <summary>
     /// Deactivates the Weapon and sets the shoot Particle to null
     /// </summary>
-    public void Despawn()
-    {
+    public void Despawn() {
         savedAmmo = currentAmmo;
-        model.SetActive(false);
+        model.gameObject.SetActive(false);
 
         shootSystem = null;
     }
@@ -184,56 +174,27 @@ public class GunSO : ScriptableObject
     /// The Damage logic so Zombies can be damaged
     /// </summary>
     /// <param name="hit">The hit info of the Raycast</param>
-    private void HitEnemy(RaycastHit hit)
-    {
+    private void HitEnemy(RaycastHit hit) {
         ZombieAI zombie = hit.transform.GetComponentInParent<ZombieAI>();
 
-        if (zombie != null)
-        {
-            if (!zombie.IsDead())
-            {
+        if (zombie != null) {
+            if (!zombie.IsDead()) {
                 zombie.TakeDamage(shootConfigSO.damage);
             }
         }
     }
 
-    public void SetFullMagazine()
-    {
+    public void SetFullMagazine() {
         emptyMagazine = false;
         currentAmmo = shootConfigSO.maxAmmo;
     }
 
-    public bool GetEmptyMagazine()
-    {
+    public bool GetEmptyMagazine() {
         return emptyMagazine;
     }
 
-    public bool MagazineIsFull()
-    {
+    public bool MagazineIsFull() {
         return currentAmmo == shootConfigSO.maxAmmo;
     }
 
-    /// <summary>
-    /// Plays the shoot Sound Effect depending on Weapon Type
-    /// </summary>
-    /// <param name="position">The Position it should be played at</param>
-    private void ShootByWeaponType(Vector3 position)
-    {
-        switch (type)
-        {
-            case GunType.AssaultRifle:
-                SoundManager.Instance.AssaultRilfe_ShootSound(position, shootConfigSO.shootVolume);
-                break;
-            case GunType.Pistol:
-                SoundManager.Instance.Pistol_ShootSound(position, shootConfigSO.shootVolume);
-                break;
-            case GunType.Shotgun:
-                SoundManager.Instance.Shotgun_ShootSound(position, shootConfigSO.shootVolume);
-                break;
-            case GunType.Sniper:
-                SoundManager.Instance.Sniper_ShootSound(position, shootConfigSO.shootVolume);
-                break;
-        }
-
-    }
 }

@@ -11,7 +11,7 @@ public class PlayerHealth : MonoBehaviour {
     [SerializeField] private DeathScreen deathScreen;
     [SerializeField] private DayNightCycle dayNightCycle;
 
-    private bool isDead;
+    private bool isDead = false;
     private HealthBar healthBar;
     private PlayerAnimation playerAnimation;
     private PlayerIK playerIK;
@@ -86,6 +86,10 @@ public class PlayerHealth : MonoBehaviour {
             Die();
     }
 
+    /// <summary>
+    /// The Player Death Animation starts and the Weapon 
+    /// inverse Kinematics are cleared so nothing weird happens
+    /// </summary>
     private void Die() {
         isDead = true;
 
@@ -100,6 +104,22 @@ public class PlayerHealth : MonoBehaviour {
         //deathScreen.ShowDeathScreen(dayNightCycle.SurvivedNights);
     }
 
+    /// <summary>
+    /// Heals the Player by a certain amount
+    /// </summary>
+    /// <param name="health">The amount to heal</param>
+    public void HealPlayerHealth(float health) {
+        if (playerStats.currentHealth != playerStats.maxHealth) {
+            playerStats.currentHealth += health;
+        }
+
+        //Debug.Log($"Healed by: {health}");
+    }
+
+    /// <summary>
+    /// Getter to Check if the Player is Dead
+    /// </summary>
+    /// <returns>true if the Player is Dead, false otherwise</returns>
     public bool GetIsDead() {
         return isDead;
     }
