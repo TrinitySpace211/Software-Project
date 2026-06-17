@@ -9,7 +9,10 @@ using UnityEngine.UI;
 /// Manages the player's inventory system, including item storage,
 /// hotbar management, drag-and-drop functionality, and inventory UI handling.
 /// </summary>
-public class Inventory : MonoBehaviour {
+public class Inventory : MonoBehaviour
+{
+    public static Inventory Instance { get; private set; }
+
     [Header("References")]
     [SerializeField] private Player player;
     [SerializeField] private PlayerInputHandler playerInputHandler;
@@ -19,7 +22,10 @@ public class Inventory : MonoBehaviour {
     [Header("Item References")]
     [SerializeField] private ItemSO[] guns;
     [SerializeField] private ItemSO[] melees;
+    [SerializeField] private ItemSO grenade;
+    [SerializeField] private ItemSO[] healthItems;
     [SerializeField] private ItemSO[] debugItems;
+
 
     [Header("Hotbar Swap Speed")]
     [SerializeField] private float swapSpeed = 0.8f;
@@ -34,7 +40,12 @@ public class Inventory : MonoBehaviour {
         Key.Digit8,
         Key.Digit9,
         Key.Digit0,
-        Key.X
+        Key.X,
+        Key.L,
+        Key.Y,
+        Key.U,
+        Key.O,
+        Key.P
     };
 
     /// <summary>
@@ -98,10 +109,18 @@ public class Inventory : MonoBehaviour {
     private float lastTimeSelected;
 
     /// <summary>
+    /// Saves the Slot that got selected in the hotbar
+    /// </summary>
+    private Slot selectedSlot = null;
+
+    /// <summary>
     /// Initializes slot collections by retrieving
     /// inventory and hotbar slots from child objects.
     /// </summary>
-    private void Awake() {
+    private void Awake()
+    {
+        Instance = this;
+
         inventorySlots.AddRange(inventorySlotParent.GetComponentsInChildren<Slot>());
         hotbarSlots.AddRange(hotbarObj.GetComponentsInChildren<Slot>());
 
@@ -112,8 +131,10 @@ public class Inventory : MonoBehaviour {
     /// <summary>
     /// Hides the inventory container at startup.
     /// </summary>
-    private void Start() {
+    private void Start()
+    {
         playerInputHandler.OnHotbarSlotPressed += PlayerInputHandler_OnHotbarSlotPressed;
+        Item.OnItemCollected += Item_OnItemCollected;
 
         container.SetActive(false);
     }
@@ -122,14 +143,18 @@ public class Inventory : MonoBehaviour {
     /// Handles input for testing item additions, inventory toggling,
     /// and drag-and-drop interactions.
     /// </summary>
-    private void Update() {
-        for (int i = 0; i < debugItems.Length && i < debugKeys.Length; i++) {
-            if (Keyboard.current[debugKeys[i]].wasPressedThisFrame) {
+    private void Update()
+    {
+        for (int i = 0; i < debugItems.Length && i < debugKeys.Length; i++)
+        {
+            if (Keyboard.current[debugKeys[i]].wasPressedThisFrame)
+            {
                 AddItem(debugItems[i], 1);
             }
         }
 
-        if (Keyboard.current.iKey.wasPressedThisFrame) {
+        if (Keyboard.current.iKey.wasPressedThisFrame)
+        {
             container.SetActive(!container.activeInHierarchy);
 
             // Cursor.lockState = Cursor.lockState == CursorLockMode.Locked
@@ -152,27 +177,47 @@ public class Inventory : MonoBehaviour {
     /// the Player will change to this item
     /// </summary>
     /// <param name="slot">the key which represents the Hotbarslot</param>
-    private void PlayerInputHandler_OnHotbarSlotPressed(int slot) {
+    private void PlayerInputHandler_OnHotbarSlotPressed(int slot)
+    {
         ItemSO item = hotbarSlots[slot].GetItem();
 
-        if (!isDragging) {
-            if (Time.time > swapSpeed + lastTimeSelected && !player.GetPlayerAnimation().GetIsReloading() && item.itemType != ItemType.Misc) {
+        if (!isDragging)
+        {
+            if (Time.time > swapSpeed + lastTimeSelected && !player.GetPlayerAnimation().GetIsReloading() && !player.GetPlayerAnimation().GetIsThrowingGrenade() && item.itemType != ItemType.Misc)
+            {
                 lastTimeSelected = Time.time;
-                if (previousSlot != -1) {
+                if (previousSlot != -1)
+                {
                     hotbarSlots[previousSlot].SetSelected(false);
                 }
 
                 hotbarSlots[slot].SetSelected(true);
+                selectedSlot = hotbarSlots[slot];
 
-                if (item == null) {
-                    if (previousSlot != -1) {
+                if (item == null)
+                {
+                    if (previousSlot != -1)
+                    {
                         ClearPreviousSelectionIfNeeded(hotbarSlots[previousSlot].GetItem());
                     }
-                } else if (item != null) {
-                    if (IsWeapon(item)) {
+                }
+                else if (item != null)
+                {
+                    if (IsWeapon(item))
+                    {
                         ToggleWeaponSelect(item);
-                    } else if (IsMelee(item)) {
+                    }
+                    else if (IsMelee(item))
+                    {
                         ToggleMeleeSelect(item);
+                    }
+                    else if (IsGrenade(item))
+                    {
+                        ToggleGrenade(item);
+                    }
+                    else if (IsConsumable(item))
+                    {
+                        ToggleConsumable(item);
                     }
                 }
 
@@ -183,21 +228,78 @@ public class Inventory : MonoBehaviour {
     }
 
     /// <summary>
+    /// If an Item is collected, than it will be shown in the Inventory
+    /// </summary>
+    /// <param name="item">The item that has been collected</param>
+    private void Item_OnItemCollected(Item item)
+    {
+        GunType collectedGun = item.GetItemType<GunType>();
+        MeleeType collectedMelee = item.GetItemType<MeleeType>();
+        ItemType collectedGrenade = item.GetItemType<ItemType>();
+        HealthItemType collectedHealthItem = item.GetItemType<HealthItemType>();
+        if (collectedGun != GunType.None)
+        {
+            foreach (ItemSO gun in guns)
+            {
+                if (gun.gunType == collectedGun)
+                {
+                    AddItem(gun, 1);
+                    return;
+                }
+            }
+        }
+        else if (collectedMelee != MeleeType.None)
+        {
+            foreach (ItemSO melee in melees)
+            {
+                if (melee.meleeType == collectedMelee)
+                {
+                    AddItem(melee, 1);
+                    return;
+                }
+            }
+        }
+        else if (collectedGrenade != ItemType.None)
+        {
+            if (collectedGrenade == ItemType.Grenade)
+            {
+                AddItem(grenade, 1);
+                return;
+            }
+        }
+        else if (collectedHealthItem != HealthItemType.None)
+        {
+            foreach (ItemSO healthItem in healthItems)
+            {
+                if (healthItem.healthItemType == collectedHealthItem)
+                {
+                    AddItem(healthItem, 1);
+                    return;
+                }
+            }
+        }
+    }
+
+    /// <summary>
     /// Adds an item to the inventory.
     /// Existing stacks are filled first before empty slots are used.
     /// </summary>
     /// <param name="itemToAdd">The item to add.</param>
     /// <param name="amount">The amount of the item to add.</param>
-    public void AddItem(ItemSO itemToAdd, int amount) {
+    public void AddItem(ItemSO itemToAdd, int amount)
+    {
         int remaining = amount;
 
         // Fill existing stacks first
-        foreach (Slot slot in inventorySlots) {
-            if (slot.HasItem() && slot.GetItem() == itemToAdd) {
+        foreach (Slot slot in inventorySlots)
+        {
+            if (slot.HasItem() && slot.GetItem() == itemToAdd)
+            {
                 int currentAmount = slot.GetAmount();
                 int maxStack = itemToAdd.maxStackSize;
 
-                if (currentAmount < maxStack) {
+                if (currentAmount < maxStack)
+                {
                     int spaceLeft = maxStack - currentAmount;
                     int amountToAdd = Mathf.Min(spaceLeft, remaining);
 
@@ -211,8 +313,10 @@ public class Inventory : MonoBehaviour {
         }
 
         // Place remaining items into empty slots
-        foreach (Slot slot in allSlots) {
-            if (!slot.HasItem()) {
+        foreach (Slot slot in allSlots)
+        {
+            if (!slot.HasItem())
+            {
                 int amountToPlace = Mathf.Min(itemToAdd.maxStackSize, remaining);
                 slot.SetItem(itemToAdd, amountToPlace);
                 remaining -= amountToPlace;
@@ -222,7 +326,8 @@ public class Inventory : MonoBehaviour {
             }
         }
 
-        if (remaining > 0) {
+        if (remaining > 0)
+        {
             Debug.Log(
                 $"Inventory is full. Could not add {remaining}x {itemToAdd.itemName}."
             );
@@ -230,13 +335,39 @@ public class Inventory : MonoBehaviour {
     }
 
     /// <summary>
+    /// Reduces the amount left at the selected Slot
+    /// </summary>
+    /// <param name="amount">How much to reduce</param>
+    public void ConsumeEquippedItem(int amount = 1)
+    {
+        if (selectedSlot == null) return;
+
+        if (!selectedSlot.HasItem()) return;
+
+        int newAmount = selectedSlot.GetAmount() - amount;
+
+        if (newAmount <= 0)
+        {
+            selectedSlot.ClearSlot();
+            player.GetPlayerGunSelector().ResetItem();
+        }
+        else
+        {
+            selectedSlot.SetItem(selectedSlot.GetItem(), newAmount);
+        }
+    }
+
+    /// <summary>
     /// Starts dragging an item if the player clicks on a slot containing an item.
     /// </summary>
-    private void StartDrag() {
-        if (Mouse.current.leftButton.wasPressedThisFrame) {
+    private void StartDrag()
+    {
+        if (Mouse.current.leftButton.wasPressedThisFrame)
+        {
             Slot hovered = GetHoveredSlot();
 
-            if (hovered != null && hovered.HasItem()) {
+            if (hovered != null && hovered.HasItem())
+            {
                 draggedSlot = hovered;
                 isDragging = true;
 
@@ -251,11 +382,14 @@ public class Inventory : MonoBehaviour {
     /// Ends the drag operation and attempts to place
     /// the dragged item into the hovered slot.
     /// </summary>
-    private void EndDrag() {
-        if (Mouse.current.leftButton.wasReleasedThisFrame && isDragging) {
+    private void EndDrag()
+    {
+        if (Mouse.current.leftButton.wasReleasedThisFrame && isDragging)
+        {
             Slot hovered = GetHoveredSlot();
 
-            if (hovered != null) {
+            if (hovered != null)
+            {
                 HandleDrop(draggedSlot, hovered);
 
                 dragIcon.enabled = false;
@@ -271,8 +405,10 @@ public class Inventory : MonoBehaviour {
     /// <returns>
     /// The hovered <see cref="Slot"/> or null if no slot is hovered.
     /// </returns>
-    private Slot GetHoveredSlot() {
-        foreach (Slot s in allSlots) {
+    private Slot GetHoveredSlot()
+    {
+        foreach (Slot s in allSlots)
+        {
             if (s.hovering)
                 return s;
         }
@@ -286,16 +422,19 @@ public class Inventory : MonoBehaviour {
     /// </summary>
     /// <param name="from">The source slot.</param>
     /// <param name="to">The destination slot.</param>
-    private void HandleDrop(Slot from, Slot to) {
+    private void HandleDrop(Slot from, Slot to)
+    {
         if (from == to)
             return;
 
         // Stack items if possible
-        if (to.HasItem() && to.GetItem() == from.GetItem()) {
+        if (to.HasItem() && to.GetItem() == from.GetItem())
+        {
             int max = to.GetItem().maxStackSize;
             int space = max - to.GetAmount();
 
-            if (space > 0) {
+            if (space > 0)
+            {
                 int move = Mathf.Min(space, from.GetAmount());
 
                 to.SetItem(to.GetItem(), to.GetAmount() + move);
@@ -309,20 +448,35 @@ public class Inventory : MonoBehaviour {
         }
 
         // Swap items if destination slot is occupied
-        if (to.HasItem()) {
+        if (to.HasItem())
+        {
             ItemSO tempItem = to.GetItem();
             int tempAmount = to.GetAmount();
 
             to.SetItem(from.GetItem(), from.GetAmount());
             from.SetItem(tempItem, tempAmount);
 
-            if (to.GetSelected()) {
-                if (IsWeapon(to.GetItem())) {
+            if (to.GetSelected())
+            {
+                if (IsWeapon(to.GetItem()))
+                {
                     ToggleWeaponSelect(to.GetItem());
-                } else if (IsMelee(to.GetItem())) {
+                }
+                else if (IsMelee(to.GetItem()))
+                {
                     ToggleMeleeSelect(to.GetItem());
                 }
-            } else if (from.GetSelected()) {
+                else if (IsGrenade(to.GetItem()))
+                {
+                    ToggleGrenade(to.GetItem());
+                }
+                else if (IsConsumable(to.GetItem()))
+                {
+                    ToggleConsumable(to.GetItem());
+                }
+            }
+            else if (from.GetSelected())
+            {
                 ClearPreviousSelectionIfNeeded(from.GetItem());
             }
 
@@ -332,13 +486,27 @@ public class Inventory : MonoBehaviour {
         // Move item into empty slot
         to.SetItem(from.GetItem(), from.GetAmount());
 
-        if (to.GetSelected()) {
-            if (IsWeapon(to.GetItem())) {
+        if (to.GetSelected())
+        {
+            if (IsWeapon(to.GetItem()))
+            {
                 ToggleWeaponSelect(to.GetItem());
-            } else if (IsMelee(to.GetItem())) {
+            }
+            else if (IsMelee(to.GetItem()))
+            {
                 ToggleMeleeSelect(to.GetItem());
             }
-        } else if (from.GetSelected()) {
+            else if (IsGrenade(to.GetItem()))
+            {
+                ToggleGrenade(to.GetItem());
+            }
+            else if (IsConsumable(to.GetItem()))
+            {
+                ToggleConsumable(to.GetItem());
+            }
+        }
+        else if (from.GetSelected())
+        {
             ClearPreviousSelectionIfNeeded(from.GetItem());
         }
 
@@ -348,8 +516,10 @@ public class Inventory : MonoBehaviour {
     /// <summary>
     /// Updates the drag icon position to follow the mouse cursor.
     /// </summary>
-    private void UpdateDragItemPosition() {
-        if (isDragging) {
+    private void UpdateDragItemPosition()
+    {
+        if (isDragging)
+        {
             dragIcon.transform.position = Mouse.current.position.ReadValue();
         }
     }
@@ -358,7 +528,8 @@ public class Inventory : MonoBehaviour {
     /// Toggles the inventory pause state,
     /// enabling/disabling the inventory UI and game time.
     /// </summary>
-    private void TogglePause() {
+    private void TogglePause()
+    {
         isPaused = !isPaused;
 
         container.SetActive(isPaused);
@@ -366,13 +537,16 @@ public class Inventory : MonoBehaviour {
         Time.timeScale = isPaused ? 0f : 1f;
     }
 
-    private void ToggleWeaponSelect(ItemSO weapon) {
-        if (weapon == null) {
+    private void ToggleWeaponSelect(ItemSO weapon)
+    {
+        if (weapon == null)
+        {
             player.GetPlayerGunSelector().DequipWeapon();
             return;
         }
 
-        switch (weapon.gunType) {
+        switch (weapon.gunType)
+        {
             case GunType.AssaultRifle:
                 player.GetPlayerGunSelector().SelectAssaultRifle();
                 break;
@@ -391,13 +565,16 @@ public class Inventory : MonoBehaviour {
         }
     }
 
-    private void ToggleMeleeSelect(ItemSO weapon) {
-        if (weapon == null) {
+    private void ToggleMeleeSelect(ItemSO weapon)
+    {
+        if (weapon == null)
+        {
             player.GetPlayerGunSelector().DequipMelee();
             return;
         }
 
-        switch (weapon.meleeType) {
+        switch (weapon.meleeType)
+        {
             case MeleeType.Knife:
                 player.GetPlayerGunSelector().SelectKnife();
                 break;
@@ -422,20 +599,83 @@ public class Inventory : MonoBehaviour {
         }
     }
 
-    private bool IsWeapon(ItemSO item) {
+    private void ToggleGrenade(ItemSO grenade)
+    {
+        if (grenade == null)
+        {
+            player.GetPlayerGunSelector().DequipGrenade();
+        }
+        else
+        {
+            switch (grenade.itemType)
+            {
+                case ItemType.Grenade:
+                    player.GetPlayerGunSelector().SelectGrenade();
+                    break;
+
+            }
+        }
+    }
+
+    private void ToggleConsumable(ItemSO consumable)
+    {
+        if (consumable == null)
+        {
+            player.GetPlayerGunSelector().DequipHealthPack();
+        }
+        else
+        {
+            player.GetPlayerGunSelector().SelectHealthPack(consumable.healthItemType);
+        }
+    }
+
+    private bool IsWeapon(ItemSO item)
+    {
         return item != null && item.itemType == ItemType.Gun;
     }
 
-    private bool IsMelee(ItemSO item) {
+    private bool IsMelee(ItemSO item)
+    {
         return item != null && item.itemType == ItemType.Melee;
     }
 
-    private void ClearPreviousSelectionIfNeeded(ItemSO item) {
-        if (IsWeapon(item)) {
+    private bool IsGrenade(ItemSO item)
+    {
+        return item != null && item.itemType == ItemType.Grenade;
+    }
+
+    private bool IsConsumable(ItemSO item)
+    {
+        return item != null && item.itemType == ItemType.Consumable;
+    }
+
+    private void ClearPreviousSelectionIfNeeded(ItemSO item)
+    {
+        if (IsWeapon(item))
+        {
             ToggleWeaponSelect(null);
-        } else if (IsMelee(item)) {
+        }
+        else if (IsMelee(item))
+        {
             ToggleMeleeSelect(null);
         }
+        else if (IsGrenade(item))
+        {
+            ToggleGrenade(null);
+        }
+        else if (IsConsumable(item))
+        {
+            ToggleConsumable(null);
+        }
+    }
+
+    public int GetSelectedItemAmount()
+    {
+        if (selectedSlot != null)
+        {
+            return selectedSlot.GetAmount();
+        }
+        return -1;
     }
 
     /*
@@ -448,14 +688,17 @@ public class Inventory : MonoBehaviour {
     /// </summary>
     /// <param name="itemToCount">The item that should be counted.</param>
     /// <returns>The total amount of the item.</returns>
-    public int GetItemAmount(ItemSO itemToCount) {
+    public int GetItemAmount(ItemSO itemToCount)
+    {
         if (itemToCount == null)
             return 0;
 
         int totalAmount = 0;
 
-        foreach (Slot slot in allSlots) {
-            if (slot.HasItem() && slot.GetItem() == itemToCount) {
+        foreach (Slot slot in allSlots)
+        {
+            if (slot.HasItem() && slot.GetItem() == itemToCount)
+            {
                 totalAmount += slot.GetAmount();
             }
         }
@@ -469,7 +712,8 @@ public class Inventory : MonoBehaviour {
     /// <param name="itemToCheck">The item that should be checked.</param>
     /// <param name="requiredAmount">The required amount.</param>
     /// <returns>True if enough items exist; otherwise false.</returns>
-    public bool HasItemAmount(ItemSO itemToCheck, int requiredAmount) {
+    public bool HasItemAmount(ItemSO itemToCheck, int requiredAmount)
+    {
         return GetItemAmount(itemToCheck) >= requiredAmount;
     }
 
@@ -480,7 +724,8 @@ public class Inventory : MonoBehaviour {
     /// <param name="itemToRemove">The item that should be removed.</param>
     /// <param name="amountToRemove">The amount that should be removed.</param>
     /// <returns>True if the item amount could be removed; otherwise false.</returns>
-    public bool RemoveItem(ItemSO itemToRemove, int amountToRemove) {
+    public bool RemoveItem(ItemSO itemToRemove, int amountToRemove)
+    {
         if (itemToRemove == null)
             return false;
 
@@ -489,8 +734,10 @@ public class Inventory : MonoBehaviour {
 
         int remainingAmount = amountToRemove;
 
-        foreach (Slot slot in allSlots) {
-            if (slot.HasItem() && slot.GetItem() == itemToRemove) {
+        foreach (Slot slot in allSlots)
+        {
+            if (slot.HasItem() && slot.GetItem() == itemToRemove)
+            {
                 int amountInSlot = slot.GetAmount();
                 int amountToTake = Mathf.Min(amountInSlot, remainingAmount);
 

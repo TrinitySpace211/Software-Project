@@ -67,8 +67,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   sunLight: {fileID: 0}
-  dayLightIntensity: 1.2
-  nightLightIntensity: 0.5
+  dayLightIntensity: 1.6
+  nightLightIntensity: 1
   dayColor: {r: 0.5849056, g: 0.51234984, b: 0.35039157, a: 1}
   nightColor: {r: 0.16491634, g: 0.20463984, b: 0.3207547, a: 1}
   playerObject: {fileID: 0}
@@ -93,6 +93,11 @@ MonoBehaviour:
   deathCanvas: {fileID: 0}
   buttonCanvas: {fileID: 0}
   nightsText: {fileID: 0}
+  inventoryUI: {fileID: 0}
+  crosshair: {fileID: 0}
+  timeDisplay: {fileID: 0}
+  healthBar: {fileID: 0}
+  gasTankHud: {fileID: 0}
   audioSource: {fileID: 0}
   deathSound: {fileID: 8300000, guid: 19c59907c023e1242a35b981abd8dbe7, type: 3}
   mainMenuScene: MainMenu

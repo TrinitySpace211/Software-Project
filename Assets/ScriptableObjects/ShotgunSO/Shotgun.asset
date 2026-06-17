@@ -19,6 +19,10 @@ MonoBehaviour:
   modelPrefab: {fileID: 1893640954530389767, guid: 1a89ed81f8fea634ea42f93bf148d770, type: 3}
   spawnPoint: {x: 0, y: 0, z: 0}
   spawnRotation: {x: 0, y: 0, z: 0}
-  shootVolume: 0.8
   shootConfigSO: {fileID: 11400000, guid: a805b2bc68abbe340aeffbbbb46a29ee, type: 2}
   trailConfigSO: {fileID: 11400000, guid: b1e0b09f055d99c4b83cba82cfb5c211, type: 2}
+  shootSoundClips:
+  - {fileID: 8300000, guid: 14c7e164977986f42afb3a04cf782fec, type: 3}
+  - {fileID: 8300000, guid: beefef55590cbf444abcaf34734cb0ab, type: 3}
+  - {fileID: 8300000, guid: b1956c4494432164fb75b45dd14ffd0b, type: 3}
+  - {fileID: 8300000, guid: a9ec7b1385509b74497843ab268ec977, type: 3}

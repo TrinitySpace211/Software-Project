@@ -4,26 +4,26 @@ Shader "Custom/PlayerMask"
 
     SubShader
     {
-        //Tags { "Queue"="Transparent" "RenderType"="Transparent" }
+        Tags { "Queue"="Geometry-10" "RenderType"="Transparent" "IgnoreProjector"="True" }
+
+        Cull Off
+        ZWrite Off
+        ZTest LEqual
 
         Pass
         {
-            // Keine Farb- oder Alpha-Outputs nötig — wir schreiben nur Stencil
             ColorMask 0
-
-            // Stelle sicher, dass die Stencil-Writes auch dann passieren,
-            // wenn die Sphäre hinter Geometrie liegt.
-            ZTest Always
-            ZWrite Off
 
             Stencil
             {
                 Ref 1
                 Comp Always
                 Pass Replace
+                ReadMask 1
+                WriteMask 1
             }
         }
     }
 
-    //FallBack Off
+    FallBack Off
 }

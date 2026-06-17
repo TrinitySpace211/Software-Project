@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// Scriptable Object to to keep most of the Sound Effects in one place
+/// </summary>
 [CreateAssetMenu(fileName = "AudioClipRefsSO", menuName = "Sounds/AudioClipRefsSO")]
 public class AudioClipRefsSO : ScriptableObject {
 
@@ -15,10 +18,18 @@ public class AudioClipRefsSO : ScriptableObject {
     public AudioClip[] pistolReloadSounds;
     public AudioClip[] shotgunReloadSounds;
     public AudioClip[] sniperReloadSounds;
+    public float reloadSoundVolume;
 
     [Space]
     [Header("Melee Swing")]
     public AudioClip[] meleeSwing;
+
+    [Space]
+    [Header("Grenade Sounds")]
+    public AudioClip[] grenadePin;
+    public float grenadePinVolume;
+    public AudioClip[] explosionSounds;
+    public float explosionSoundsVolume;
 
     [Space]
     [Header("Zombie Hurt")]
@@ -34,4 +45,14 @@ public class AudioClipRefsSO : ScriptableObject {
     [Header("Player Death")]
     public AudioClip playerDeath;
     public float playerDeathVolume;
+
+    [Space]
+    [Header("Player Heal")]
+    public AudioClip playerHeal;
+    public float playerHealVolume;
+
+    [Space]
+    [Header("Map")]
+    public AudioClip[] mapOpen;
+    public float mapOpenVolume;
 }

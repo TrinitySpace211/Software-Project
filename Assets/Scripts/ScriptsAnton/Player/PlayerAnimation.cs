@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -14,6 +15,7 @@ public class PlayerAnimation : MonoBehaviour {
     private Player player;
     private bool isSprinting;
     private bool isReloading = false;
+    private bool isThrowingGrenade = false;
 
     private int inputXHash = Animator.StringToHash("inputX");
     private int inputYHash = Animator.StringToHash("inputY");
@@ -25,11 +27,13 @@ public class PlayerAnimation : MonoBehaviour {
     private int isWeaponAimingHash = Animator.StringToHash("IsWeaponAiming");
     private int meleeAttack1Hash = Animator.StringToHash("MeleeAttack1");
     private int meleeAttack2Hash = Animator.StringToHash("MeleeAttack2");
+    private int grenadeThrowHash = Animator.StringToHash("ThrowGrenade");
     private int meleeAttckSpeedMultHash = Animator.StringToHash("MeleeAttackSpeedMult");
 
     private void Start() {
         player = GetComponent<Player>();
     }
+
     private void Update() {
         UpdateAnimationState();
     }
@@ -97,6 +101,7 @@ public class PlayerAnimation : MonoBehaviour {
 
     public void StartReloading() {
         isReloading = true;
+
         animator.SetBool(isReloadingHash, isReloading);
     }
 
@@ -112,6 +117,18 @@ public class PlayerAnimation : MonoBehaviour {
 
     public bool GetIsReloading() {
         return isReloading;
+    }
+
+    public void SetIsThrowingGrenade(bool isThrowingGrenade) {
+        this.isThrowingGrenade = isThrowingGrenade;
+    }
+
+    public bool GetIsThrowingGrenade() {
+        return isThrowingGrenade;
+    }
+
+    public void SetGrenadeAnimation() {
+        animator.SetTrigger(grenadeThrowHash);
     }
 
     public void SetOneHandMeleeAttack() {

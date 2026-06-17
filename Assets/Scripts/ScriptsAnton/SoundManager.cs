@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 /// <summary>
@@ -9,27 +10,39 @@ using UnityEngine;
 public class SoundManager : MonoBehaviour {
     public static SoundManager Instance { get; private set; }
 
-    private const string PLAYER_PREFS_SOUND_EFFECTS_VOLUME = "SoundEffectsVolume";
-
     [SerializeField] private AudioClipRefsSO audioClipRefsSO;
 
     [Header("Sound References")]
     [SerializeField] private AudioSource backgroundMusic;
     [SerializeField] private AudioSource bulletImpactAudioSource;
     [SerializeField] private AudioSource footstepsAudioSource;
+    [SerializeField] private AudioSource bulletShootAudioSource;
+    [SerializeField] private AudioSource mapOpenAudioSource;
 
-    private float volume = 1f;
+    public float volume { get; private set; } = 1f;
+
+    private readonly float shotgunReloadDelay = 0.25f;
 
     private void Awake() {
         Instance = this;
-
-        volume = PlayerPrefs.GetFloat(PLAYER_PREFS_SOUND_EFFECTS_VOLUME, 1f);
     }
 
-    private void Start() {
+    private void OnEnable() {
+        Player.OnHeal += Player_OnHeal;
         PlayerHealth.OnTakeDamage += Player_OnTakeDamage;
+        Player.OnReload += Player_OnReload;
         PlayerHealth.OnDeath += Player_OnDeath;
         ZombieAI.OnTakeDamage += Enemy_OnTakeDamage;
+        Player.OnGrenadeThrow += Player_OnGrenadeThrow;
+    }
+
+    private void OnDestroy() {
+        Player.OnHeal -= Player_OnHeal;
+        PlayerHealth.OnTakeDamage -= Player_OnTakeDamage;
+        Player.OnReload -= Player_OnReload;
+        PlayerHealth.OnDeath -= Player_OnDeath;
+        ZombieAI.OnTakeDamage -= Enemy_OnTakeDamage;
+        Player.OnGrenadeThrow -= Player_OnGrenadeThrow;
     }
 
     /// <summary>
@@ -37,7 +50,7 @@ public class SoundManager : MonoBehaviour {
     /// </summary>
     /// <param name="position">Postion of the Zombie</param>
     private void Enemy_OnTakeDamage(Vector3 position) {
-        Zombie_Hurt(position, audioClipRefsSO.playerHurtVolume);
+        PlaySound(audioClipRefsSO.zombieHurt, position, audioClipRefsSO.zombieHurtVolume);
     }
 
     /// <summary>
@@ -45,47 +58,61 @@ public class SoundManager : MonoBehaviour {
     /// </summary>
     /// <param name="position">Position of the Player</param>
     private void Player_OnTakeDamage(Vector3 position) {
-        Player_Hurt(position, audioClipRefsSO.playerHurtVolume);
+        PlaySound(audioClipRefsSO.playerHurt, position, audioClipRefsSO.playerHurtVolume);
     }
 
+    /// <summary>
+    /// Event that triggers once the Player is Dead
+    /// </summary>
+    /// <param name="position">The Position of the Player</param>
     private void Player_OnDeath(Vector3 position) {
-        Player_Death(position, audioClipRefsSO.playerDeathVolume);
+        PlaySound(audioClipRefsSO.playerDeath, position, audioClipRefsSO.playerDeathVolume);
     }
 
     /// <summary>
-    /// Plays the Shoot Sound Effects for the Assault Rifle
+    /// Event that triggers every time the Player is Reloading.
+    /// Plays the Reload Sound Effect for the corresponding Weapon
     /// </summary>
-    /// <param name="position">The position of the Impact</param>
-    /// <param name="volume">Volume of the Sound Effects</param>
-    public void AssaultRilfe_ShootSound(Vector3 position, float volume) {
-        PlaySound(audioClipRefsSO.assaultRifleSounds, position, volume);
+    /// <param name="position">The Position of the Player</param>
+    private void Player_OnReload(Vector3 position, GunSO gun) {
+        switch (gun.type) {
+            case GunType.AssaultRifle:
+                AssaultRilfe_ReloadSound(position, audioClipRefsSO.reloadSoundVolume);
+                break;
+            case GunType.Pistol:
+                Pistol_ReloadSound(position, audioClipRefsSO.reloadSoundVolume);
+                break;
+            case GunType.Shotgun:
+                Shotgun_ReloadSound(position, audioClipRefsSO.reloadSoundVolume, gun);
+                break;
+            case GunType.Sniper:
+                Sniper_ReloadSound(position, audioClipRefsSO.reloadSoundVolume);
+                break;
+        }
     }
 
     /// <summary>
-    /// Plays the Shoot Sound Effects for the Pistol
+    /// Plays the Pin Sound of the Grenade when it gets thrown
     /// </summary>
-    /// <param name="position">The position of the Impact</param>
-    /// <param name="volume">Volume of the Sound Effects</param>
-    public void Pistol_ShootSound(Vector3 position, float volume) {
-        PlaySound(audioClipRefsSO.pistolSounds, position, volume);
+    /// <param name="position">The position where the Sound should happen</param>
+    private void Player_OnGrenadeThrow(Vector3 position) {
+        PlaySound(audioClipRefsSO.grenadePin, position, audioClipRefsSO.grenadePinVolume);
     }
 
     /// <summary>
-    /// Plays the Shoot Sound Effects for the Shotgun
+    /// Plays the Explosion Sound for the Grenade at a specific Position
     /// </summary>
-    /// <param name="position">The position of the Impact</param>
-    /// <param name="volume">Volume of the Sound Effects</param>
-    public void Shotgun_ShootSound(Vector3 position, float volume) {
-        PlaySound(audioClipRefsSO.shotgunSounds, position, volume);
+    /// <param name="position">The position where the Sound should happen</param>
+    public void Grenade_ExplosionSound(Vector3 position) {
+        PlaySound(audioClipRefsSO.explosionSounds, position, audioClipRefsSO.explosionSoundsVolume);
     }
 
     /// <summary>
-    /// Plays the Shoot Sound Effects for the Sniper
+    /// Plays the Heal Sound for the Health Kits at a specific Position
     /// </summary>
-    /// <param name="position">The position of the Impact</param>
-    /// <param name="volume">Volume of the Sound Effects</param>
-    public void Sniper_ShootSound(Vector3 position, float volume) {
-        PlaySound(audioClipRefsSO.sniperSounds, position, volume);
+    /// <param name="position">The position where the Sound should happen</param>
+    private void Player_OnHeal(Vector3 position) {
+        PlaySound(audioClipRefsSO.playerHeal, position, audioClipRefsSO.playerHealVolume);
     }
 
     /// <summary>
@@ -93,8 +120,8 @@ public class SoundManager : MonoBehaviour {
     /// </summary>
     /// <param name="position">The position of the Impact</param>
     /// <param name="volume">Volume of the Sound Effects</param>s
-    public void AssaultRilfe_Reload(Vector3 position, float volume) {
-        PlaySound(audioClipRefsSO.assaultRifleSounds, position, volume);
+    public void AssaultRilfe_ReloadSound(Vector3 position, float volume) {
+        PlaySound(audioClipRefsSO.assaultRifleReloadSounds, position, volume);
     }
 
     /// <summary>
@@ -102,8 +129,8 @@ public class SoundManager : MonoBehaviour {
     /// </summary>
     /// <param name="position">The position of the Impact</param>
     /// <param name="volume">Volume of the Sound Effects</param>
-    public void Pistol_Reload(Vector3 position, float volume) {
-        PlaySound(audioClipRefsSO.pistolSounds, position, volume);
+    public void Pistol_ReloadSound(Vector3 position, float volume) {
+        PlaySound(audioClipRefsSO.pistolReloadSounds, position, volume);
     }
 
     /// <summary>
@@ -111,8 +138,25 @@ public class SoundManager : MonoBehaviour {
     /// </summary>
     /// <param name="position">The position of the Impact</param>
     /// <param name="volume">Volume of the Sound Effects</param>
-    public void Shotgun_Reload(Vector3 position, float volume) {
-        PlaySound(audioClipRefsSO.shotgunSounds, position, volume);
+    public void Shotgun_ReloadSound(Vector3 position, float volume, GunSO gun) {
+        if (gun.type == GunType.Shotgun) {
+            StartCoroutine(ReloadMultipleTimes(position, volume, gun));
+        } else {
+            PlaySound(audioClipRefsSO.shotgunReloadSounds, position, volume);
+        }
+    }
+
+    /// <summary>
+    /// The Reload Sound will be played multiple times by the amount of bullets a gun has.
+    /// This is just for the Shotgun, because it reloads every bullet one at a time;
+    /// </summary>
+    private IEnumerator ReloadMultipleTimes(Vector3 position, float volume, GunSO gun) {
+        float missingAmmo = gun.shootConfigSO.maxAmmo - gun.currentAmmo;
+        for (int i = 0; i < missingAmmo; i++) {
+            PlaySound(audioClipRefsSO.shotgunReloadSounds, position, volume);
+
+            yield return new WaitForSeconds(shotgunReloadDelay);
+        }
     }
 
     /// <summary>
@@ -120,8 +164,8 @@ public class SoundManager : MonoBehaviour {
     /// </summary>
     /// <param name="position">The position of the Impact</param>
     /// <param name="volume">Volume of the Sound Effects</param>
-    public void Sniper_Reload(Vector3 position, float volume) {
-        PlaySound(audioClipRefsSO.sniperSounds, position, volume);
+    public void Sniper_ReloadSound(Vector3 position, float volume) {
+        PlaySound(audioClipRefsSO.sniperReloadSounds, position, volume);
     }
 
     /// <summary>
@@ -131,33 +175,6 @@ public class SoundManager : MonoBehaviour {
     /// <param name="volume">Volume of the Sound Effects</param>
     public void Melee_Swing(Vector3 position, float volume) {
         PlaySound(audioClipRefsSO.meleeSwing, position, volume);
-    }
-
-    /// <summary>
-    /// Plays this Sound Effect if the hp of a Zombie gets reduced
-    /// </summary>
-    /// <param name="position">The position of the Impact</param>
-    /// <param name="volume">Volume of the Sound Effects</param>
-    public void Zombie_Hurt(Vector3 position, float volume) {
-        PlaySound(audioClipRefsSO.zombieHurt, position, volume);
-    }
-
-    /// <summary>
-    /// Plays this Sound Effect if the hp of a Player gets reduced
-    /// </summary>
-    /// <param name="position">The position of the Impact</param>
-    /// <param name="volume">Volume of the Sound Effects</param>
-    public void Player_Hurt(Vector3 position, float volume) {
-        PlaySound(audioClipRefsSO.playerHurt, position, volume);
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="position"></param>
-    /// <param name="volume"></param>
-    public void Player_Death(Vector3 position, float volume) {
-        PlaySound(audioClipRefsSO.playerDeath, position, volume);
     }
 
     /// <summary>
@@ -180,4 +197,5 @@ public class SoundManager : MonoBehaviour {
     private void PlaySound(AudioClip audioClip, Vector3 position, float volumeMultiplier) {
         AudioSource.PlayClipAtPoint(audioClip, position, volumeMultiplier * volume);
     }
+
 }
