@@ -37,6 +37,7 @@ public class ObjectiveManager : MonoBehaviour {
     /// </summary>
     public void OnNightStarted() {
         var zombies = FindObjectsByType<ZombieAI>(FindObjectsSortMode.None);
+        var sprinters = FindObjectsByType<SprinterController>(FindObjectsSortMode.None); // NEU
         var redirected = 0;
 
         foreach (var zombie in zombies) {
@@ -44,6 +45,14 @@ public class ObjectiveManager : MonoBehaviour {
             var objective = GetRandomActiveObjective();
             if (objective == null) break;
             zombie.SetTarget(objective, true);
+            redirected++;
+        }
+
+        foreach (var sprinter in sprinters) {
+            if (sprinter.isDead) continue;
+            var objective = GetRandomActiveObjective();
+            if (objective == null) break;
+            sprinter.SetTarget(objective, true);
             redirected++;
         }
 

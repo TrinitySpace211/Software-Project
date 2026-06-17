@@ -8,7 +8,7 @@ using Random = UnityEngine.Random;
 ///     Controls zombie behaviour: patrolling, chasing, and attacking the player or objective.
 ///     Transitions between states based on distance to the current target.
 /// </summary>
-public class ZombieAI : MonoBehaviour {
+public class ZombieAI : MonoBehaviour, IDamageable {
     public static Action<Vector3> OnTakeDamage;
     public int health = 100;
 
@@ -86,6 +86,25 @@ public class ZombieAI : MonoBehaviour {
             HandleObjectiveMode();
         else
             HandlePlayerMode();
+    }
+
+    public void TakeDamage(int damage) {
+        if (isDead) return;
+
+        health -= damage;
+        OnTakeDamage?.Invoke(transform.position);
+
+        if (health <= 0) {
+            Die();
+            return;
+        }
+
+        StopAllCoroutines();
+        StartCoroutine(HitFeedback());
+    }
+
+    public bool IsDead() {
+        return isDead;
     }
 
     /// <summary>
@@ -245,21 +264,6 @@ public class ZombieAI : MonoBehaviour {
         _isAttacking = false;
     }
 
-    public void TakeDamage(int damage) {
-        if (isDead) return;
-
-        health -= damage;
-        OnTakeDamage?.Invoke(transform.position);
-
-        if (health <= 0) {
-            Die();
-            return;
-        }
-
-        StopAllCoroutines();
-        StartCoroutine(HitFeedback());
-    }
-
     private void Die() {
         isDead = true;
         _animController?.SetDead(true);
@@ -271,9 +275,5 @@ public class ZombieAI : MonoBehaviour {
         zombieMaterial.color = hitColor;
         yield return new WaitForSeconds(0.1f);
         zombieMaterial.color = originalColor;
-    }
-
-    public bool IsDead() {
-        return isDead;
     }
 }
