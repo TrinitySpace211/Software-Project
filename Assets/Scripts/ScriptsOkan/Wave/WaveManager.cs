@@ -16,6 +16,10 @@ public class WaveManager : MonoBehaviour {
 
     private int _currentDay;
 
+    private void Awake() {
+        LeanTween.init(800);
+    }
+
     /// <summary>
     ///     Called by the Start button. Resets the day counter and spawns the first wave.
     /// </summary>
@@ -42,11 +46,19 @@ public class WaveManager : MonoBehaviour {
             maxZombiesTotal
         );
 
+        // Ab Tag 2 (Welle 3): 1 Sprinter, danach +1 pro Welle bis max 8
+        var totalSprinters = _currentDay >= 2
+            ? Mathf.Min(_currentDay - 1, 8)
+            : 0;
+
         var perZone = total / spawnZones.Length;
         var remainder = total % spawnZones.Length;
+        var sprintersPerZone = totalSprinters / spawnZones.Length;
 
         for (var i = 0; i < spawnZones.Length; i++) {
             spawnZones[i].zombieCount = perZone + (i == 0 ? remainder : 0);
+            spawnZones[i].sprinterCount =
+                sprintersPerZone + (i == 0 ? totalSprinters % spawnZones.Length : 0); // ← Rest auch verteilen
             spawnZones[i].SpawnWave();
         }
     }
