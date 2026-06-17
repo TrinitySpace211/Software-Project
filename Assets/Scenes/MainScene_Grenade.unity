@@ -23,7 +23,7 @@ RenderSettings:
   m_AmbientSkyColor: {r: 0.212, g: 0.227, b: 0.259, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
-  m_AmbientIntensity: 0.5
+  m_AmbientIntensity: 1.2
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
   m_SkyboxMaterial: {fileID: 2100000, guid: f6af5f60fe942f342a04ad9a43225c75, type: 2}
@@ -35,7 +35,7 @@ RenderSettings:
   m_DefaultReflectionMode: 0
   m_DefaultReflectionResolution: 128
   m_ReflectionBounces: 1
-  m_ReflectionIntensity: 0.3
+  m_ReflectionIntensity: 0.5
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 1805392118}
   m_UseRadianceAmbientProbe: 0
@@ -93,7 +93,7 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 0}
+  m_LightingDataAsset: {fileID: 112000000, guid: d90d07532e21f0d43b9e30af2a493f18, type: 2}
   m_LightingSettings: {fileID: 4890085278179872738, guid: 1dbc56f07bb346f4d82bbef08d8db784, type: 2}
 --- !u!196 &4
 NavMeshSettings:
@@ -1960,7 +1960,7 @@ Transform:
   m_GameObject: {fileID: 351377793}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -57.52, y: 0.53, z: -4.16}
+  m_LocalPosition: {x: -4.92, y: 0.5, z: -4.16}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3167,6 +3167,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 3010391939335521095, guid: 431d7ed34772d8b429b9358df3f011a7, type: 3}
+      propertyPath: m_ReceiveGI
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3010391939335521095, guid: 431d7ed34772d8b429b9358df3f011a7, type: 3}
       propertyPath: m_LightmapParameters
       value: 
       objectReference: {fileID: 15204, guid: 0000000000000000f000000000000000, type: 0}
@@ -3232,7 +3236,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8652738360515917477, guid: 431d7ed34772d8b429b9358df3f011a7, type: 3}
       propertyPath: m_StaticEditorFlags
-      value: 2147483647
+      value: 126
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3588,7 +3592,7 @@ PrefabInstance:
       objectReference: {fileID: 758257482}
     - target: {fileID: 5427726534359471549, guid: 0c9fa39718c653b4c9b29a8aaa6e023e, type: 3}
       propertyPath: dayLightIntensity
-      value: 1.4
+      value: 1.6
       objectReference: {fileID: 0}
     - target: {fileID: 5427726534359471549, guid: 0c9fa39718c653b4c9b29a8aaa6e023e, type: 3}
       propertyPath: hoursPerRealSecond
@@ -3596,7 +3600,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5427726534359471549, guid: 0c9fa39718c653b4c9b29a8aaa6e023e, type: 3}
       propertyPath: nightLightIntensity
-      value: 0.8
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5427726534359471549, guid: 0c9fa39718c653b4c9b29a8aaa6e023e, type: 3}
       propertyPath: onNewDayStarted.m_PersistentCalls.m_Calls.Array.size
@@ -4497,7 +4501,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7972688246153947666, guid: 10cda794c28ef3a489afcf55a3d31dc7, type: 3}
       propertyPath: m_RenderPostProcessing
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7972688246153947666, guid: 10cda794c28ef3a489afcf55a3d31dc7, type: 3}
       propertyPath: m_VolumeLayerMask.m_Bits
@@ -5235,8 +5239,28 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8207453988858882644, guid: c136419487cf0f84aa6253d8b382a976, type: 3}
-      propertyPath: m_Intensity
+      propertyPath: m_Color.b
+      value: 0.7122642
+      objectReference: {fileID: 0}
+    - target: {fileID: 8207453988858882644, guid: c136419487cf0f84aa6253d8b382a976, type: 3}
+      propertyPath: m_Color.g
+      value: 0.8401468
+      objectReference: {fileID: 0}
+    - target: {fileID: 8207453988858882644, guid: c136419487cf0f84aa6253d8b382a976, type: 3}
+      propertyPath: m_Color.r
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8207453988858882644, guid: c136419487cf0f84aa6253d8b382a976, type: 3}
+      propertyPath: m_Intensity
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8207453988858882644, guid: c136419487cf0f84aa6253d8b382a976, type: 3}
+      propertyPath: m_Lightmapping
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8207453988858882644, guid: c136419487cf0f84aa6253d8b382a976, type: 3}
+      propertyPath: m_BounceIntensity
+      value: 1.2
       objectReference: {fileID: 0}
     - target: {fileID: 8207453988858882644, guid: c136419487cf0f84aa6253d8b382a976, type: 3}
       propertyPath: m_CullingMask.m_Bits

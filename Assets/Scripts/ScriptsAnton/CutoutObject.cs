@@ -19,9 +19,9 @@ public class CutoutObject : MonoBehaviour {
         LeanTween.cancel(gameObject);
         if (Physics.Raycast(origin, direction, out RaycastHit hit, distanceToSphere, obstacleMask)) {
             // No obstacle hit: show/scale up the sphere
-            LeanTween.scale(sphere.gameObject, Vector3.one * 6, 0.5f);
+            LeanTween.scale(sphere.gameObject, Vector3.one * 6, 0.5f).setIgnoreTimeScale(true);
         } else {            // Hit an obstacle between camera and sphere: hide/scale down the sphere
-            LeanTween.scale(sphere.gameObject, Vector3.zero, 0.5f);
+            LeanTween.scale(sphere.gameObject, Vector3.zero, 0.5f).setIgnoreTimeScale(true);
         }
     }
 }
