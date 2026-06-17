@@ -46,7 +46,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 0}
-  speed: 5
+  speed: 15
   hitDistance: 0.25
   damage: 10
   rotationOffset: {x: 0, y: 0, z: 0}

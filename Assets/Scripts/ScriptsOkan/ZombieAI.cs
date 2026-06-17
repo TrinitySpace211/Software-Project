@@ -225,10 +225,10 @@ public class ZombieAI : MonoBehaviour, IDamageable {
 
         if (isObjective) {
             _targetHealth = null;
-            _targetObjectiveHealth = newTarget?.GetComponent<GasTankHealth>();
+            _targetObjectiveHealth = newTarget != null ? newTarget.GetComponentInChildren<GasTankHealth>() : null;
         } else {
             _targetObjectiveHealth = null;
-            _targetHealth = newTarget?.GetComponentInChildren<PlayerHealth>();
+            _targetHealth = newTarget != null ? newTarget.GetComponentInChildren<PlayerHealth>() : null;
         }
     }
 

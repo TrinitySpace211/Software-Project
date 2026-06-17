@@ -5420,6 +5420,7 @@ GameObject:
   - component: {fileID: 9209443484949224615}
   - component: {fileID: 6734014837290629750}
   - component: {fileID: 2278979405329887630}
+  - component: {fileID: 6294829713073682860}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -5673,6 +5674,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 143263074188f5c49bad9e80f2ff2908, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &6294829713073682860
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7586121502588828446}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0135bfa10904244f89c21bfbd3d5fb4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startingScrap: 0
+  currentScrap: 0
+  scrapMessageText: {fileID: 0}
+  messageDuration: 2
 --- !u!1 &7914151368615872266
 GameObject:
   m_ObjectHideFlags: 0

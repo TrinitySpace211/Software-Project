@@ -30,7 +30,7 @@ public class GasTankHealth : MonoBehaviour {
     private void Awake() {
         currentHP = maxHP;
     }
-    
+
     /// <summary>
     /// Applies damage to the gas tank.
     /// </summary>
