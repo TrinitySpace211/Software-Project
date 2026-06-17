@@ -7,20 +7,12 @@ using UnityEngine.UI;
 
 /// <summary>
 /// Controls the death screen UI, including fade-in effects,
-/// disabling gameplay UI, and scene transitions after player death.
 /// </summary>
 public class DeathScreen : MonoBehaviour {
     [Header("UI")]
     public CanvasGroup deathCanvas;
     public CanvasGroup buttonCanvas;
     public TMP_Text nightsText;
-
-    [Header("Disable On Death")]
-    public GameObject inventoryUI;
-    public GameObject crosshair;
-    public GameObject timeDisplay;
-    public GameObject healthBar;
-    public GameObject gasTankHud;
 
     [Header("Audio")]
     public AudioSource audioSource;
@@ -44,21 +36,6 @@ public class DeathScreen : MonoBehaviour {
     private IEnumerator DeathRoutine(int survivedNights) {
         Time.timeScale = 0f;
 
-        // Disable gameplay-related UI elements
-        if (inventoryUI != null)
-            inventoryUI.SetActive(false);
-
-        if (crosshair != null)
-            crosshair.SetActive(false);
-
-        if (timeDisplay != null)
-            timeDisplay.SetActive(false);
-
-        if (healthBar != null)
-            healthBar.SetActive(false);
-
-        if (gasTankHud != null)
-            gasTankHud.SetActive(false);
 
         // Enable death UI
         deathCanvas.gameObject.SetActive(true);

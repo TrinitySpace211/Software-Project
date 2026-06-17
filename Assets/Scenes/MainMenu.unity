@@ -439,7 +439,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da0f13f24cdf8124ea0edc27502912ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameSceneName: MainScene
+  gameSceneName: TutorialScene
   settingsPanel: {fileID: 528013239}
   clickSound: {fileID: 8300000, guid: c0e76ed8bb1c6564dabd23a24910f61a, type: 3}
   musicClip: {fileID: 8300000, guid: f95e206fefc399740a9b681ac7a09021, type: 3}
