@@ -3145,8 +3145,7 @@ PrefabInstance:
     - target: {fileID: 582196051590256123, guid: 79f7817e938e3de45b8dfd67d1d9060c, type: 3}
       propertyPath: 'tutorialMessages.Array.data[2]'
       value: "You\u2019re not alone. Someone else survived here. He knows how to
-        turn scrap into weapons, upgrades and defenses. Earn his trust, and he\u2019ll
-        help you stay alive.  "
+        turn scrap into weapons, upgrades and defenses. He will help you stay alive. "
       objectReference: {fileID: 0}
     - target: {fileID: 582196051590256123, guid: 79f7817e938e3de45b8dfd67d1d9060c, type: 3}
       propertyPath: 'tutorialMessages.Array.data[3]'
