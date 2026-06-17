@@ -9,7 +9,7 @@ public class Bullet : MonoBehaviour
     /// <summary>
     /// The founded enemy which cames from Emmitter script.
     /// </summary>
-    public GameObject target; 
+    public ZombieAI target; 
 
     /// <summary>
     /// Speed of the arrow.   
@@ -56,7 +56,7 @@ public class Bullet : MonoBehaviour
         // Check if the arrow is close enough to the enemy.
         // And to avoid that arrows can go through out enemies
         if (direction.magnitude <= hitDistance || direction.magnitude <= moveDistance) {
-            HitTarget(); // Called if a arrow hit can be analyzed
+            HitTarget(target); // Called if a arrow hit can be analyzed
             return;
         }
 
@@ -74,11 +74,10 @@ public class Bullet : MonoBehaviour
     /// <summary>
     /// Applies damage to the target and destroys the arrow after hitting.
     /// </summary>
-    private void HitTarget() {
+    private void HitTarget(ZombieAI zombie) {
 
         // Calls a method named TakeDamage on the target.
-        // SendMessageOptions.DontRequireReceiver = If the enemy doesn't have a TakeDamage method, no error occurs.
-        target.SendMessage("TakeDamage", damage, SendMessageOptions.DontRequireReceiver);
+        zombie.TakeDamage(damage);
 
         // Destroys the arrow after a hit
         Destroy(gameObject);

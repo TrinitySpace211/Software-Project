@@ -30,24 +30,7 @@ public class GasTankHealth : MonoBehaviour {
     private void Awake() {
         currentHP = maxHP;
     }
-
-    /// <summary>
-    /// Handles debug health input.
-    /// </summary>
-    void Update() {
-        if (Keyboard.current.tKey.wasPressedThisFrame) {
-            TakeDamage(10);
-        }
-
-        if (Keyboard.current.hKey.wasPressedThisFrame) {
-            Heal(10);
-        }
-
-        if (Keyboard.current.rKey.wasPressedThisFrame) {
-            ResetHP();
-        }
-    }
-
+    
     /// <summary>
     /// Applies damage to the gas tank.
     /// </summary>
