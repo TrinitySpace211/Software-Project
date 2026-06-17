@@ -99,8 +99,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   roamRadius: 25
-  detectionRange: 30
-  sprintDistance: 22
+  detectionRange: 18
+  sprintDistance: 14
   attackDistance: 1
   attackCooldown: 2.5
   attackDamage: 20

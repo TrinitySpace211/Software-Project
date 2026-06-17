@@ -22,16 +22,17 @@ public class CutoutObject : MonoBehaviour {
             LeanTween.scale(sphere.gameObject, Vector3.one * 6, 0.5f).setIgnoreTimeScale(true);
         } else {            // Hit an obstacle between camera and sphere: hide/scale down the sphere
             LeanTween.scale(sphere.gameObject, Vector3.zero, 0.5f).setIgnoreTimeScale(true);
-        var blocked = Physics.Raycast(origin, direction, out var hit, distanceToSphere, obstacleMask);
+            /* var blocked = Physics.Raycast(origin, direction, out var hit, distanceToSphere, obstacleMask);
 
-        if (blocked && isVisible) {
-            isVisible = false;
-            LeanTween.cancel(sphere.gameObject);
-            LeanTween.scale(sphere.gameObject, Vector3.one * 6, 0.5f);
-        } else if (!blocked && !isVisible) {
-            isVisible = true;
-            LeanTween.cancel(sphere.gameObject);
-            LeanTween.scale(sphere.gameObject, Vector3.zero, 0.5f);
+            if (blocked && isVisible) {
+                isVisible = false;
+                LeanTween.cancel(sphere.gameObject);
+                LeanTween.scale(sphere.gameObject, Vector3.one * 6, 0.5f);
+            } else if (!blocked && !isVisible) {
+                isVisible = true;
+                LeanTween.cancel(sphere.gameObject);
+                LeanTween.scale(sphere.gameObject, Vector3.zero, 0.5f);
+            } */
         }
     }
 }

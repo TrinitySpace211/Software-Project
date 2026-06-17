@@ -72,9 +72,6 @@ public class PlayerHealth : MonoBehaviour {
 
         OnTakeDamage?.Invoke(transform.position);
 
-        //playerStats.currentHealth -= finalDamage;
-        //playerStats.currentHealth = Mathf.Clamp(playerStats.currentHealth, 0, playerStats.maxHealth);
-
         LeanTween.value(gameObject, playerStats.currentHealth, playerStats.currentHealth - finalDamage, 0.25f)
         .setOnUpdate((float hp) => {
             playerStats.currentHealth = hp;
@@ -107,7 +104,7 @@ public class PlayerHealth : MonoBehaviour {
         }
 
         OnDeath?.Invoke(transform.position);
-        //deathScreen.ShowDeathScreen(dayNightCycle.SurvivedNights);
+        deathScreen.ShowDeathScreen(dayNightCycle.SurvivedNights);
     }
 
     /// <summary>

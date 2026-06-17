@@ -46,8 +46,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerTransform: {fileID: 0}
   zombiePrefab: {fileID: 8829481681053086251, guid: a655c0812eb2f794f9cc432633075233, type: 3}
+  sprinterPrefab: {fileID: 3179182197375070704, guid: 4c13a259f66fc184fae2e9d3bf49982a, type: 3}
   zombieCount: 5
   spawnRadius: 8
+  sprinterCount: 0
+  currentDay: 0
   groundLayer:
     serializedVersion: 2
     m_Bits: 64

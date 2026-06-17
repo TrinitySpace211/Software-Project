@@ -15,9 +15,10 @@ MonoBehaviour:
   itemType: 2
   gunType: 0
   meleeType: 3
+  healthItemType: 0
   itemName: Crowbar
   icon: {fileID: 21300000, guid: 9ff09a2c3ca1be64ea1f7818cf933871, type: 3}
   maxStackSize: 1
-  itemPrefab: {fileID: 0}
+  itemPrefab: {fileID: 6272712600895007793, guid: 51057fc46eb09994eaedf1ca77f9586b, type: 3}
   handItemPrefab: {fileID: 0}
   baseDamage: 12

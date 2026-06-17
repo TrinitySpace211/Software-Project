@@ -232,16 +232,13 @@ public class NPCDialog : MonoBehaviour {
     /// Prepares the UI panels by briefly activating them and then disabling them again.
     /// This helps avoid visual stuttering when switching between panels.
     /// </summary>
-    public void start() {
-
+    public void Start() {
         HidePanel(dialogPanel);
         HidePanel(functionsPanel);
         HidePanel(towerInfoPanel);
 
         // Force Unity to update the canvas layout immediately
         Canvas.ForceUpdateCanvases();
-
-        
     }
 
     /// <summary>
@@ -362,7 +359,7 @@ public class NPCDialog : MonoBehaviour {
             buildTowerButton.interactable = false;
 
             return;
-            }
+        }
 
         // Get the current amount of scrap from the player's inventory.
         int currentScrap = playerInventory.GetItemAmount(scrapItem);
@@ -420,7 +417,7 @@ public class NPCDialog : MonoBehaviour {
         // Enable the build button only if the player has enough scrap
         // and the maximum tower count has not been reached.
         buildTowerButton.interactable = canBuildTower;
-        }
+    }
 
     /// <summary>
     /// Spawns a tower at the assigned spawn point.

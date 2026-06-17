@@ -51,6 +51,7 @@ public class GunSO : ScriptableObject {
             model.transform.localPosition = spawnPoint;
             model.transform.localRotation = Quaternion.Euler(spawnRotation);
 
+
             currentAmmo = shootConfigSO.maxAmmo;
         } else {
             model.SetActive(true);
@@ -58,6 +59,7 @@ public class GunSO : ScriptableObject {
             currentAmmo = savedAmmo;
         }
 
+        shootSound = model.GetComponentInChildren<AudioSource>();
         shootSystem = model.GetComponentInChildren<ParticleSystem>();
     }
 
@@ -100,8 +102,9 @@ public class GunSO : ScriptableObject {
         }
     }
 
+    #region Trail Rendering
     /// <summary>
-    ///     Deactivates the Weapon and sets the shoot Particle to null
+    /// Deactivates the Weapon and sets the shoot Particle to null
     /// </summary>
     /// <param name="startPoint">The starting position of the "bullets"</param>
     /// <param name="endPoint">The end position of the "bullets"</param>
@@ -201,5 +204,5 @@ public class GunSO : ScriptableObject {
         return shootConfigSO != null ? shootConfigSO.maxAmmo : 0;
     }
 
-    #endregion
+
 }

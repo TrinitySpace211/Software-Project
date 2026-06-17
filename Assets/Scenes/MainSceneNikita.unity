@@ -1908,8 +1908,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerTransform: {fileID: 880913233}
   zombiePrefab: {fileID: 8829481681053086251, guid: a655c0812eb2f794f9cc432633075233, type: 3}
+  sprinterPrefab: {fileID: 0}
   zombieCount: 5
   spawnRadius: 8
+  sprinterCount: 0
+  currentDay: 0
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
@@ -2110,14 +2113,6 @@ PrefabInstance:
       value: NPC
       objectReference: {fileID: 0}
     - target: {fileID: 3066661656993230696, guid: c046bf553c604cb469868eb7f1aec626, type: 3}
-      propertyPath: scrapCost
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 3066661656993230696, guid: c046bf553c604cb469868eb7f1aec626, type: 3}
-      propertyPath: scrapItem
-      value: 
-      objectReference: {fileID: 11400000, guid: dd4350791c348774dac3b2d39042056f, type: 2}
-    - target: {fileID: 3066661656993230696, guid: c046bf553c604cb469868eb7f1aec626, type: 3}
       propertyPath: playerInventory
       value: 
       objectReference: {fileID: 863536722}
@@ -2153,10 +2148,6 @@ PrefabInstance:
       propertyPath: 'towerSpawnPoints.Array.data[7]'
       value: 
       objectReference: {fileID: 1523296837}
-    - target: {fileID: 3136638725633630460, guid: c046bf553c604cb469868eb7f1aec626, type: 3}
-      propertyPath: m_SortingOrder
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 6919647780753462315, guid: c046bf553c604cb469868eb7f1aec626, type: 3}
       propertyPath: m_LocalPosition.x
       value: 3.94
@@ -3622,31 +3613,31 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2999549442909087572, guid: 10cda794c28ef3a489afcf55a3d31dc7, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 7.047278
+      value: 2.94
       objectReference: {fileID: 0}
     - target: {fileID: 2999549442909087572, guid: 10cda794c28ef3a489afcf55a3d31dc7, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 2.67
+      value: 0.6700001
       objectReference: {fileID: 0}
     - target: {fileID: 2999549442909087572, guid: 10cda794c28ef3a489afcf55a3d31dc7, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 8.51242
+      value: 11.63
       objectReference: {fileID: 0}
     - target: {fileID: 2999549442909087572, guid: 10cda794c28ef3a489afcf55a3d31dc7, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.943471
+      value: 0.9572127
       objectReference: {fileID: 0}
     - target: {fileID: 2999549442909087572, guid: 10cda794c28ef3a489afcf55a3d31dc7, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.25640103
+      value: 0.2893855
       objectReference: {fileID: 0}
     - target: {fileID: 2999549442909087572, guid: 10cda794c28ef3a489afcf55a3d31dc7, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.2026981
+      value: 0.00000002697164
       objectReference: {fileID: 0}
     - target: {fileID: 2999549442909087572, guid: 10cda794c28ef3a489afcf55a3d31dc7, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0.05508595
+      value: -0.000000008154092
       objectReference: {fileID: 0}
     - target: {fileID: 3054496669216063694, guid: 10cda794c28ef3a489afcf55a3d31dc7, type: 3}
       propertyPath: m_ClearFlags
@@ -3666,31 +3657,31 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5928231054077404643, guid: 10cda794c28ef3a489afcf55a3d31dc7, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 7.0472775
+      value: 2.94
       objectReference: {fileID: 0}
     - target: {fileID: 5928231054077404643, guid: 10cda794c28ef3a489afcf55a3d31dc7, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 2.67
+      value: 0.6700001
       objectReference: {fileID: 0}
     - target: {fileID: 5928231054077404643, guid: 10cda794c28ef3a489afcf55a3d31dc7, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 8.51242
+      value: 11.63
       objectReference: {fileID: 0}
     - target: {fileID: 5928231054077404643, guid: 10cda794c28ef3a489afcf55a3d31dc7, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.943471
+      value: 0.9572127
       objectReference: {fileID: 0}
     - target: {fileID: 5928231054077404643, guid: 10cda794c28ef3a489afcf55a3d31dc7, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.256401
+      value: 0.28938544
       objectReference: {fileID: 0}
     - target: {fileID: 5928231054077404643, guid: 10cda794c28ef3a489afcf55a3d31dc7, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.2026981
+      value: 0.000000028518484
       objectReference: {fileID: 0}
     - target: {fileID: 5928231054077404643, guid: 10cda794c28ef3a489afcf55a3d31dc7, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0.05508595
+      value: -0.000000013270673
       objectReference: {fileID: 0}
     - target: {fileID: 5928231054077404643, guid: 10cda794c28ef3a489afcf55a3d31dc7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -3990,8 +3981,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerTransform: {fileID: 880913233}
   zombiePrefab: {fileID: 8829481681053086251, guid: a655c0812eb2f794f9cc432633075233, type: 3}
+  sprinterPrefab: {fileID: 0}
   zombieCount: 5
   spawnRadius: 8
+  sprinterCount: 0
+  currentDay: 0
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
@@ -4041,8 +4035,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerTransform: {fileID: 880913233}
   zombiePrefab: {fileID: 8829481681053086251, guid: a655c0812eb2f794f9cc432633075233, type: 3}
+  sprinterPrefab: {fileID: 0}
   zombieCount: 5
   spawnRadius: 7
+  sprinterCount: 0
+  currentDay: 0
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
@@ -4092,8 +4089,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerTransform: {fileID: 880913233}
   zombiePrefab: {fileID: 8829481681053086251, guid: a655c0812eb2f794f9cc432633075233, type: 3}
+  sprinterPrefab: {fileID: 0}
   zombieCount: 5
   spawnRadius: 10
+  sprinterCount: 0
+  currentDay: 0
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
@@ -4774,8 +4774,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerTransform: {fileID: 880913233}
   zombiePrefab: {fileID: 8829481681053086251, guid: a655c0812eb2f794f9cc432633075233, type: 3}
+  sprinterPrefab: {fileID: 0}
   zombieCount: 5
   spawnRadius: 8
+  sprinterCount: 0
+  currentDay: 0
   groundLayer:
     serializedVersion: 2
     m_Bits: 64

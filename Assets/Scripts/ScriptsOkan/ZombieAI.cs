@@ -8,7 +8,7 @@ using Random = UnityEngine.Random;
 ///     Controls zombie behaviour: patrolling, chasing, and attacking the player or objective.
 ///     Transitions between states based on distance to the current target.
 /// </summary>
-public class ZombieAI : MonoBehaviour {
+public class ZombieAI : MonoBehaviour, IDamageable {
     public static Action<Vector3> OnTakeDamage;
     public int health = 100;
 
