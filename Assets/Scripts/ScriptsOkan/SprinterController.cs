@@ -1,20 +1,12 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-/// <summary>
-///     Controls the Sprinter Zombie enemy type.
-///     Behaviour states: Roam → Detect Player/Objective → Walk → Sprint → Attack → Die
-///     The Sprinter detects the player earlier and starts sprinting from further
-///     away compared to the normal zombie.
-///     Supports switching target to an objective via SetTarget().
-/// </summary>
 public class SprinterController : MonoBehaviour, IDamageable {
     [Header("Detection")] public float roamRadius = 10f;
     public float detectionRange = 15f;
     public float sprintDistance = 12f;
 
     [Header("Attack")] public float attackDistance = 1.5f;
-    public float objectiveAttackDistance = 3f;
     public float attackCooldown = 1.5f;
     public int attackDamage = 20;
 
@@ -34,12 +26,14 @@ public class SprinterController : MonoBehaviour, IDamageable {
     private NavMeshAgent agent;
     private Animator animator;
     private float attackTimer;
+    private BoxCollider boxCollider;
+
     private Transform currentTarget;
     private bool isAttacking;
-    private bool isSprinting;
     private bool isTargetingObjective;
     private bool isWaiting;
     private Transform player;
+
     private bool playerDetected;
     private PlayerHealth playerHealth;
     private Vector3 roamTarget;
@@ -47,6 +41,7 @@ public class SprinterController : MonoBehaviour, IDamageable {
     private float waitTimer;
 
     private void Start() {
+        boxCollider = GetComponent<BoxCollider>();
         animator = GetComponent<Animator>();
         agent = GetComponent<NavMeshAgent>();
         player = GameObject.FindWithTag("Player").transform;
@@ -59,14 +54,19 @@ public class SprinterController : MonoBehaviour, IDamageable {
     private void Update() {
         if (isDead) return;
 
-        attackTimer -= Time.deltaTime;
-
-        if (isAttacking && attackTimer <= 0f) {
-            isAttacking = false;
-            animator.SetBool("isAttacking", false);
-        }
+        if (attackTimer > 0f)
+            attackTimer -= Time.deltaTime;
 
         if (isAttacking) return;
+
+        if (!isTargetingObjective) {
+            var nearestObjective = ObjectiveManager.Instance?.GetNearestActiveObjective(transform.position);
+            if (nearestObjective != null) {
+                var distToObjective = Vector3.Distance(transform.position, nearestObjective.position);
+                if (distToObjective <= detectionRange)
+                    SetTarget(nearestObjective, true);
+            }
+        }
 
         if (isTargetingObjective) {
             HandleObjectiveMode();
@@ -83,14 +83,17 @@ public class SprinterController : MonoBehaviour, IDamageable {
             return;
         }
 
-        if (distance <= attackDistance)
-            Attack(playerHealth, null);
-        else if (distance <= sprintDistance)
+        if (distance <= attackDistance) {
+            TryStartAttack();
+        } else if (distance <= sprintDistance) {
             Sprint();
-        else
+            agent.isStopped = false;
+            agent.SetDestination(player.position);
+        } else {
             Walk();
-
-        agent.SetDestination(player.position);
+            agent.isStopped = false;
+            agent.SetDestination(player.position);
+        }
     }
 
     public void TakeDamage(int damage) {
@@ -105,39 +108,49 @@ public class SprinterController : MonoBehaviour, IDamageable {
         return isDead;
     }
 
-    /// <summary>
-    ///     Objective mode: moves toward the objective.
-    ///     Attacks the player only if directly in attack range, otherwise focuses objective.
-    /// </summary>
-    private void HandleObjectiveMode() {
-        if (isAttacking) return;
+    private void TryStartAttack() {
+        agent.isStopped = true;
+        agent.velocity = Vector3.zero;
+        agent.ResetPath();
 
+        LookAtTarget(player.position);
+
+        animator.SetBool("isWalking", false);
+        animator.SetBool("isSprinting", false);
+
+        if (attackTimer > 0f) {
+            animator.SetBool("isAttacking", false);
+            return;
+        }
+
+        isAttacking = true;
+        attackTimer = attackCooldown;
+        animator.SetBool("isAttacking", true);
+    }
+
+    private void HandleObjectiveMode() {
         if (player != null) {
             var distToPlayer = Vector3.Distance(transform.position, player.position);
             if (distToPlayer <= attackDistance) {
-                Attack(playerHealth, null);
+                TryStartAttack();
                 return;
             }
         }
 
-        var distToObj = Vector3.Distance(transform.position, currentTarget.position);
-        if (distToObj <= objectiveAttackDistance + 0.5f) // ← kleiner Buffer
-            Attack(null, targetObjectiveHealth);
-        else if (distToObj <= sprintDistance)
+        var targetPos = currentTarget.position;
+        var distToObjective = Vector3.Distance(transform.position, targetPos);
+
+        if (distToObjective <= attackDistance) {
+            TryStartAttack();
+        } else if (distToObjective <= sprintDistance) {
             Sprint();
-        else
+            agent.isStopped = false;
+            agent.SetDestination(targetPos);
+        } else {
             Walk();
-
-        MoveTowardsObjective();
-    }
-
-    /// <summary>
-    ///     Sets destination to a point outside the objective so the sprinter stops at the edge.
-    /// </summary>
-    private void MoveTowardsObjective() {
-        var dirToObj = (currentTarget.position - transform.position).normalized;
-        var stoppingPos = currentTarget.position - dirToObj * objectiveAttackDistance;
-        agent.SetDestination(stoppingPos);
+            agent.isStopped = false;
+            agent.SetDestination(targetPos);
+        }
     }
 
     private void Roam() {
@@ -150,6 +163,7 @@ public class SprinterController : MonoBehaviour, IDamageable {
             waitTimer -= Time.deltaTime;
             agent.isStopped = true;
             animator.SetBool("isWalking", false);
+
             if (waitTimer <= 0f) {
                 isWaiting = false;
                 agent.isStopped = false;
@@ -167,19 +181,8 @@ public class SprinterController : MonoBehaviour, IDamageable {
         }
     }
 
-    private void SetNewRoamTarget() {
-        var randomDirection = Random.insideUnitSphere * roamRadius;
-        randomDirection += transform.position;
-        NavMeshHit hit;
-        if (NavMesh.SamplePosition(randomDirection, out hit, roamRadius, 1)) {
-            roamTarget = hit.position;
-            agent.SetDestination(roamTarget);
-        }
-    }
-
     private void Walk() {
         agent.isStopped = false;
-        isSprinting = false;
         agent.speed = walkSpeed;
         animator.speed = animationSpeed;
         animator.SetBool("isWalking", true);
@@ -189,7 +192,6 @@ public class SprinterController : MonoBehaviour, IDamageable {
 
     private void Sprint() {
         agent.isStopped = false;
-        isSprinting = true;
         agent.speed = sprintSpeed;
         animator.speed = sprintAnimationSpeed;
         animator.SetBool("isWalking", false);
@@ -197,56 +199,72 @@ public class SprinterController : MonoBehaviour, IDamageable {
         animator.SetBool("isAttacking", false);
     }
 
-    private void Attack(PlayerHealth ph, GasTankHealth oh) {
-        isSprinting = false;
-        agent.isStopped = true;
-        agent.velocity = Vector3.zero;
-        agent.ResetPath();
-
-        var direction = (currentTarget.position - transform.position).normalized;
-        direction.y = 0;
-        if (direction != Vector3.zero)
-            transform.rotation = Quaternion.Slerp(transform.rotation,
-                Quaternion.LookRotation(direction), Time.deltaTime * 5f);
-
-        animator.SetBool("isWalking", false);
-        animator.SetBool("isSprinting", false);
-
-        if (attackTimer <= 0f) {
-            isAttacking = true;
-            attackTimer = attackCooldown;
-            animator.SetBool("isAttacking", true);
-
-            if (oh != null)
-                oh.TakeDamage(attackDamage);
-            else if (ph != null && !ph.GetIsDead())
-                ph.TakeDamage(attackDamage);
+    private void SetNewRoamTarget() {
+        var randomDirection = Random.insideUnitSphere * roamRadius + transform.position;
+        NavMeshHit hit;
+        if (NavMesh.SamplePosition(randomDirection, out hit, roamRadius, 1)) {
+            roamTarget = hit.position;
+            agent.SetDestination(roamTarget);
         }
     }
 
-    /// <summary>
-    ///     Switches the sprinter's target between the player and an objective.
-    ///     Called by ObjectiveManager — mirrors ZombieAI.SetTarget().
-    /// </summary>
+    private void LookAtTarget(Vector3 targetPos) {
+        var direction = targetPos - transform.position;
+        direction.y = 0f;
+
+        if (direction.sqrMagnitude > 0.001f)
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
+                Quaternion.LookRotation(direction.normalized),
+                Time.deltaTime * 10f
+            );
+    }
+
+    public void DealDamage() {
+        if (isDead) return;
+
+        if (isTargetingObjective) {
+            if (targetObjectiveHealth != null)
+                targetObjectiveHealth.TakeDamage(attackDamage);
+        } else {
+            if (playerHealth != null && !playerHealth.GetIsDead()) {
+                var dist = Vector3.Distance(transform.position, player.position);
+                if (dist <= attackDistance + 0.5f)
+                    playerHealth.TakeDamage(attackDamage);
+            }
+        }
+
+        isAttacking = false;
+        animator.SetBool("isAttacking", false);
+        agent.isStopped = false;
+    }
+
     public void SetTarget(Transform newTarget, bool isObjective = false) {
         currentTarget = newTarget;
         isTargetingObjective = isObjective;
         playerDetected = true;
 
         if (isObjective)
-            targetObjectiveHealth = newTarget?.GetComponent<GasTankHealth>();
+            targetObjectiveHealth = newTarget != null ? newTarget.GetComponent<GasTankHealth>() : null;
         else
             targetObjectiveHealth = null;
     }
 
     public void Die() {
         if (isDead) return;
-        isDead = true;
-        agent.enabled = false;
 
-        if (isSprinting)
-            animator.SetTrigger("deadFly");
-        else
-            animator.SetTrigger("deadNormal");
+        isDead = true;
+        agent.isStopped = true;
+        agent.velocity = Vector3.zero;
+        agent.ResetPath();
+
+        animator.SetBool("isDead", true);
+        //animator.SetBool("isWalking", false);
+        //animator.SetBool("isSprinting", false);
+        // animator.SetBool("isAttacking", false);
+
+
+        if (boxCollider != null)
+            boxCollider.enabled = false;
     }
 }

@@ -31,6 +31,23 @@ public class ObjectiveManager : MonoBehaviour {
         return active[Random.Range(0, active.Length)].transform;
     }
 
+    public Transform GetNearestActiveObjective(Vector3 position) {
+        Transform nearest = null;
+        var minDist = float.MaxValue;
+
+        foreach (var o in objectives) {
+            if (o == null || o.CurrentHP <= 0) continue;
+
+            var dist = Vector3.Distance(position, o.transform.position);
+            if (dist < minDist) {
+                minDist = dist;
+                nearest = o.transform;
+            }
+        }
+
+        return nearest;
+    }
+
     /// <summary>
     ///     Called by DayNightCycle.onNightStarted.
     ///     Redirects all active zombies to attack a random objective.

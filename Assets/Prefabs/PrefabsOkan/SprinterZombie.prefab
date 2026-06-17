@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 54e1bb4daa67e464f813b1fd5e373ad2, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -1.13
+      value: -54.6
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 54e1bb4daa67e464f813b1fd5e373ad2, type: 3}
       propertyPath: m_LocalPosition.y
@@ -18,7 +18,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 54e1bb4daa67e464f813b1fd5e373ad2, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -2.847
+      value: -33.4
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 54e1bb4daa67e464f813b1fd5e373ad2, type: 3}
       propertyPath: m_LocalRotation.w
@@ -52,6 +52,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SprinterZombie
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 54e1bb4daa67e464f813b1fd5e373ad2, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 5866666021909216657, guid: 54e1bb4daa67e464f813b1fd5e373ad2, type: 3}
       propertyPath: m_Controller
       value: 
@@ -70,6 +74,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 54e1bb4daa67e464f813b1fd5e373ad2, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1482682547788469134}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 54e1bb4daa67e464f813b1fd5e373ad2, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3400558414375491539}
     - targetCorrespondingSourceObject: {fileID: 7036213049465896255, guid: 54e1bb4daa67e464f813b1fd5e373ad2, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8493486588612870614}
@@ -94,17 +101,17 @@ MonoBehaviour:
   roamRadius: 25
   detectionRange: 30
   sprintDistance: 22
-  attackDistance: 1.5
+  attackDistance: 1
+  attackCooldown: 2.5
+  attackDamage: 20
   roamSpeed: 1.5
   walkSpeed: 2
   sprintSpeed: 5
-  attackCooldown: 2.5
-  attackDamage: 20
   animationSpeed: 1.1
   sprintAnimationSpeed: 0.9
   roamWaitMin: 7
-  health: 60
   roamWaitMax: 16
+  health: 60
   isDead: 0
 --- !u!195 &1482682547788469134
 NavMeshAgent:
@@ -128,6 +135,27 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!65 &3400558414375491539
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3179182197375070704}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.5, y: 2, z: 0.5}
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!1 &4718214339694539166 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7036213049465896255, guid: 54e1bb4daa67e464f813b1fd5e373ad2, type: 3}
