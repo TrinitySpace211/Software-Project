@@ -5,23 +5,25 @@ public class CutoutObject : MonoBehaviour {
     [SerializeField] private Camera mainCamera;
     [SerializeField] private LayerMask obstacleMask = ~0;
 
+    private bool isVisible = true; // aktueller Zustand
+
     private void Update() {
-        if (sphere == null || mainCamera == null) {
-            return;
-        }
+        if (sphere == null || mainCamera == null) return;
 
-        Vector3 origin = mainCamera.transform.position;
-        Vector3 direction = (sphere.position - origin).normalized;
-        float distanceToSphere = Vector3.Distance(origin, sphere.position);
+        var origin = mainCamera.transform.position;
+        var direction = (sphere.position - origin).normalized;
+        var distanceToSphere = Vector3.Distance(origin, sphere.position);
 
-        // Raycast against the obstacle layers only. If something is hit before reaching the sphere,
-        // the view is blocked. Otherwise the sphere is visible.
-        if (Physics.Raycast(origin, direction, out RaycastHit hit, distanceToSphere, obstacleMask)) {
-            // No obstacle hit: show/scale up the sphere
+        var blocked = Physics.Raycast(origin, direction, out var hit, distanceToSphere, obstacleMask);
+
+        if (blocked && isVisible) {
+            isVisible = false;
+            LeanTween.cancel(sphere.gameObject);
             LeanTween.scale(sphere.gameObject, Vector3.one * 6, 0.5f);
-        } else {            // Hit an obstacle between camera and sphere: hide/scale down the sphere
+        } else if (!blocked && !isVisible) {
+            isVisible = true;
+            LeanTween.cancel(sphere.gameObject);
             LeanTween.scale(sphere.gameObject, Vector3.zero, 0.5f);
         }
     }
 }
-
