@@ -28,14 +28,14 @@ public class LookAtEnemy : MonoBehaviour {
     /// Rotates the tower towards the found enemy every frame.
     /// </summary>
     private void Update() {
-        if (enemy == null || enemy.enemy == null) {
+        if (enemy == null || enemy.zombie == null) {
 
             // return if enemies not found, the tower doesn't rotate in this case
             return;
         }
 
         // Calculate the distance between enemy and tower
-        Vector3 direction = enemy.enemy.transform.position - transform.position;
+        Vector3 direction = enemy.zombie.transform.position - transform.position;
 
         // The y position component should be 0, because tower should not rotate in y-direction
         direction.y = 0f;

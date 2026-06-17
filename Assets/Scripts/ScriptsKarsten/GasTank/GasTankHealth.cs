@@ -11,7 +11,8 @@ public class GasTankHealth : MonoBehaviour {
 
     [Header("Health")]
     [SerializeField] private int maxHP = 100;
-    [SerializeField] private int currentHP;
+
+    private int currentHP;
 
     /// <summary>
     /// Current health value of the gas tank.
@@ -26,28 +27,10 @@ public class GasTankHealth : MonoBehaviour {
     /// <summary>
     /// Initializes the health value.
     /// </summary>
-    void Start() {
-        if (currentHP <= 0)
-            currentHP = maxHP;
+    private void Awake() {
+        currentHP = maxHP;
     }
-
-    /// <summary>
-    /// Handles debug health input.
-    /// </summary>
-    void Update() {
-        if (Keyboard.current.tKey.wasPressedThisFrame) {
-            TakeDamage(10);
-        }
-
-        if (Keyboard.current.hKey.wasPressedThisFrame) {
-            Heal(10);
-        }
-
-        if (Keyboard.current.rKey.wasPressedThisFrame) {
-            ResetHP();
-        }
-    }
-
+    
     /// <summary>
     /// Applies damage to the gas tank.
     /// </summary>
@@ -87,8 +70,6 @@ public class GasTankHealth : MonoBehaviour {
     /// </summary>
     private void OnDestroyed() {
         Debug.Log("Gas Tank destroyed!");
-
-        Time.timeScale = 0f;
 
         if (deathScreen != null && dayNightCycle != null) {
             deathScreen.ShowDeathScreen(dayNightCycle.SurvivedNights);

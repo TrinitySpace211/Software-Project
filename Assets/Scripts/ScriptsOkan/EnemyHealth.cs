@@ -26,6 +26,13 @@ public class EnemyHealth : MonoBehaviour {
     }
 
     private void Die() {
+        ZombieLootDrop lootDrop = GetComponent<ZombieLootDrop>();
+        if (lootDrop == null) {
+            lootDrop = gameObject.AddComponent<ZombieLootDrop>();
+        }
+
+        lootDrop.GiveLootToCurrentPlayer();
+
         if (_animator != null)
             _animator.SetBool(IS_DEAD, true);
 
