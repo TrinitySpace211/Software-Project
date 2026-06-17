@@ -10,11 +10,18 @@ public class SpawnZone : MonoBehaviour {
 
     [Header("Spawn Settings")] public GameObject zombiePrefab;
 
+    public GameObject sprinterPrefab;
+
     /// <summary>Number of zombies spawned per wave.</summary>
     public int zombieCount = 5;
 
     /// <summary>Radius of the spawn and patrol area.</summary>
     public float spawnRadius = 5f;
+
+    [HideInInspector] public int sprinterCount;
+
+    [HideInInspector] public int currentDay;
+
 
     [Header("Ground Detection")] [SerializeField]
     private LayerMask groundLayer;
@@ -33,18 +40,21 @@ public class SpawnZone : MonoBehaviour {
     ///     Each zombie is initialized with this zone's center and radius for patrol behaviour.
     /// </summary>
     public void SpawnWave() {
-        for (var i = 0; i < zombieCount; i++) {
-            var randomOffset = Random.insideUnitCircle * spawnRadius;
-            var spawnPos = new Vector3(
-                transform.position.x + randomOffset.x,
-                transform.position.y,
-                transform.position.z + randomOffset.y
-            );
+        // Normale Zombies
+        for (var i = 0; i < zombieCount; i++) SpawnZombieAt(zombiePrefab);
+        // Sprinter
+        for (var i = 0; i < sprinterCount; i++) SpawnZombieAt(sprinterPrefab);
+    }
 
-            var go = Instantiate(zombiePrefab, spawnPos, Quaternion.identity);
-            var ai = go.GetComponent<ZombieAI>();
-            //if (ai != null) ai.Init(transform.position, spawnRadius, playerTransform);
-            if (ai != null) ai.Init(transform.position, spawnRadius * 2f, playerTransform);
-        }
+    private void SpawnZombieAt(GameObject prefab) {
+        var randomOffset = Random.insideUnitCircle * spawnRadius;
+        var spawnPos = new Vector3(
+            transform.position.x + randomOffset.x,
+            transform.position.y,
+            transform.position.z + randomOffset.y
+        );
+        var go = Instantiate(prefab, spawnPos, Quaternion.identity);
+        var ai = go.GetComponent<ZombieAI>();
+        if (ai != null) ai.Init(transform.position, spawnRadius * 2f, playerTransform);
     }
 }

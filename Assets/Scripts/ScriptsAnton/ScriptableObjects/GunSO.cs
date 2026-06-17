@@ -2,9 +2,10 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Pool;
+using UnityEngine.Rendering;
 
 /// <summary>
-/// Creates a Sciptable Object for the Guns with Logic so every Weapon is the same
+///     Creates a Sciptable Object for the Guns with Logic so every Weapon is the same
 /// </summary>
 [CreateAssetMenu(fileName = "Gun", menuName = "Guns/Gun", order = 0)]
 public class GunSO : ScriptableObject {
@@ -25,17 +26,17 @@ public class GunSO : ScriptableObject {
     private MonoBehaviour activeMonoBehaviour;
     private GameObject model;
     private float lastShootTime;
-    private ParticleSystem shootSystem;
     private AudioSource shootSound;
-    private ObjectPool<TrailRenderer> trailPool;
     private GameObject poolParent;
 
     public int currentAmmo { get; private set; }
+    private bool emptyMagazine;
     private int savedAmmo;
-    private bool emptyMagazine = false;
+    private ParticleSystem shootSystem;
+    private ObjectPool<TrailRenderer> trailPool;
 
     /// <summary>
-    /// Instantiates the Model of the Gun first then it will just turn it of and on
+    ///     Instantiates the Model of the Gun first then it will just turn it of and on
     /// </summary>
     /// <param name="parent">The Position of the Parent where it should spawn</param>
     /// <param name="activeMonoBehaviour">The Instance which spawned the Weapon so that a Coroutine can be used</param>
@@ -52,19 +53,19 @@ public class GunSO : ScriptableObject {
 
             currentAmmo = shootConfigSO.maxAmmo;
         } else {
-            model.gameObject.SetActive(true);
+            model.SetActive(true);
 
             currentAmmo = savedAmmo;
         }
-        shootSound = model.GetComponentInChildren<AudioSource>();
+
         shootSystem = model.GetComponentInChildren<ParticleSystem>();
     }
 
     /// <summary>
-    /// The Shoot Function which is played depending of the firerate.
-    /// It plays a Sound and Particle Effect at the Muzzle of the gun
-    /// When the Weapon shoots then it will Shoot a Raycast and if it hits then it will play the bullet trail normally,
-    /// otherwise the trail will be rendered until it reaches a certain duration
+    ///     The Shoot Function which is played depending of the firerate.
+    ///     It plays a Sound and Particle Effect at the Muzzle of the gun
+    ///     When the Weapon shoots then it will Shoot a Raycast and if it hits then it will play the bullet trail normally,
+    ///     otherwise the trail will be rendered until it reaches a certain duration
     /// </summary>
     public void Shoot() {
         if (Time.time > shootConfigSO.fireRate + lastShootTime && currentAmmo > 0) {
@@ -92,16 +93,15 @@ public class GunSO : ScriptableObject {
                     activeMonoBehaviour.StartCoroutine(PlayTrail(shootSystem.transform.position, shootSystem.transform.position + (shootDirection * trailConfigSO.missDistance), new RaycastHit()));
                 }
             }
+
             currentAmmo--;
         } else if (currentAmmo == 0) {
             emptyMagazine = true;
         }
-
     }
 
-    #region Trail Creation and Trail Update
     /// <summary>
-    /// Plays the path of the "bullets" and if it hits and object it plays the corresponding texture impact particle effect
+    ///     Deactivates the Weapon and sets the shoot Particle to null
     /// </summary>
     /// <param name="startPoint">The starting position of the "bullets"</param>
     /// <param name="endPoint">The end position of the "bullets"</param>
@@ -171,17 +171,13 @@ public class GunSO : ScriptableObject {
     }
 
     /// <summary>
-    /// The Damage logic so Zombies can be damaged
+    ///     The Damage logic so Zombies can be damaged
     /// </summary>
     /// <param name="hit">The hit info of the Raycast</param>
     private void HitEnemy(RaycastHit hit) {
-        ZombieAI zombie = hit.transform.GetComponentInParent<ZombieAI>();
-
-        if (zombie != null) {
-            if (!zombie.IsDead()) {
-                zombie.TakeDamage(shootConfigSO.damage);
-            }
-        }
+        var damageable = hit.transform.GetComponentInParent<IDamageable>();
+        if (damageable != null && !damageable.IsDead())
+            damageable.TakeDamage(shootConfigSO.damage);
     }
 
     public void SetFullMagazine() {
@@ -202,6 +198,8 @@ public class GunSO : ScriptableObject {
     }
 
     public int GetMaxAmmo() {
-        return shootConfigSO.maxAmmo;
+        return shootConfigSO != null ? shootConfigSO.maxAmmo : 0;
     }
+
+    #endregion
 }
