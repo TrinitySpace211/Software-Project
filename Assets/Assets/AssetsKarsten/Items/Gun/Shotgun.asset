@@ -19,3 +19,5 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: 2cacde15b6710424bbaf21d584de0d72, type: 3}
   maxStackSize: 1
   itemPrefab: {fileID: 0}
+  handItemPrefab: {fileID: 0}
+  baseDamage: 15

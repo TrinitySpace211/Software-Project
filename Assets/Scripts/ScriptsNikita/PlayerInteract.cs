@@ -13,7 +13,7 @@ public class PlayerInteract : MonoBehaviour
     void Update()
     {
         if (Keyboard.current.eKey.wasPressedThisFrame) {
-            float interactRange = 2f;
+            float interactRange = 1.7f;
 
             // Find all colliders within the interaction range
             Collider[] colliderArray = Physics.OverlapSphere(transform.position, interactRange);

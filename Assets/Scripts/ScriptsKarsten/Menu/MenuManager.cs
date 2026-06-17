@@ -10,7 +10,7 @@ using UnityEngine.UI;
 /// </summary>
 public class MenuManager : MonoBehaviour {
 
-    [SerializeField] private string gameSceneName = "MainScene";
+    [SerializeField] private string gameSceneName = "TutorialScene";
 
     [SerializeField] private GameObject settingsPanel;
 
