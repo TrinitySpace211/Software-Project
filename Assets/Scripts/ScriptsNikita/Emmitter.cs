@@ -23,7 +23,7 @@ public class Emmitter : MonoBehaviour
     /// <summary>
     /// // Reference to the FindEnemy script that stores the currently found enemy.
     /// </summary>
-    public FindEnemy enemy;
+    public FindEnemy findEnemy;
 
     /// <summary>
     /// Initializes the shooting timer and gets the FindEnemy component from the parent GameObject.
@@ -34,7 +34,7 @@ public class Emmitter : MonoBehaviour
         currentTime = timeInterval;
 
         // Searches in the parent GameObejct the FindEnemy component
-        enemy = GetComponentInParent<FindEnemy>(); 
+        findEnemy = GetComponentInParent<FindEnemy>(); 
     }
 
     /// <summary>
@@ -42,7 +42,7 @@ public class Emmitter : MonoBehaviour
     /// </summary>
     private void Update()
     {
-        if (enemy == null || enemy.enemy == null)
+        if (findEnemy == null || findEnemy.zombie == null)
 
             // return if enemies not found, the tower doesnt shot in this case
             return;
@@ -51,8 +51,8 @@ public class Emmitter : MonoBehaviour
         currentTime -= Time.deltaTime;
 
         // If timer reaches 0, the shoot() method can be called
-        if (currentTime <= 0f) {
-            Shoot(enemy.enemy);
+        if (currentTime <= 0f && !findEnemy.zombie.IsDead()) {
+            Shoot(findEnemy.zombie);
             currentTime = timeInterval; // to reset the timer
         }
     }
@@ -60,7 +60,7 @@ public class Emmitter : MonoBehaviour
     /// <summary>
     /// Spawns a bullet (arrow) and assigns the given target to it.
     /// </summary>
-    private void Shoot(GameObject target) {
+    private void Shoot(ZombieAI target) {
 
         // Information for the developer
         if (bullet == null) {

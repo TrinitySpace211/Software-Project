@@ -156,7 +156,7 @@ public class Inventory : MonoBehaviour {
         ItemSO item = hotbarSlots[slot].GetItem();
 
         if (!isDragging) {
-            if (Time.time > swapSpeed + lastTimeSelected && !player.GetPlayerAnimation().GetIsReloading()) {
+            if (Time.time > swapSpeed + lastTimeSelected && !player.GetPlayerAnimation().GetIsReloading() && item.itemType != ItemType.Misc) {
                 lastTimeSelected = Time.time;
                 if (previousSlot != -1) {
                     hotbarSlots[previousSlot].SetSelected(false);
@@ -437,4 +437,73 @@ public class Inventory : MonoBehaviour {
             ToggleMeleeSelect(null);
         }
     }
+
+    /*
+ *******************************************************************************
+ * Ergänzugen für den NPC. Benötigt werden öffentliche Methoden.
+ */
+
+    /// <summary>
+    /// Returns the total amount of a specific item across all inventory and hotbar slots.
+    /// </summary>
+    /// <param name="itemToCount">The item that should be counted.</param>
+    /// <returns>The total amount of the item.</returns>
+    public int GetItemAmount(ItemSO itemToCount) {
+        if (itemToCount == null)
+            return 0;
+
+        int totalAmount = 0;
+
+        foreach (Slot slot in allSlots) {
+            if (slot.HasItem() && slot.GetItem() == itemToCount) {
+                totalAmount += slot.GetAmount();
+            }
+        }
+
+        return totalAmount;
+    }
+
+    /// <summary>
+    /// Checks if the inventory contains at least a specific amount of an item.
+    /// </summary>
+    /// <param name="itemToCheck">The item that should be checked.</param>
+    /// <param name="requiredAmount">The required amount.</param>
+    /// <returns>True if enough items exist; otherwise false.</returns>
+    public bool HasItemAmount(ItemSO itemToCheck, int requiredAmount) {
+        return GetItemAmount(itemToCheck) >= requiredAmount;
+    }
+
+    /// <summary>
+    /// Removes a specific amount of an item from the inventory.
+    /// Items are removed from existing stacks until the required amount was removed.
+    /// </summary>
+    /// <param name="itemToRemove">The item that should be removed.</param>
+    /// <param name="amountToRemove">The amount that should be removed.</param>
+    /// <returns>True if the item amount could be removed; otherwise false.</returns>
+    public bool RemoveItem(ItemSO itemToRemove, int amountToRemove) {
+        if (itemToRemove == null)
+            return false;
+
+        if (!HasItemAmount(itemToRemove, amountToRemove))
+            return false;
+
+        int remainingAmount = amountToRemove;
+
+        foreach (Slot slot in allSlots) {
+            if (slot.HasItem() && slot.GetItem() == itemToRemove) {
+                int amountInSlot = slot.GetAmount();
+                int amountToTake = Mathf.Min(amountInSlot, remainingAmount);
+
+                slot.RemoveAmount(amountToTake);
+                remainingAmount -= amountToTake;
+
+                if (remainingAmount <= 0)
+                    return true;
+            }
+        }
+
+        return true;
+    }
+
 }
+

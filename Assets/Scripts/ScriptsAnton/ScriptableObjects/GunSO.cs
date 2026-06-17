@@ -213,6 +213,16 @@ public class GunSO : ScriptableObject
         return currentAmmo == shootConfigSO.maxAmmo;
     }
 
+    public int GetCurrentAmmo()
+    {
+        return currentAmmo;
+    }
+
+    public int GetMaxAmmo()
+    {
+        return shootConfigSO != null ? shootConfigSO.maxAmmo : 0;
+    }
+
     /// <summary>
     /// Plays the shoot Sound Effect depending on Weapon Type
     /// </summary>

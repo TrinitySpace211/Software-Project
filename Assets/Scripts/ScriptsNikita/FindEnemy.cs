@@ -8,7 +8,7 @@ public class FindEnemy : MonoBehaviour {
     /// <summary>
     /// Stores the found enemy. Other scripts, such as LookAtEnemy.cs and Emmitter.cs, use this value.
     /// </summary>
-    public GameObject enemy; 
+    public ZombieAI zombie; 
 
     /// <summary>
     /// The search radius of the tower.
@@ -46,33 +46,17 @@ public class FindEnemy : MonoBehaviour {
     /// Searches for the nearest active enemy within the defined radius.
     /// </summary>
     private void FindNewEnemy() {
+        Collider[] hits = Physics.OverlapSphere(transform.position, radius);
 
-        // Stores all GameObjects with the "Enemy" tag
-        GameObject[] enemies = GameObject.FindGameObjectsWithTag(enemyTag);
-
-        // Stores the nearest enemy to the tower
-        GameObject nearestEnemy = null;
-
-        // // The maximum allowed distance between the enemy and the tower.
-        // Later we use sqrMagnitude and this is square of the distance and performs better than Vector3.Distance
-        float nearestDistance = radius * radius;
-
-        foreach (GameObject possibleEnemy in enemies) {
-            if (!possibleEnemy.activeInHierarchy)
-                continue; // Ignore deactivated enemies
-
-            // Calculates the distance between enemy and tower
-            // sqrMagnitude returns the squared length of this vector
-            float distance = (possibleEnemy.transform.position - transform.position).sqrMagnitude; 
-
-            // Stores the new nearest Enemy
-            if (distance < nearestDistance) {
-                nearestDistance = distance;
-                nearestEnemy = possibleEnemy;
+        foreach(Collider hit in hits) {
+            ZombieAI zombie = hit.gameObject.GetComponentInParent<ZombieAI>();
+            if (zombie != null) {
+                if(zombie.IsDead()) {
+                    return;
+                }
+                this.zombie = zombie; // global variable becomes the local variable
             }
         }
-
-        enemy = nearestEnemy;
     }
 
     /// <summary>
