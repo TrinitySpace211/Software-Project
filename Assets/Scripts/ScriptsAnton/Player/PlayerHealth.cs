@@ -72,7 +72,13 @@ public class PlayerHealth : MonoBehaviour {
 
         OnTakeDamage?.Invoke(transform.position);
 
-        playerStats.currentHealth -= finalDamage;
+        //playerStats.currentHealth -= finalDamage;
+        //playerStats.currentHealth = Mathf.Clamp(playerStats.currentHealth, 0, playerStats.maxHealth);
+
+        LeanTween.value(gameObject, playerStats.currentHealth, playerStats.currentHealth - finalDamage, 0.25f)
+        .setOnUpdate((float hp) => {
+            playerStats.currentHealth = hp;
+        });
         playerStats.currentHealth = Mathf.Clamp(playerStats.currentHealth, 0, playerStats.maxHealth);
 
         //Debug.Log($"Player HP: {playerStats.currentHealth}/{playerStats.maxHealth}");
@@ -109,9 +115,13 @@ public class PlayerHealth : MonoBehaviour {
     /// </summary>
     /// <param name="health">The amount to heal</param>
     public void HealPlayerHealth(float health) {
-        if (playerStats.currentHealth != playerStats.maxHealth) {
-            playerStats.currentHealth += health;
-        }
+        float startHp = playerStats.currentHealth;
+        float targetHp = Mathf.Min(playerStats.currentHealth + health, playerStats.maxHealth);
+
+        LeanTween.value(gameObject, startHp, targetHp, 0.25f)
+        .setOnUpdate((float hp) => {
+            playerStats.currentHealth = hp;
+        });
 
         //Debug.Log($"Healed by: {health}");
     }

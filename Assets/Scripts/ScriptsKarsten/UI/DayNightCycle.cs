@@ -400,8 +400,8 @@ public class DayNightCycle : MonoBehaviour {
         );
 
         RenderSettings.ambientIntensity = Mathf.Lerp(
-            0.5f,
-            1f,
+            0.8f,
+            1.2f,
             t
         );
     }

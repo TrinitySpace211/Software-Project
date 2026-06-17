@@ -17,6 +17,8 @@ public class PlayerInputHandler : MonoBehaviour {
     public bool InteractTriggered { get; private set; }
     public bool ThrowTriggered { get; private set; }
     public bool UseTriggered { get; private set; }
+    public bool TurnRightInput { get; private set; }
+    public bool TurnLeftInput { get; private set; }
 
     //Hotbar Key Events
     public event Action<int> OnHotbarSlotPressed;
@@ -49,6 +51,12 @@ public class PlayerInputHandler : MonoBehaviour {
     private void SubscribeToPlayerInputs() {
         playerInputActions.Player.Move.performed += inputInfo => MovementInput = inputInfo.ReadValue<Vector2>();
         playerInputActions.Player.Move.canceled += _ => MovementInput = Vector2.zero;
+
+        playerInputActions.Player.TurnRight.performed += _ => TurnRightInput = true;
+        playerInputActions.Player.TurnRight.canceled += _ => TurnRightInput = false;
+
+        playerInputActions.Player.TurnLeft.performed += _ => TurnLeftInput = true;
+        playerInputActions.Player.TurnLeft.canceled += _ => TurnLeftInput = false;
 
         playerInputActions.Player.Look.performed += _ => MousePosition = Mouse.current.position.ReadValue();
 

@@ -16,6 +16,7 @@ public class CutoutObject : MonoBehaviour {
 
         // Raycast against the obstacle layers only. If something is hit before reaching the sphere,
         // the view is blocked. Otherwise the sphere is visible.
+        LeanTween.cancel(gameObject);
         if (Physics.Raycast(origin, direction, out RaycastHit hit, distanceToSphere, obstacleMask)) {
             // No obstacle hit: show/scale up the sphere
             LeanTween.scale(sphere.gameObject, Vector3.one * 6, 0.5f);

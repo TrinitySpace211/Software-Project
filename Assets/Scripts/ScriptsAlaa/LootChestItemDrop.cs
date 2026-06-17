@@ -237,9 +237,13 @@ public class LootChestItemDrop : MonoBehaviour {
         Item spawnedItem = Instantiate(itemSO.itemPrefab, startPosition, itemSO.itemPrefab.transform.rotation).GetComponentInChildren<Item>();
 
         if (itemSO.itemType == ItemType.Gun) {
-            SetItemType(() => spawnedItem.SetItemType(itemSO.gunType), itemSO.itemType, itemSO.gunType, MeleeType.None);
+            SetItemType(() => spawnedItem.SetItemType(itemSO.gunType), itemSO.itemType, itemSO.gunType);
         } else if (itemSO.itemType == ItemType.Melee) {
-            SetItemType(() => spawnedItem.SetItemType(itemSO.meleeType), itemSO.itemType, GunType.None, itemSO.meleeType);
+            SetItemType(() => spawnedItem.SetItemType(itemSO.meleeType), itemSO.itemType, itemSO.meleeType);
+        } else if (itemSO.itemType == ItemType.Grenade) {
+            SetItemType(() => spawnedItem.SetItemType(itemSO.itemType), itemSO.itemType, itemSO.itemType);
+        } else if (itemSO.itemType == ItemType.Consumable) {
+            SetItemType(() => spawnedItem.SetItemType(itemSO.healthItemType), itemSO.itemType, itemSO.healthItemType);
         }
 
         StartCoroutine(RevealItem(spawnedItem.gameObject, startPosition, landingPosition));
@@ -302,10 +306,12 @@ public class LootChestItemDrop : MonoBehaviour {
         }
     }
 
-    private void SetItemType(Action action, ItemType itemType, GunType gunType, MeleeType meleeType) {
+    private void SetItemType<T>(Action action, ItemType itemType, T getItemType) {
         bool isValid = itemType switch {
-            ItemType.Gun => gunType is GunType.AssaultRifle or GunType.Pistol or GunType.Shotgun or GunType.Sniper,
-            ItemType.Melee => meleeType is MeleeType.Knife or MeleeType.Baseball_Bat or MeleeType.Crowbar or MeleeType.Hatchet or MeleeType.Sword or MeleeType.Tomahawk,
+            ItemType.Gun => getItemType is GunType.AssaultRifle or GunType.Pistol or GunType.Shotgun or GunType.Sniper,
+            ItemType.Melee => getItemType is MeleeType.Knife or MeleeType.Baseball_Bat or MeleeType.Crowbar or MeleeType.Hatchet or MeleeType.Sword or MeleeType.Tomahawk,
+            ItemType.Grenade => getItemType is ItemType.Grenade,
+            ItemType.Consumable => getItemType is HealthItemType.Bandage or HealthItemType.HealthBottle or HealthItemType.Syringe or HealthItemType.HealthPack,
             _ => false
         };
 

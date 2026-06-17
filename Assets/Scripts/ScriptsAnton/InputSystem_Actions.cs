@@ -199,6 +199,24 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""TurnRight"",
+                    ""type"": ""Button"",
+                    ""id"": ""71efec53-734a-40b1-aa19-b9dfa0fd5940"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""TurnLeft"",
+                    ""type"": ""Button"",
+                    ""id"": ""561520d8-416b-4fcf-b946-007b4872b3a3"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -513,7 +531,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""1c04ea5f-b012-41d1-a6f7-02e963b52893"",
-                    ""path"": ""<Keyboard>/e"",
+                    ""path"": ""<Keyboard>/f"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
@@ -584,6 +602,28 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": "";Keyboard&Mouse"",
                     ""action"": ""Use"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f93dc459-9773-480d-974f-43f6a8accc2e"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""TurnRight"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b59d448a-e965-4ba7-9cbd-0d7a741564ff"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""TurnLeft"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1283,6 +1323,8 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_Player_Reloading = m_Player.FindAction("Reloading", throwIfNotFound: true);
         m_Player_Throw = m_Player.FindAction("Throw", throwIfNotFound: true);
         m_Player_Use = m_Player.FindAction("Use", throwIfNotFound: true);
+        m_Player_TurnRight = m_Player.FindAction("TurnRight", throwIfNotFound: true);
+        m_Player_TurnLeft = m_Player.FindAction("TurnLeft", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1393,6 +1435,8 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Reloading;
     private readonly InputAction m_Player_Throw;
     private readonly InputAction m_Player_Use;
+    private readonly InputAction m_Player_TurnRight;
+    private readonly InputAction m_Player_TurnLeft;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -1452,6 +1496,14 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/Use".
         /// </summary>
         public InputAction @Use => m_Wrapper.m_Player_Use;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/TurnRight".
+        /// </summary>
+        public InputAction @TurnRight => m_Wrapper.m_Player_TurnRight;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/TurnLeft".
+        /// </summary>
+        public InputAction @TurnLeft => m_Wrapper.m_Player_TurnLeft;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1514,6 +1566,12 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Use.started += instance.OnUse;
             @Use.performed += instance.OnUse;
             @Use.canceled += instance.OnUse;
+            @TurnRight.started += instance.OnTurnRight;
+            @TurnRight.performed += instance.OnTurnRight;
+            @TurnRight.canceled += instance.OnTurnRight;
+            @TurnLeft.started += instance.OnTurnLeft;
+            @TurnLeft.performed += instance.OnTurnLeft;
+            @TurnLeft.canceled += instance.OnTurnLeft;
         }
 
         /// <summary>
@@ -1561,6 +1619,12 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Use.started -= instance.OnUse;
             @Use.performed -= instance.OnUse;
             @Use.canceled -= instance.OnUse;
+            @TurnRight.started -= instance.OnTurnRight;
+            @TurnRight.performed -= instance.OnTurnRight;
+            @TurnRight.canceled -= instance.OnTurnRight;
+            @TurnLeft.started -= instance.OnTurnLeft;
+            @TurnLeft.performed -= instance.OnTurnLeft;
+            @TurnLeft.canceled -= instance.OnTurnLeft;
         }
 
         /// <summary>
@@ -2000,6 +2064,20 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnUse(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "TurnRight" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnTurnRight(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "TurnLeft" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnTurnLeft(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

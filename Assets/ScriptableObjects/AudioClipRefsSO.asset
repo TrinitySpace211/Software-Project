@@ -64,3 +64,9 @@ MonoBehaviour:
   playerDeathVolume: 1
   playerHeal: {fileID: 8300000, guid: 972ac064c9dbb1f40a319e00e0e6fc35, type: 3}
   playerHealVolume: 1
+  mapOpen:
+  - {fileID: 8300000, guid: 9f8f20915ace873439906330f7424aad, type: 3}
+  - {fileID: 8300000, guid: e63c532c72d4a9b46b2c89189718e1f9, type: 3}
+  - {fileID: 8300000, guid: b55640c6c8a2ab146a076cab469e3b03, type: 3}
+  - {fileID: 8300000, guid: 4d975e795d3a2cb42ac8754e4f01f51b, type: 3}
+  mapOpenVolume: 0.3

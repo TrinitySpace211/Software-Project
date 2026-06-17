@@ -50,4 +50,9 @@ public class AudioClipRefsSO : ScriptableObject {
     [Header("Player Heal")]
     public AudioClip playerHeal;
     public float playerHealVolume;
+
+    [Space]
+    [Header("Map")]
+    public AudioClip[] mapOpen;
+    public float mapOpenVolume;
 }

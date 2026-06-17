@@ -17,8 +17,9 @@ public class SoundManager : MonoBehaviour {
     [SerializeField] private AudioSource bulletImpactAudioSource;
     [SerializeField] private AudioSource footstepsAudioSource;
     [SerializeField] private AudioSource bulletShootAudioSource;
+    [SerializeField] private AudioSource mapOpenAudioSource;
 
-    private float volume = 1f;
+    public float volume { get; private set; } = 1f;
 
     private readonly float shotgunReloadDelay = 0.25f;
 
@@ -196,4 +197,5 @@ public class SoundManager : MonoBehaviour {
     private void PlaySound(AudioClip audioClip, Vector3 position, float volumeMultiplier) {
         AudioSource.PlayClipAtPoint(audioClip, position, volumeMultiplier * volume);
     }
+
 }

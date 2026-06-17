@@ -205,9 +205,15 @@ public class Inventory : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// If an Item is collected, than it will be shown in the Inventory
+    /// </summary>
+    /// <param name="item">The item that has been collected</param>
     private void Item_OnItemCollected(Item item) {
         GunType collectedGun = item.GetItemType<GunType>();
         MeleeType collectedMelee = item.GetItemType<MeleeType>();
+        ItemType collectedGrenade = item.GetItemType<ItemType>();
+        HealthItemType collectedHealthItem = item.GetItemType<HealthItemType>();
         if (collectedGun != GunType.None) {
             foreach (ItemSO gun in guns) {
                 if (gun.gunType == collectedGun) {
@@ -219,6 +225,18 @@ public class Inventory : MonoBehaviour {
             foreach (ItemSO melee in melees) {
                 if (melee.meleeType == collectedMelee) {
                     AddItem(melee, 1);
+                    return;
+                }
+            }
+        } else if (collectedGrenade != ItemType.None) {
+            if (collectedGrenade == ItemType.Grenade) {
+                AddItem(grenade, 1);
+                return;
+            }
+        } else if (collectedHealthItem != HealthItemType.None) {
+            foreach (ItemSO healthItem in healthItems) {
+                if (healthItem.healthItemType == collectedHealthItem) {
+                    AddItem(healthItem, 1);
                     return;
                 }
             }
@@ -272,34 +290,10 @@ public class Inventory : MonoBehaviour {
         }
     }
 
-    /* /// <summary>
-    /// 
+    /// <summary>
+    /// Reduces the amount left at the selected Slot
     /// </summary>
-    /// <param name="itemToAdd"></param>
-    /// <param name="amount"></param>
-    public void RemoveItem(ItemSO itemToRemove, int amount) {
-        int remaining = amount;
-
-        // Remove from existing stacks first
-        foreach (Slot slot in inventorySlots) {
-            if (slot.HasItem() && slot.GetItem() == itemToAdd) {
-                int currentAmount = slot.GetAmount();
-                int maxStack = itemToAdd.maxStackSize;
-
-                if (currentAmount < maxStack) {
-                    int spaceLeft = maxStack - currentAmount;
-                    int amountToAdd = Mathf.Min(spaceLeft, remaining);
-
-                    slot.SetItem(itemToAdd, currentAmount + amountToAdd);
-                    remaining -= amountToAdd;
-
-                    if (remaining <= 0)
-                        return;
-                }
-            }
-        }
-    } */
-
+    /// <param name="amount">How much to reduce</param>
     public void ConsumeEquippedItem(int amount = 1) {
         if (selectedSlot == null) return;
 

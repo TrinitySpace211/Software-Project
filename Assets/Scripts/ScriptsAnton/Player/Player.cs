@@ -4,10 +4,9 @@ using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
 /// <summary>
-/// This is the Player Class. The Player Movement, Jumping and Rotation will be calculated.
-/// The Method HandleJumping() doesn't have any animations yet.
+/// This is the Player Class. The Player Movement and Rotation will be calculated.
 /// The Player needs the Component "CharacterController" to work properly.
-/// The inputs will be handled in the "PlayerInputHandler" Script.
+/// The Inputs will be handled in the "PlayerInputHandler" Script.
 /// </summary>
 [DefaultExecutionOrder(-1), DisallowMultipleComponent]
 public class Player : MonoBehaviour {
@@ -35,6 +34,7 @@ public class Player : MonoBehaviour {
     [SerializeField] private float walkSpeed = 4f;
     [SerializeField] private float sprintMultipier = 1.5f;
     [SerializeField] private float movingThreshold = 0.01f;
+    [SerializeField] private float gravityMultiplier = 1f;
 
     [Header("Aim Parameters")]
     [SerializeField] private float aimDuration = 0.3f;
@@ -54,9 +54,6 @@ public class Player : MonoBehaviour {
 
     private Transform setupWeaponParent;
 
-    //Define Stats for this Player Instance
-    public PlayerStats currentPlayerStats { get; private set; }
-
     //Player Movement Variables
     private Vector3 worldMousePos;
     private Vector3 currentMovement;
@@ -68,6 +65,7 @@ public class Player : MonoBehaviour {
     private bool isSprinting;
     private float lastFootPlaced = 0f;
 
+    //Items in Players Range ready to be collected
     private List<Item> itemsInRange = new();
 
     //Event
@@ -77,11 +75,6 @@ public class Player : MonoBehaviour {
     #endregion
 
     private void Start() {
-        currentPlayerStats = new PlayerStats {
-            maxHealth = baseStats.health,
-            armor = baseStats.armor
-        };
-
         PlayerInputHandler.OnReloadAction += PlayerInputHandler_OnReloadAction;
         Item.OnItemCollected += Item_OnItemCollected;
     }
@@ -100,7 +93,7 @@ public class Player : MonoBehaviour {
         }
     }
 
-    private void LateUpdate() {
+    private void FixedUpdate() {
         if (playerInputHandler != null && !playerHealth.GetIsDead()) {
             if (playerInputHandler.InteractTriggered) {
                 Collider[] hits = Physics.OverlapSphere(transform.position, collectRadius);
@@ -138,6 +131,10 @@ public class Player : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// If the Item got collected it will be removed from the List of collectable Items
+    /// </summary>
+    /// <param name="item">The Item that has been collected</param>
     private void Item_OnItemCollected(Item item) {
         if (itemsInRange.Contains(item)) {
             itemsInRange.Remove(item);
@@ -145,7 +142,6 @@ public class Player : MonoBehaviour {
     }
 
     #region Movement
-
     /// <summary>
     /// Calculates the normalized Direction of the input relative to the camera's orientation.
     /// This ensures that "forward" always means towards where the camera is looking.
@@ -214,6 +210,7 @@ public class Player : MonoBehaviour {
 
         //Moves the Character
         characterController.Move(currentMovement * Time.deltaTime);
+        HandleFall();
 
         // Footstep Sound
         float walkFootstepDelay = 1f / walkSpeed * footstepSoundSpeed;
@@ -257,6 +254,18 @@ public class Player : MonoBehaviour {
         Quaternion targetRotation = Quaternion.LookRotation(direction);
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, dirAmount * Time.deltaTime);
     }
+
+    /// <summary>
+    /// If the Player goes over a ledge it checks if the Player is Grounded.
+    /// If not then gravity will pull him down.
+    /// </summary>
+    private void HandleFall() {
+        if (characterController.isGrounded) {
+            currentMovement.y = -0.5f;
+        } else {
+            currentMovement.y += Physics.gravity.y * gravityMultiplier * Time.deltaTime;
+        }
+    }
     #endregion
 
     #region Weapon Aiming, Shooting & Melee Attack 
@@ -286,7 +295,7 @@ public class Player : MonoBehaviour {
     private void HandleShooting() {
         GunSO activeGun = weaponSelector.activeGun;
 
-        if (playerInputHandler.AttackTriggered && playerInputHandler.AimingTriggered && activeGun != null && !playerAnimation.GetIsReloading() && !weaponSelector.IsSelecting()) {
+        if (playerInputHandler.AttackTriggered && playerInputHandler.AimingTriggered && !isSprinting && activeGun != null && !playerAnimation.GetIsReloading() && !weaponSelector.IsSelecting()) {
             activeGun.Shoot();
 
             if (activeGun.GetEmptyMagazine()) {
@@ -349,6 +358,8 @@ public class Player : MonoBehaviour {
         }
     }
     #endregion
+
+    #region Item Interact, Grenade Throw & use Heal
     /// <summary>
     /// Handles the Interact Input to collect Items that are dropped via the Loot Chests.
     /// The Item that is closest to the Player is going to be collected first.
@@ -425,7 +436,7 @@ public class Player : MonoBehaviour {
     private void HandleHealingKits() {
         HealthItemSO healthItem = weaponSelector.activeHealthItem;
         if (healthItem != null) {
-            if (playerInputHandler.UseTriggered) {
+            if (playerInputHandler.UseTriggered && playerHealth.stats.currentHealth <= playerHealth.stats.maxHealth) {
                 healthItem.Heal(this);
 
                 OnHeal?.Invoke(transform.position);
@@ -440,6 +451,7 @@ public class Player : MonoBehaviour {
             }
         }
     }
+    #endregion
 
     #region State Checks
     /// <summary>

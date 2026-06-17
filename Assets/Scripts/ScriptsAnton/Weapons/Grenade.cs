@@ -31,6 +31,7 @@ public class Grenade : MonoBehaviour {
         if (grenadeRb != null) {
             grenadeRb.linearVelocity = Vector3.zero;
             grenadeRb.useGravity = false;
+            grenadeRb.isKinematic = true;
         }
 
         return grenadeInstance;
