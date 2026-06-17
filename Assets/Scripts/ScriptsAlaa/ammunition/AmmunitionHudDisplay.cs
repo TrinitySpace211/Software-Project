@@ -1,5 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 /// <summary>
 /// Zeigt die Munition der aktuell ausgeruesteten Waffe an.
@@ -15,17 +18,19 @@ public class AmmunitionHudDisplay : MonoBehaviour {
     [SerializeField] private Vector2 hudPosition = new Vector2(20f, -145f);
 
     // Groesse vom Icon.
-    [SerializeField] private Vector2 iconSize = new Vector2(42f, 42f);
+    [SerializeField] private Vector2 iconSize = new Vector2(34f, 34f);
 
     // Farbe vom Munitionstext.
     [SerializeField] private Color textColor = new Color(0.85f, 0.95f, 1f);
 
     private RectTransform hudRect;
+    private Image ammunitionIconImage;
     private Text ammunitionText;
     private GameObject hudObject;
+    private GameObject canvasObject;
 
     private void Awake() {
-        RemoveOldRuntimeHudCanvases();
+        RemoveOwnRuntimeHudCanvas();
         HideOldImageOnThisObject();
         FindWeaponSelectorIfMissing();
         CreateHud();
@@ -33,6 +38,8 @@ public class AmmunitionHudDisplay : MonoBehaviour {
 
     private void Update() {
         FindWeaponSelectorIfMissing();
+        FindIconIfMissing();
+        UpdateAmmunitionIcon();
         UpdateHudPosition();
         UpdateAmmunitionText();
     }
@@ -46,13 +53,24 @@ public class AmmunitionHudDisplay : MonoBehaviour {
         weaponSelector = FindFirstObjectByType<PlayerWeaponSelector>();
     }
 
-    private void RemoveOldRuntimeHudCanvases() {
-        // Entfernt alte automatisch erstellte Ammo-HUDs, damit nicht mehrere Anzeigen uebereinander liegen.
-        Canvas[] canvases = FindObjectsByType<Canvas>(FindObjectsSortMode.None);
-        foreach (Canvas canvas in canvases) {
-            if (canvas != null && canvas.gameObject.name == "Ammunition HUD Canvas") {
-                Destroy(canvas.gameObject);
-            }
+    private void FindIconIfMissing() {
+        // Falls das Icon im Inspector leer ist, wird das Logo automatisch gesucht.
+        if (ammunitionIcon != null) {
+            return;
+        }
+
+#if UNITY_EDITOR
+        ammunitionIcon = AssetDatabase.LoadAssetAtPath<Sprite>(
+            "Assets/Scripts/ScriptsAlaa/ammunition logo/ammunition logo.png"
+        );
+#endif
+    }
+
+    private void RemoveOwnRuntimeHudCanvas() {
+        // Entfernt nur das HUD, das von diesem Objekt erstellt wurde.
+        Transform oldCanvas = transform.Find("Ammunition HUD Canvas");
+        if (oldCanvas != null) {
+            Destroy(oldCanvas.gameObject);
         }
     }
 
@@ -66,7 +84,9 @@ public class AmmunitionHudDisplay : MonoBehaviour {
 
     private void CreateHud() {
         // Erstellt ein eigenes Canvas fuer die Munitionsanzeige.
-        GameObject canvasObject = new GameObject("Ammunition HUD Canvas");
+        canvasObject = new GameObject("Ammunition HUD Canvas");
+        canvasObject.transform.SetParent(transform, false);
+
         Canvas canvas = canvasObject.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         canvas.sortingOrder = 1000;
@@ -87,11 +107,11 @@ public class AmmunitionHudDisplay : MonoBehaviour {
         hudRect.anchorMax = new Vector2(0f, 1f);
         hudRect.pivot = new Vector2(0f, 1f);
         hudRect.anchoredPosition = hudPosition;
-        hudRect.sizeDelta = new Vector2(150f, 46f);
+        hudRect.sizeDelta = new Vector2(175f, 46f);
 
         // Dunkler Hintergrund, damit man die Anzeige gut lesen kann.
         Image background = hudObject.AddComponent<Image>();
-        background.color = new Color(0.04f, 0.06f, 0.05f, 0.72f);
+        background.color = new Color(0.02f, 0.025f, 0.03f, 0.82f);
         background.raycastTarget = false;
 
         // Icon links in der Anzeige.
@@ -105,12 +125,11 @@ public class AmmunitionHudDisplay : MonoBehaviour {
         iconRect.anchoredPosition = new Vector2(8f, 0f);
         iconRect.sizeDelta = iconSize;
 
-        Image iconImage = iconObject.AddComponent<Image>();
-        iconImage.sprite = ammunitionIcon;
-        iconImage.enabled = ammunitionIcon != null;
-        iconImage.color = Color.white;
-        iconImage.preserveAspect = true;
-        iconImage.raycastTarget = false;
+        ammunitionIconImage = iconObject.AddComponent<Image>();
+        ammunitionIconImage.color = Color.white;
+        ammunitionIconImage.preserveAspect = true;
+        ammunitionIconImage.raycastTarget = false;
+        UpdateAmmunitionIcon();
 
         // Text rechts neben dem Icon.
         GameObject textObject = new GameObject("Ammunition Count");
@@ -119,14 +138,13 @@ public class AmmunitionHudDisplay : MonoBehaviour {
         RectTransform textRect = textObject.AddComponent<RectTransform>();
         textRect.anchorMin = new Vector2(0f, 0f);
         textRect.anchorMax = new Vector2(1f, 1f);
-        textRect.offsetMin = new Vector2(46f, 0f);
+        textRect.offsetMin = new Vector2(50f, 0f);
         textRect.offsetMax = new Vector2(-4f, 0f);
 
         ammunitionText = textObject.AddComponent<Text>();
         ammunitionText.alignment = TextAnchor.MiddleLeft;
         ammunitionText.fontSize = 23;
         ammunitionText.fontStyle = FontStyle.Bold;
-        ammunitionText.color = textColor;
         ammunitionText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         if (ammunitionText.font == null) {
             ammunitionText.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
@@ -140,6 +158,18 @@ public class AmmunitionHudDisplay : MonoBehaviour {
         UpdateAmmunitionText();
     }
 
+    private void ApplyTextColor() {
+        // Nimmt immer die Farbe aus dem Inspector-Feld "Text Color".
+        if (ammunitionText == null) {
+            return;
+        }
+
+        ammunitionText.color = textColor;
+        ammunitionText.canvasRenderer.SetColor(textColor);
+        ammunitionText.SetVerticesDirty();
+        ammunitionText.SetMaterialDirty();
+    }
+
     private void UpdateHudPosition() {
         // Haelt die Anzeige an einer festen Position.
         if (hudRect == null) {
@@ -147,6 +177,17 @@ public class AmmunitionHudDisplay : MonoBehaviour {
         }
 
         hudRect.anchoredPosition = hudPosition;
+    }
+
+    private void UpdateAmmunitionIcon() {
+        // Aktualisiert das Icon auch nach einem Reimport oder Inspector-Wechsel.
+        if (ammunitionIconImage == null) {
+            return;
+        }
+
+        ammunitionIconImage.sprite = ammunitionIcon;
+        ammunitionIconImage.enabled = ammunitionIcon != null;
+        ammunitionIconImage.SetAllDirty();
     }
 
     private void UpdateAmmunitionText() {
@@ -163,9 +204,10 @@ public class AmmunitionHudDisplay : MonoBehaviour {
             return;
         }
 
-        // Setzt die Farbe jedes Frame, damit der Inspector-Wert immer uebernommen wird.
-        ammunitionText.color = textColor;
+        ApplyTextColor();
         ammunitionText.text = $": {activeGun.GetCurrentAmmo()} / {activeGun.GetMaxAmmo()}";
+        ammunitionText.SetVerticesDirty();
+        ammunitionText.SetMaterialDirty();
         ammunitionText.SetAllDirty();
     }
 }
