@@ -80,13 +80,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5211376706169761891}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.26047787, y: 0.112050734, z: -0.03045131, w: 0.9584721}
-  m_LocalPosition: {x: -79.80659, y: 2.6, z: -47.730347}
+  m_LocalRotation: {x: 0.28938547, y: -0.00000001336916, z: 0.000000004041777, w: 0.9572127}
+  m_LocalPosition: {x: 0, y: 0, z: -1.0000005}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8957816653423263269}
-  m_LocalEulerAnglesHint: {x: 45.21, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 30, y: 0, z: 0}
 --- !u!20 &3054496669216063694
 Camera:
   m_ObjectHideFlags: 0
@@ -96,7 +96,7 @@ Camera:
   m_GameObject: {fileID: 5211376706169761891}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 2
+  m_ClearFlags: 1
   m_BackGroundColor: {r: 0, g: 0, b: 0, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
@@ -105,12 +105,12 @@ Camera:
   m_ShutterSpeed: 0.005
   m_Aperture: 16
   m_FocusDistance: 10
-  m_FocalLength: 50
+  m_FocalLength: 13.858139
   m_BladeCount: 5
   m_Curvature: {x: 2, y: 11}
   m_BarrelClipping: 0.25
   m_Anamorphism: 0
-  m_SensorSize: {x: 36, y: 24}
+  m_SensorSize: {x: 21.946, y: 16.002}
   m_LensShift: {x: 0, y: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2
@@ -126,7 +126,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 6135
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -163,13 +163,13 @@ MonoBehaviour:
   m_RequiresOpaqueTextureOption: 2
   m_CameraType: 0
   m_Cameras: []
-  m_RendererIndex: -1
+  m_RendererIndex: 0
   m_VolumeLayerMask:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 4097
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
+  m_RenderPostProcessing: 1
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
@@ -189,7 +189,7 @@ MonoBehaviour:
     m_JitterScale: 1
     m_MipBias: 0
     m_VarianceClampScale: 0.9
-    m_ContrastAdaptiveSharpening: 0
+    m_ContrastAdaptiveSharpening: 0.224
 --- !u!114 &4333506232380549735
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -302,13 +302,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7251539479078182273}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.2604778, y: 0.11205071, z: -0.030451303, w: 0.9584721}
-  m_LocalPosition: {x: -79.80659, y: 2.6, z: -47.730347}
+  m_LocalRotation: {x: 0.2893854, y: 0.000000028527165, z: -0.000000008624358, w: 0.9572127}
+  m_LocalPosition: {x: 0, y: 0, z: -1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8957816653423263269}
-  m_LocalEulerAnglesHint: {x: 30, y: -0.778, z: 0}
+  m_LocalEulerAnglesHint: {x: 33.58, y: 0, z: 0}
 --- !u!114 &9065719167428275361
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -412,12 +412,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TrackerSettings:
-    BindingMode: 5
+    BindingMode: 1
     PositionDamping: {x: 1, y: 1, z: 1}
     AngularDampingMode: 0
     RotationDamping: {x: 1, y: 1, z: 1}
     QuaternionDamping: 1
-  FollowOffset: {x: 0, y: 7, z: -10}
+  FollowOffset: {x: 0, y: 5, z: -6}
 --- !u!114 &160217982412614679
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -431,7 +431,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Composition:
-    ScreenPosition: {x: 0, y: 0.06944436}
+    ScreenPosition: {x: 0, y: 0.09351832}
     DeadZone:
       Enabled: 0
       Size: {x: 0.2, y: 0.2}
