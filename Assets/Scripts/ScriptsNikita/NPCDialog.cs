@@ -275,8 +275,12 @@ public class NPCDialog : MonoBehaviour {
 
         // Unlock and show the cursor
         Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
 
+        if (playerInventory.container.gameObject.activeInHierarchy) {
+            Cursor.visible = true;
+        } else if (!playerInventory.container.gameObject.activeInHierarchy) {
+            Cursor.visible = false;
+        }
         // Clear the currently selected UI element
         EventSystem.current.SetSelectedGameObject(null);
     }
@@ -289,6 +293,8 @@ public class NPCDialog : MonoBehaviour {
         ShowPanel(dialogPanel);
         HidePanel(functionsPanel);
         HidePanel(towerInfoPanel);
+
+        CloseDialog();
 
         // Clear the currently selected UI element
         EventSystem.current.SetSelectedGameObject(null);

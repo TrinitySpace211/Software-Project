@@ -31,7 +31,9 @@ public class UpdateCursor : MonoBehaviour {
         transform.position = UpdatePositionAroundPlayer(new Vector3(mouseWorldPos.x, yOffset, mouseWorldPos.z));
 
         //Crosshair position vom Canvas anpassen
-        crosshair.GetComponent<RectTransform>().position = playerInputHandler.MousePosition;
+        if (crosshair != null) {
+            crosshair.GetComponent<RectTransform>().position = playerInputHandler.MousePosition;
+        }
     }
 
     private Vector3 UpdatePositionAroundPlayer(Vector3 targetPosition) {

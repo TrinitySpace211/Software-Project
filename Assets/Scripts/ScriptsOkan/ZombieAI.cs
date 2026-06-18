@@ -276,4 +276,11 @@ public class ZombieAI : MonoBehaviour, IDamageable {
     public bool IsDead() {
         return isDead;
     }
+
+    private void OnDrawGizmos() {
+        Gizmos.color = Color.red;
+        Gizmos.DrawSphere(transform.position, enemyStatsSO.detectionRange);
+
+        Gizmos.DrawWireSphere(transform.position, enemyStatsSO.detectionRange);
+    }
 }
