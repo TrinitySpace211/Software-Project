@@ -4,7 +4,7 @@ A survival game where players must endure increasingly dangerous days while mana
 
 # Download
 
-➡️ [Download the latest version](https://github.com/TrinitySpace211/Software-Project/releases/download/v0.1.0/10Dayz.zip)
+➡️ [Download the latest version](https://github.com/TrinitySpace211/Software-Project/releases/tag/v0.2.0/10DayZ.zip)
 
 ## Playtest Information
 
