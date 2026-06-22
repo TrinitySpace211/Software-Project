@@ -10,7 +10,7 @@ public class NPCInteractionHint : MonoBehaviour {
     /// <summary>
     /// Text that will be shown above the NPC.
     /// </summary>
-    private const string PromptText = "E drücken zum Sprechen";
+    private const string PromptText = "Press F to speak";
 
     /// <summary>
     /// Player and camera can be assigned in the Inspector.

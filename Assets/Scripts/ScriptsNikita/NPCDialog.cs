@@ -161,7 +161,6 @@ public class NPCDialog : MonoBehaviour {
     /// </summary>
     public Button buyWeaponButton;
 
-
     /// <summary>
     /// Item definition for the shotgun.
     /// This ItemSO is added to the inventory when the player buys the shotgun.
@@ -229,6 +228,53 @@ public class NPCDialog : MonoBehaviour {
     private ItemSO selectedWeaponItem;
 
     /// <summary>
+    /// Panel that contains the available upgrade options.
+    /// </summary>
+    public CanvasGroup upgradePanel;
+
+    /// <summary>
+    /// Panel that displays detailed information about the selected upgrade.
+    /// </summary>
+    public CanvasGroup upgradeInfoPanel;
+
+    /// <summary>
+    /// Amount of scrap required to heal the gas tank.
+    /// </summary>
+    public int gasTankHealScrapCost = 40;
+
+    /// <summary>
+    /// Amount of health restored to the gas tank.
+    /// </summary>
+    public int gasTankHealAmount = 10;
+
+    /// <summary>
+    /// Text element that displays the current scrap amount and required scrap cost.
+    /// </summary>
+    public TMP_Text gasTankHealScrapText;
+
+    /// <summary>
+    /// Warning box that is shown if the player cannot buy the gas tank healing upgrade.
+    /// </summary>
+    public GameObject gasTankHealWarningBox;
+
+    /// <summary>
+    /// Button used to buy the gas tank healing upgrade.
+    /// </summary>
+    public Button gasTankHealButton;
+
+    /// <summary>
+    /// Reference to the gas tank health script.
+    /// This is used to restore health when the player buys the gas tank healing upgrade.
+    /// </summary>
+    public GasTankHealth gasTankHealth;
+
+    /// <summary>
+    /// Text element inside the gas tank healing warning box.
+    /// It displays why the gas tank healing upgrade cannot be bought.
+    /// </summary>
+    public TMP_Text gasTankHealWarningText;
+
+    /// <summary>
     /// Prepares the UI panels by briefly activating them and then disabling them again.
     /// This helps avoid visual stuttering when switching between panels.
     /// </summary>
@@ -236,6 +282,8 @@ public class NPCDialog : MonoBehaviour {
         HidePanel(dialogPanel);
         HidePanel(functionsPanel);
         HidePanel(towerInfoPanel);
+        HidePanel(upgradePanel);
+        HidePanel(upgradeInfoPanel);
 
         // Force Unity to update the canvas layout immediately
         Canvas.ForceUpdateCanvases();
@@ -272,6 +320,8 @@ public class NPCDialog : MonoBehaviour {
         HidePanel(dialogPanel);
         HidePanel(functionsPanel);
         HidePanel(towerInfoPanel);
+        HidePanel(upgradePanel);
+        HidePanel(upgradeInfoPanel);
 
         // Unlock and show the cursor
         Cursor.lockState = CursorLockMode.None;
@@ -297,14 +347,6 @@ public class NPCDialog : MonoBehaviour {
         CloseDialog();
 
         // Clear the currently selected UI element
-        EventSystem.current.SetSelectedGameObject(null);
-    }
-
-    /// <summary>
-    /// Handles the upgrade option selected by the player.
-    /// </summary>
-    public void Upgrade() {
-        Debug.Log("Upgrade gewählt");
         EventSystem.current.SetSelectedGameObject(null);
     }
 
@@ -790,6 +832,169 @@ public class NPCDialog : MonoBehaviour {
 
         // Update the weapon info panel after the scrap amount has changed.
         UpdateWeaponInfo();
+    }
+
+    /// <summary>
+    /// Opens the upgrade panel.
+    /// The main dialog panel is closed and the upgrade options are shown.
+    /// </summary>
+    public void OpenUpgradePanel() {
+        HidePanel(dialogPanel);
+        HidePanel(functionsPanel);
+        HidePanel(towerInfoPanel);
+        HidePanel(weaponTypePanel);
+        HidePanel(weaponPanelRanged);
+        HidePanel(weaponPanelClose);
+        HidePanel(weaponInfoPanel);
+        HidePanel(upgradeInfoPanel);
+
+        ShowPanel(upgradePanel);
+    }
+
+    /// <summary>
+    /// Goes back from the upgrade panel to the main dialog panel.
+    /// </summary>
+    public void BackFromUpgradePanel() {
+        HidePanel(upgradePanel);
+        HidePanel(upgradeInfoPanel);
+
+        ShowPanel(dialogPanel);
+    }
+
+    /// <summary>
+    /// Selects the gas tank healing upgrade and opens the upgrade info panel.
+    /// </summary>
+    public void SelectGasTankHealing() {
+        ShowPanel(upgradePanel);
+        ShowPanel(upgradeInfoPanel);
+
+        upgradeInfoPanel.transform.SetAsLastSibling();
+
+        UpdateGasTankHealingInfo();
+    }
+
+    /// <summary>
+    /// Updates the gas tank healing upgrade info panel.
+    /// It checks the current scrap amount, gas tank health state
+    /// and enables or disables the heal button.
+    /// </summary>
+    private void UpdateGasTankHealingInfo() {
+        if (playerInventory == null || scrapItem == null) {
+            // If the inventory or the scrap item is missing,
+            // the current scrap amount cannot be checked.
+            gasTankHealScrapText.text = "SCRAP: ? / " + gasTankHealScrapCost;
+
+            // Show the warning box because healing is not possible.
+            gasTankHealWarningBox.SetActive(true);
+
+            // Disable the heal button to prevent errors.
+            gasTankHealButton.interactable = false;
+
+            return;
+        }
+
+        if (gasTankHealth == null) {
+            // If the gas tank health script is missing,
+            // the gas tank cannot be healed.
+            gasTankHealScrapText.text = "SCRAP: ? / " + gasTankHealScrapCost;
+
+            // Show the warning box because healing is not possible.
+            gasTankHealWarningBox.SetActive(true);
+
+            // Disable the heal button to prevent errors.
+            gasTankHealButton.interactable = false;
+
+            return;
+        }
+
+        // Get the current amount of scrap from the player's inventory.
+        int currentScrap = playerInventory.GetItemAmount(scrapItem);
+
+        // Check if the player has enough scrap to buy the healing upgrade.
+        bool hasEnoughScrap = currentScrap >= gasTankHealScrapCost;
+
+        // Check if the gas tank is damaged and can actually be healed.
+        bool gasTankNeedsHealing = gasTankHealth.CurrentHP < gasTankHealth.MaxHP;
+
+        // The healing upgrade can only be bought if the player has enough scrap
+        // and the gas tank is not already at full health.
+        bool canBuyHealing = hasEnoughScrap && gasTankNeedsHealing;
+
+        if (gasTankHealWarningText != null) {
+            // Clear the warning text before creating a new warning message.
+            gasTankHealWarningText.text = "";
+
+            // Add a warning message if the player does not have enough scrap.
+            if (!hasEnoughScrap) {
+                gasTankHealWarningText.text += "NOT ENOUGH RESOURCES";
+            }
+
+            // Add a warning message if the gas tank is already at full health.
+            if (!gasTankNeedsHealing) {
+                // If there is already another warning message,
+                // add a line break before adding the next message.
+                if (gasTankHealWarningText.text != "") {
+                    gasTankHealWarningText.text += "\n";
+                }
+
+                // Add the full health warning message.
+                gasTankHealWarningText.text += "GAS-TANK ALREADY FULL";
+            }
+        }
+
+        // Show current scrap amount and required scrap cost.
+        gasTankHealScrapText.text = "SCRAP: " + currentScrap + " / " + gasTankHealScrapCost;
+
+        // Show the warning box if the healing upgrade cannot be bought.
+        gasTankHealWarningBox.SetActive(!canBuyHealing);
+
+        // Enable the heal button only if the player has enough scrap
+        // and the gas tank needs healing.
+        gasTankHealButton.interactable = canBuyHealing;
+    }
+
+    /// <summary>
+    /// Buys the gas tank healing upgrade.
+    /// The required scrap amount is removed from the inventory and the gas tank health is restored.
+    /// </summary>
+    public void BuyGasTankHealing() {
+        if (playerInventory == null || scrapItem == null) {
+            // If the inventory or the scrap item is missing,
+            // the healing upgrade cannot be bought correctly.
+            Debug.LogError("Inventory oder Scrap Item fehlt!");
+            return;
+        }
+
+        if (gasTankHealth == null) {
+            // If no gas tank health script is assigned,
+            // the gas tank cannot be healed.
+            Debug.LogError("Gas Tank Health fehlt!");
+            return;
+        }
+
+        if (!playerInventory.HasItemAmount(scrapItem, gasTankHealScrapCost)) {
+            // Stop healing if the player does not have enough scrap.
+            Debug.Log("Nicht genug Scrap für Gas-Tank Healing.");
+
+            // Update the upgrade info panel so the warning and button state are correct.
+            UpdateGasTankHealingInfo();
+
+            return;
+        }
+
+        // Remove the required scrap amount from the player's inventory.
+        playerInventory.RemoveItem(scrapItem, gasTankHealScrapCost);
+
+        // Restore health to the gas tank.
+        gasTankHealth.Heal(gasTankHealAmount);
+
+        Debug.Log("Gas-Tank healed by " + gasTankHealAmount + " HP.");
+
+        // Update the upgrade info panel after the scrap amount has changed.
+        UpdateGasTankHealingInfo();
+
+        // Clear the currently selected UI element.
+        EventSystem.current.SetSelectedGameObject(null);
     }
 
     /// <summary>
