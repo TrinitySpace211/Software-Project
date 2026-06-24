@@ -205,7 +205,7 @@ public class AmmunitionHudDisplay : MonoBehaviour {
         }
 
         ApplyTextColor();
-        ammunitionText.text = $": {activeGun.GetCurrentAmmo()} / {activeGun.GetMaxAmmo()}";
+        ammunitionText.text = $": {activeGun.currentAmmo} / {activeGun.GetMaxAmmo()}";
         ammunitionText.SetVerticesDirty();
         ammunitionText.SetMaterialDirty();
         ammunitionText.SetAllDirty();

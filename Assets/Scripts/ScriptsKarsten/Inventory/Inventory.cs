@@ -23,6 +23,7 @@ public class Inventory : MonoBehaviour {
     [SerializeField] private ItemSO[] melees;
     [SerializeField] private ItemSO grenade;
     [SerializeField] private ItemSO[] healthItems;
+    [SerializeField] private ItemSO[] ammunitions;
     [SerializeField] private ItemSO[] debugItems;
 
 
@@ -30,21 +31,16 @@ public class Inventory : MonoBehaviour {
     [SerializeField] private float swapSpeed = 0.8f;
 
     private static readonly Key[] debugKeys = new Key[] {
-        Key.B,
-        Key.N,
-        Key.M,
-        Key.V,
-        Key.C,
+        Key.Digit6,
         Key.Digit7,
         Key.Digit8,
         Key.Digit9,
         Key.Digit0,
-        Key.X,
-        Key.L,
+        Key.T,
         Key.Y,
         Key.U,
         Key.O,
-        Key.P
+        Key.P,
     };
 
     /// <summary>
@@ -115,6 +111,11 @@ public class Inventory : MonoBehaviour {
     private Slot selectedSlot = null;
 
     /// <summary>
+    /// Holds all the ItemSOs in a List
+    /// </summary>
+    private List<ItemSO> items = new();
+
+    /// <summary>
     /// Initializes slot collections by retrieving
     /// inventory and hotbar slots from child objects.
     /// </summary>
@@ -136,6 +137,11 @@ public class Inventory : MonoBehaviour {
         Item.OnItemCollected += Item_OnItemCollected;
 
         container.SetActive(false);
+
+        items.AddRange(guns);
+        items.AddRange(melees);
+        items.Add(grenade);
+        items.AddRange(healthItems);
     }
 
     /// <summary>
@@ -143,11 +149,12 @@ public class Inventory : MonoBehaviour {
     /// and drag-and-drop interactions.
     /// </summary>
     private void Update() {
-        for (int i = 0; i < debugItems.Length && i < debugKeys.Length; i++) {
+        //Debug Cheat Weapons
+        /* for (int i = 0; i < debugItems.Length && i < debugKeys.Length; i++) {
             if (Keyboard.current[debugKeys[i]].wasPressedThisFrame) {
                 AddItem(debugItems[i], 1);
             }
-        }
+        } */
 
         if (Keyboard.current.iKey.wasPressedThisFrame) {
             container.SetActive(!container.activeInHierarchy);
@@ -163,7 +170,6 @@ public class Inventory : MonoBehaviour {
                 crosshair.SetActive(true);
                 Cursor.visible = false;
             }
-
 
             //TogglePause();
         }
@@ -182,8 +188,19 @@ public class Inventory : MonoBehaviour {
     private void PlayerInputHandler_OnHotbarSlotPressed(int slot) {
         ItemSO item = hotbarSlots[slot].GetItem();
 
-        if (!isDragging && item != null) {
-            if (Time.time > swapSpeed + lastTimeSelected && !player.GetPlayerAnimation().GetIsReloading() && !player.GetPlayerAnimation().GetIsThrowingGrenade() && item.itemType != ItemType.Misc) {
+        if (item != null) {
+            if (item.itemType == ItemType.Misc || item.itemType == ItemType.Ammunition) {
+                return;
+            }
+        }
+
+        if (!isDragging) {
+            if (Time.time > swapSpeed + lastTimeSelected
+            && !player.GetPlayerAnimation().GetIsReloading()
+            && !player.GetPlayerAnimation().GetIsThrowingGrenade()
+            && !player.GetIsMeleeAttacking()
+            && !hotbarSlots[slot].GetSelected()) {
+
                 lastTimeSelected = Time.time;
                 if (previousSlot != -1) {
                     hotbarSlots[previousSlot].SetSelected(false);
@@ -223,6 +240,7 @@ public class Inventory : MonoBehaviour {
         MeleeType collectedMelee = item.GetItemType<MeleeType>();
         ItemType collectedGrenade = item.GetItemType<ItemType>();
         HealthItemType collectedHealthItem = item.GetItemType<HealthItemType>();
+        AmmunitionType collectedAmmoType = item.GetItemType<AmmunitionType>();
         if (collectedGun != GunType.None) {
             foreach (ItemSO gun in guns) {
                 if (gun.gunType == collectedGun) {
@@ -246,6 +264,15 @@ public class Inventory : MonoBehaviour {
             foreach (ItemSO healthItem in healthItems) {
                 if (healthItem.healthItemType == collectedHealthItem) {
                     AddItem(healthItem, 1);
+                    return;
+                }
+            }
+        } else if (collectedAmmoType != AmmunitionType.None) {
+            foreach (ItemSO ammoItem in ammunitions) {
+                if (ammoItem.ammunitionType == collectedAmmoType) {
+                    int amount = UnityEngine.Random.Range((int)(ammoItem.maxStackSize * 0.1), (int)(ammoItem.maxStackSize * 0.3));
+                    AddItem(ammoItem, amount);
+                    //Debug.Log(amount + " " + ammoItem.maxStackSize + " " + ammoItem.maxStackSize * 0.1);
                     return;
                 }
             }
@@ -297,6 +324,55 @@ public class Inventory : MonoBehaviour {
                 $"Inventory is full. Could not add {remaining}x {itemToAdd.itemName}."
             );
         }
+    }
+
+    public void AddItem<T>(ItemType itemType, T type) {
+        switch (itemType) {
+            case ItemType.Gun:
+                foreach (ItemSO gun in guns) {
+                    if (EqualityComparer<T>.Default.Equals(type, (T)(object)gun.gunType)) {
+                        AddItem(gun, 1);
+                        return;
+                    }
+                }
+                break;
+            case ItemType.Melee:
+                foreach (ItemSO melee in melees) {
+                    if (EqualityComparer<T>.Default.Equals(type, (T)(object)melee.meleeType)) {
+                        AddItem(melee, 1);
+                        return;
+                    }
+                }
+                break;
+        }
+
+        Debug.LogWarning($"No Item Found with that Type {type}");
+    }
+
+    public void AddItem<T>(ItemType itemType, T type, int amount) {
+        switch (itemType) {
+            case ItemType.Grenade:
+                AddItem(grenade, amount);
+                return;
+            case ItemType.Consumable:
+                foreach (ItemSO healthItem in healthItems) {
+                    if (EqualityComparer<T>.Default.Equals(type, (T)(object)healthItem.healthItemType)) {
+                        AddItem(healthItem, amount);
+                        return;
+                    }
+                }
+                break;
+            case ItemType.Ammunition:
+                foreach (ItemSO ammo in ammunitions) {
+                    if (EqualityComparer<T>.Default.Equals(type, (T)(object)ammo.ammunitionType)) {
+                        AddItem(ammo, amount);
+                        return;
+                    }
+                }
+                break;
+        }
+
+        Debug.LogWarning($"No Item Found with that Type {type}");
     }
 
     /// <summary>
@@ -568,6 +644,39 @@ public class Inventory : MonoBehaviour {
         }
     }
 
+    public bool GetAmmoAvailable(GunSO gun, out int ammoNeed) {
+        int maxAmmo = gun.shootConfigSO.maxAmmo;
+
+        int ammoHas = 0;
+        ammoNeed = maxAmmo - gun.currentAmmo;
+        foreach (Slot slot in allSlots) {
+            if (slot.HasItem() && slot.GetItem().ammunitionType == gun.ammunitionType && slot.GetItem().gunType == GunType.None) {
+                ammoHas += slot.GetAmount();
+            }
+        }
+        if (ammoHas > 0) {
+            if (ammoHas >= maxAmmo && gun.currentAmmo <= 0) {
+                ammoNeed = maxAmmo;
+            } else {
+                if (ammoHas <= ammoNeed) {
+                    ammoNeed = ammoHas;
+                }
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public ItemSO GetItemSOWithGunType<T>(T ammunitionType) {
+        foreach (ItemSO ammo in ammunitions) {
+            if (EqualityComparer<T>.Default.Equals(ammunitionType, (T)(object)ammo.ammunitionType)) {
+                return ammo;
+            }
+        }
+        return null;
+    }
+
     public int GetSelectedItemAmount() {
         if (selectedSlot != null) {
             return selectedSlot.GetAmount();
@@ -575,10 +684,18 @@ public class Inventory : MonoBehaviour {
         return -1;
     }
 
+    public bool GetIsDragging() {
+        return isDragging;
+    }
+
+    public List<ItemSO> GetItemSOs() {
+        return items;
+    }
+
     /*
- *******************************************************************************
- * Ergänzugen für den NPC. Benötigt werden öffentliche Methoden.
- */
+    *******************************************************************************
+    * Ergänzugen für den NPC. Benötigt werden öffentliche Methoden.
+    */
 
     /// <summary>
     /// Returns the total amount of a specific item across all inventory and hotbar slots.
@@ -641,6 +758,5 @@ public class Inventory : MonoBehaviour {
 
         return true;
     }
-
 }
 

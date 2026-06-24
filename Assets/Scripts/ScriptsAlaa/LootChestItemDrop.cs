@@ -244,6 +244,8 @@ public class LootChestItemDrop : MonoBehaviour {
             SetItemType(() => spawnedItem.SetItemType(itemSO.itemType), itemSO.itemType, itemSO.itemType);
         } else if (itemSO.itemType == ItemType.Consumable) {
             SetItemType(() => spawnedItem.SetItemType(itemSO.healthItemType), itemSO.itemType, itemSO.healthItemType);
+        } else if (itemSO.itemType == ItemType.Ammunition) {
+            SetItemType(() => spawnedItem.SetItemType(itemSO.ammunitionType), itemSO.itemType, itemSO.ammunitionType);
         }
 
         StartCoroutine(RevealItem(spawnedItem.gameObject, startPosition, landingPosition));
@@ -312,6 +314,7 @@ public class LootChestItemDrop : MonoBehaviour {
             ItemType.Melee => getItemType is MeleeType.Knife or MeleeType.Baseball_Bat or MeleeType.Crowbar or MeleeType.Hatchet or MeleeType.Sword or MeleeType.Tomahawk,
             ItemType.Grenade => getItemType is ItemType.Grenade,
             ItemType.Consumable => getItemType is HealthItemType.Bandage or HealthItemType.HealthBottle or HealthItemType.Syringe or HealthItemType.HealthPack,
+            ItemType.Ammunition => getItemType is AmmunitionType.Ammo556x45mm or AmmunitionType.Ammo9mm or AmmunitionType.Ammo12Gauge or AmmunitionType.AmmoSniper,
             _ => false
         };
 

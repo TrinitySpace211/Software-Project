@@ -217,6 +217,33 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""DeselectWeapon"",
+                    ""type"": ""Button"",
+                    ""id"": ""77bed085-1544-4a4c-b1c5-b0d7791ac329"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ToggleDebug"",
+                    ""type"": ""Button"",
+                    ""id"": ""83ec54ba-13e7-47a0-b73c-302af86156ff"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Return"",
+                    ""type"": ""Button"",
+                    ""id"": ""181e5c0b-3cca-4790-a514-fb668e5de1f3"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -624,6 +651,39 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": "";Keyboard&Mouse"",
                     ""action"": ""TurnLeft"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a55b0d00-439f-4649-8c20-a7e5a30a0c0a"",
+                    ""path"": ""<Keyboard>/x"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""DeselectWeapon"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""0d97792e-00a1-4250-8095-d35a7e260fdd"",
+                    ""path"": ""<Keyboard>/backquote"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""ToggleDebug"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f78415f9-744a-4eb6-b8b5-992452e35cba"",
+                    ""path"": ""<Keyboard>/enter"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""Return"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1325,6 +1385,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_Player_Use = m_Player.FindAction("Use", throwIfNotFound: true);
         m_Player_TurnRight = m_Player.FindAction("TurnRight", throwIfNotFound: true);
         m_Player_TurnLeft = m_Player.FindAction("TurnLeft", throwIfNotFound: true);
+        m_Player_DeselectWeapon = m_Player.FindAction("DeselectWeapon", throwIfNotFound: true);
+        m_Player_ToggleDebug = m_Player.FindAction("ToggleDebug", throwIfNotFound: true);
+        m_Player_Return = m_Player.FindAction("Return", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1437,6 +1500,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Use;
     private readonly InputAction m_Player_TurnRight;
     private readonly InputAction m_Player_TurnLeft;
+    private readonly InputAction m_Player_DeselectWeapon;
+    private readonly InputAction m_Player_ToggleDebug;
+    private readonly InputAction m_Player_Return;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -1505,6 +1571,18 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @TurnLeft => m_Wrapper.m_Player_TurnLeft;
         /// <summary>
+        /// Provides access to the underlying input action "Player/DeselectWeapon".
+        /// </summary>
+        public InputAction @DeselectWeapon => m_Wrapper.m_Player_DeselectWeapon;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/ToggleDebug".
+        /// </summary>
+        public InputAction @ToggleDebug => m_Wrapper.m_Player_ToggleDebug;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/Return".
+        /// </summary>
+        public InputAction @Return => m_Wrapper.m_Player_Return;
+        /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
         public InputActionMap Get() { return m_Wrapper.m_Player; }
@@ -1572,6 +1650,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @TurnLeft.started += instance.OnTurnLeft;
             @TurnLeft.performed += instance.OnTurnLeft;
             @TurnLeft.canceled += instance.OnTurnLeft;
+            @DeselectWeapon.started += instance.OnDeselectWeapon;
+            @DeselectWeapon.performed += instance.OnDeselectWeapon;
+            @DeselectWeapon.canceled += instance.OnDeselectWeapon;
+            @ToggleDebug.started += instance.OnToggleDebug;
+            @ToggleDebug.performed += instance.OnToggleDebug;
+            @ToggleDebug.canceled += instance.OnToggleDebug;
+            @Return.started += instance.OnReturn;
+            @Return.performed += instance.OnReturn;
+            @Return.canceled += instance.OnReturn;
         }
 
         /// <summary>
@@ -1625,6 +1712,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @TurnLeft.started -= instance.OnTurnLeft;
             @TurnLeft.performed -= instance.OnTurnLeft;
             @TurnLeft.canceled -= instance.OnTurnLeft;
+            @DeselectWeapon.started -= instance.OnDeselectWeapon;
+            @DeselectWeapon.performed -= instance.OnDeselectWeapon;
+            @DeselectWeapon.canceled -= instance.OnDeselectWeapon;
+            @ToggleDebug.started -= instance.OnToggleDebug;
+            @ToggleDebug.performed -= instance.OnToggleDebug;
+            @ToggleDebug.canceled -= instance.OnToggleDebug;
+            @Return.started -= instance.OnReturn;
+            @Return.performed -= instance.OnReturn;
+            @Return.canceled -= instance.OnReturn;
         }
 
         /// <summary>
@@ -2078,6 +2174,27 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnTurnLeft(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "DeselectWeapon" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnDeselectWeapon(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "ToggleDebug" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnToggleDebug(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Return" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnReturn(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.
