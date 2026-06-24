@@ -2106,6 +2106,10 @@ PrefabInstance:
       propertyPath: playerCamera
       value: 
       objectReference: {fileID: 3054496669308956911}
+    - target: {fileID: 5493940094580379912, guid: 15a9cfe9adbab934fafe64f3521ad00b, type: 3}
+      propertyPath: interactionKey
+      value: 20
+      objectReference: {fileID: 0}
     - target: {fileID: 6013680722051870588, guid: 15a9cfe9adbab934fafe64f3521ad00b, type: 3}
       propertyPath: m_LocalPosition.x
       value: -2.11
@@ -3041,6 +3045,10 @@ PrefabInstance:
       propertyPath: playerCamera
       value: 
       objectReference: {fileID: 3054496669308956911}
+    - target: {fileID: 2863992689022251076, guid: c8b3c671cc24a4244a992158cd62eb73, type: 3}
+      propertyPath: interactionKey
+      value: 20
+      objectReference: {fileID: 0}
     - target: {fileID: 3480368452254418628, guid: c8b3c671cc24a4244a992158cd62eb73, type: 3}
       propertyPath: player
       value: 
@@ -3878,6 +3886,10 @@ PrefabInstance:
       propertyPath: playerCamera
       value: 
       objectReference: {fileID: 3054496669308956911}
+    - target: {fileID: 3293917502217594507, guid: 128817179b98b06439c3beaae7fb8614, type: 3}
+      propertyPath: interactionKey
+      value: 20
+      objectReference: {fileID: 0}
     - target: {fileID: 4993307724844372168, guid: 128817179b98b06439c3beaae7fb8614, type: 3}
       propertyPath: m_LocalPosition.x
       value: 51.397
@@ -3974,6 +3986,10 @@ PrefabInstance:
       propertyPath: playerCamera
       value: 
       objectReference: {fileID: 3054496669308956911}
+    - target: {fileID: 2251076376019903986, guid: 1c967a96aebc27b4d9766afea24ef5de, type: 3}
+      propertyPath: interactionKey
+      value: 20
+      objectReference: {fileID: 0}
     - target: {fileID: 5549080317420302600, guid: 1c967a96aebc27b4d9766afea24ef5de, type: 3}
       propertyPath: m_Name
       value: ammo_box (5)
@@ -5225,6 +5241,10 @@ PrefabInstance:
       propertyPath: playerCamera
       value: 
       objectReference: {fileID: 3054496669308956911}
+    - target: {fileID: 7728486042925639639, guid: 8dce40ed5e318874f81fbdc5315b161d, type: 3}
+      propertyPath: interactionKey
+      value: 20
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5480,6 +5500,10 @@ PrefabInstance:
       propertyPath: playerCamera
       value: 
       objectReference: {fileID: 3054496669308956911}
+    - target: {fileID: 8182439034990766675, guid: f53c8dce44ddb43469fb178d04600c33, type: 3}
+      propertyPath: interactionKey
+      value: 20
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5628,6 +5652,10 @@ PrefabInstance:
       propertyPath: playerCamera
       value: 
       objectReference: {fileID: 3054496669308956911}
+    - target: {fileID: 5686900491687394132, guid: 3e4ea78b126a4a94bbcc5f60de6376d6, type: 3}
+      propertyPath: interactionKey
+      value: 20
+      objectReference: {fileID: 0}
     - target: {fileID: 8763076807299320740, guid: 3e4ea78b126a4a94bbcc5f60de6376d6, type: 3}
       propertyPath: player
       value: 
@@ -6061,15 +6089,15 @@ PrefabInstance:
       objectReference: {fileID: 2057377107}
     - target: {fileID: 4683536296749086831, guid: 6a3f8a245ea41bf4b86f73a192216266, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -59.68
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 4683536296749086831, guid: 6a3f8a245ea41bf4b86f73a192216266, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.56
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 4683536296749086831, guid: 6a3f8a245ea41bf4b86f73a192216266, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -2.07
+      value: -13
       objectReference: {fileID: 0}
     - target: {fileID: 4683536296749086831, guid: 6a3f8a245ea41bf4b86f73a192216266, type: 3}
       propertyPath: m_LocalRotation.w
@@ -6190,6 +6218,10 @@ PrefabInstance:
       propertyPath: playerCamera
       value: 
       objectReference: {fileID: 3054496669308956911}
+    - target: {fileID: 2701839700561315145, guid: 39a88c589375d2045a3e138720bbb026, type: 3}
+      propertyPath: interactionKey
+      value: 20
+      objectReference: {fileID: 0}
     - target: {fileID: 4233376193590336841, guid: 39a88c589375d2045a3e138720bbb026, type: 3}
       propertyPath: m_LocalPosition.x
       value: 68.219

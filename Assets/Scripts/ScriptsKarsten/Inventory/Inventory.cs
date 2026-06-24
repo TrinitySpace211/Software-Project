@@ -24,24 +24,9 @@ public class Inventory : MonoBehaviour {
     [SerializeField] private ItemSO grenade;
     [SerializeField] private ItemSO[] healthItems;
     [SerializeField] private ItemSO[] ammunitions;
-    [SerializeField] private ItemSO[] debugItems;
-
 
     [Header("Hotbar Swap Speed")]
     [SerializeField] private float swapSpeed = 0.8f;
-
-    private static readonly Key[] debugKeys = new Key[] {
-        Key.Digit6,
-        Key.Digit7,
-        Key.Digit8,
-        Key.Digit9,
-        Key.Digit0,
-        Key.T,
-        Key.Y,
-        Key.U,
-        Key.O,
-        Key.P,
-    };
 
     /// <summary>
     /// Reference to the hotbar object containing hotbar slots.
@@ -149,13 +134,6 @@ public class Inventory : MonoBehaviour {
     /// and drag-and-drop interactions.
     /// </summary>
     private void Update() {
-        //Debug Cheat Weapons
-        /* for (int i = 0; i < debugItems.Length && i < debugKeys.Length; i++) {
-            if (Keyboard.current[debugKeys[i]].wasPressedThisFrame) {
-                AddItem(debugItems[i], 1);
-            }
-        } */
-
         if (Keyboard.current.iKey.wasPressedThisFrame) {
             container.SetActive(!container.activeInHierarchy);
 

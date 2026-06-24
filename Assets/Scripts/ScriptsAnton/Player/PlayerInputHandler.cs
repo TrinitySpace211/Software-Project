@@ -29,6 +29,7 @@ public class PlayerInputHandler : MonoBehaviour {
     public static event Action OnReloadAction;
     public static event Action OnToggleDebugAction;
     public static event Action OnReturnAction;
+    public static event Action OnMapOpenAction;
 
     private void OnEnable() {
         playerInputActions = new InputSystem_Actions();
@@ -94,6 +95,7 @@ public class PlayerInputHandler : MonoBehaviour {
 
         playerInputActions.Player.ToggleDebug.performed += ToggleDebug_performed;
         playerInputActions.Player.Return.performed += Return_performed;
+        playerInputActions.Player.OpenMap.performed += OpenMap_performed;
 
         playerInputActions.Player.Pause.performed += Pause_performed;
         playerInputActions.Player.Reloading.performed += Reloading_performed;
@@ -109,7 +111,6 @@ public class PlayerInputHandler : MonoBehaviour {
         playerInputActions.UI.Three.performed += HotbarKey_Pressed;
         playerInputActions.UI.Four.performed += HotbarKey_Pressed;
         playerInputActions.UI.Five.performed += HotbarKey_Pressed;
-
     }
 
     /// <summary>
@@ -150,6 +151,14 @@ public class PlayerInputHandler : MonoBehaviour {
     /// <param name="context">The context that got send from the input key</param>
     private void Return_performed(InputAction.CallbackContext context) {
         OnReturnAction?.Invoke();
+    }
+
+    /// <summary>
+    /// Sends an Event when the Toggle Debug Input Key is triggered
+    /// </summary>
+    /// <param name="context">The context that got send from the input key</param>
+    private void OpenMap_performed(InputAction.CallbackContext context) {
+        OnMapOpenAction?.Invoke();
     }
 
     /// <summary>
