@@ -595,6 +595,10 @@ public class Player : MonoBehaviour, ISaveable {
     public Inventory GetInventory() {
         return inventory;
     }
+
+    public Camera GetMainCamera() {
+        return playerCamera;
+    }
     #endregion
 
     #region Save and Load

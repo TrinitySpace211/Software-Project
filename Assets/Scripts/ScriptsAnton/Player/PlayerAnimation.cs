@@ -7,9 +7,10 @@ using UnityEngine;
 public class PlayerAnimation : MonoBehaviour {
 
     [SerializeField] private Animator animator;
-    [SerializeField] private PlayerInputHandler playerInputHandler;
     [SerializeField] private float locomotionBlendSpeed = 10f;
-    [SerializeField] private Camera mainCamera;
+
+    private PlayerInputHandler playerInputHandler;
+    private Camera mainCamera;
 
     private Vector3 currentBlendInput = Vector3.zero;
     private Player player;
@@ -34,6 +35,8 @@ public class PlayerAnimation : MonoBehaviour {
 
     private void Start() {
         player = GetComponent<Player>();
+        playerInputHandler = player.GetPlayerInputHandler();
+        mainCamera = player.GetMainCamera();
     }
 
     private void Update() {
