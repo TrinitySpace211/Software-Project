@@ -37,7 +37,6 @@ public class PauseMenu : MonoBehaviour {
         yield return null;
 
         Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
 
         if (Mouse.current != null) {
             var pos = Mouse.current.position.ReadValue();
@@ -54,7 +53,6 @@ public class PauseMenu : MonoBehaviour {
 
         crosshair.SetActive(false);
 
-        Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
 
