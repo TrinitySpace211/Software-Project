@@ -8,6 +8,7 @@ public class MapUI : MonoBehaviour {
     [SerializeField] private AudioSource mapOpenAudioSource;
     [SerializeField] private AudioClipRefsSO audioClipRefsSO;
 
+    public PauseMenu pauseMenu;
     private void Start() {
         HideMap();
     }

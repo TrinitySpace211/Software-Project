@@ -29,6 +29,8 @@ public class Inventory : MonoBehaviour {
     [Header("Hotbar Swap Speed")]
     [SerializeField] private float swapSpeed = 0.8f;
 
+    public PauseMenu pauseMenu;
+
     private static readonly Key[] debugKeys = new Key[] {
         Key.B,
         Key.N,
