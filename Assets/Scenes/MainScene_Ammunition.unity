@@ -6627,7 +6627,11 @@ PrefabInstance:
     - target: {fileID: 7661501141472537178, guid: b5785ca94fb270b468c33a466700ee64, type: 3}
       propertyPath: saveables.Array.data[0].target
       value: 
-      objectReference: {fileID: 8694702426204482713}
+      objectReference: {fileID: 1913510877}
+    - target: {fileID: 7661501141472537178, guid: b5785ca94fb270b468c33a466700ee64, type: 3}
+      propertyPath: saveables.Array.data[1].target
+      value: 
+      objectReference: {fileID: 1913510877}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

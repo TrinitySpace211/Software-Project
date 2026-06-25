@@ -12,7 +12,7 @@ using UnityEngine.InputSystem;
 /// The Inputs will be handled in the "PlayerInputHandler" Script.
 /// </summary>
 [DefaultExecutionOrder(-1), DisallowMultipleComponent]
-public class Player : MonoBehaviour, ISaveable {
+public class Player : MonoBehaviour {
 
     #region Class Variables
     [Header("References")]
@@ -86,8 +86,6 @@ public class Player : MonoBehaviour, ISaveable {
         Item.OnItemCollected += Item_OnItemCollected;
     }
 
-    private bool pressed = false;
-    private bool pressedEnter = false;
     private void Update() {
         if (!playerHealth.GetIsDead()) {
             UpdateMovementState();
@@ -104,18 +102,6 @@ public class Player : MonoBehaviour, ISaveable {
             HandleHealingKits();
         }
 
-        if (Keyboard.current.spaceKey.wasPressedThisFrame && !pressed) {
-            SaveManager.Instance.SaveGame();
-            pressed = true;
-        } else {
-            pressed = false;
-        }
-        if (Keyboard.current.enterKey.wasPressedThisFrame && !pressedEnter) {
-            SaveManager.Instance.LoadGame();
-            pressedEnter = true;
-        } else {
-            pressedEnter = false;
-        }
     }
 
     private void FixedUpdate() {
@@ -602,7 +588,7 @@ public class Player : MonoBehaviour, ISaveable {
     #endregion
 
     #region Save and Load
-    public object Save() {
+    /* public object Save() {
         return new PlayerData {
             position = transform.position
         };
@@ -617,6 +603,6 @@ public class Player : MonoBehaviour, ISaveable {
 
     private class PlayerData {
         public Vector3 position;
-    }
+    } */
     #endregion
 }

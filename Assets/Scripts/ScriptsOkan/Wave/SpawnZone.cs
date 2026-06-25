@@ -23,17 +23,18 @@ public class SpawnZone : MonoBehaviour {
     [HideInInspector] public int currentDay;
 
 
-    [Header("Ground Detection")] [SerializeField]
+    [Header("Ground Detection")]
+    [SerializeField]
     private LayerMask groundLayer;
 
     /// <summary>
     ///     Draws a wire sphere in the Scene View to visualize the spawn area.
     ///     Only visible when the GameObject is selected.
     /// </summary>
-    private void OnDrawGizmosSelected() {
+    /* private void OnDrawGizmosSelected() {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, spawnRadius);
-    }
+    } */
 
     /// <summary>
     ///     Spawns a wave of zombies at random positions within the spawn radius.
@@ -53,8 +54,14 @@ public class SpawnZone : MonoBehaviour {
             transform.position.y,
             transform.position.z + randomOffset.y
         );
-        var go = Instantiate(prefab, spawnPos, Quaternion.identity);
+        var go = Instantiate(prefab, spawnPos, Quaternion.identity, transform);
         var ai = go.GetComponent<ZombieAI>();
         if (ai != null) ai.Init(transform.position, spawnRadius * 2f, playerTransform);
+    }
+
+    public void ClearZombies() {
+        for (int i = transform.childCount - 1; i >= 0; i--) {
+            Destroy(transform.GetChild(i));
+        }
     }
 }

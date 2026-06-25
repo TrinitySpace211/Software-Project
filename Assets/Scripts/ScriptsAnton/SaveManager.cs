@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class SaveManager : MonoBehaviour {
     public static SaveManager Instance { get; private set; }
@@ -8,10 +9,33 @@ public class SaveManager : MonoBehaviour {
     [SerializeField] private SaveableRef[] saveables;
     private string savePath;
 
+    //temp
+    private bool pressed = false;
+    private bool pressedEnter = false;
+
+    private void Start() {
+        LoadGame();
+    }
+
     private void OnValidate() {
         if (saveables == null) return;
         for (int i = 0; i < saveables.Length; i++) {
             saveables[i].OnValidate();
+        }
+    }
+
+    private void Update() {
+        if (Keyboard.current.spaceKey.wasPressedThisFrame && !pressed) {
+            SaveGame();
+            pressed = true;
+        } else {
+            pressed = false;
+        }
+        if (Keyboard.current.enterKey.wasPressedThisFrame && !pressedEnter) {
+            LoadGame();
+            pressedEnter = true;
+        } else {
+            pressedEnter = false;
         }
     }
 
