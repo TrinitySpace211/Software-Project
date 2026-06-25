@@ -53,15 +53,19 @@ public class DebugController : MonoBehaviour {
         //Guns
         GIVE_ASSAULTRIFLE = new DebugCommand("/give Rifle", "Puts a Assault Rifle in the Player Inventory", "/give Rifle", () => {
             inventory.AddItem(ItemType.Gun, GunType.AssaultRifle);
+            inventory.AddItem(ItemType.Ammunition, AmmunitionType.Ammo556x45mm, 30);
         });
         GIVE_PISTOL = new DebugCommand("/give Pistol", "Puts a Pistol in the Player Inventory", "/give Pistol", () => {
             inventory.AddItem(ItemType.Gun, GunType.Pistol);
+            inventory.AddItem(ItemType.Ammunition, AmmunitionType.Ammo9mm, 10);
         });
         GIVE_SHOTGUN = new DebugCommand("/give Shotgun", "Puts a Shotgun in the Player Inventory", "/give Shotgun", () => {
             inventory.AddItem(ItemType.Gun, GunType.Shotgun);
+            inventory.AddItem(ItemType.Ammunition, AmmunitionType.Ammo12Gauge, 8);
         });
         GIVE_SNIPER = new DebugCommand("/give Sniper", "Puts a Sniper in the Player Inventory", "/give Sniper", () => {
             inventory.AddItem(ItemType.Gun, GunType.Sniper);
+            inventory.AddItem(ItemType.Ammunition, AmmunitionType.AmmoSniper, 5);
         });
         //Melees
         GIVE_BASEBALL = new DebugCommand("/give Melee_B", "Puts a Baseball Bat in the Player Inventory", "/give Melee_B", () => {
@@ -83,33 +87,33 @@ public class DebugController : MonoBehaviour {
             inventory.AddItem(ItemType.Melee, MeleeType.Tomahawk);
         });
         //Grenade
-        GIVE_GRENADE = new DebugCommand<int>("/give Grenade", "Puts a Grenade in the Player Inventory", "/give Grenade", (x) => {
+        GIVE_GRENADE = new DebugCommand<int>("/give grenade", "Puts a Grenade in the Player Inventory", "/give Grenade <amount>", (x) => {
             inventory.AddItem(ItemType.Grenade, ItemType.Grenade, x);
         });
         //Health
-        GIVE_BANDAGE = new DebugCommand<int>("/give Health1", "Puts a Bandage in the Player Inventory", "/give Health1", (x) => {
+        GIVE_BANDAGE = new DebugCommand<int>("/give h1", "Puts a Bandage in the Player Inventory", "/give Health1 <amount>", (x) => {
             inventory.AddItem(ItemType.Consumable, HealthItemType.Bandage, x);
         });
-        GIVE_SYRINGE = new DebugCommand<int>("/give Health2", "Puts a Syringe in the Player Inventory", "/give Health2", (x) => {
+        GIVE_SYRINGE = new DebugCommand<int>("/give h2", "Puts a Syringe in the Player Inventory", "/give Health2 <amount>", (x) => {
             inventory.AddItem(ItemType.Consumable, HealthItemType.Syringe, x);
         });
-        GIVE_HEALTHBOTTLE = new DebugCommand<int>("/give Health3", "Puts a Health Bottle in the Player Inventory", "/give Health3", (x) => {
+        GIVE_HEALTHBOTTLE = new DebugCommand<int>("/give h3", "Puts a Health Bottle in the Player Inventory", "/give Health3 <amount>", (x) => {
             inventory.AddItem(ItemType.Consumable, HealthItemType.HealthBottle, x);
         });
-        GIVE_HEALTHPACK = new DebugCommand<int>("/give Health4", "Puts a Health Pack in the Player Inventory", "/give Health4", (x) => {
+        GIVE_HEALTHPACK = new DebugCommand<int>("/give h4", "Puts a Health Pack in the Player Inventory", "/give Health4 <amount>", (x) => {
             inventory.AddItem(ItemType.Consumable, HealthItemType.HealthPack, x);
         });
         //Ammo
-        GIVE_AMMO556 = new DebugCommand<int>("/give 556", "Puts a 5.56x45mm Ammo Box in the Player Inventory", "/give 556", (x) => {
+        GIVE_AMMO556 = new DebugCommand<int>("/give 556", "Puts a 5.56x45mm Ammo Box in the Player Inventory", "/give 556 <amount>", (x) => {
             inventory.AddItem(ItemType.Ammunition, AmmunitionType.Ammo556x45mm, x);
         });
         GIVE_AMMO9 = new DebugCommand<int>("/give 9", "Puts a 9mm Ammo Box in the Player Inventory", "/give 9", (x) => {
             inventory.AddItem(ItemType.Ammunition, AmmunitionType.Ammo9mm, x);
         });
-        GIVE_AMMO12G = new DebugCommand<int>("/give 12G", "Puts 12 Gauge Bullets Ammo Box in the Player Inventory", "/give 12G", (x) => {
+        GIVE_AMMO12G = new DebugCommand<int>("/give 12G", "Puts 12 Gauge Bullets Ammo Box in the Player Inventory", "/give 12G <amount>", (x) => {
             inventory.AddItem(ItemType.Ammunition, AmmunitionType.Ammo12Gauge, x);
         });
-        GIVE_AMMO_S = new DebugCommand<int>("/give SA", "Puts Sniper Bullets in the Player Inventory", "/give SA", (x) => {
+        GIVE_AMMO_S = new DebugCommand<int>("/give SA", "Puts Sniper Bullets in the Player Inventory", "/give SA <amount>", (x) => {
             inventory.AddItem(ItemType.Ammunition, AmmunitionType.AmmoSniper, x);
         });
 

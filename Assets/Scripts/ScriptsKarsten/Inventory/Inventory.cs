@@ -344,6 +344,7 @@ public class Inventory : MonoBehaviour {
                 foreach (ItemSO ammo in ammunitions) {
                     if (EqualityComparer<T>.Default.Equals(type, (T)(object)ammo.ammunitionType)) {
                         AddItem(ammo, amount);
+                        //Debug.Log(ammo + " " + amount);
                         return;
                     }
                 }

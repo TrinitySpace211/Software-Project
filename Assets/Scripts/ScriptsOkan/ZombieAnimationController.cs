@@ -38,4 +38,8 @@ public class ZombieAnimationController : MonoBehaviour {
         if (_animator is not null)
             _animator.SetBool(IS_DEAD, value);
     }
+
+    public void DeactivateAnimator() {
+        _animator.enabled = false;
+    }
 }

@@ -312,7 +312,7 @@ public class Player : MonoBehaviour {
             if (activeGun.GetEmptyMagazine() && inventory.GetAmmoAvailable(activeGun, out int ammoNeed)) {
                 setupWeaponParent = playerIK.GetParent();
                 weaponSelector.ClearSetupCurrentWeapon();
-                Debug.Log(ammoNeed);
+                //Debug.Log(ammoNeed);
                 playerAnimation.StartReloading(ammoNeed);
                 OnReload?.Invoke(transform.position, weaponSelector.activeGun);
             }
@@ -329,7 +329,7 @@ public class Player : MonoBehaviour {
             if (!activeGun.MagazineIsFull() && !playerAnimation.GetIsReloading() && inventory.GetAmmoAvailable(activeGun, out int ammoNeed)) {
                 setupWeaponParent = playerIK.GetParent();
                 weaponSelector.ClearSetupCurrentWeapon();
-                Debug.Log(ammoNeed);
+                //Debug.Log(ammoNeed);
                 playerAnimation.StartReloading(ammoNeed);
                 OnReload?.Invoke(transform.position, activeGun);
             }

@@ -11,6 +11,5 @@ AssetOrigin:
   productId: 127325
   packageName: Particle Pack
   packageVersion: 3.1
-  assetPath: Assets/Assets/AssetsAnton/Ignore_Folder/UnityTechnologies/ParticlePack/EffectExamples/Weapon
-    Effects/Materials/GoopStreak.mat
+  assetPath: Assets/Assets/AssetsAnton/Materials/GoopStreak.mat
   uploadId: 691001
