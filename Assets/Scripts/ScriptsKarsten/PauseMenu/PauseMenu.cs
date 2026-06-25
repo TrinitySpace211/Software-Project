@@ -1,11 +1,18 @@
+using System.Collections;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.SceneManagement;
 
 public class PauseMenu : MonoBehaviour {
     public GameObject pauseMenuUI;
+    [SerializeField] private Inventory inventory;
+    [SerializeField] private NPCDialog npcDialog;
+    [SerializeField] private GameObject crosshair;
 
     private bool isPaused = false;
+    public bool IsPaused => isPaused;
 
     void Update() {
         if (Keyboard.current != null &&
@@ -21,15 +28,31 @@ public class PauseMenu : MonoBehaviour {
         pauseMenuUI.SetActive(false);
         Time.timeScale = 1f;
         isPaused = false;
+        crosshair.SetActive(true);
 
-        Cursor.lockState = CursorLockMode.Locked;
+        StartCoroutine(ResumeRoutine());
+    }
+
+    private IEnumerator ResumeRoutine() {
+        yield return null;
+
         Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
+
+        if (Mouse.current != null) {
+            var pos = Mouse.current.position.ReadValue();
+            Mouse.current.WarpCursorPosition(pos);
+            InputSystem.QueueStateEvent(Mouse.current, new MouseState { position = pos });
+            InputSystem.Update();
+        }
     }
 
     void Pause() {
         pauseMenuUI.SetActive(true);
         Time.timeScale = 0f;
         isPaused = true;
+
+        crosshair.SetActive(false);
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
@@ -46,7 +69,10 @@ public class PauseMenu : MonoBehaviour {
     }
 
     public void ExitGame() {
-        Debug.Log("Spiel beendet.");
-        Application.Quit();
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
     }
 }

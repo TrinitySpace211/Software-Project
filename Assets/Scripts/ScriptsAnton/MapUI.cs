@@ -14,6 +14,10 @@ public class MapUI : MonoBehaviour {
     }
 
     private void Update() {
+
+        if (pauseMenu.IsPaused)
+            return;
+
         if (Keyboard.current.zKey.wasPressedThisFrame) {
             ShowHideMap();
             PauseGame();

@@ -151,6 +151,9 @@ public class Inventory : MonoBehaviour {
             }
         }
 
+        if (pauseMenu.IsPaused)
+            return;
+
         if (Keyboard.current.iKey.wasPressedThisFrame) {
             container.SetActive(!container.activeInHierarchy);
 
