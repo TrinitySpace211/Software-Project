@@ -1,0 +1,6 @@
+
+public interface ISaveable {
+
+    object Save();
+    void Load(object data);
+}

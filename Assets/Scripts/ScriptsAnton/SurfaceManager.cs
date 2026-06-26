@@ -66,6 +66,7 @@ public class SurfaceManager : MonoBehaviour {
                     activeTexture = GetActiveTextureFromRenderer(renderer, triangleIndex);
                     surfaceType = surfacesTypes.Find(surface => surface.albedo == activeTexture);
                 }
+
                 if (surfaceType != null) {
                     foreach (Surface.SurfaceImpactTypeEffect typeEffect in surfaceType.surface.impactTypeEffects) {
                         if (typeEffect.impactType == impact) {
@@ -166,7 +167,18 @@ public class SurfaceManager : MonoBehaviour {
 
         Mesh mesh = null;
         if (renderer is SkinnedMeshRenderer skinnedMeshRenderer) {
-            mesh = skinnedMeshRenderer.sharedMesh;
+            if (skinnedMeshRenderer.sharedMaterials.Length > 1) {
+                if (skinnedMeshRenderer.sharedMaterials[0].mainTexture == null) {
+                    return skinnedMeshRenderer.sharedMaterials[0].GetTexture("_MainTexture");
+                } else {
+                    return skinnedMeshRenderer.sharedMaterials[0].mainTexture;
+                }
+
+            } else {
+                Debug.Log(skinnedMeshRenderer.sharedMaterial.mainTexture);
+                return skinnedMeshRenderer.sharedMaterial.mainTexture;
+            }
+
         } else if (renderer.TryGetComponent(out MeshFilter meshFilter)) {
             mesh = meshFilter.sharedMesh;
         }

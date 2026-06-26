@@ -7,9 +7,10 @@ using UnityEngine;
 public class PlayerAnimation : MonoBehaviour {
 
     [SerializeField] private Animator animator;
-    [SerializeField] private PlayerInputHandler playerInputHandler;
     [SerializeField] private float locomotionBlendSpeed = 10f;
-    [SerializeField] private Camera mainCamera;
+
+    private PlayerInputHandler playerInputHandler;
+    private Camera mainCamera;
 
     private Vector3 currentBlendInput = Vector3.zero;
     private Player player;
@@ -30,8 +31,12 @@ public class PlayerAnimation : MonoBehaviour {
     private int grenadeThrowHash = Animator.StringToHash("ThrowGrenade");
     private int meleeAttckSpeedMultHash = Animator.StringToHash("MeleeAttackSpeedMult");
 
+    private int ammoAmount = 0;
+
     private void Start() {
         player = GetComponent<Player>();
+        playerInputHandler = player.GetPlayerInputHandler();
+        mainCamera = player.GetMainCamera();
     }
 
     private void Update() {
@@ -99,8 +104,9 @@ public class PlayerAnimation : MonoBehaviour {
         animator.SetTrigger(isDeadWithWeaponHash);
     }
 
-    public void StartReloading() {
+    public void StartReloading(int ammoAmount) {
         isReloading = true;
+        this.ammoAmount = ammoAmount;
 
         animator.SetBool(isReloadingHash, isReloading);
     }
@@ -110,8 +116,13 @@ public class PlayerAnimation : MonoBehaviour {
         animator.SetBool(isReloadingHash, isReloading);
 
         GunSO activeGun = player.GetPlayerGunSelector().activeGun;
-        if (activeGun != null) {
-            activeGun.SetFullMagazine();
+        if (activeGun != null && ammoAmount > 0) {
+            activeGun.SetAmmoAmount(ammoAmount);
+            Inventory inventory = player.GetInventory();
+            ItemSO ammunitionItem = inventory.GetItemSOWithGunType(activeGun.ammunitionType);
+            if (ammunitionItem != null) {
+                inventory.RemoveItem(ammunitionItem, ammoAmount);
+            }
         }
     }
 

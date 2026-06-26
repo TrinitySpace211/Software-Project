@@ -71,6 +71,5 @@ AssetOrigin:
   productId: 127325
   packageName: Particle Pack
   packageVersion: 3.1
-  assetPath: Assets/Assets/AssetsAnton/Ignore_Folder/UnityTechnologies/ParticlePack/EffectExamples/Weapon
-    Effects/Textures/FleshBulletHoleAlbedo.tif
+  assetPath: Assets/Assets/AssetsAnton/Textures/Impact/FleshBulletHoleAlbedo.tif
   uploadId: 691001

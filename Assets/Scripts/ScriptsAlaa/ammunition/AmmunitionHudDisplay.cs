@@ -9,7 +9,7 @@ using UnityEditor;
 /// </summary>
 public class AmmunitionHudDisplay : MonoBehaviour {
     // Spieler-Waffenauswahl, aus der die aktuelle Waffe gelesen wird.
-    [SerializeField] private PlayerWeaponSelector weaponSelector;
+    [SerializeField] private Player player;
 
     // Munition-Icon aus dem Projekt.
     [SerializeField] private Sprite ammunitionIcon;
@@ -22,6 +22,9 @@ public class AmmunitionHudDisplay : MonoBehaviour {
 
     // Farbe vom Munitionstext.
     [SerializeField] private Color textColor = new Color(0.85f, 0.95f, 1f);
+
+    private PlayerWeaponSelector weaponSelector;
+    private Inventory inventory;
 
     private RectTransform hudRect;
     private Image ammunitionIconImage;
@@ -36,6 +39,11 @@ public class AmmunitionHudDisplay : MonoBehaviour {
         CreateHud();
     }
 
+    private void Start() {
+        weaponSelector = player.GetPlayerGunSelector();
+        inventory = player.GetInventory();
+    }
+
     private void Update() {
         FindWeaponSelectorIfMissing();
         FindIconIfMissing();
@@ -46,11 +54,11 @@ public class AmmunitionHudDisplay : MonoBehaviour {
 
     private void FindWeaponSelectorIfMissing() {
         // Sucht die Waffenauswahl automatisch, falls sie im Inspector leer ist.
-        if (weaponSelector != null) {
+        if (player != null) {
             return;
         }
 
-        weaponSelector = FindFirstObjectByType<PlayerWeaponSelector>();
+        player = FindFirstObjectByType<Player>();
     }
 
     private void FindIconIfMissing() {
@@ -205,7 +213,7 @@ public class AmmunitionHudDisplay : MonoBehaviour {
         }
 
         ApplyTextColor();
-        ammunitionText.text = $": {activeGun.GetCurrentAmmo()} / {activeGun.GetMaxAmmo()}";
+        ammunitionText.text = $": {activeGun.currentAmmo} / {inventory.GetAllAmmo(activeGun)}";
         ammunitionText.SetVerticesDirty();
         ammunitionText.SetMaterialDirty();
         ammunitionText.SetAllDirty();

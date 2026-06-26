@@ -9,14 +9,13 @@ public class MapUI : MonoBehaviour {
     [SerializeField] private AudioClipRefsSO audioClipRefsSO;
 
     private void Start() {
+        PlayerInputHandler.OnMapOpenAction += PlayerInputHandler_OnMapOpenAction;
         HideMap();
     }
 
-    private void Update() {
-        if (Keyboard.current.zKey.wasPressedThisFrame) {
-            ShowHideMap();
-            PauseGame();
-        }
+    private void PlayerInputHandler_OnMapOpenAction() {
+        ShowHideMap();
+        PauseGame();
     }
 
     private void ShowHideMap() {
