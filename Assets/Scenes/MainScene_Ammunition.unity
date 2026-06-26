@@ -2996,7 +2996,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6889118dc6fbdf14dba32f2083842d58, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  weaponSelector: {fileID: 3991829341836180734}
+  player: {fileID: 8694702426204482713}
   ammunitionIcon: {fileID: 21300000, guid: 6313b0e510f6686409f2dbb1c7d7aae6, type: 3}
   hudPosition: {x: 20, y: -145}
   iconSize: {x: 34, y: 34}
@@ -6514,17 +6514,6 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 87e155eb11bdf4546b6b0cbdad9c4aa6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &3991829341836180734 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 18214205369558462, guid: 6a3f8a245ea41bf4b86f73a192216266, type: 3}
-  m_PrefabInstance: {fileID: 2057377105}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7586121502659420972}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 906290ff13a05194eb9efd72f0695c3c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!4 &4474771663635373331 stripped

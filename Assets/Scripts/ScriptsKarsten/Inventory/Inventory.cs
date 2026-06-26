@@ -626,13 +626,10 @@ public class Inventory : MonoBehaviour {
     public bool GetAmmoAvailable(GunSO gun, out int ammoNeed) {
         int maxAmmo = gun.shootConfigSO.maxAmmo;
 
-        int ammoHas = 0;
         ammoNeed = maxAmmo - gun.currentAmmo;
-        foreach (Slot slot in allSlots) {
-            if (slot.HasItem() && slot.GetItem().ammunitionType == gun.ammunitionType && slot.GetItem().gunType == GunType.None) {
-                ammoHas += slot.GetAmount();
-            }
-        }
+
+        int ammoHas = GetAllAmmo(gun);
+
         if (ammoHas > 0) {
             if (ammoHas >= maxAmmo && gun.currentAmmo <= 0) {
                 ammoNeed = maxAmmo;
@@ -645,6 +642,16 @@ public class Inventory : MonoBehaviour {
         } else {
             return false;
         }
+    }
+
+    public int GetAllAmmo(GunSO gun) {
+        int ammoHas = 0;
+        foreach (Slot slot in allSlots) {
+            if (slot.HasItem() && slot.GetItem().ammunitionType == gun.ammunitionType && slot.GetItem().gunType == GunType.None) {
+                ammoHas += slot.GetAmount();
+            }
+        }
+        return ammoHas;
     }
 
     public ItemSO GetItemSOWithGunType<T>(T ammunitionType) {
