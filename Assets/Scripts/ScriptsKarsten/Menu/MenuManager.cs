@@ -3,6 +3,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using System.IO;
+using TMPro;
 
 /// <summary>
 /// Manages the main menu logic including scene loading, settings UI,
@@ -10,14 +12,21 @@ using UnityEngine.UI;
 /// </summary>
 public class MenuManager : MonoBehaviour {
 
-    [SerializeField] private string gameSceneName = "TutorialScene";
+    [Header("Scene Names")]
+    [SerializeField] private string tutorialSceneName = "TutorialScene";
+    [SerializeField] private string mainSceneName = "MainScene";
 
     [SerializeField] private GameObject settingsPanel;
 
-
+    [Header("Audio")]
     [SerializeField] private AudioClip clickSound;
     [SerializeField] private AudioClip musicClip;
     [SerializeField] private AudioClip buttonSelect;
+
+    [Header("Buttons")]
+    [SerializeField] private Image continueButtonImage;
+    [SerializeField] private Button continueButton;
+    [SerializeField] private TextMeshProUGUI continueButtonText;
 
     [SerializeField] private GameObject firstSelectedButton;
     [SerializeField] private CanvasGroup fadeGroup;
@@ -27,6 +36,11 @@ public class MenuManager : MonoBehaviour {
     private AudioSource musicSource;
     private bool isTransitioning;
 
+    //Save Paths
+    private string savePath;
+    private string tutorialPath;
+    private bool hasTutorial = false;
+
     /// <summary>
     /// Initializes audio sources, starts background music,
     /// and prepares the fade overlay at startup.
@@ -34,11 +48,12 @@ public class MenuManager : MonoBehaviour {
     private void Awake() {
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.playOnAwake = false;
-        audioSource.volume = 0.5f;
+        audioSource.volume = 0.2f;
 
         musicSource = gameObject.AddComponent<AudioSource>();
         musicSource.clip = musicClip;
         musicSource.loop = true;
+        musicSource.volume = 0.2f;
         musicSource.playOnAwake = false;
 
         if (musicClip != null)
@@ -65,6 +80,21 @@ public class MenuManager : MonoBehaviour {
         if (settingsPanel != null)
             settingsPanel.SetActive(false);
 
+        savePath = Path.Combine(Application.persistentDataPath, "save.json");
+        tutorialPath = Path.Combine(Application.persistentDataPath, $"{TutorialManager.ID}.json");
+        hasTutorial = File.Exists(tutorialPath);
+
+        if (continueButton != null && continueButtonImage != null && continueButtonText != null) {
+            if (!hasTutorial) {
+                continueButton.interactable = false;
+                continueButtonImage.color = new Color32(100, 100, 100, 255);
+                continueButtonText.color = new Color32(100, 100, 100, 255);
+            } else {
+                continueButton.interactable = true;
+                continueButtonImage.color = new Color32(255, 255, 255, 255);
+                continueButtonText.color = new Color32(255, 255, 255, 255);
+            }
+        }
     }
 
     /// <summary>
@@ -74,13 +104,16 @@ public class MenuManager : MonoBehaviour {
         if (isTransitioning)
             return;
 
-        StartCoroutine(FadeAndLoadScene());
+        File.Delete(tutorialPath);
+        File.Delete(savePath);
+
+        StartCoroutine(FadeAndLoadScene(tutorialSceneName));
     }
 
     /// <summary>
     /// Handles fade-out animation and loads the target game scene.
     /// </summary>
-    private IEnumerator FadeAndLoadScene() {
+    private IEnumerator FadeAndLoadScene(string sceneName) {
         isTransitioning = true;
         PlayClick();
 
@@ -93,7 +126,7 @@ public class MenuManager : MonoBehaviour {
         // Small delay to ensure fade completes cleanly
         yield return new WaitForSeconds(0.1f);
 
-        SceneManager.LoadScene(gameSceneName);
+        SceneManager.LoadScene(sceneName);
     }
 
     /// <summary>
@@ -154,8 +187,16 @@ public class MenuManager : MonoBehaviour {
     }
 
     public void ContinueGame() {
-        PlayClick();
-        //hier Rest einfügen Anton
+        if (hasTutorial) {
+            TutorialManager.TutorialData tutorialData = SaveManager.Instance.LoadData<TutorialManager.TutorialData>(TutorialManager.ID);
+
+            bool tutorialFinished = tutorialData.tutorialFinished;
+            if (tutorialFinished) {
+                StartCoroutine(FadeAndLoadScene(mainSceneName));
+            } else {
+                StartCoroutine(FadeAndLoadScene(tutorialSceneName));
+            }
+        }
     }
 
     /// <summary>

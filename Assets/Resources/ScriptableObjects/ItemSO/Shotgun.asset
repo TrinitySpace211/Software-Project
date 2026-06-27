@@ -10,16 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0659dd53b3ca625439ae534d06aca6dd, type: 3}
-  m_Name: Pistol
+  m_Name: Shotgun
   m_EditorClassIdentifier: 
   itemType: 1
-  gunType: 2
+  gunType: 3
+  gunSO: {fileID: 11400000, guid: fe8c164c47cedda4cbc0c00deb09224c, type: 2}
   meleeType: 0
   healthItemType: 0
-  ammunitionType: 2
-  itemName: Pistol
-  icon: {fileID: 21300000, guid: cc6f40fcdb1dd074fa0747e6648f0d42, type: 3}
+  ammunitionType: 0
+  itemName: Shotgun
+  icon: {fileID: 21300000, guid: 2cacde15b6710424bbaf21d584de0d72, type: 3}
   maxStackSize: 1
-  itemPrefab: {fileID: 1841787361118700111, guid: a599b9514f8967645a513cd529c91e84, type: 3}
+  itemPrefab: {fileID: 1893640954530389767, guid: 05849435aa8f4774ead7bb002722c4ed, type: 3}
   handItemPrefab: {fileID: 0}
-  baseDamage: 7
+  baseDamage: 15

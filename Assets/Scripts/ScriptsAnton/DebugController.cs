@@ -208,6 +208,6 @@ public class DebugController : MonoBehaviour {
     }
 
     private void PauseGame() {
-        _ = Time.timeScale == 0 ? Time.timeScale = 1f : Time.timeScale = 0;
+        _ = !showConsole ? Time.timeScale = 1f : Time.timeScale = 0;
     }
 }

@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using System.IO;
+using NUnit.Framework.Internal;
 using UnityEngine;
 using UnityEngine.Pool;
 using UnityEngine.Rendering;
@@ -29,8 +31,9 @@ public class GunSO : ScriptableObject {
     private float lastShootTime;
     private AudioSource shootSound;
     private GameObject poolParent;
+    private GunData gunData;
 
-    public int currentAmmo { get; private set; }
+    public int currentAmmo { get; private set; } = 0;
     private bool emptyMagazine;
     private int savedAmmo;
     private ParticleSystem shootSystem;
@@ -52,12 +55,19 @@ public class GunSO : ScriptableObject {
             model.transform.localPosition = spawnPoint;
             model.transform.localRotation = Quaternion.Euler(spawnRotation);
 
-            currentAmmo = 0;
+            if (!File.Exists(Path.Combine(Application.persistentDataPath, "save.json"))) {
+                gunData = new GunData();
+                gunData.UpdateStats(0, shootConfigSO.maxAmmo, shootConfigSO.damage);
+            }
+
+            currentAmmo = gunData.currentAmmo;
         } else {
             model.SetActive(true);
 
             currentAmmo = savedAmmo;
         }
+
+        //Debug.Log($"Waffe gespawnt. Munition: {currentAmmo}, Schaden: {gunData.effectiveDamage}, MaxAmmo: {gunData.effectiveMaxAmmo}");
 
         shootSound = model.GetComponentInChildren<AudioSource>();
         shootSystem = model.GetComponentInChildren<ParticleSystem>();
@@ -163,10 +173,6 @@ public class GunSO : ScriptableObject {
     }
     #endregion
 
-    private void CheckAvailableAmmo() {
-
-    }
-
     /// <summary>
     /// Deactivates the Weapon and sets the shoot Particle to null
     /// </summary>
@@ -178,13 +184,33 @@ public class GunSO : ScriptableObject {
     }
 
     /// <summary>
+    /// Cleanup after closing the game or changing the scene
+    /// </summary>
+    public void DestroyAll() {
+        if (model != null) {
+            Destroy(model);
+            model = null;
+        }
+
+        if (poolParent != null) {
+            Destroy(poolParent);
+            poolParent = null;
+        }
+
+        activeMonoBehaviour = null;
+        trailPool = null;
+        shootSystem = null;
+        gunData = null;
+    }
+
+    /// <summary>
     ///     The Damage logic so Zombies can be damaged
     /// </summary>
     /// <param name="hit">The hit info of the Raycast</param>
     private void HitEnemy(RaycastHit hit) {
         var damageable = hit.transform.GetComponentInParent<IDamageable>();
         if (damageable != null && !damageable.IsDead())
-            damageable.TakeDamage(shootConfigSO.damage);
+            damageable.TakeDamage(gunData.effectiveDamage);
     }
 
     public void SetAmmoAmount(int amount) {
@@ -197,12 +223,37 @@ public class GunSO : ScriptableObject {
     }
 
     public bool MagazineIsFull() {
-        return currentAmmo == shootConfigSO.maxAmmo;
+        return currentAmmo == gunData.effectiveMaxAmmo;
     }
 
     public int GetMaxAmmo() {
-        return shootConfigSO != null ? shootConfigSO.maxAmmo : 0;
+        return gunData.effectiveMaxAmmo;
     }
 
+    public GunData GetGunData() {
+        return gunData;
+    }
 
+    public void SaveGunData() {
+        gunData = new GunData();
+        gunData.UpdateStats(currentAmmo, gunData.effectiveMaxAmmo, gunData.effectiveDamage);
+    }
+
+    public void LoadGunData(GunData gunData) {
+        this.gunData = gunData;
+    }
+
+    [Serializable]
+    public class GunData {
+        public int currentAmmo;
+        public int effectiveMaxAmmo;
+        public int effectiveDamage;
+
+        public void UpdateStats(int currentAmmo, int effectiveMaxAmmo, int effectiveDamage) {
+            this.currentAmmo = currentAmmo;
+            this.effectiveMaxAmmo = effectiveMaxAmmo;
+            this.effectiveDamage = effectiveDamage;
+        }
+    }
 }
+

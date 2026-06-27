@@ -20,6 +20,8 @@ public class PlayerInputHandler : MonoBehaviour {
     public bool TurnRightInput { get; private set; }
     public bool TurnLeftInput { get; private set; }
     public bool DeselectWeaponTriggered { get; private set; }
+    public bool LeftClickUITriggered { get; private set; }
+    public bool CloseTriggered { get; private set; }
 
     //Hotbar Key Events
     public event Action<int> OnHotbarSlotPressed;
@@ -111,6 +113,12 @@ public class PlayerInputHandler : MonoBehaviour {
         playerInputActions.UI.Three.performed += HotbarKey_Pressed;
         playerInputActions.UI.Four.performed += HotbarKey_Pressed;
         playerInputActions.UI.Five.performed += HotbarKey_Pressed;
+
+        playerInputActions.UI.Click.performed += _ => LeftClickUITriggered = true;
+        playerInputActions.UI.Click.canceled += _ => LeftClickUITriggered = false;
+
+        playerInputActions.UI.Close.performed += _ => CloseTriggered = true;
+        playerInputActions.UI.Close.canceled += _ => CloseTriggered = false;
     }
 
     /// <summary>
@@ -209,5 +217,9 @@ public class PlayerInputHandler : MonoBehaviour {
 
     public void SetDeselectWeaponTriggered(bool DeselectWeaponTriggered) {
         this.DeselectWeaponTriggered = DeselectWeaponTriggered;
+    }
+
+    public void SetCloseTriggered(bool CloseTriggered) {
+        this.CloseTriggered = CloseTriggered;
     }
 }

@@ -9,7 +9,8 @@ using UnityEngine.UI;
 /// Manages the player's inventory system, including item storage,
 /// hotbar management, drag-and-drop functionality, and inventory UI handling.
 /// </summary>
-public class Inventory : MonoBehaviour {
+public class Inventory : MonoBehaviour, ISaveable {
+    private static readonly string ID = "Inventory";
     public static Inventory Instance { get; private set; }
 
     [Header("References")]
@@ -30,7 +31,7 @@ public class Inventory : MonoBehaviour {
 
     public PauseMenu pauseMenu;
 
-    
+
 
     /// <summary>
     /// Reference to the hotbar object containing hotbar slots.
@@ -378,6 +379,12 @@ public class Inventory : MonoBehaviour {
             player.GetPlayerGunSelector().ResetItem();
         } else {
             selectedSlot.SetItem(selectedSlot.GetItem(), newAmount);
+        }
+    }
+
+    private void ClearAllSlots() {
+        foreach (var s in allSlots) {
+            s.SetItem(null);
         }
     }
 
@@ -751,6 +758,83 @@ public class Inventory : MonoBehaviour {
         }
 
         return true;
+    }
+
+    #region Save/Load
+    public string GetSaveID() => ID;
+
+    public object Save() {
+        InventoryData saveData = new InventoryData();
+
+        for (int i = 0; i < allSlots.Count; i++) {
+            var slot = allSlots[i];
+
+            if (slot.HasItem()) {
+                ItemSO item = slot.GetItem();
+
+                SlotSaveData slotData = new SlotSaveData {
+                    itemName = item.name,
+                    amount = slot.GetAmount(),
+                    slotIndex = i
+                };
+
+                if (item.gunSO != null) {
+                    slotData.isGun = true;
+
+                    item.gunSO.SaveGunData();
+
+                    slotData.gunName = item.gunSO.gunName;
+                    slotData.gunData = item.gunSO.GetGunData();
+                }
+                saveData.slots.Add(slotData);
+            }
+        }
+        return saveData;
+    }
+
+    public void Load(object data) {
+        InventoryData loadData = (InventoryData)data;
+
+        ClearAllSlots();
+
+        foreach (var slotData in loadData.slots) {
+            ItemSO item = Resources.Load<ItemSO>($"ScriptableObjects/ItemSO/{slotData.itemName}");
+
+            if (item != null && slotData.isGun) {
+                GunSO gun = Instantiate(item.gunSO);
+
+                gun.LoadGunData(slotData.gunData);
+            }
+
+            allSlots[slotData.slotIndex].SetItem(item, slotData.amount);
+        }
+    }
+
+    [Serializable]
+    public class SlotSaveData {
+        public string itemName;
+        public int amount;
+        public int slotIndex;
+
+        //Is the Item in the Slot a Gun?
+        public bool isGun;
+        public string gunName;
+        public GunSO.GunData gunData;
+    }
+
+    [Serializable]
+    public class InventoryData {
+        public List<SlotSaveData> slots = new();
+    }
+    #endregion
+
+    private void OnEnable() {
+        SaveManager.Instance.Register(this);
+    }
+
+    private void OnDisable() {
+        if (SaveManager.Instance != null)
+            SaveManager.Instance.Unregister(this);
     }
 }
 

@@ -16,6 +16,7 @@ public class PauseMenu : MonoBehaviour {
     public GameObject pauseMenuUI;
 
     [SerializeField] private Inventory inventory;
+    [SerializeField] private PlayerInputHandler playerInputHandler;
     [SerializeField] private NPCDialog npcDialog;
 
     /// <summary>
@@ -52,7 +53,7 @@ public class PauseMenu : MonoBehaviour {
     private void Awake() {
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.playOnAwake = false;
-        audioSource.volume = 0.5f;
+        audioSource.volume = 0.1f;
 
         if (pauseMenuUI != null)
             pauseMenuUI.SetActive(false);
@@ -72,12 +73,13 @@ public class PauseMenu : MonoBehaviour {
     /// Toggles pause with the Escape key.
     /// </summary>
     private void Update() {
-        if (Keyboard.current != null &&
-            Keyboard.current.escapeKey.wasPressedThisFrame) {
+        if (Keyboard.current != null && playerInputHandler.CloseTriggered) {
             if (isPaused)
                 Resume();
             else
                 Pause();
+
+            playerInputHandler.SetCloseTriggered(false);
         }
     }
 
@@ -110,7 +112,7 @@ public class PauseMenu : MonoBehaviour {
         Cursor.visible = false;
 
         if (Mouse.current != null) {
-            var pos = Mouse.current.position.ReadValue();
+            var pos = playerInputHandler.MousePosition;
             Mouse.current.WarpCursorPosition(pos);
             InputSystem.QueueStateEvent(Mouse.current, new MouseState { position = pos });
             InputSystem.Update();

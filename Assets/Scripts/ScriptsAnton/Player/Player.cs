@@ -93,8 +93,11 @@ public class Player : MonoBehaviour {
 
             HandleShooting();
             HandleAiming();
-            if (!EventSystem.current.IsPointerOverGameObject() && !inventory.GetIsDragging()) {
-                HandleMeleeAttack();
+
+            if (inventory != null) {
+                if (!EventSystem.current.IsPointerOverGameObject() && !inventory.GetIsDragging()) {
+                    HandleMeleeAttack();
+                }
             }
 
             HandleReloadFinished();
@@ -587,22 +590,4 @@ public class Player : MonoBehaviour {
     }
     #endregion
 
-    #region Save and Load
-    /* public object Save() {
-        return new PlayerData {
-            position = transform.position
-        };
-    }
-
-    public void Load(object data) {
-        characterController.enabled = false;
-        PlayerData playerData = (PlayerData)data;
-        transform.position = playerData.position;
-        characterController.enabled = true;
-    }
-
-    private class PlayerData {
-        public Vector3 position;
-    } */
-    #endregion
 }

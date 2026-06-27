@@ -738,4 +738,9 @@ public class PlayerWeaponSelector : MonoBehaviour {
         playerIK.SetConsumable<HealthItemSO>(false, null);
     }
 
+    private void OnDestroy() {
+        if (activeGun != null) {
+            activeGun.DestroyAll();
+        }
+    }
 }

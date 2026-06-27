@@ -4,7 +4,8 @@ using UnityEngine;
 /// <summary>
 /// Handles player health, damage and death logic.
 /// </summary>
-public class PlayerHealth : MonoBehaviour {
+public class PlayerHealth : MonoBehaviour, ISaveable {
+    private static readonly string ID = "PlayerHealth";
 
     [SerializeField] private PlayerStats playerStats;
     [SerializeField] private BaseStats baseStats;
@@ -130,4 +131,22 @@ public class PlayerHealth : MonoBehaviour {
     public bool GetIsDead() {
         return isDead;
     }
+
+    #region Save and Load
+    public string GetSaveID() => ID;
+    public object Save() {
+        return new PlayerData {
+            health = playerStats.currentHealth
+        };
+    }
+
+    public void Load(object data) {
+        PlayerData playerData = (PlayerData)data;
+        playerStats.currentHealth = playerData.health;
+    }
+
+    private class PlayerData {
+        public float health;
+    }
+    #endregion
 }

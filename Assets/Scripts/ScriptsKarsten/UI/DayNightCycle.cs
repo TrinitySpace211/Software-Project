@@ -4,6 +4,7 @@ using TMPro;
 using System.Collections;
 using UnityEngine.UI;
 using UnityEngine.Events;
+using System;
 
 /// <summary>
 /// Controls the full day-night cycle system including:
@@ -15,6 +16,9 @@ using UnityEngine.Events;
 /// - Extraction after surviving a defined number of nights
 /// </summary>
 public class DayNightCycle : MonoBehaviour, ISaveable {
+
+    private static readonly string ID = "DayNightCycle";
+
     /// <summary>
     /// UI text showing current time and state.
     /// </summary>
@@ -166,6 +170,8 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
             playerScript = playerObject.GetComponent<Player>();
         }
         ShowNotification("Protect the Fuel Tank. Hold out until Night 10.");
+
+        SaveManager.Instance.LoadGame();
     }
 
     /// <summary>
@@ -207,7 +213,7 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
                     // Count a night as survived once the player reaches the next day.
                     if (nightNumber > 0) {
                         survivedNights++;
-                        Debug.Log(survivedNights);
+                        SaveManager.Instance.SaveGame();
                     }
 
                     ShowNotification($"Day {dayNumber} begins!");
@@ -419,6 +425,9 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
         timeOfDay = time;
     }
 
+    #region Save/Load
+    public string GetSaveID() => ID;
+
     public object Save() {
         return new DayNightData {
             survivedNights = survivedNights
@@ -434,7 +443,18 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
         //Debug.Log("Loaded Night: " + survivedNights);
     }
 
+    [Serializable]
     public class DayNightData {
         public int survivedNights;
+    }
+    #endregion
+
+    private void OnEnable() {
+        SaveManager.Instance.Register(this);
+    }
+
+    private void OnDisable() {
+        if (SaveManager.Instance != null)
+            SaveManager.Instance.Unregister(this);
     }
 }

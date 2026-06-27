@@ -1,10 +1,13 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
 /// Manages the gas tank's health and destruction state.
 /// </summary>
-public class GasTankHealth : MonoBehaviour {
+public class GasTankHealth : MonoBehaviour, ISaveable {
+    private static readonly string ID = "Objective";
+
     [SerializeField] private DeathScreen deathScreen;
     [SerializeField] private DayNightCycle dayNightCycle;
     [SerializeField] private GasTankHUD tankHUD;
@@ -86,5 +89,34 @@ public class GasTankHealth : MonoBehaviour {
     /// </summary>
     public void ResetHP() {
         currentHP = maxHP;
+    }
+
+    #region Save/Load
+    public string GetSaveID() => ID;
+
+    public object Save() {
+        return new ObjectiveData {
+            health = currentHP
+        };
+    }
+
+    public void Load(object data) {
+        ObjectiveData objectiveData = (ObjectiveData)data;
+        currentHP = objectiveData.health;
+    }
+
+    [Serializable]
+    public class ObjectiveData {
+        public int health;
+    }
+    #endregion
+
+    private void OnEnable() {
+        SaveManager.Instance.Register(this);
+    }
+
+    private void OnDisable() {
+        if (SaveManager.Instance != null)
+            SaveManager.Instance.Unregister(this);
     }
 }
