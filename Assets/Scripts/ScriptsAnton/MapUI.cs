@@ -23,6 +23,7 @@ public class MapUI : MonoBehaviour {
             ShowHideMap();
             PauseGame();
         }
+    }
     private void PlayerInputHandler_OnMapOpenAction() {
         ShowHideMap();
         PauseGame();

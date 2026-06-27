@@ -2,7 +2,6 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using System;
 
 /// <summary>
 /// Represents a single inventory or hotbar slot.
@@ -15,9 +14,11 @@ public class Slot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
     public bool hovering;
 
     /// <summary>
-    /// Indicates if a hotbar slot ist currently selected through the key buttons 1-5
+    /// Indicates if a hotbar slot is currently selected through the key buttons 1-5.
     /// </summary>
     public bool selected;
+
+    [SerializeField] private TextMeshProUGUI slotNumberTxt;
 
     /// <summary>
     /// The item currently stored in this slot.
@@ -40,7 +41,7 @@ public class Slot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
     private TextMeshProUGUI amountTxt;
 
     /// <summary>
-    /// The RectTransform component of this slot
+    /// The RectTransform component of this slot.
     /// </summary>
     private RectTransform rectTransform;
 
@@ -61,9 +62,6 @@ public class Slot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
     /// <summary>
     /// Returns the item currently stored in this slot.
     /// </summary>
-    /// <returns>
-    /// The stored <see cref="ItemSO"/>, or null if the slot is empty.
-    /// </returns>
     public ItemSO GetItem() {
         return heldItem;
     }
@@ -71,9 +69,6 @@ public class Slot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
     /// <summary>
     /// Returns the current amount of items in this slot.
     /// </summary>
-    /// <returns>
-    /// The item quantity.
-    /// </returns>
     public int GetAmount() {
         return itemAmount;
     }
@@ -82,70 +77,50 @@ public class Slot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
     /// Assigns an item and amount to this slot.
     /// Updates the slot UI afterwards.
     /// </summary>
-    /// <param name="item">
-    /// The item to place into the slot.
-    /// </param>
-    /// <param name="amount">
-    /// The amount of items to store. Defaults to 1.
-    /// </param>
     public void SetItem(ItemSO item, int amount = 1) {
         heldItem = item;
         itemAmount = amount;
-
         UpdateSlot();
     }
 
     /// <summary>
-    /// If set to true the Slot scale will be increased to 1.1 so that it gives the player the feedback, 
-    /// that this hotbar slot has been selected
+    /// Sets whether the slot is selected.
     /// </summary>
-    /// <param name="state">If the slot is selected or not</param>
     public void SetSelected(bool state) {
         selected = state;
     }
 
     /// <summary>
-    /// returns if this slot has been selected via input key 1-5
+    /// Returns whether the slot is selected.
     /// </summary>
-    /// <returns>the selected state</returns>
     public bool GetSelected() {
         return selected;
     }
 
     /// <summary>
     /// Updates the slot UI based on the current item data.
-    /// Displays the icon and amount if an item exists,
-    /// otherwise clears the UI.
     /// </summary>
     public void UpdateSlot() {
         if (heldItem != null) {
             iconImage.enabled = true;
             iconImage.sprite = heldItem.icon;
-            if (itemAmount > 1) {
-                amountTxt.text = itemAmount.ToString();
-            } else if (itemAmount == 1) {
-                amountTxt.text = "";
-            }
 
+            if (amountTxt != null)
+                amountTxt.text = itemAmount > 1 ? itemAmount.ToString() : "";
         } else {
             iconImage.enabled = false;
-            amountTxt.text = "";
+
+            if (amountTxt != null)
+                amountTxt.text = "";
         }
     }
 
     /// <summary>
     /// Adds a specified amount to the current item stack.
     /// </summary>
-    /// <param name="amountToAdd">
-    /// The amount to add.
-    /// </param>
-    /// <returns>
-    /// The updated item amount.
-    /// </returns>
     public int AddAmount(int amountToAdd) {
         itemAmount += amountToAdd;
         UpdateSlot();
-
         return itemAmount;
     }
 
@@ -153,12 +128,6 @@ public class Slot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
     /// Removes a specified amount from the current item stack.
     /// Clears the slot if the amount reaches zero or below.
     /// </summary>
-    /// <param name="amountToRemove">
-    /// The amount to remove.
-    /// </param>
-    /// <returns>
-    /// The updated item amount.
-    /// </returns>
     public int RemoveAmount(int amountToRemove) {
         itemAmount -= amountToRemove;
 
@@ -172,8 +141,7 @@ public class Slot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
     }
 
     /// <summary>
-    /// Clears the slot by removing the item
-    /// and resetting the amount to zero.
+    /// Clears the slot by removing the item and resetting the amount.
     /// </summary>
     public void ClearSlot() {
         heldItem = null;
@@ -184,31 +152,20 @@ public class Slot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
     /// <summary>
     /// Checks whether this slot currently contains an item.
     /// </summary>
-    /// <returns>
-    /// True if the slot contains an item; otherwise false.
-    /// </returns>
     public bool HasItem() {
         return heldItem != null;
     }
 
     /// <summary>
     /// Called when the mouse pointer enters this slot.
-    /// Sets the hovering state to true.
     /// </summary>
-    /// <param name="eventData">
-    /// Event data associated with the pointer event.
-    /// </param>
     public void OnPointerEnter(PointerEventData eventData) {
         hovering = true;
     }
 
     /// <summary>
     /// Called when the mouse pointer exits this slot.
-    /// Sets the hovering state to false.
     /// </summary>
-    /// <param name="eventData">
-    /// Event data associated with the pointer event.
-    /// </param>
     public void OnPointerExit(PointerEventData eventData) {
         hovering = false;
     }
