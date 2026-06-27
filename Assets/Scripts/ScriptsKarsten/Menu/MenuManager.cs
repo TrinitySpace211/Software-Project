@@ -14,6 +14,7 @@ public class MenuManager : MonoBehaviour {
 
     [SerializeField] private GameObject settingsPanel;
 
+
     [SerializeField] private AudioClip clickSound;
     [SerializeField] private AudioClip musicClip;
     [SerializeField] private AudioClip buttonSelect;
@@ -150,6 +151,11 @@ public class MenuManager : MonoBehaviour {
 #else
             Application.Quit();
 #endif
+    }
+
+    public void ContinueGame() {
+        PlayClick();
+        //hier Rest einfügen Anton
     }
 
     /// <summary>

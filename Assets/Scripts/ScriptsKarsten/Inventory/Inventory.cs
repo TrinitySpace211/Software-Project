@@ -28,6 +28,10 @@ public class Inventory : MonoBehaviour {
     [Header("Hotbar Swap Speed")]
     [SerializeField] private float swapSpeed = 0.8f;
 
+    public PauseMenu pauseMenu;
+
+    
+
     /// <summary>
     /// Reference to the hotbar object containing hotbar slots.
     /// </summary>
@@ -134,6 +138,10 @@ public class Inventory : MonoBehaviour {
     /// and drag-and-drop interactions.
     /// </summary>
     private void Update() {
+
+        if (pauseMenu.IsPaused)
+            return;
+
         if (Keyboard.current.iKey.wasPressedThisFrame) {
             container.SetActive(!container.activeInHierarchy);
 

@@ -12,12 +12,19 @@ public class UpdateCursor : MonoBehaviour {
     [SerializeField] private bool cursorVisible = false;
     [SerializeField] private float cursorMinDistanceFromPlayer = 1f;
     [SerializeField] private float yOffset = 1.5f;
+        public PauseMenu pauseMenu;
 
     private void Start() {
         Cursor.visible = cursorVisible;
     }
 
     private void LateUpdate() {
+        if (player == null || playerInputHandler == null || crosshair == null)
+            return;
+
+        if (pauseMenu != null && pauseMenu.IsPaused)
+            return;
+
         LookAt();
     }
 

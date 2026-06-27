@@ -8,11 +8,22 @@ public class MapUI : MonoBehaviour {
     [SerializeField] private AudioSource mapOpenAudioSource;
     [SerializeField] private AudioClipRefsSO audioClipRefsSO;
 
+    public PauseMenu pauseMenu;
     private void Start() {
         PlayerInputHandler.OnMapOpenAction += PlayerInputHandler_OnMapOpenAction;
         HideMap();
     }
 
+    private void Update() {
+
+        if (pauseMenu.IsPaused)
+            return;
+
+        if (Keyboard.current.zKey.wasPressedThisFrame) {
+            ShowHideMap();
+            PauseGame();
+        }
+    }
     private void PlayerInputHandler_OnMapOpenAction() {
         ShowHideMap();
         PauseGame();
