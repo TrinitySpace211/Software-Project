@@ -14,8 +14,7 @@ using UnityEngine.Events;
 /// - Sunrise and sunset transitions
 /// - Extraction after surviving a defined number of nights
 /// </summary>
-public class DayNightCycle : MonoBehaviour
-{
+public class DayNightCycle : MonoBehaviour, ISaveable {
     /// <summary>
     /// UI text showing current time and state.
     /// </summary>
@@ -68,8 +67,7 @@ public class DayNightCycle : MonoBehaviour
     /// <summary>
     /// Current time state.
     /// </summary>
-    private enum TimeState
-    {
+    private enum TimeState {
         Night,
         Sunrise,
         Day,
@@ -151,15 +149,12 @@ public class DayNightCycle : MonoBehaviour
     /// <summary>
     /// Initializes system and hides notification UI.
     /// </summary>
-    void Start()
-    {
-        if (notificationText != null)
-        {
+    void Start() {
+        if (notificationText != null) {
             notificationText.gameObject.SetActive(false);
         }
 
-        if (fadeCanvasGroup != null)
-        {
+        if (fadeCanvasGroup != null) {
             fadeCanvasGroup.alpha = 0f;
             fadeCanvasGroup.interactable = false;
             fadeCanvasGroup.blocksRaycasts = false;
@@ -167,8 +162,7 @@ public class DayNightCycle : MonoBehaviour
 
         currentState = GetTimeState();
 
-        if (playerObject != null)
-        {
+        if (playerObject != null) {
             playerScript = playerObject.GetComponent<Player>();
         }
         ShowNotification("Protect the Fuel Tank. Hold out until Night 10.");
@@ -177,8 +171,7 @@ public class DayNightCycle : MonoBehaviour
     /// <summary>
     /// Main update loop.
     /// </summary>
-    void Update()
-    {
+    void Update() {
         if (extractionTriggered)
             return;
 
@@ -191,8 +184,7 @@ public class DayNightCycle : MonoBehaviour
     /// <summary>
     /// Advances in-game time.
     /// </summary>
-    private void UpdateTime()
-    {
+    private void UpdateTime() {
         timeOfDay += Time.deltaTime * hoursPerRealSecond;
         timeOfDay %= 24f;
     }
@@ -200,32 +192,28 @@ public class DayNightCycle : MonoBehaviour
     /// <summary>
     /// Determines current time state and handles transitions.
     /// </summary>
-    private void HandleState()
-    {
+    private void HandleState() {
         TimeState newState = GetTimeState();
 
-        if (newState != currentState)
-        {
+        if (newState != currentState) {
             currentState = newState;
 
-            switch (currentState)
-            {
+            switch (currentState) {
                 case TimeState.Sunrise:
                     ShowNotification("Sunrise begins...");
                     break;
 
                 case TimeState.Day:
                     // Count a night as survived once the player reaches the next day.
-                    if (nightNumber > 0)
-                    {
+                    if (nightNumber > 0) {
                         survivedNights++;
+                        Debug.Log(survivedNights);
                     }
 
                     ShowNotification($"Day {dayNumber} begins!");
                     onNewDayStarted?.Invoke();
 
-                    if (dayNumber > extractionNight)
-                    {
+                    if (dayNumber > extractionNight) {
                         TriggerExtraction();
                     }
 
@@ -250,20 +238,17 @@ public class DayNightCycle : MonoBehaviour
     /// <summary>
     /// Starts the extraction sequence, disables player controls, fades the screen to black, and loads the extraction scene.
     /// </summary>
-    private void TriggerExtraction()
-    {
+    private void TriggerExtraction() {
         if (extractionTriggered)
             return;
 
         extractionTriggered = true;
 
-        if (playerScript != null)
-        {
+        if (playerScript != null) {
             playerScript.enabled = false;
         }
 
-        if (extractionController != null)
-        {
+        if (extractionController != null) {
             extractionController.StartExtraction();
         }
 
@@ -273,8 +258,7 @@ public class DayNightCycle : MonoBehaviour
     /// <summary>
     /// Loads the extraction scene after the configured delay and fade.
     /// </summary>
-    private IEnumerator LoadExtractionSceneRoutine()
-    {
+    private IEnumerator LoadExtractionSceneRoutine() {
         yield return new WaitForSeconds(extractionSceneDelay);
         yield return StartCoroutine(FadeToBlackRoutine());
         SceneManager.LoadScene(extractionSceneName);
@@ -283,8 +267,7 @@ public class DayNightCycle : MonoBehaviour
     /// <summary>
     /// Fades the screen to black using the assigned CanvasGroup.
     /// </summary>
-    private IEnumerator FadeToBlackRoutine()
-    {
+    private IEnumerator FadeToBlackRoutine() {
         if (fadeCanvasGroup == null)
             yield break;
 
@@ -294,8 +277,7 @@ public class DayNightCycle : MonoBehaviour
         float elapsed = 0f;
         float startAlpha = fadeCanvasGroup.alpha;
 
-        while (elapsed < fadeDuration)
-        {
+        while (elapsed < fadeDuration) {
             elapsed += Time.deltaTime;
             fadeCanvasGroup.alpha = Mathf.Lerp(startAlpha, 1f, elapsed / fadeDuration);
             yield return null;
@@ -307,8 +289,7 @@ public class DayNightCycle : MonoBehaviour
     /// <summary>
     /// Updates UI clock display.
     /// </summary>
-    private void UpdateUI()
-    {
+    private void UpdateUI() {
         int hours = Mathf.FloorToInt(timeOfDay);
         int minutes = Mathf.FloorToInt((timeOfDay - hours) * 60f);
 
@@ -321,8 +302,7 @@ public class DayNightCycle : MonoBehaviour
         else
             stateText = $"Day {dayNumber}";
 
-        if (timeText != null)
-        {
+        if (timeText != null) {
             timeText.text = $"{stateText}\n{hours:00}:{minutes:00}";
         }
     }
@@ -330,16 +310,14 @@ public class DayNightCycle : MonoBehaviour
     /// <summary>
     /// Shows a temporary notification.
     /// </summary>
-    private void ShowNotification(string message)
-    {
+    private void ShowNotification(string message) {
         StartCoroutine(NotificationRoutine(message));
     }
 
     /// <summary>
     /// Notification coroutine.
     /// </summary>
-    private IEnumerator NotificationRoutine(string message)
-    {
+    private IEnumerator NotificationRoutine(string message) {
         if (notificationText == null)
             yield break;
 
@@ -362,8 +340,7 @@ public class DayNightCycle : MonoBehaviour
     /// <returns>
     /// The current TimeState from enum based on timeOfDay.
     /// </returns>
-    private TimeState GetTimeState()
-    {
+    private TimeState GetTimeState() {
         if (timeOfDay >= 5f && timeOfDay < 6f)
             return TimeState.Sunrise;
 
@@ -379,8 +356,7 @@ public class DayNightCycle : MonoBehaviour
     /// <summary>
     /// Updates sun rotation, intensity, color and ambient lighting.
     /// </summary>
-    private void UpdateLighting()
-    {
+    private void UpdateLighting() {
         if (sunLight == null)
             return;
 
@@ -394,8 +370,7 @@ public class DayNightCycle : MonoBehaviour
 
         float t = 0f;
 
-        switch (currentState)
-        {
+        switch (currentState) {
             case TimeState.Sunrise:
                 t = Mathf.InverseLerp(5f, 6f, timeOfDay);
                 break;
@@ -440,8 +415,26 @@ public class DayNightCycle : MonoBehaviour
     /// <summary>
     /// Sets time manually (debug/testing).
     /// </summary>
-    public void SetTime(float time)
-    {
+    public void SetTime(float time) {
         timeOfDay = time;
+    }
+
+    public object Save() {
+        return new DayNightData {
+            survivedNights = survivedNights
+        };
+    }
+
+    public void Load(object data) {
+        DayNightData dayNightData = (DayNightData)data;
+        survivedNights = dayNightData.survivedNights;
+        dayNumber = 1 + survivedNights;
+        nightNumber = survivedNights;
+        timeOfDay = 6;
+        //Debug.Log("Loaded Night: " + survivedNights);
+    }
+
+    public class DayNightData {
+        public int survivedNights;
     }
 }

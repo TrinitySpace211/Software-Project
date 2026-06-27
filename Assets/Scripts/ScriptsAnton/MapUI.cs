@@ -10,6 +10,7 @@ public class MapUI : MonoBehaviour {
 
     public PauseMenu pauseMenu;
     private void Start() {
+        PlayerInputHandler.OnMapOpenAction += PlayerInputHandler_OnMapOpenAction;
         HideMap();
     }
 
@@ -22,6 +23,9 @@ public class MapUI : MonoBehaviour {
             ShowHideMap();
             PauseGame();
         }
+    private void PlayerInputHandler_OnMapOpenAction() {
+        ShowHideMap();
+        PauseGame();
     }
 
     private void ShowHideMap() {

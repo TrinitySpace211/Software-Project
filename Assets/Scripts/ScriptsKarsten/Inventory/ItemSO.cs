@@ -6,6 +6,7 @@ public enum ItemType {
     Melee,
     Grenade,
     Consumable,
+    Ammunition,
     Misc
 }
 
@@ -20,6 +21,7 @@ public class ItemSO : ScriptableObject {
     public GunType gunType;
     public MeleeType meleeType;
     public HealthItemType healthItemType;
+    public AmmunitionType ammunitionType;
 
     /// <summary>
     /// The display name of the item.

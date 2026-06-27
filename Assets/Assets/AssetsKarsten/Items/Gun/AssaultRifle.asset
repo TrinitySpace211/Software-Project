@@ -16,6 +16,7 @@ MonoBehaviour:
   gunType: 1
   meleeType: 0
   healthItemType: 0
+  ammunitionType: 1
   itemName: Assault Rifle
   icon: {fileID: 21300000, guid: 08c951c6edd0d0d419ee7436aecac45e, type: 3}
   maxStackSize: 1
