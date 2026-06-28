@@ -88,5 +88,15 @@ public class Emmitter : MonoBehaviour
             // Give the enemy to the bullet script
             bulletScript.target = target;
         }
+
+        ExplosiveBullet explosiveBulletScript = bulletInstance.GetComponent<ExplosiveBullet>();
+
+        if (explosiveBulletScript == null) {
+            explosiveBulletScript = bulletInstance.GetComponentInChildren<ExplosiveBullet>();
+        }
+
+        if (explosiveBulletScript != null) {
+            explosiveBulletScript.target = target;
+        }
     }
 }

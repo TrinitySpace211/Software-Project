@@ -1,4 +1,5 @@
 using TMPro;
+using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -8,6 +9,7 @@ using UnityEngine.UI;
 /// </summary>
 public class NPCDialog : MonoBehaviour {
 
+    [Header("Dialog Panels")]
     /// <summary>
     /// The main dialog panel shown when the player interacts with the NPC.
     /// </summary>
@@ -24,10 +26,17 @@ public class NPCDialog : MonoBehaviour {
     /// </summary>
     public CanvasGroup towerInfoPanel;
 
+    [Header("Tower Build Settings")]
     /// <summary>
     /// The tower prefab that will be spawned.
     /// </summary>
-    public GameObject towerPrefab;
+    //public GameObject towerPrefab;
+
+    /// <summary>
+    /// Tower prefabs for each upgrade level.
+    /// Element 0 is the base tower, element 1 is the first upgrade, element 2 is the second upgrade.
+    /// </summary>
+    public GameObject[] towerPrefabsByLevel;
 
     /// <summary>
     /// Spawn points where towers can be built.
@@ -63,6 +72,7 @@ public class NPCDialog : MonoBehaviour {
     /// </summary>
     public bool IsDialogOpen { get; private set; }
 
+    [Header("Inventory References")]
     /// <summary>
     /// Reference to the player's inventory.
     /// This is needed to check how much scrap the player currently owns
@@ -87,8 +97,8 @@ public class NPCDialog : MonoBehaviour {
     public TMP_Text scrapAmountText;
 
     /// <summary>
-    /// UI object that contains the warning message.
-    /// It is shown when the player does not have enough scrap.
+    /// UI object that contains the tower build warning message.
+    /// It is shown when the player cannot build a tower.
     /// </summary>
     public GameObject warningBox;
 
@@ -109,6 +119,7 @@ public class NPCDialog : MonoBehaviour {
     /// </summary>
     public TMP_Text towerDamageText;
 
+    [Header("Weapon Shop Panels")]
     /// <summary>
     /// Panel where the player can choose between ranged combat and close combat weapons.
     /// </summary>
@@ -117,18 +128,19 @@ public class NPCDialog : MonoBehaviour {
     /// <summary>
     /// Panel that contains all ranged weapon buttons.
     /// </summary>
-    public CanvasGroup weaponPanelRanged;
+    public CanvasGroup rangedWeaponPanel;
 
     /// <summary>
     /// Panel that contains all close combat weapon buttons.
     /// </summary>
-    public CanvasGroup weaponPanelClose;
+    public CanvasGroup closeWeaponPanel;
 
     /// <summary>
     /// Panel that displays detailed information about the currently selected weapon.
     /// </summary>
     public CanvasGroup weaponInfoPanel;
 
+    [Header("Weapon Shop UI")]
     /// <summary>
     /// Text element that displays the name of the selected weapon.
     /// </summary>
@@ -161,6 +173,7 @@ public class NPCDialog : MonoBehaviour {
     /// </summary>
     public Button buyWeaponButton;
 
+    [Header("Weapon Item References")]
     /// <summary>
     /// Item definition for the shotgun.
     /// This ItemSO is added to the inventory when the player buys the shotgun.
@@ -227,16 +240,18 @@ public class NPCDialog : MonoBehaviour {
     /// </summary>
     private ItemSO selectedWeaponItem;
 
+    [Header("Upgrade Panels GasTank")]
     /// <summary>
     /// Panel that contains the available upgrade options.
     /// </summary>
     public CanvasGroup upgradePanel;
 
     /// <summary>
-    /// Panel that displays detailed information about the selected upgrade.
+    /// Panel that displays detailed information about the gas tank healing upgrade.
     /// </summary>
     public CanvasGroup upgradeInfoPanel;
 
+    [Header("Gas Tank Healing Upgrade")]
     /// <summary>
     /// Amount of scrap required to heal the gas tank.
     /// </summary>
@@ -274,6 +289,167 @@ public class NPCDialog : MonoBehaviour {
     /// </summary>
     public TMP_Text gasTankHealWarningText;
 
+    [Header("NPC References")]
+    /// <summary>
+    /// Reference to the NPC movement script.
+    /// It is used to stop the NPC while the dialog is open.
+    /// </summary>
+    public NPCNavMeshWander npcWander;
+
+    [Header("Tower Upgrade UI")]
+    /// <summary>
+    /// Panel that displays detailed information about the tower upgrade.
+    /// </summary>
+    public CanvasGroup upgradeInfoPanelTower;
+
+    /// <summary>
+    /// Amount of scrap required to upgrade one tower.
+    /// </summary>
+    public int towerUpgradeScrapCost = 200;
+
+    /// <summary>
+    /// Text element that displays the current scrap amount and required scrap cost for the tower upgrade.
+    /// </summary>
+    public TMP_Text towerUpgradeScrapText;
+
+    /// <summary>
+    /// Warning box that is shown if the tower upgrade cannot be bought.
+    /// </summary>
+    public GameObject towerUpgradeWarningBox;
+
+    /// <summary>
+    /// Text element inside the tower upgrade warning box.
+    /// It displays why the tower upgrade cannot be bought.
+    /// </summary>
+    public TMP_Text towerUpgradeWarningText;
+
+    /// <summary>
+    /// Button used to buy the tower upgrade.
+    /// </summary>
+    public Button towerUpgradeButton;
+
+    /// <summary>
+    /// Number of tower upgrades that have already been bought.
+    /// A maximum of 16 upgrades is possible because 8 towers can each be upgraded 2 times.
+    /// </summary>
+    private int boughtTowerUpgradeCount = 0;
+
+    private GameObject[] builtTowers;
+    private int[] towerUpgradeLevels;
+
+    [Header("Weapon Upgrade UI")]
+    /// <summary>
+    /// Left-side panel where the player can choose between weapon damage and ammo upgrades.
+    /// </summary>
+    public CanvasGroup weaponTypeUpgradePanel;
+
+    /// <summary>
+    /// Right-side info panel that shows the currently selected weapon upgrade information.
+    /// </summary>
+    public CanvasGroup upgradeInfoPanelWeapon;
+
+    /// <summary>
+    /// Title text of the selected weapon upgrade.
+    /// </summary>
+    public TMP_Text weaponUpgradeTitleText;
+
+    /// <summary>
+    /// Description text of the selected weapon upgrade.
+    /// </summary>
+    public TMP_Text weaponUpgradeDescriptionText;
+
+    /// <summary>
+    /// Effect text of the selected weapon upgrade.
+    /// </summary>
+    public TMP_Text weaponUpgradeEffectText;
+
+    /// <summary>
+    /// Scrap cost text of the selected weapon upgrade.
+    /// </summary>
+    public TMP_Text weaponUpgradeScrapText;
+
+    /// <summary>
+    /// Warning box for weapon upgrade problems.
+    /// </summary>
+    public GameObject weaponUpgradeWarningBox;
+
+    /// <summary>
+    /// Warning text for weapon upgrade problems.
+    /// </summary>
+    public TMP_Text weaponUpgradeWarningText;
+
+    /// <summary>
+    /// Button used to buy the selected weapon upgrade.
+    /// </summary>
+    public Button weaponUpgradeBuyButton;
+
+    [Header("Weapon Upgrade Values")]
+    /// <summary>
+    /// Scrap cost for increasing ranged weapon damage.
+    /// </summary>
+    public int weaponDamageUpgradeScrapCost = 120;
+
+    /// <summary>
+    /// Scrap cost for increasing ranged weapon ammo capacity.
+    /// </summary>
+    public int weaponAmmoUpgradeScrapCost = 100;
+
+    /// <summary>
+    /// Damage increase for the selected ranged weapon.
+    /// </summary>
+    public int weaponDamageIncrease = 5;
+
+    /// <summary>
+    /// Ammo capacity increase for the selected ranged weapon.
+    /// </summary>
+    public int weaponAmmoIncrease = 10;
+
+    /// <summary>
+    /// Stores which weapon upgrade type is currently selected.
+    /// </summary>
+    private WeaponUpgradeType selectedWeaponUpgradeType = WeaponUpgradeType.None;
+
+    /// <summary>
+    /// Defines the currently selected weapon upgrade type.
+    /// </summary>
+    private enum WeaponUpgradeType {
+        None,
+        Damage,
+        Ammo
+    }
+
+    [Header("Weapon Shop Gun References")]
+    /// <summary>
+    /// GunSO reference for the shotgun.
+    /// This is used to display upgraded weapon values in the shop UI.
+    /// </summary>
+    public GunSO shotgunGun;
+
+    /// <summary>
+    /// GunSO reference for the assault rifle.
+    /// This is used to display upgraded weapon values in the shop UI.
+    /// </summary>
+    public GunSO assaultRifleGun;
+
+    /// <summary>
+    /// GunSO reference for the sniper rifle.
+    /// This is used to display upgraded weapon values in the shop UI.
+    /// </summary>
+    public GunSO sniperGun;
+
+    /// <summary>
+    /// GunSO reference for the pistol.
+    /// This is used to display upgraded weapon values in the shop UI.
+    /// </summary>
+    public GunSO pistolGun;
+
+    [Header("Weapon Upgrade References")]
+    /// <summary>
+    /// Reference to the player weapon selector.
+    /// This is used to get the currently equipped gun for weapon upgrades.
+    /// </summary>
+    public PlayerWeaponSelector playerWeaponSelector;
+
     /// <summary>
     /// Prepares the UI panels by briefly activating them and then disabling them again.
     /// This helps avoid visual stuttering when switching between panels.
@@ -284,9 +460,45 @@ public class NPCDialog : MonoBehaviour {
         HidePanel(towerInfoPanel);
         HidePanel(upgradePanel);
         HidePanel(upgradeInfoPanel);
+        HidePanel(upgradeInfoPanelTower);
+
+        builtTowers = new GameObject[towerSpawnPoints.Length];
+        towerUpgradeLevels = new int[towerSpawnPoints.Length];
 
         // Force Unity to update the canvas layout immediately
         Canvas.ForceUpdateCanvases();
+    }
+
+    /// <summary>
+    /// Updates visible NPC dialog info panels while the dialog is open.
+    /// This keeps costs, warnings and button states up to date when the player inventory,
+    /// selected weapon or available upgrades change during the dialog.
+    /// </summary>
+    private void Update() {
+
+        // Do not update any NPC dialog UI while the dialog is closed
+        if (!IsDialogOpen)
+            return;
+
+        // Update the tower build info only while the tower info panel is visible.
+        if (towerInfoPanel != null && towerInfoPanel.alpha > 0f)
+            UpdateTowerInfo();
+
+        // Update the gas tank healing info only while the gas tank upgrade info panel is visible.
+        if (upgradeInfoPanel != null && upgradeInfoPanel.alpha > 0f)
+            UpdateGasTankHealingInfo();
+
+        // Update the tower upgrade info only while the tower upgrade info panel is visible.
+        if (upgradeInfoPanelTower != null && upgradeInfoPanelTower.alpha > 0f)
+            UpdateTowerUpgradeInfo();
+
+        // Update the weapon upgrade info only while the weapon upgrade info panel is visible.
+        if (upgradeInfoPanelWeapon != null && upgradeInfoPanelWeapon.alpha > 0f)
+            UpdateWeaponUpgradeInfo();
+
+        // Update the weapon info only while the weapon info panel is visible.
+        if (weaponInfoPanel != null && weaponInfoPanel.alpha > 0f)
+            UpdateWeaponInfo();
     }
 
     /// <summary>
@@ -305,6 +517,10 @@ public class NPCDialog : MonoBehaviour {
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
+        if (npcWander != null) {
+            npcWander.StopMovement();
+        }
+
         // Clear the currently selected UI element.
         EventSystem.current.SetSelectedGameObject(null);
     }
@@ -317,20 +533,36 @@ public class NPCDialog : MonoBehaviour {
         // Other scripts can use this value to check if the player is already talking to the NPC
         IsDialogOpen = false;
 
+        // Hide all left-side panels.
         HidePanel(dialogPanel);
         HidePanel(functionsPanel);
-        HidePanel(towerInfoPanel);
+        HidePanel(weaponTypePanel);
+        HidePanel(rangedWeaponPanel);
+        HidePanel(closeWeaponPanel);
         HidePanel(upgradePanel);
+        HidePanel(weaponTypeUpgradePanel);
+
+        // Hide all right-side info panels.
+        HidePanel(towerInfoPanel);
+        HidePanel(weaponInfoPanel);
         HidePanel(upgradeInfoPanel);
+        HidePanel(upgradeInfoPanelTower);
+        HidePanel(upgradeInfoPanelWeapon);
 
         // Unlock and show the cursor
         Cursor.lockState = CursorLockMode.None;
 
+        // Keep the cursor visible only if the inventory is currently open.
         if (playerInventory.container.gameObject.activeInHierarchy) {
             Cursor.visible = true;
         } else if (!playerInventory.container.gameObject.activeInHierarchy) {
             Cursor.visible = false;
         }
+
+        if (npcWander != null) {
+            npcWander.ResumeMovement();
+        }
+
         // Clear the currently selected UI element
         EventSystem.current.SetSelectedGameObject(null);
     }
@@ -343,8 +575,6 @@ public class NPCDialog : MonoBehaviour {
         ShowPanel(dialogPanel);
         HidePanel(functionsPanel);
         HidePanel(towerInfoPanel);
-
-        CloseDialog();
 
         // Clear the currently selected UI element
         EventSystem.current.SetSelectedGameObject(null);
@@ -503,7 +733,10 @@ public class NPCDialog : MonoBehaviour {
         playerInventory.RemoveItem(scrapItem, scrapCost);
 
         // Create a tower at the selected spawn point position and rotation.
-        Instantiate(towerPrefab, selectedSpawnPoint.position, selectedSpawnPoint.rotation);
+        GameObject newTower = Instantiate(towerPrefabsByLevel[0], selectedSpawnPoint.position, selectedSpawnPoint.rotation);
+
+        builtTowers[builtTowerCount] = newTower;
+        towerUpgradeLevels[builtTowerCount] = 0;
 
         // Increase the built tower count so the next tower uses the next spawn point.
         builtTowerCount++;
@@ -518,8 +751,8 @@ public class NPCDialog : MonoBehaviour {
     public void OpenWeaponTypes() {
         HidePanel(functionsPanel);
         HidePanel(towerInfoPanel);
-        HidePanel(weaponPanelRanged);
-        HidePanel(weaponPanelClose);
+        HidePanel(rangedWeaponPanel);
+        HidePanel(closeWeaponPanel);
         HidePanel(weaponInfoPanel);
 
         ShowPanel(weaponTypePanel);
@@ -529,28 +762,28 @@ public class NPCDialog : MonoBehaviour {
         HidePanel(weaponTypePanel);
         HidePanel(weaponInfoPanel);
 
-        ShowPanel(weaponPanelRanged);
+        ShowPanel(rangedWeaponPanel);
     }
 
     public void OpenCloseCombatWeapons() {
         HidePanel(weaponTypePanel);
         HidePanel(weaponInfoPanel);
 
-        ShowPanel(weaponPanelClose);
+        ShowPanel(closeWeaponPanel);
     }
 
     public void BackToFunctionsFromWeaponTypes() {
         HidePanel(weaponTypePanel);
-        HidePanel(weaponPanelRanged);
-        HidePanel(weaponPanelClose);
+        HidePanel(rangedWeaponPanel);
+        HidePanel(closeWeaponPanel);
         HidePanel(weaponInfoPanel);
 
         ShowPanel(functionsPanel);
     }
 
     public void BackToWeaponTypes() {
-        HidePanel(weaponPanelRanged);
-        HidePanel(weaponPanelClose);
+        HidePanel(rangedWeaponPanel);
+        HidePanel(closeWeaponPanel);
         HidePanel(weaponInfoPanel);
 
         ShowPanel(weaponTypePanel);
@@ -561,34 +794,54 @@ public class NPCDialog : MonoBehaviour {
         HidePanel(functionsPanel);
         HidePanel(towerInfoPanel);
 
-        ShowPanel(weaponPanelRanged);
+        ShowPanel(rangedWeaponPanel);
         HidePanel(weaponInfoPanel);
     }
 
     // WEG
     public void BackToFunctionsFromWeapons() {
-        HidePanel(weaponPanelRanged);
+        HidePanel(rangedWeaponPanel);
         HidePanel(weaponInfoPanel);
 
         ShowPanel(functionsPanel);
     }
 
     /// <summary>
-    /// Updates the weapon information panel.
-    /// Shows the current scrap amount, checks if the player has enough scrap,
-    /// enables or disables the buy button and shows or hides the warning box.
+    /// Returns the GunSO that belongs to the selected weapon item.
+    /// Only ranged weapons have a matching GunSO.
     /// </summary>
+    private GunSO GetGunForSelectedWeaponItem() {
+        if (selectedWeaponItem == shotgunItem)
+            return shotgunGun;
+
+        if (selectedWeaponItem == assaultRifleItem)
+            return assaultRifleGun;
+
+        if (selectedWeaponItem == sniperItem)
+            return sniperGun;
+
+        return null;
+    }
+
     private void UpdateWeaponInfo() {
         // If the inventory or the scrap item was not assigned,
         // show an unknown scrap amount and disable buying.
         if (playerInventory == null || scrapItem == null) {
             weaponScrapAmountText.text = "SCRAP: ? / " + selectedWeaponCost;
 
-            // Show the damage value of the selected weapon
-            if (selectedWeaponItem != null) {
-                weaponDamageText.text = "" + selectedWeaponItem.baseDamage;
-            } else {
+            // Show the current damage value of the selected weapon.
+            // Ranged weapons use their GunSO value so upgrades are displayed correctly.
+            // Melee weapons still use the base damage from the ItemSO.
+            if (selectedWeaponItem == null) {
                 weaponDamageText.text = "?";
+            } else {
+                GunSO selectedGun = GetGunForSelectedWeaponItem();
+
+                if (selectedGun != null) {
+                    weaponDamageText.text = "" + selectedGun.GetDamage();
+                } else {
+                    weaponDamageText.text = "" + selectedWeaponItem.baseDamage;
+                }
             }
 
             weaponWarningBox.SetActive(true);
@@ -605,11 +858,19 @@ public class NPCDialog : MonoBehaviour {
         // Update the scrap amount text in the weapon information panel.
         weaponScrapAmountText.text = "SCRAP: " + currentScrap + " / " + selectedWeaponCost;
 
-        // Show the damage value of the selected weapon
-        if (selectedWeaponItem != null) {
-            weaponDamageText.text = "" + selectedWeaponItem.baseDamage;
-        } else {
+        // Show the current damage value of the selected weapon.
+        // Ranged weapons use their GunSO value so upgrades are displayed correctly.
+        // Melee weapons still use the base damage from the ItemSO.
+        if (selectedWeaponItem == null) {
             weaponDamageText.text = "?";
+        } else {
+            GunSO selectedGun = GetGunForSelectedWeaponItem();
+
+            if (selectedGun != null) {
+                weaponDamageText.text = "" + selectedGun.GetDamage();
+            } else {
+                weaponDamageText.text = "" + selectedWeaponItem.baseDamage;
+            }
         }
 
         // Show the warning box only if the player does not have enough scrap.
@@ -843,8 +1104,8 @@ public class NPCDialog : MonoBehaviour {
         HidePanel(functionsPanel);
         HidePanel(towerInfoPanel);
         HidePanel(weaponTypePanel);
-        HidePanel(weaponPanelRanged);
-        HidePanel(weaponPanelClose);
+        HidePanel(rangedWeaponPanel);
+        HidePanel(closeWeaponPanel);
         HidePanel(weaponInfoPanel);
         HidePanel(upgradeInfoPanel);
 
@@ -857,6 +1118,9 @@ public class NPCDialog : MonoBehaviour {
     public void BackFromUpgradePanel() {
         HidePanel(upgradePanel);
         HidePanel(upgradeInfoPanel);
+        HidePanel(upgradeInfoPanelTower);
+        HidePanel(upgradeInfoPanelWeapon);
+        HidePanel(weaponTypeUpgradePanel);
 
         ShowPanel(dialogPanel);
     }
@@ -865,6 +1129,7 @@ public class NPCDialog : MonoBehaviour {
     /// Selects the gas tank healing upgrade and opens the upgrade info panel.
     /// </summary>
     public void SelectGasTankHealing() {
+        HidePanel(upgradeInfoPanelTower);
         ShowPanel(upgradePanel);
         ShowPanel(upgradeInfoPanel);
 
@@ -994,6 +1259,476 @@ public class NPCDialog : MonoBehaviour {
         UpdateGasTankHealingInfo();
 
         // Clear the currently selected UI element.
+        EventSystem.current.SetSelectedGameObject(null);
+    }
+
+    /// <summary>
+    /// Selects the tower upgrade and opens the tower upgrade info panel.
+    /// </summary>
+    public void SelectTowerUpgrade() {
+        ShowPanel(upgradePanel);
+        HidePanel(upgradeInfoPanel);
+        ShowPanel(upgradeInfoPanelTower); 
+
+        upgradeInfoPanelTower.transform.SetAsLastSibling();
+
+        UpdateTowerUpgradeInfo();
+    }
+
+    /// <summary>
+    /// Checks if at least one built tower can still be upgraded.
+    /// </summary>
+    private bool HasUpgradeableTower() {
+        if (builtTowers == null || towerUpgradeLevels == null || towerPrefabsByLevel == null)
+            return false;
+
+        int maxUpgradeLevel = towerPrefabsByLevel.Length - 1;
+
+        for (int i = 0; i < builtTowers.Length; i++) {
+            if (builtTowers[i] != null && towerUpgradeLevels[i] < maxUpgradeLevel) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Updates the tower upgrade info panel.
+    /// It checks the current scrap amount and if at least one tower exists.
+    /// </summary>
+    private void UpdateTowerUpgradeInfo() {
+        if (playerInventory == null || scrapItem == null) {
+            // If the inventory or the scrap item is missing,
+            // the current scrap amount cannot be checked.
+            towerUpgradeScrapText.text = "SCRAP: ? / " + towerUpgradeScrapCost;
+
+            // Show the warning box because upgrading is not possible.
+            towerUpgradeWarningBox.SetActive(true);
+
+            // Disable the upgrade button to prevent errors.
+            towerUpgradeButton.interactable = false;
+
+            return;
+        }
+
+        // Get the current amount of scrap from the player's inventory.
+        int currentScrap = playerInventory.GetItemAmount(scrapItem);
+
+        // Check if the player has enough scrap to buy the tower upgrade.
+        bool hasEnoughScrap = currentScrap >= towerUpgradeScrapCost;
+
+        // Check if at least one tower has already been built.
+        bool hasBuiltTower = builtTowerCount > 0;
+
+        // Check whether there is a tower that can be updated
+        bool hasUpgradeableTower = HasUpgradeableTower();
+
+        // The tower upgrade can only be bought if the player has enough scrap
+        // and at least one tower exists and tower can be upgraded.
+        bool canBuyTowerUpgrade = hasEnoughScrap && hasBuiltTower && hasUpgradeableTower;
+
+        // Show current scrap amount and required scrap cost.
+        towerUpgradeScrapText.text = "SCRAP: " + currentScrap + " / " + towerUpgradeScrapCost;
+
+        if (towerUpgradeWarningText != null) {
+            // Clear the warning text before creating a new warning message.
+            towerUpgradeWarningText.text = "";
+
+            // Add a warning message if the player does not have enough scrap.
+            if (!hasEnoughScrap) {
+                towerUpgradeWarningText.text += "NOT ENOUGH RESOURCES";
+            }
+
+            // Add a warning message if no tower exists yet.
+            if (!hasBuiltTower) {
+                if (towerUpgradeWarningText.text != "") {
+                    towerUpgradeWarningText.text += "\n";
+                }
+
+                towerUpgradeWarningText.text += "NO TOWER BUILT";
+            }
+
+            // Add a warning message if all possible tower upgrades have already been bought.
+            if (hasBuiltTower && !hasUpgradeableTower) {
+                if (towerUpgradeWarningText.text != "") {
+                    towerUpgradeWarningText.text += "\n";
+                }
+
+                towerUpgradeWarningText.text += "ALL TOWERS UPGRADED";
+            }
+        }
+
+        // Show the warning box if the tower upgrade cannot be bought.
+        towerUpgradeWarningBox.SetActive(!canBuyTowerUpgrade);
+
+        // Enable the upgrade button only if the player has enough scrap
+        // and at least one tower exists.
+        towerUpgradeButton.interactable = canBuyTowerUpgrade;
+    }
+
+    /// <summary>
+    /// Buys a tower upgrade.
+    /// A random built tower that has not reached the maximum upgrade level is replaced by the next tower prefab level.
+    /// </summary>
+    public void BuyTowerUpgrade() {
+        if (playerInventory == null || scrapItem == null) {
+            Debug.LogError("Inventory oder Scrap Item fehlt!");
+            return;
+        }
+
+        if (towerPrefabsByLevel == null || towerPrefabsByLevel.Length < 3) {
+            Debug.LogError("Tower Prefabs By Level ist nicht korrekt eingerichtet!");
+            return;
+        }
+
+        if (builtTowers == null || towerUpgradeLevels == null) {
+            Debug.LogError("Tower arrays wurden nicht initialisiert!");
+            return;
+        }
+
+        if (builtTowerCount <= 0) {
+            Debug.Log("Es wurde noch kein Tower gebaut.");
+            UpdateTowerUpgradeInfo();
+            return;
+        }
+
+        if (!playerInventory.HasItemAmount(scrapItem, towerUpgradeScrapCost)) {
+            Debug.Log("Nicht genug Scrap für Tower Upgrade.");
+            UpdateTowerUpgradeInfo();
+            return;
+        }
+
+        if (!HasUpgradeableTower()) {
+            UpdateTowerUpgradeInfo();
+            return;
+        }
+
+        // Find all built towers that can still be upgraded.
+        int[] upgradeableTowerIndexes = new int[builtTowers.Length];
+        int upgradeableTowerCount = 0;
+
+        for (int i = 0; i < builtTowers.Length; i++) {
+            if (builtTowers[i] != null && towerUpgradeLevels[i] < towerPrefabsByLevel.Length - 1) {
+                upgradeableTowerIndexes[upgradeableTowerCount] = i;
+                upgradeableTowerCount++;
+            }
+        }
+
+        if (upgradeableTowerCount <= 0) {
+            Debug.Log("Alle Tower sind bereits vollständig geupgradet.");
+            UpdateTowerUpgradeInfo();
+            return;
+        }
+
+        // Select one upgradeable tower randomly.
+        int randomListIndex = Random.Range(0, upgradeableTowerCount);
+        int selectedTowerIndex = upgradeableTowerIndexes[randomListIndex];
+
+        // Calculate the next upgrade level.
+        int nextUpgradeLevel = towerUpgradeLevels[selectedTowerIndex] + 1;
+
+        if (towerPrefabsByLevel[nextUpgradeLevel] == null) {
+            Debug.LogError("Tower Prefab fehlt für Upgrade Level: " + nextUpgradeLevel);
+            return;
+        }
+
+        if (towerSpawnPoints == null ||
+            selectedTowerIndex >= towerSpawnPoints.Length ||
+            towerSpawnPoints[selectedTowerIndex] == null) {
+            Debug.LogError("Tower SpawnPoint fehlt für Tower Index: " + selectedTowerIndex);
+            return;
+        }
+
+        // Remove the required scrap amount from the player's inventory.
+        playerInventory.RemoveItem(scrapItem, towerUpgradeScrapCost);
+
+        // Use the original spawn point position and rotation instead of the current tower rotation.
+        // This prevents the upgraded tower from inheriting the current aiming rotation of the old tower.
+        Vector3 towerPosition = towerSpawnPoints[selectedTowerIndex].position;
+        Quaternion towerRotation = towerSpawnPoints[selectedTowerIndex].rotation;
+
+        // Destroy the old tower.
+        Destroy(builtTowers[selectedTowerIndex]);
+
+        // Create the upgraded tower at the original spawn point position and rotation.
+        GameObject upgradedTower = Instantiate(
+            towerPrefabsByLevel[nextUpgradeLevel],
+            towerPosition,
+            towerRotation
+        );
+
+        // Store the new upgraded tower and its upgrade level.
+        builtTowers[selectedTowerIndex] = upgradedTower;
+        towerUpgradeLevels[selectedTowerIndex] = nextUpgradeLevel;
+
+        // Count the bought upgrade.
+        boughtTowerUpgradeCount++;
+
+        Debug.Log("Tower at index " + selectedTowerIndex + " upgraded to level " + nextUpgradeLevel + ".");
+
+        // Update the tower upgrade info panel after the scrap amount and upgrade state have changed.
+        UpdateTowerUpgradeInfo();
+
+        // Update the normal tower info panel as well, because tower values may have changed.
+        UpdateTowerInfo();
+
+        // Clear the currently selected UI element.
+        EventSystem.current.SetSelectedGameObject(null);
+    }
+
+    // <summary>
+    /// Opens the weapon upgrade panel from the main upgrade panel.
+    /// </summary>
+    public void OpenWeaponTypeUpgradePanel() {
+        // Hide the current upgrade panel.
+        HidePanel(upgradePanel);
+
+        // Hide all right-side info panels.
+        HidePanel(upgradeInfoPanel);
+        HidePanel(upgradeInfoPanelTower);
+        HidePanel(upgradeInfoPanelWeapon);
+
+        // Show the weapon upgrade selection panel.
+        ShowPanel(weaponTypeUpgradePanel);
+
+        // No weapon upgrade type is selected at the beginning.
+        selectedWeaponUpgradeType = WeaponUpgradeType.None;
+
+        // Clear the currently selected UI element.
+        EventSystem.current.SetSelectedGameObject(null);
+    }
+
+    /// <summary>
+    /// Returns from the weapon upgrade panel back to the main upgrade panel.
+    /// </summary>
+    public void BackFromWeaponUpgradePanel() {
+        // Hide the weapon upgrade panels.
+        HidePanel(weaponTypeUpgradePanel);
+        HidePanel(upgradeInfoPanelWeapon);
+
+        // Show the main upgrade panel again.
+        ShowPanel(upgradePanel);
+
+        // Clear the selected upgrade type.
+        selectedWeaponUpgradeType = WeaponUpgradeType.None;
+
+        // Clear the currently selected UI element.
+        EventSystem.current.SetSelectedGameObject(null);
+    }
+
+    //// <summary>
+    /// Selects the damage upgrade for the currently equipped ranged weapon.
+    /// </summary>
+    public void SelectWeaponDamageUpgrade() {
+        selectedWeaponUpgradeType = WeaponUpgradeType.Damage;
+
+        ShowPanel(upgradeInfoPanelWeapon);
+
+        if (weaponUpgradeTitleText != null)
+            weaponUpgradeTitleText.text = "DAMAGE UPGRADE";
+
+        if (weaponUpgradeDescriptionText != null)
+            weaponUpgradeDescriptionText.text = "Increases the damage of the currently equipped ranged weapon.";
+
+        if (weaponUpgradeEffectText != null)
+            weaponUpgradeEffectText.text = "DAMAGE";
+
+        UpdateWeaponUpgradeInfo();
+
+        EventSystem.current.SetSelectedGameObject(null);
+    }
+
+    /// <summary>
+    /// Selects the ammo upgrade for the currently equipped ranged weapon.
+    /// </summary>
+    public void SelectWeaponAmmoUpgrade() {
+        selectedWeaponUpgradeType = WeaponUpgradeType.Ammo;
+
+        ShowPanel(upgradeInfoPanelWeapon);
+
+        if (weaponUpgradeTitleText != null)
+            weaponUpgradeTitleText.text = "AMMO UPGRADE";
+
+        if (weaponUpgradeDescriptionText != null)
+            weaponUpgradeDescriptionText.text = "Increases the maximum ammo capacity of the currently equipped ranged weapon.";
+
+        if (weaponUpgradeEffectText != null)
+            weaponUpgradeEffectText.text = "MAX AMMO";
+
+        UpdateWeaponUpgradeInfo();
+
+        EventSystem.current.SetSelectedGameObject(null);
+    }
+
+    /// <summary>
+    /// Returns from the weapon upgrade panel back to the main upgrade panel.
+    /// </summary>
+    public void BackFromWeaponTypeUpgradePanel() {
+        // Hide the weapon upgrade selection panel.
+        HidePanel(weaponTypeUpgradePanel);
+
+        // Hide the weapon upgrade info panel on the right side.
+        HidePanel(upgradeInfoPanelWeapon);
+
+        // Show the main upgrade panel again.
+        ShowPanel(upgradePanel);
+
+        // Clear the selected weapon upgrade type.
+        selectedWeaponUpgradeType = WeaponUpgradeType.None;
+
+        // Clear the currently selected UI element.
+        EventSystem.current.SetSelectedGameObject(null);
+    }
+
+    /// <summary>
+    /// Updates the weapon upgrade info panel depending on the selected upgrade type,
+    /// the currently equipped gun, the available scrap and the upgrade limit.
+    /// </summary>
+    private void UpdateWeaponUpgradeInfo() {
+        if (playerInventory == null || scrapItem == null)
+            return;
+
+        GunSO currentGun = GetCurrentSelectedGun();
+
+        int currentScrap = playerInventory.GetItemAmount(scrapItem);
+        int requiredScrap = GetSelectedWeaponUpgradeCost();
+
+        if (weaponUpgradeScrapText != null) {
+            weaponUpgradeScrapText.text = "SCRAP: " + currentScrap + " / " + requiredScrap;
+        }
+
+        bool hasSelectedUpgrade = selectedWeaponUpgradeType != WeaponUpgradeType.None;
+        bool hasSelectedGun = currentGun != null;
+        bool hasEnoughScrap = currentScrap >= requiredScrap;
+        bool canUpgradeSelectedType = true;
+
+        if (hasSelectedGun && hasSelectedUpgrade) {
+            if (selectedWeaponUpgradeType == WeaponUpgradeType.Damage) {
+                canUpgradeSelectedType = currentGun.CanUpgradeDamage();
+            } else if (selectedWeaponUpgradeType == WeaponUpgradeType.Ammo) {
+                canUpgradeSelectedType = currentGun.CanUpgradeMaxAmmo();
+            }
+        }
+
+        string warningMessage = "";
+
+        if (!hasSelectedUpgrade) {
+            warningMessage += "NO UPGRADE SELECTED";
+        }
+
+        if (!hasSelectedGun) {
+            if (warningMessage.Length > 0)
+                warningMessage += "\n";
+
+            warningMessage += "    NO RANGED WEAPON SELECTED";
+        }
+
+        if (!canUpgradeSelectedType) {
+            if (warningMessage.Length > 0)
+                warningMessage += "\n";
+
+            warningMessage += "UPGRADE ALREADY MAXED";
+        }
+
+        if (!hasEnoughScrap) {
+            if (warningMessage.Length > 0)
+                warningMessage += "\n";
+
+            warningMessage += "NOT ENOUGH RESOURCES";
+        }
+
+        bool canBuyUpgrade = hasSelectedUpgrade && hasSelectedGun && hasEnoughScrap && canUpgradeSelectedType;
+
+        if (weaponUpgradeWarningText != null)
+            weaponUpgradeWarningText.text = warningMessage;
+
+        if (weaponUpgradeWarningBox != null)
+            weaponUpgradeWarningBox.SetActive(!canBuyUpgrade);
+
+        if (weaponUpgradeBuyButton != null)
+            weaponUpgradeBuyButton.interactable = canBuyUpgrade;
+    }
+
+    /// <summary>
+    /// Returns the scrap cost of the currently selected weapon upgrade.
+    /// </summary>
+    private int GetSelectedWeaponUpgradeCost() {
+        switch (selectedWeaponUpgradeType) {
+            case WeaponUpgradeType.Damage:
+                return weaponDamageUpgradeScrapCost;
+
+            case WeaponUpgradeType.Ammo:
+                return weaponAmmoUpgradeScrapCost;
+
+            default:
+                return 0;
+        }
+    }
+
+    /// <summary>
+    /// Returns the currently equipped gun of the player.
+    /// </summary>
+    private GunSO GetCurrentSelectedGun() {
+        if (playerWeaponSelector == null)
+            return null;
+
+        return playerWeaponSelector.activeGun;
+    }
+
+    /// <summary>
+    /// Buys the currently selected weapon upgrade and applies it to the currently equipped gun.
+    /// </summary>
+    public void BuySelectedWeaponUpgrade() {
+        if (playerInventory == null || scrapItem == null)
+            return;
+
+        GunSO currentGun = GetCurrentSelectedGun();
+
+        if (currentGun == null) {
+            UpdateWeaponUpgradeInfo();
+            return;
+        }
+
+        if (selectedWeaponUpgradeType == WeaponUpgradeType.None) {
+            UpdateWeaponUpgradeInfo();
+            return;
+        }
+
+        if (selectedWeaponUpgradeType == WeaponUpgradeType.Damage && !currentGun.CanUpgradeDamage()) {
+            UpdateWeaponUpgradeInfo();
+            return;
+        }
+
+        if (selectedWeaponUpgradeType == WeaponUpgradeType.Ammo && !currentGun.CanUpgradeMaxAmmo()) {
+            UpdateWeaponUpgradeInfo();
+            return;
+        }
+
+        int requiredScrap = GetSelectedWeaponUpgradeCost();
+
+        if (!playerInventory.HasItemAmount(scrapItem, requiredScrap)) {
+            UpdateWeaponUpgradeInfo();
+            return;
+        }
+
+        bool removedScrap = playerInventory.RemoveItem(scrapItem, requiredScrap);
+
+        if (!removedScrap) {
+            UpdateWeaponUpgradeInfo();
+            return;
+        }
+
+        if (selectedWeaponUpgradeType == WeaponUpgradeType.Damage) {
+            currentGun.UpgradeDamage(weaponDamageIncrease);
+            Debug.Log("Damage upgrade bought for: " + currentGun.gunName);
+        } else if (selectedWeaponUpgradeType == WeaponUpgradeType.Ammo) {
+            currentGun.UpgradeMaxAmmo(weaponAmmoIncrease);
+            Debug.Log("Ammo upgrade bought for: " + currentGun.gunName);
+        }
+
+        UpdateWeaponUpgradeInfo();
+
         EventSystem.current.SetSelectedGameObject(null);
     }
 
