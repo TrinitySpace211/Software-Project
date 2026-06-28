@@ -1,0 +1,268 @@
+# ==============================================================================
+#  Unity CI/CD Pipeline
+# ==============================================================================
+#  Diese Pipeline automatisiert drei Dinge fuer unser Unity-Survival-Game:
+#    1. TESTS   - Fuehrt die PlayMode-Tests aus (Assets/Tests/PlayMode)
+#    2. BUILD   - Baut spielbare Versionen (Windows .exe, optional WebGL)
+#    3. RELEASE - Veroeffentlicht den Build automatisch als GitHub Release
+#
+#  Sie laeuft auf GitHubs Servern ("runs-on: ubuntu-latest") und nutzt
+#  GameCI (https://game.ci) - die Standard-Werkzeuge fuer Unity + GitHub Actions.
+#
+#  WICHTIG - Damit die Pipeline laeuft, muessen in GitHub diese "Secrets"
+#  hinterlegt sein (Repo -> Settings -> Secrets and variables -> Actions):
+#    UNITY_LICENSE   - Inhalt der .ulf-Lizenzdatei (siehe unity-activation.yml)
+#    UNITY_EMAIL     - E-Mail des Unity-Accounts
+#    UNITY_PASSWORD  - Passwort des Unity-Accounts
+#  Ohne diese Secrets schlagen alle Jobs fehl (Unity kann nicht aktiviert werden).
+# ==============================================================================
+
+name: Unity CI/CD
+
+# ------------------------------------------------------------------------------
+#  WANN laeuft die Pipeline? ("Trigger")
+# ------------------------------------------------------------------------------
+on:
+  # Bei jedem "push" (hochgeladener Commit) auf einen dieser Branches:
+  push:
+    branches:
+      - main
+      - develop
+      - 'feature/**'   # alle feature/-Branches, z.B. feature/CiCd-Pipe
+      - 'fix/**'       # alle fix/-Branches
+  # Bei jedem Pull Request, der auf main oder develop zielt:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  # ============================================================================
+  #  JOB 1: TESTS
+  #  Fuehrt die automatisierten PlayMode-Tests aus (z.B. GasTankHealthTests,
+  #  DayNightCycleTests, PlayerTests). Laeuft bei JEDEM push/PR -> so merken
+  #  wir sofort, wenn eine Aenderung etwas kaputt macht.
+  # ============================================================================
+  test:
+    name: Run Unity Tests
+    runs-on: ubuntu-latest
+    steps:
+      # Holt unseren Code auf die Cloud-Maschine.
+      # lfs: true -> laedt auch die grossen Dateien (Git LFS: Modelle, Texturen).
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      # Unity erzeugt beim ersten Oeffnen einen grossen "Library"-Ordner
+      # (importierte Assets, Shader-Cache usw.). Den zwischenzuspeichern spart
+      # bei spaeteren Laeufen sehr viel Zeit (sonst ~20+ Min pro Lauf).
+      # Der "key" aendert sich nur, wenn sich Assets/Packages/ProjectSettings
+      # aendern - sonst wird der gecachte Ordner wiederverwendet.
+      - name: Cache Library folder
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-test-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-test-
+            Library-
+
+      # Das eigentliche Test-Ausfuehren. "testMode: all" deckt Edit- UND
+      # PlayMode ab. Wir haben aktuell nur PlayMode-Tests -> EditMode wird
+      # einfach uebersprungen (kein Fehler).
+      - name: Run Edit Mode & Play Mode Tests
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}  # automatisch von GitHub bereitgestellt
+          testMode: all
+          artifactsPath: test-results
+
+      # Speichert den Testbericht als herunterladbares "Artefakt".
+      # if: always() -> auch hochladen, wenn Tests fehlschlagen (zum Nachschauen).
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: test-results
+
+  # ============================================================================
+  #  JOB 2: WINDOWS-BUILD
+  #  Baut die spielbare Windows-Version (.exe).
+  #  needs: test  -> laeuft NUR, wenn Job 1 (Tests) erfolgreich war.
+  #  if: ...      -> nur auf main/develop, NICHT bei jedem feature-Push
+  #                  (spart Build-Zeit; ein Build dauert deutlich laenger als Tests).
+  # ============================================================================
+  build-windows:
+    name: Build (Windows)
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      # Eigener Cache fuer den Build (getrennt von den Tests).
+      - name: Cache Library folder
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-build-windows-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-build-windows-
+            Library-
+
+      # Baut das Projekt fuer Windows 64-bit.
+      - name: Build for Windows
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: StandaloneWindows64
+          buildName: SurvivalGame
+          buildsPath: builds
+
+      # Stellt die fertige .exe als Download bereit (14 Tage aufbewahrt).
+      - name: Upload Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-windows
+          path: builds/StandaloneWindows64
+          retention-days: 14
+
+  # ============================================================================
+  #  JOB 3: WEBGL-BUILD (optional)
+  #  Baut die Browser-Version, damit das Spiel ueber einen Link spielbar ist.
+  #  if: ... main -> laeuft nur auf dem main-Branch.
+  #
+  #  HINWEIS PERFORMANCE: Ein 3D-Spiel im Browser laeuft langsamer als die .exe.
+  #  Die WebGL-Version ist als Demo/Review-App gedacht - die Windows-.exe bleibt
+  #  die "richtige" spielbare Version.
+  #
+  #  WICHTIG - WEBGL-KOMPRESSION FUER GITHUB PAGES:
+  #  Standardmaessig komprimiert Unity WebGL-Builds (Brotli/Gzip). GitHub Pages
+  #  sendet dafuer aber nicht die noetigen HTTP-Header -> das Spiel laedt dann
+  #  NICHT (Konsolenfehler). Damit der Pages-Deploy funktioniert, in Unity:
+  #    Edit -> Project Settings -> Player -> WebGL -> Publishing Settings ->
+  #    Compression Format = "Disabled"  (oder "Decompression Fallback" anhaken).
+  #  Diese Einstellung muss EINMAL gesetzt und committet werden.
+  # ============================================================================
+  build-webgl:
+    name: Build (WebGL)
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Cache Library folder
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-build-webgl-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-build-webgl-
+            Library-
+
+      - name: Build for WebGL
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: WebGL
+          buildName: SurvivalGame
+          buildsPath: builds
+
+      # Unity legt die WebGL-Dateien je nach Version unterschiedlich tief ab.
+      # Dieser Schritt sucht die index.html und kopiert den fertigen Build in
+      # einen sauberen Ordner "_site" - egal wie tief er verschachtelt war.
+      - name: Prepare site for GitHub Pages
+        run: |
+          INDEX_PATH=$(find builds/WebGL -name index.html | head -n 1)
+          if [ -z "$INDEX_PATH" ]; then
+            echo "FEHLER: keine index.html im WebGL-Build gefunden!"; exit 1
+          fi
+          BUILD_DIR=$(dirname "$INDEX_PATH")
+          echo "WebGL-Build gefunden in: $BUILD_DIR"
+          mkdir -p _site
+          cp -r "$BUILD_DIR"/. _site/
+
+      # Verpackt den _site-Ordner im speziellen Pages-Format fuer den Deploy.
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  # ============================================================================
+  #  JOB 3b: WEBGL AUF GITHUB PAGES DEPLOYEN
+  #  Nimmt das im build-webgl-Job verpackte Artefakt und veroeffentlicht es auf
+  #  GitHub Pages -> ergibt einen oeffentlichen, spielbaren Link.
+  #  Das ist unser "Deployment / Review-App".
+  #
+  #  EINMALIGE EINRICHTUNG in GitHub noetig:
+  #    Repo -> Settings -> Pages -> "Source" auf "GitHub Actions" stellen.
+  #  Der fertige Link erscheint danach hier im Job ("environment url") und
+  #  unter Settings -> Pages.
+  # ============================================================================
+  deploy-webgl:
+    name: Deploy WebGL to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: build-webgl
+    if: github.ref == 'refs/heads/main'
+    # Diese Rechte braucht der offizielle Pages-Deploy zwingend:
+    permissions:
+      pages: write       # darf auf Pages veroeffentlichen
+      id-token: write    # sichere Authentifizierung fuer den Deploy
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}   # zeigt den fertigen Link an
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # ============================================================================
+  #  JOB 4: GITHUB RELEASE
+  #  Erstellt automatisch ein GitHub Release mit der Windows-Version als ZIP.
+  #  if: startsWith(... 'refs/tags/v') -> laeuft NUR, wenn ein Git-Tag gepusht
+  #  wird, der mit "v" beginnt (z.B.  git tag v1.0  &&  git push --tags ).
+  #  Das ist unser "Artefakt-Deployment": jede Version bekommt einen Download.
+  # ============================================================================
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [build-windows]
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      # Holt das im Windows-Job erzeugte Build-Artefakt wieder herunter.
+      - name: Download Windows build
+        uses: actions/download-artifact@v4
+        with:
+          name: build-windows
+          path: build-windows
+
+      # Packt den Build in eine ZIP-Datei (Dateiname enthaelt den Tag-Namen).
+      - name: Zip Windows build
+        run: zip -r SurvivalGame-Windows-${{ github.ref_name }}.zip build-windows/
+
+      # Legt das Release an und haengt die ZIP als Download an.
+      # generate_release_notes -> erstellt automatisch eine Changelog-Liste.
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: SurvivalGame-Windows-${{ github.ref_name }}.zip
+          generate_release_notes: true

@@ -1,0 +1,54 @@
+# ==============================================================================
+#  Unity License Activation - EINMALIG ausfuehren!
+# ==============================================================================
+#  ZWECK:
+#  Damit Unity auf GitHubs Servern bauen/testen darf, braucht es eine Lizenz.
+#  Fuer die kostenlose "Personal"-Lizenz muss man eine .ulf-Datei erzeugen.
+#  Dieser Workflow erstellt den dafuer noetigen ERSTEN Schritt: eine .alf-Datei.
+#
+#  ANLEITUNG (nur ein einziges Mal noetig):
+#    1. Diesen Workflow auf GitHub manuell starten:
+#       Repo -> Tab "Actions" -> links "Unity License Activation"
+#       -> Button "Run workflow".
+#    2. Nach dem Lauf unten beim Job das Artefakt
+#       "unity-license-activation-file" herunterladen -> enthaelt eine .alf-Datei.
+#    3. Auf  https://license.unity3d.com/manual  gehen, die .alf hochladen,
+#       Fragen beantworten -> man erhaelt eine .ulf-Datei.
+#    4. Den GESAMTEN Inhalt der .ulf-Datei als GitHub-Secret speichern:
+#       Repo -> Settings -> Secrets and variables -> Actions -> New secret
+#       Name: UNITY_LICENSE  | Value: <Inhalt der .ulf-Datei>
+#    5. Zusaetzlich UNITY_EMAIL und UNITY_PASSWORD als Secrets anlegen
+#       (E-Mail/Passwort des Unity-Accounts).
+#
+#  Danach ist diese Datei nicht mehr noetig und koennte geloescht werden.
+# ==============================================================================
+
+name: Unity License Activation (einmalig ausführen)
+
+# ------------------------------------------------------------------------------
+#  "workflow_dispatch" = laeuft NICHT automatisch, sondern nur, wenn man ihn
+#  in der GitHub-Oberflaeche manuell per Knopfdruck startet.
+# ------------------------------------------------------------------------------
+on:
+  workflow_dispatch:
+
+jobs:
+  activation:
+    name: Request Unity License File
+    runs-on: ubuntu-latest
+    steps:
+      # Erzeugt die .alf-Aktivierungsdatei.
+      # unityVersion: auto -> liest die Unity-Version automatisch aus
+      # ProjectSettings/ProjectVersion.txt (so passt sie immer zum Projekt).
+      - name: Request manual activation file
+        uses: game-ci/unity-request-activation-file@v2
+        with:
+          unityVersion: auto
+
+      # Stellt die .alf-Datei als herunterladbares Artefakt bereit
+      # (Schritt 2 der Anleitung oben).
+      - name: Upload activation file
+        uses: actions/upload-artifact@v4
+        with:
+          name: unity-license-activation-file
+          path: ./*.alf
