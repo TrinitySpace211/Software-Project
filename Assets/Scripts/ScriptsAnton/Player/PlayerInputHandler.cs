@@ -30,9 +30,15 @@ public class PlayerInputHandler : MonoBehaviour {
     public static event Action OnToggleDebugAction;
     public static event Action OnReturnAction;
     public static event Action OnMapOpenAction;
+    private const string RebindKey = "rebinds";
 
     private void OnEnable() {
         playerInputActions = new InputSystem_Actions();
+
+        if (PlayerPrefs.HasKey(RebindKey)) {
+            playerInputActions.LoadBindingOverridesFromJson(PlayerPrefs.GetString(RebindKey));
+        }
+
         playerInputActions.Enable();
     }
 
