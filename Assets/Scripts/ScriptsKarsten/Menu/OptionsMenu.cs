@@ -1,152 +1,226 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.InputSystem;
 
 /// <summary>
-/// Options menu handling audio settings and saving/loading them via PlayerPrefs.
-/// Supports separate control for Master, Music and SFX volume.
+/// Options menu handling audio + input rebinding (Player InputActions).
+/// Saves everything via PlayerPrefs (including Input bindings as JSON).
 /// </summary>
 public class OptionsMenu : MonoBehaviour {
-    [Header("Master Audio")]
-    /// Slider for controlling master volume (0–1 range).
+    [Header("Audio")]
     [SerializeField] private Slider masterVolumeSlider;
-
-    /// Text that displays the current master volume as a percentage.
     [SerializeField] private TextMeshProUGUI masterVolumeValueText;
 
-    [Header("Music Audio")]
-    /// Slider for controlling music volume (0–1 range).
     [SerializeField] private Slider musicVolumeSlider;
-
-    /// Text that displays the current music volume as a percentage.
     [SerializeField] private TextMeshProUGUI musicVolumeValueText;
 
-    [Header("SFX Audio")]
-    /// Slider for controlling sound effects volume (0–1 range).
     [SerializeField] private Slider sfxVolumeSlider;
-
-    /// Text that displays the current SFX volume as a percentage.
     [SerializeField] private TextMeshProUGUI sfxVolumeValueText;
 
-    /// Key used for saving/loading master volume from PlayerPrefs.
-    private const string MasterVolumeKey = "master_volume";
+    [Header("Input Actions")]
+    [SerializeField] private InputActionAsset inputActions;
 
-    /// Key used for saving/loading music volume from PlayerPrefs.
-    private const string MusicVolumeKey = "music_volume";
+    [Header("Move Rebind UI")]
+    [SerializeField] private TextMeshProUGUI moveUpText;
+    [SerializeField] private TextMeshProUGUI moveDownText;
+    [SerializeField] private TextMeshProUGUI moveLeftText;
+    [SerializeField] private TextMeshProUGUI moveRightText;
 
-    /// Key used for saving/loading SFX volume from PlayerPrefs.
-    private const string SfxVolumeKey = "sfx_volume";
+    [Header("Other Rebind UI")]
+    [SerializeField] private TextMeshProUGUI sprintText;
+    [SerializeField] private TextMeshProUGUI interactText;
+    [SerializeField] private TextMeshProUGUI useText;
+    [SerializeField] private TextMeshProUGUI throwText;
+    [SerializeField] private TextMeshProUGUI reloadText;
+    [SerializeField] private TextMeshProUGUI mapText;
 
-    /// <summary>
-    /// Loads saved volume settings when the menu is opened.
-    /// </summary>
+    private InputAction moveAction;
+    private InputAction sprintAction;
+    private InputAction interactAction;
+    private InputAction useAction;
+    private InputAction throwAction;
+    private InputAction reloadAction;
+    private InputAction mapAction;
+
+
+    private const string RebindKey = "rebinds";
+
+
     private void Start() {
         LoadVolumes();
-        masterVolumeSlider.onValueChanged.AddListener(SetMasterVolume);
-        musicVolumeSlider.onValueChanged.AddListener(SetMusicVolume);
-        sfxVolumeSlider.onValueChanged.AddListener(SetSfxVolume);
+        LoadRebinds();
+
+        CacheActions();
+        RefreshAllUI();
     }
 
+    // ---------------- AUDIO ----------------
 
-    /// <summary>
-    /// Sets the master volume, updates UI, and saves it.
-    /// </summary>
-    /// <param name="value">Volume value between 0 and 1.</param>
     public void SetMasterVolume(float value) {
-        value = Mathf.Clamp01(value);
-
-        PlayerPrefs.SetFloat(MasterVolumeKey, value);
-        PlayerPrefs.Save();
-
-        UpdateText(masterVolumeValueText, value);
+        PlayerPrefs.SetFloat("master_volume", value);
         AudioListener.volume = value;
     }
 
-    /// <summary>
-    /// Sets the music volume, updates UI, and saves it.
-    /// </summary>
-    /// <param name="value">Volume value between 0 and 1.</param>
     public void SetMusicVolume(float value) {
-        value = Mathf.Clamp01(value);
-
-        PlayerPrefs.SetFloat(MusicVolumeKey, value);
-        PlayerPrefs.Save();
-
-        UpdateText(musicVolumeValueText, value);
-        AudioListener.volume = value;
-
-
-        ApplyToAllAudio();
+        PlayerPrefs.SetFloat("music_volume", value);
     }
 
-    /// <summary>
-    /// Sets the sound effects volume, updates UI, and saves it.
-    /// </summary>
-    /// <param name="value">Volume value between 0 and 1.</param>
     public void SetSfxVolume(float value) {
-        value = Mathf.Clamp01(value);
-
-        PlayerPrefs.SetFloat(SfxVolumeKey, value);
-        PlayerPrefs.Save();
-
-        UpdateText(sfxVolumeValueText, value);
-        AudioListener.volume = value;
-
-
-        ApplyToAllAudio();
+        PlayerPrefs.SetFloat("sfx_volume", value);
     }
 
-    private void ApplyToAllAudio() {
-        AudioListener.volume = MasterVolume;
-    }
-
-    /// <summary>
-    /// Loads all saved volume settings and applies them to the UI.
-    /// </summary>
     private void LoadVolumes() {
-        float masterVolume = PlayerPrefs.GetFloat(MasterVolumeKey, 1f);
-        float musicVolume = PlayerPrefs.GetFloat(MusicVolumeKey, 1f);
-        float sfxVolume = PlayerPrefs.GetFloat(SfxVolumeKey, 1f);
+        float master = PlayerPrefs.GetFloat("master_volume", 1f);
+        float music = PlayerPrefs.GetFloat("music_volume", 1f);
+        float sfx = PlayerPrefs.GetFloat("sfx_volume", 1f);
 
-        if (masterVolumeSlider != null)
-            masterVolumeSlider.SetValueWithoutNotify(masterVolume);
+        masterVolumeSlider.SetValueWithoutNotify(master);
+        musicVolumeSlider.SetValueWithoutNotify(music);
+        sfxVolumeSlider.SetValueWithoutNotify(sfx);
 
-        if (musicVolumeSlider != null)
-            musicVolumeSlider.SetValueWithoutNotify(musicVolume);
-
-        if (sfxVolumeSlider != null)
-            sfxVolumeSlider.SetValueWithoutNotify(sfxVolume);
-
-        UpdateText(masterVolumeValueText, masterVolume);
-        UpdateText(musicVolumeValueText, musicVolume);
-        UpdateText(sfxVolumeValueText, sfxVolume);
-
-        AudioListener.volume = masterVolume;
+        AudioListener.volume = master;
     }
 
-    /// <summary>
-    /// Updates a volume text field with the current percentage value.
-    /// </summary>
-    private void UpdateText(TextMeshProUGUI text, float value) {
-        if (text != null)
-            text.text = Mathf.RoundToInt(value * 100f) + "%";
+    // ---------------- INPUT ----------------
+
+    private void CacheActions() {
+        var map = inputActions.FindActionMap("Player");
+
+        moveAction = map.FindAction("Move");
+        sprintAction = map.FindAction("Sprint");
+        interactAction = map.FindAction("Interact");
+        useAction = map.FindAction("Use");
+        throwAction = map.FindAction("Throw");
+        reloadAction = map.FindAction("Reloading");
+        mapAction = map.FindAction("OpenMap");
+
     }
 
-    /// <summary>
-    /// Returns the currently saved master volume.
-    /// </summary>
+    // ---------------- MOVE REBIND ----------------
+
+    public void RebindMoveUp() => RebindComposite(moveAction, "up", moveUpText);
+    public void RebindMoveDown() => RebindComposite(moveAction, "down", moveDownText);
+    public void RebindMoveLeft() => RebindComposite(moveAction, "left", moveLeftText);
+    public void RebindMoveRight() => RebindComposite(moveAction, "right", moveRightText);
+
+    // ---------------- SIMPLE ACTION REBIND ----------------
+
+    public void RebindSprint() => RebindButton(sprintAction, sprintText);
+    public void RebindInteract() => RebindButton(interactAction, interactText);
+    public void RebindUse() => RebindButton(useAction, useText);
+    public void RebindThrow() => RebindButton(throwAction, throwText);
+    public void RebindReload() => RebindButton(reloadAction, reloadText);
+    public void RebindMap() => RebindButton(mapAction, mapText);
+
+
+    // ---------------- CORE REBIND SYSTEM ----------------
+
+    private void RebindButton(InputAction action, TextMeshProUGUI label) {
+        action.Disable();
+
+        action.PerformInteractiveRebinding()
+            .WithControlsExcluding("Mouse")
+            .OnComplete(op => {
+                op.Dispose();
+                action.Enable();
+                SaveRebinds();
+                RefreshAllUI();
+            })
+            .Start();
+    }
+
+    private void RebindComposite(InputAction action, string part, TextMeshProUGUI label) {
+        action.Disable();
+
+        int bindingIndex = GetCompositeBindingIndex(action, part);
+
+        action.PerformInteractiveRebinding(bindingIndex)
+            .OnComplete(op => {
+                op.Dispose();
+                action.Enable();
+                SaveRebinds();
+                RefreshAllUI();
+            })
+            .Start();
+    }
+
+    private int GetCompositeBindingIndex(InputAction action, string part) {
+        for (int i = 0; i < action.bindings.Count; i++) {
+            if (action.bindings[i].isPartOfComposite && action.bindings[i].name == part)
+                return i;
+        }
+        return -1;
+    }
+
+    // ---------------- SAVE / LOAD ----------------
+
+    private void SaveRebinds() {
+        PlayerPrefs.SetString(RebindKey, inputActions.SaveBindingOverridesAsJson());
+        PlayerPrefs.Save();
+    }
+
+    private void LoadRebinds() {
+        if (PlayerPrefs.HasKey(RebindKey)) {
+            inputActions.LoadBindingOverridesFromJson(PlayerPrefs.GetString(RebindKey));
+        }
+    }
+
+    // ---------------- UI REFRESH ----------------
+
+    private void RefreshAllUI() {
+        RefreshMoveUI();
+        RefreshActionUI();
+    }
+
+    private void RefreshMoveUI() {
+        moveUpText.text = GetBinding(moveAction, "up");
+        moveDownText.text = GetBinding(moveAction, "down");
+        moveLeftText.text = GetBinding(moveAction, "left");
+        moveRightText.text = GetBinding(moveAction, "right");
+    }
+
+    private void RefreshActionUI() {
+        sprintText.text = GetBinding(sprintAction);
+        interactText.text = GetBinding(interactAction);
+        useText.text = GetBinding(useAction);
+        throwText.text = GetBinding(throwAction);
+        reloadText.text = GetBinding(reloadAction);
+        mapText.text = GetBinding(mapAction);
+    }
+
+
+    private string GetBinding(InputAction action) {
+        var b = action.bindings[0];
+        return InputControlPath.ToHumanReadableString(
+            b.effectivePath,
+            InputControlPath.HumanReadableStringOptions.OmitDevice);
+    }
+
+    private string GetBinding(InputAction action, string part) {
+        foreach (var b in action.bindings) {
+            if (b.isPartOfComposite && b.name == part)
+                return InputControlPath.ToHumanReadableString(
+                    b.effectivePath,
+                    InputControlPath.HumanReadableStringOptions.OmitDevice);
+        }
+        return "?";
+    }
+
+    // ---------------- RESET ----------------
+
+    public void ResetRebinds() {
+        inputActions.RemoveAllBindingOverrides();
+        PlayerPrefs.DeleteKey(RebindKey);
+        RefreshAllUI();
+    }
+
     public static float MasterVolume =>
-        PlayerPrefs.GetFloat(MasterVolumeKey, 1f);
+    PlayerPrefs.GetFloat("master_volume", 1f);
 
-    /// <summary>
-    /// Returns the currently saved music volume.
-    /// </summary>
     public static float MusicVolume =>
-        PlayerPrefs.GetFloat(MusicVolumeKey, 1f);
+        PlayerPrefs.GetFloat("music_volume", 1f);
 
-    /// <summary>
-    /// Returns the currently saved sound effects volume.
-    /// </summary>
     public static float SfxVolume =>
-        PlayerPrefs.GetFloat(SfxVolumeKey, 1f);
+        PlayerPrefs.GetFloat("sfx_volume", 1f);
 }

@@ -26,8 +26,9 @@ public class MenuManager : MonoBehaviour {
     [SerializeField] private GameObject audioSection;
     [SerializeField] private GameObject controlsSection;
 
+    [SerializeField] private AudioSource musicSource;
+
     private AudioSource audioSource;
-    private AudioSource musicSource;
     private bool isTransitioning;
 
     /// <summary>
@@ -38,16 +39,6 @@ public class MenuManager : MonoBehaviour {
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.playOnAwake = false;
 
-        musicSource = gameObject.AddComponent<AudioSource>();
-        musicSource.clip = musicClip;
-        musicSource.loop = true;
-        musicSource.playOnAwake = false;
-
-        // Apply saved audio settings before playing sounds.
-        ApplyVolumeSettings();
-
-        if (musicClip != null)
-            musicSource.Play();
 
         // Initialize fade overlay (fully transparent and non-blocking)
         if (fadeGroup != null) {
@@ -211,7 +202,7 @@ public class MenuManager : MonoBehaviour {
     /// <summary>
     /// Applies all saved audio settings to the audio sources.
     /// </summary>
-    private void ApplyVolumeSettings() {
+    public void ApplyVolumeSettings() {
         float master = OptionsMenu.MasterVolume;
         float music = OptionsMenu.MusicVolume;
         float sfx = OptionsMenu.SfxVolume;
