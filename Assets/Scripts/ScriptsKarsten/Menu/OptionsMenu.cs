@@ -29,11 +29,15 @@ public class OptionsMenu : MonoBehaviour {
     [SerializeField] private TextMeshProUGUI throwText;
     [SerializeField] private TextMeshProUGUI reloadText;
     [SerializeField] private TextMeshProUGUI mapText;
-    [SerializeField] private TextMeshProUGUI inventoryText;
 
     [Header("Audio Sources")]
     [SerializeField] private AudioSource musicSource;
     [SerializeField] private AudioSource sfxSource;
+
+    [Header("Rebind Popup")]
+    [SerializeField] private GameObject rebindPopup;
+    [SerializeField] private TextMeshProUGUI rebindPopupText;
+    [SerializeField] private TextMeshProUGUI rebindPopupHint;
 
     private InputAction moveAction;
     private InputAction sprintAction;
@@ -41,7 +45,6 @@ public class OptionsMenu : MonoBehaviour {
     private InputAction throwAction;
     private InputAction reloadAction;
     private InputAction mapAction;
-    private InputAction inventoryAction;
 
     private const string RebindKey = "rebinds";
     private const string MasterKey = "master_volume";
@@ -158,26 +161,25 @@ public class OptionsMenu : MonoBehaviour {
         throwAction = map.FindAction("Throw", true);
         reloadAction = map.FindAction("Reloading", true);
         mapAction = map.FindAction("OpenMap", true);
-        inventoryAction = map.FindAction("OpenInventory", true);
     }
 
-    public void RebindMoveUp() => RebindComposite(moveAction, "up", moveUpText);
-    public void RebindMoveDown() => RebindComposite(moveAction, "down", moveDownText);
-    public void RebindMoveLeft() => RebindComposite(moveAction, "left", moveLeftText);
-    public void RebindMoveRight() => RebindComposite(moveAction, "right", moveRightText);
+    public void RebindMoveUp() => RebindComposite(moveAction, "up", moveUpText, "Move up");
+    public void RebindMoveDown() => RebindComposite(moveAction, "down", moveDownText, "Move down");
+    public void RebindMoveLeft() => RebindComposite(moveAction, "left", moveLeftText, "Move left");
+    public void RebindMoveRight() => RebindComposite(moveAction, "right", moveRightText, "Move right");
 
-    public void RebindSprint() => RebindButton(sprintAction, sprintText);
-    public void RebindInteract() => RebindButton(interactAction, interactText);
-    public void RebindThrow() => RebindButton(throwAction, throwText);
-    public void RebindReload() => RebindButton(reloadAction, reloadText);
-    public void RebindMap() => RebindButton(mapAction, mapText);
-    public void RebindInventory() => RebindButton(inventoryAction, inventoryText);
+    public void RebindSprint() => RebindButton(sprintAction, sprintText, "Sprint");
+    public void RebindInteract() => RebindButton(interactAction, interactText, "Interact");
+    public void RebindThrow() => RebindButton(throwAction, throwText, "Throw");
+    public void RebindReload() => RebindButton(reloadAction, reloadText, "Reload");
+    public void RebindMap() => RebindButton(mapAction, mapText, "Map");
 
-    private void RebindButton(InputAction action, TextMeshProUGUI label) {
+    private void RebindButton(InputAction action, TextMeshProUGUI label, string actionName) {
         if (action == null)
             return;
 
         action.Disable();
+        ShowRebindPopup(actionName);
 
         if (label != null)
             label.text = "...";
@@ -188,18 +190,20 @@ public class OptionsMenu : MonoBehaviour {
             .OnComplete(op => {
                 op.Dispose();
                 action.Enable();
+                HideRebindPopup();
                 SaveRebinds();
                 RefreshAllUI();
             })
             .OnCancel(op => {
                 op.Dispose();
                 action.Enable();
+                HideRebindPopup();
                 RefreshAllUI();
             })
             .Start();
     }
 
-    private void RebindComposite(InputAction action, string part, TextMeshProUGUI label) {
+    private void RebindComposite(InputAction action, string part, TextMeshProUGUI label, string actionName) {
         if (action == null)
             return;
 
@@ -211,6 +215,8 @@ public class OptionsMenu : MonoBehaviour {
             return;
         }
 
+        ShowRebindPopup(actionName);
+
         if (label != null)
             label.text = "...";
 
@@ -219,15 +225,33 @@ public class OptionsMenu : MonoBehaviour {
             .OnComplete(op => {
                 op.Dispose();
                 action.Enable();
+                HideRebindPopup();
                 SaveRebinds();
                 RefreshAllUI();
             })
             .OnCancel(op => {
                 op.Dispose();
                 action.Enable();
+                HideRebindPopup();
                 RefreshAllUI();
             })
             .Start();
+    }
+
+    private void ShowRebindPopup(string actionName) {
+        if (rebindPopup != null)
+            rebindPopup.SetActive(true);
+
+        if (rebindPopupText != null)
+            rebindPopupText.text = $"Drücke eine Taste für {actionName}";
+
+        if (rebindPopupHint != null)
+            rebindPopupHint.text = "Esc zum Abbrechen";
+    }
+
+    private void HideRebindPopup() {
+        if (rebindPopup != null)
+            rebindPopup.SetActive(false);
     }
 
     private int GetCompositeBindingIndex(InputAction action, string part) {
@@ -267,7 +291,6 @@ public class OptionsMenu : MonoBehaviour {
         if (throwText != null) throwText.text = GetBinding(throwAction);
         if (reloadText != null) reloadText.text = GetBinding(reloadAction);
         if (mapText != null) mapText.text = GetBinding(mapAction);
-        if (inventoryText != null) inventoryText.text = GetBinding(inventoryAction);
     }
 
     private string GetBinding(InputAction action) {

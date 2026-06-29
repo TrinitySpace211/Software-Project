@@ -52,10 +52,7 @@ public class MenuManager : MonoBehaviour {
     /// including selected button and hidden settings panel.
     /// </summary>
     private void Start() {
-        if (firstSelectedButton != null && EventSystem.current != null) {
-            EventSystem.current.SetSelectedGameObject(null);
-            EventSystem.current.SetSelectedGameObject(firstSelectedButton);
-        }
+        
 
         // Ensure settings panel starts hidden
         if (settingsPanel != null)
@@ -68,6 +65,8 @@ public class MenuManager : MonoBehaviour {
         if (controlsSection != null)
             controlsSection.SetActive(false);
 
+        if (EventSystem.current != null)
+            EventSystem.current.SetSelectedGameObject(null);
     }
 
 
