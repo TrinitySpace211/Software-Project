@@ -16,7 +16,7 @@ public class PlayerTests {
     private Camera _camera;
 
     public void PlayerIntegrationTest() {
-        _playerPrefab = AssetDatabase.LoadAssetAtPath<Player>("Assets/Prefabs/PrefabsAnton/Player.prefab");
+        _playerPrefab = AssetDatabase.LoadAssetAtPath<Player>("Assets/Prefabs/PrefabsAnton/Player/Player.prefab");
 
         Application.targetFrameRate = 60;
         Time.fixedDeltaTime = 1f / 60;
