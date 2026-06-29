@@ -225,6 +225,7 @@ public class GunSO : ScriptableObject {
         currentAmmo = gunData.effectiveMaxAmmo;
         savedAmmo = currentAmmo;
         gunData.currentAmmo = currentAmmo;
+    }
     public void SetAmmoAmount(int amount) {
         emptyMagazine = false;
         currentAmmo += amount;
