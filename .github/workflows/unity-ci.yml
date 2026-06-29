@@ -71,10 +71,12 @@ jobs:
             Library-test-
             Library-
 
-      # Das eigentliche Test-Ausfuehren. "testMode: all" deckt Edit- UND
-      # PlayMode ab. Wir haben aktuell nur PlayMode-Tests -> EditMode wird
-      # einfach uebersprungen (kein Fehler).
-      - name: Run Edit Mode & Play Mode Tests
+      # Das eigentliche Test-Ausfuehren.
+      # testMode: playmode -> wir haben NUR PlayMode-Tests (Assets/Tests/PlayMode).
+      # "all" wuerde zusaetzlich einen EditMode-Lauf starten, der hier mit
+      # Exit Code 3 scheitert (kein EditMode-Test vorhanden + Editor-Assembly-
+      # Warnungen). Deshalb gezielt nur PlayMode.
+      - name: Run Play Mode Tests
         uses: game-ci/unity-test-runner@v4
         env:
           # Aktivierung ueber Seriennummer (Student/Plus/Pro-Lizenz).
@@ -84,7 +86,7 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}  # automatisch von GitHub bereitgestellt
-          testMode: all
+          testMode: playmode
           artifactsPath: test-results
 
       # Speichert den Testbericht als herunterladbares "Artefakt".
