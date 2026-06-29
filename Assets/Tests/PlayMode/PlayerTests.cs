@@ -29,15 +29,6 @@ public class PlayerTests {
 
     [SetUp]
     public void Setup() {
-        // Das instanziierte Player-Prefab bringt ein UI-EventSystem mit dem alten
-        // StandaloneInputModule mit, das UnityEngine.Input liest. Da das Projekt auf
-        // "Input System (New)" steht, wirft das pro Frame eine InvalidOperationException,
-        // die das Test-Framework sonst als Fehler wertet. Diese Tests pruefen aber die
-        // Bewegungslogik, nicht das UI-Input -> daher hier ignorieren.
-        // TODO (Team): Player-Prefab auf InputSystemUIInputModule migrieren bzw.
-        // Active Input Handling projektweit klaeren.
-        LogAssert.ignoreFailingMessages = true;
-
         PlayerIntegrationTest();
 
         // Erstelle Plane für den Raycast
@@ -60,6 +51,18 @@ public class PlayerTests {
         // Player instanzieren + PlayerInputHandler und Camera initiieren
         _player = Object.Instantiate(_playerPrefab);
         _player.Construct(_playerInputHandler, _camera);
+
+        // Das instanziierte Prefab bringt ein UI-EventSystem mit dem alten
+        // StandaloneInputModule mit. Da das Projekt auf "Input System (New)" steht,
+        // liest dessen Update() pro Frame UnityEngine.Input -> InvalidOperationException,
+        // die das Test-Framework als Fehler wertet (LogAssert.ignoreFailingMessages half
+        // hier NICHT zuverlaessig). Fuer die reinen Bewegungstests ist das UI irrelevant
+        // -> EventSystem deaktivieren, damit es gar nicht erst tickt.
+        // TODO (Team): Prefab auf InputSystemUIInputModule migrieren bzw. Active Input
+        // Handling projektweit klaeren (betrifft auch echte Builds).
+        foreach (var eventSystem in Object.FindObjectsByType<UnityEngine.EventSystems.EventSystem>(FindObjectsSortMode.None)) {
+            eventSystem.gameObject.SetActive(false);
+        }
 
         // PlayerAnimation Komponente holen und PlayerInputHandler initiieren
         _playerAnimation = _player.GetComponent<PlayerAnimation>();
