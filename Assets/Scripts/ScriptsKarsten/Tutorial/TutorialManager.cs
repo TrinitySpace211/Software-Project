@@ -37,7 +37,7 @@ public class TutorialManager : MonoBehaviour {
     [Header("Scene Transition")]
     public Image fadeImage;
     public float fadeDuration = 2f;
-    public string nextSceneName;
+    public Loader.Scene nextScene = Loader.Scene.MainScene;
 
     [Header("UI")]
     public Button skipButton;
@@ -131,7 +131,7 @@ public class TutorialManager : MonoBehaviour {
 
         yield return new WaitForSeconds(2f);
 
-        yield return FadeToScene(nextSceneName);
+        yield return FadeToScene(nextScene);
     }
 
     /// <summary>
@@ -253,15 +253,15 @@ public class TutorialManager : MonoBehaviour {
 
         yield return null;
 
-        yield return FadeToScene(nextSceneName);
+        yield return FadeToScene(nextScene);
     }
 
     /// <summary>
     /// Fades out and loads a new scene.
     /// </summary>
-    private IEnumerator FadeToScene(string sceneName) {
+    private IEnumerator FadeToScene(Loader.Scene scene) {
         if (fadeImage == null) {
-            SceneManager.LoadScene(sceneName);
+            Loader.Load(scene);
             yield break;
         }
 
@@ -278,7 +278,7 @@ public class TutorialManager : MonoBehaviour {
         c.a = 1f;
         fadeImage.color = c;
 
-        SceneManager.LoadScene(sceneName);
+        Loader.Load(scene);
     }
 
     /// <summary>

@@ -7,7 +7,7 @@ public enum ItemType {
     Grenade,
     Consumable,
     Ammunition,
-    Misc
+    Scrap
 }
 
 /// <summary>

@@ -19,6 +19,7 @@ public class ZombieAI : MonoBehaviour, IDamageable {
     [SerializeField] public Transform target;
 
     [SerializeField] private Rigidbody[] joints;
+    [SerializeField] private CapsuleCollider[] capsuleCollider;
     [SerializeField] private GameObject attackPoint;
     [SerializeField] private Transform[] patrolPoints;
     [SerializeField] private float patrolWaitTime = 2f;
@@ -85,6 +86,7 @@ public class ZombieAI : MonoBehaviour, IDamageable {
         }
 
         foreach (var joint in joints) joint.isKinematic = true;
+        foreach (var collider in capsuleCollider) collider.isTrigger = true;
     }
 
     private void Update() {
@@ -309,6 +311,7 @@ public class ZombieAI : MonoBehaviour, IDamageable {
         SetLayerRecursively(gameObject, layer);
 
         foreach (var joint in joints) joint.isKinematic = false;
+        foreach (var collider in capsuleCollider) collider.isTrigger = false;
 
         StartCoroutine(DissolveEnemy(3f));
     }

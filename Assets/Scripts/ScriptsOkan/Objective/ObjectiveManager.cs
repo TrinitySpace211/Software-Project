@@ -8,10 +8,10 @@ using Random = UnityEngine.Random;
 /// </summary>
 public class ObjectiveManager : MonoBehaviour {
 
+    public static ObjectiveManager Instance { get; private set; }
+
     [Header("Player")][SerializeField] private Transform player;
     [Header("Objectives")] public GasTankHealth[] objectives;
-
-    public static ObjectiveManager Instance { get; private set; }
 
     private void Awake() {
         if (Instance != null && Instance != this) {

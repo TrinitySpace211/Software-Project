@@ -13,8 +13,8 @@ using TMPro;
 public class MenuManager : MonoBehaviour {
 
     [Header("Scene Names")]
-    [SerializeField] private string tutorialSceneName = "TutorialScene";
-    [SerializeField] private string mainSceneName = "MainScene";
+    [SerializeField] private Loader.Scene tutorialScene = Loader.Scene.TutorialScene;
+    [SerializeField] private Loader.Scene mainScene = Loader.Scene.MainScene;
 
     [SerializeField] private GameObject settingsPanel;
 
@@ -64,6 +64,8 @@ public class MenuManager : MonoBehaviour {
             fadeGroup.alpha = 0f;
             fadeGroup.blocksRaycasts = false;
         }
+
+        Time.timeScale = 1f;
     }
 
     /// <summary>
@@ -107,13 +109,13 @@ public class MenuManager : MonoBehaviour {
         File.Delete(tutorialPath);
         File.Delete(savePath);
 
-        StartCoroutine(FadeAndLoadScene(tutorialSceneName));
+        StartCoroutine(FadeAndLoadScene(tutorialScene));
     }
 
     /// <summary>
     /// Handles fade-out animation and loads the target game scene.
     /// </summary>
-    private IEnumerator FadeAndLoadScene(string sceneName) {
+    private IEnumerator FadeAndLoadScene(Loader.Scene scene) {
         isTransitioning = true;
         PlayClick();
 
@@ -126,7 +128,7 @@ public class MenuManager : MonoBehaviour {
         // Small delay to ensure fade completes cleanly
         yield return new WaitForSeconds(0.1f);
 
-        SceneManager.LoadScene(sceneName);
+        Loader.Load(scene);
     }
 
     /// <summary>
@@ -192,9 +194,9 @@ public class MenuManager : MonoBehaviour {
 
             bool tutorialFinished = tutorialData.tutorialFinished;
             if (tutorialFinished) {
-                StartCoroutine(FadeAndLoadScene(mainSceneName));
+                StartCoroutine(FadeAndLoadScene(mainScene));
             } else {
-                StartCoroutine(FadeAndLoadScene(tutorialSceneName));
+                StartCoroutine(FadeAndLoadScene(tutorialScene));
             }
         }
     }

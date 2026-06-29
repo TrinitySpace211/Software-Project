@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 148661823309698256}
   - component: {fileID: 5427726534359471549}
   - component: {fileID: 6545705305623812503}
+  - component: {fileID: 7970446360677227621}
   m_Layer: 0
   m_Name: DayNightManager
   m_TagString: Untagged
@@ -47,7 +48,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   timeText: {fileID: 0}
   notificationText: {fileID: 0}
-  hoursPerRealSecond: 1
+  gameSavedUIText: {fileID: 0}
+  hoursPerRealSecond: 0.1
   onNewDayStarted:
     m_PersistentCalls:
       m_Calls:
@@ -63,13 +65,37 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: ObjectiveManager, Scripts
+        m_MethodName: OnDayStarted
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   onNightStarted:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: ObjectiveManager, Scripts
+        m_MethodName: OnNightStarted
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   sunLight: {fileID: 0}
   dayLightIntensity: 1.6
   nightLightIntensity: 1
-  dayColor: {r: 0.5849056, g: 0.51234984, b: 0.35039157, a: 1}
+  dayColor: {r: 0.7735849, g: 0.69067514, b: 0.49261302, a: 1}
   nightColor: {r: 0.16491634, g: 0.20463984, b: 0.3207547, a: 1}
   playerObject: {fileID: 0}
   extractionController: {fileID: 0}
@@ -93,12 +119,104 @@ MonoBehaviour:
   deathCanvas: {fileID: 0}
   buttonCanvas: {fileID: 0}
   nightsText: {fileID: 0}
-  inventoryUI: {fileID: 0}
-  crosshair: {fileID: 0}
-  timeDisplay: {fileID: 0}
-  healthBar: {fileID: 0}
-  gasTankHud: {fileID: 0}
   audioSource: {fileID: 0}
   deathSound: {fileID: 8300000, guid: 19c59907c023e1242a35b981abd8dbe7, type: 3}
   mainMenuScene: MainMenu
   gameScene: MainScene
+--- !u!82 &7970446360677227621
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2948784600151051082}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4

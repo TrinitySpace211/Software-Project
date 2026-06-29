@@ -8,6 +8,8 @@ public class DebugController : MonoBehaviour {
     public static DebugController Instance { get; private set; }
 
     [SerializeField] private Inventory inventory;
+    [SerializeField] private PlayerHealth playerHealth;
+    [SerializeField] private GasTankHealth objectiveHealth;
 
     private GUIStyle customTextFieldStyle;
 
@@ -41,6 +43,11 @@ public class DebugController : MonoBehaviour {
     public static DebugCommand<int> GIVE_AMMO9;
     public static DebugCommand<int> GIVE_AMMO12G;
     public static DebugCommand<int> GIVE_AMMO_S;
+    //Scrap Command
+    public static DebugCommand<int> GIVE_SCRAP;
+    //Kill/Destroy
+    public static DebugCommand KILL_PLAYER;
+    public static DebugCommand DESTROY_OBJECTIVE;
 
     public List<object> commandList;
 
@@ -116,6 +123,17 @@ public class DebugController : MonoBehaviour {
         GIVE_AMMO_S = new DebugCommand<int>("/give SA", "Puts Sniper Bullets in the Player Inventory", "/give SA <amount>", (x) => {
             inventory.AddItem(ItemType.Ammunition, AmmunitionType.AmmoSniper, x);
         });
+        //Scrap
+        GIVE_SCRAP = new DebugCommand<int>("/give scrap", "Puts Scrap in the Player Inventory", "/give scrap <amount>", (x) => {
+            inventory.AddItem(ItemType.Scrap, ItemType.Scrap, x);
+        });
+        //Kill/Destroy
+        KILL_PLAYER = new DebugCommand("/kill", "Kills the Player", "/kill", () => {
+            playerHealth.TakeDamage(999);
+        });
+        DESTROY_OBJECTIVE = new DebugCommand("/destroy", "destroys the Objective", "destroy", () => {
+            objectiveHealth.TakeDamage(999);
+        });
 
         commandList = new List<object> {
             HELP,
@@ -136,7 +154,10 @@ public class DebugController : MonoBehaviour {
             GIVE_AMMO556,
             GIVE_AMMO9,
             GIVE_AMMO12G,
-            GIVE_AMMO_S
+            GIVE_AMMO_S,
+            GIVE_SCRAP,
+            KILL_PLAYER,
+            DESTROY_OBJECTIVE
         };
     }
 

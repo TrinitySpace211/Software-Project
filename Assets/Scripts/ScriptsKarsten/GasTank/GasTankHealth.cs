@@ -15,6 +15,11 @@ public class GasTankHealth : MonoBehaviour, ISaveable {
     [Header("Health")]
     [SerializeField] private int maxHP = 100;
 
+    [Header("Generator")]
+    [SerializeField] private float generatorVolume = 1f;
+
+    private AudioSource audioSource;
+
     private int currentHP;
 
     /// <summary>
@@ -27,11 +32,29 @@ public class GasTankHealth : MonoBehaviour, ISaveable {
     /// </summary>
     public int MaxHP => maxHP;
 
+    public static event Action<Vector3> OnObjectiveDestroyed;
+
     /// <summary>
     /// Initializes the health value.
     /// </summary>
     private void Awake() {
         currentHP = maxHP;
+    }
+
+    private void Start() {
+        audioSource = GetComponentInChildren<AudioSource>();
+        DayNightCycle.OnSunsetStarted += DayNightCycle_OnSunsetStarted;
+        DayNightCycle.OnSunriseStarted += DayNightCycle_OnSunriseStarted;
+    }
+
+    private void DayNightCycle_OnSunsetStarted() {
+        //Debug.Log(audioSource + " " + SoundManager.Instance.volume);
+        audioSource.volume = generatorVolume * SoundManager.Instance.volume;
+        audioSource.Play();
+    }
+
+    private void DayNightCycle_OnSunriseStarted() {
+        audioSource.Stop();
     }
 
     /// <summary>
@@ -50,8 +73,9 @@ public class GasTankHealth : MonoBehaviour, ISaveable {
             tankHUD.OnTankDamaged();
         }
 
-        if (currentHP == 0) {
+        if (currentHP <= 0) {
             OnDestroyed();
+            OnObjectiveDestroyed?.Invoke(transform.position);
         }
     }
 
@@ -73,6 +97,8 @@ public class GasTankHealth : MonoBehaviour, ISaveable {
     /// </summary>
     private void OnDestroyed() {
         Debug.Log("Gas Tank destroyed!");
+
+        audioSource.Stop();
 
         if (deathScreen != null && dayNightCycle != null) {
             deathScreen.ShowDeathScreen(dayNightCycle.SurvivedNights);
@@ -112,7 +138,8 @@ public class GasTankHealth : MonoBehaviour, ISaveable {
     #endregion
 
     private void OnEnable() {
-        SaveManager.Instance.Register(this);
+        if (SaveManager.Instance != null)
+            SaveManager.Instance.Register(this);
     }
 
     private void OnDisable() {

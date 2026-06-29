@@ -1,10 +1,10 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using UnityEngine.EventSystems;
-using UnityEngine.InputSystem;
+using Random = UnityEngine.Random;
 
 /// <summary>
 /// This is the Player Class. The Player Movement and Rotation will be calculated.
@@ -28,6 +28,7 @@ public class Player : MonoBehaviour {
     [SerializeField] private CurrentPlayerState playerState;
     [SerializeField] private PlayerIK playerIK;
     [SerializeField] private Inventory inventory;
+    [SerializeField] private GameObject flashlight;
 
     [Header("Footsteps Reference")]
     [SerializeField] private ImpactType impactType;
@@ -42,6 +43,7 @@ public class Player : MonoBehaviour {
 
     [Header("Aim Parameters")]
     [SerializeField] private float aimDuration = 0.3f;
+    [SerializeField] private MultiAimConstraint weaponPoseSpineAim;
 
     [Header("Animation")]
     [SerializeField] private float rotationMouseDirAmount = 10f;
@@ -53,9 +55,15 @@ public class Player : MonoBehaviour {
     [Header("Grenade Throw")]
     [SerializeField] private float grenadeThrowForce = 10f;
 
+    [Header("Flashlight Parameters")]
+    [SerializeField] private float minIntensity;
+    [SerializeField] private float maxIntensitySpotLight;
+    [SerializeField] private float maxIntensityPointLight;
+
     [Header("Debugging")]
     [SerializeField] private bool alwaysAiming = false;
 
+    //Saved current active Weapon parent transform
     private Transform setupWeaponParent;
 
     //Player Movement Variables
@@ -79,11 +87,32 @@ public class Player : MonoBehaviour {
 
     //Other Checks
     private bool isMeleeAttacking = false;
+
+    //Flashlight
+    private float waitBeforeActivate = 1f;
+    private Light spotLight;
+    private Light pointLight;
     #endregion
 
     private void Start() {
+        for (int i = 0; i < flashlight.transform.childCount; i++) {
+            Light light = flashlight.transform.GetChild(i).GetComponent<Light>();
+            if (light != null) {
+                if (light.type == LightType.Spot) {
+                    spotLight = light;
+                } else if (light.type == LightType.Point) {
+                    pointLight = light;
+                }
+            }
+        }
+
+        spotLight.enabled = false;
+        pointLight.enabled = false;
+
         PlayerInputHandler.OnReloadAction += PlayerInputHandler_OnReloadAction;
         Item.OnItemCollected += Item_OnItemCollected;
+        DayNightCycle.OnSunsetStarted += DayNightCycle_OnSunsetStarted;
+        DayNightCycle.OnSunriseStarted += DayNightCycle_OnSunriseStarted;
     }
 
     private void Update() {
@@ -104,7 +133,6 @@ public class Player : MonoBehaviour {
             HandleGrenade();
             HandleHealingKits();
         }
-
     }
 
     private void FixedUpdate() {
@@ -135,6 +163,15 @@ public class Player : MonoBehaviour {
         this.playerCamera = playerCamera;
     }
 
+    private void DayNightCycle_OnSunriseStarted() {
+        spotLight.enabled = false;
+        pointLight.enabled = false;
+    }
+
+    private void DayNightCycle_OnSunsetStarted() {
+        StartCoroutine(TurnOnLight());
+    }
+
     /// <summary>
     /// If the Player pressed the "R" Key and is not Dead then HandleReloadButton() will be called
     /// and the Player is going to Reload
@@ -153,6 +190,50 @@ public class Player : MonoBehaviour {
         if (itemsInRange.Contains(item)) {
             itemsInRange.Remove(item);
         }
+    }
+
+    private IEnumerator TurnOnLight() {
+        yield return new WaitForSeconds(waitBeforeActivate);
+
+        spotLight.enabled = true;
+        pointLight.enabled = true;
+
+        for (int i = 0; i < Random.Range(5, 10); i++) {
+            spotLight.enabled = !spotLight.enabled;
+            pointLight.enabled = !pointLight.enabled;
+
+            float intensityTempSpot = Random.Range(minIntensity, maxIntensitySpotLight);
+            float intensityTempPoint = Random.Range(minIntensity, maxIntensityPointLight);
+            spotLight.intensity = intensityTempSpot;
+            pointLight.intensity = intensityTempPoint;
+
+            yield return new WaitForSeconds(Random.Range(0.03f, 0.15f));
+        }
+
+        spotLight.enabled = true;
+        pointLight.enabled = true;
+        spotLight.intensity = 0f;
+        pointLight.intensity = 0f;
+
+        bool max1 = false;
+        bool max2 = false;
+        while (!max1 || !max2) {
+
+            if (spotLight.intensity < maxIntensitySpotLight) {
+                spotLight.intensity += Time.deltaTime * 30f;
+            } else {
+                max1 = true;
+            }
+
+            if (pointLight.intensity < maxIntensityPointLight) {
+                pointLight.intensity += Time.deltaTime * 15f;
+            } else {
+                max2 = true;
+            }
+
+            yield return null;
+        }
+
     }
 
     #region Movement
@@ -253,8 +334,10 @@ public class Player : MonoBehaviour {
     /// <param name="lookDir">The Direction to the Mouse Position in World Space</param>
     private void UpdatePlayerRotation(Vector3 moveDir, Vector3 lookDir) {
         if (moveDir.sqrMagnitude > 0.1f && (isSprinting || (!playerIK.GetHasWeapon() && !playerIK.GetHasOneHanded()))) {
+            weaponPoseSpineAim.weight = 0f;
             RotatePlayerToTarget(moveDir, rotationMoveDirAmount);
         } else if (lookDir.sqrMagnitude > 0.1f && !isSprinting && (playerIK.GetHasWeapon() || playerIK.GetHasOneHanded())) {
+            weaponPoseSpineAim.weight = 0.7f;
             RotatePlayerToTarget(lookDir, rotationMouseDirAmount);
         }
     }
@@ -456,7 +539,7 @@ public class Player : MonoBehaviour {
     private void HandleHealingKits() {
         HealthItemSO healthItem = weaponSelector.activeHealthItem;
         if (healthItem != null) {
-            if (playerInputHandler.UseTriggered && playerHealth.stats.currentHealth <= playerHealth.stats.maxHealth) {
+            if (playerInputHandler.UseTriggered && playerHealth.stats.currentHealth < playerHealth.stats.maxHealth) {
                 healthItem.Heal(this);
 
                 OnHeal?.Invoke(transform.position);

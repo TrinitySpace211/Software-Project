@@ -636,25 +636,9 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 130480, guid: 594f3fc567628034db98d196d4b84924, type: 3}
-      propertyPath: m_StaticEditorFlags
-      value: 2147483647
-      objectReference: {fileID: 0}
-    - target: {fileID: 132978, guid: 594f3fc567628034db98d196d4b84924, type: 3}
-      propertyPath: m_StaticEditorFlags
-      value: 2147483647
-      objectReference: {fileID: 0}
-    - target: {fileID: 139698, guid: 594f3fc567628034db98d196d4b84924, type: 3}
-      propertyPath: m_StaticEditorFlags
-      value: 2147483647
-      objectReference: {fileID: 0}
     - target: {fileID: 177118, guid: 594f3fc567628034db98d196d4b84924, type: 3}
       propertyPath: m_Name
       value: Heli
-      objectReference: {fileID: 0}
-    - target: {fileID: 177118, guid: 594f3fc567628034db98d196d4b84924, type: 3}
-      propertyPath: m_StaticEditorFlags
-      value: 2147483647
       objectReference: {fileID: 0}
     - target: {fileID: 430228, guid: 594f3fc567628034db98d196d4b84924, type: 3}
       propertyPath: m_LocalPosition.x
@@ -694,18 +678,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 430228, guid: 594f3fc567628034db98d196d4b84924, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2364514, guid: 594f3fc567628034db98d196d4b84924, type: 3}
-      propertyPath: m_CastShadows
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6581104, guid: 594f3fc567628034db98d196d4b84924, type: 3}
-      propertyPath: m_IsTrigger
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6581104, guid: 594f3fc567628034db98d196d4b84924, type: 3}
-      propertyPath: m_ProvidesContacts
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -907,11 +879,20 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5732149735392703961, guid: 6a3f8a245ea41bf4b86f73a192216266, type: 3}
+      propertyPath: flashlight
+      value: 
+      objectReference: {fileID: 560373938}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6a3f8a245ea41bf4b86f73a192216266, type: 3}
+--- !u!1 &560373938 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5874960111074013083, guid: 6a3f8a245ea41bf4b86f73a192216266, type: 3}
+  m_PrefabInstance: {fileID: 560373937}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &734841609
 GameObject:
   m_ObjectHideFlags: 0

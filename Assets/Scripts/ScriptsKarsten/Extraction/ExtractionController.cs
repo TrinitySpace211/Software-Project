@@ -159,6 +159,8 @@ public class ExtractionController : MonoBehaviour {
         // Fade in black screen / overlay
         yield return FadeCanvasGroup(fadeGroup, 0f, 1f);
 
+        Cursor.visible = true;
+
         // Show end text
         if (endText != null) {
             endText.gameObject.SetActive(true);
@@ -253,24 +255,24 @@ public class ExtractionController : MonoBehaviour {
     /// Exits the application (or stops play mode in the Unity Editor).
     /// </summary>
     public void OnExitClicked() {
-        #if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-        #else
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
             Application.Quit();
-        #endif
+#endif
     }
 
     /// <summary>
     /// Restarts the main gameplay scene.
     /// </summary>
     public void OnRetryClicked() {
-        UnityEngine.SceneManagement.SceneManager.LoadScene("MainScene");
+        Loader.Load(Loader.Scene.MainScene);
     }
 
     /// <summary>
     /// Loads the main menu scene.
     /// </summary>
     public void OnMainMenuClicked() {
-        UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
+        Loader.Load(Loader.Scene.MainMenu);
     }
 }

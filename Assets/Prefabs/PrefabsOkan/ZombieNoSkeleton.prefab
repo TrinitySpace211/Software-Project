@@ -2584,6 +2584,7 @@ GameObject:
   - component: {fileID: -5387112310429555302}
   - component: {fileID: 2322059663790836396}
   - component: {fileID: -7248929446526361467}
+  - component: {fileID: 8757881352051829892}
   m_Layer: 0
   m_Name: ZombieNoSkeleton
   m_TagString: Untagged
@@ -2658,6 +2659,15 @@ MonoBehaviour:
   - {fileID: 6879453742745033733}
   - {fileID: 5163395829086023739}
   - {fileID: 3679196187198203105}
+  capsuleCollider:
+  - {fileID: 6991830508536131067}
+  - {fileID: 7111285638852559522}
+  - {fileID: 1732418045075312509}
+  - {fileID: 6466198410783851642}
+  - {fileID: 5597428248798425118}
+  - {fileID: 418706484281075426}
+  - {fileID: 2609201778952031226}
+  - {fileID: 7023973246208540397}
   attackPoint: {fileID: 1095709081916607388}
   patrolPoints: []
   patrolWaitTime: 2
@@ -2714,6 +2724,27 @@ MonoBehaviour:
   scrapPickupPrefab: {fileID: 0}
   fallbackScrapIcon: {fileID: 0}
   pickupSpawnHeight: 0.35
+--- !u!65 &8757881352051829892
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8829481681053086251}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.8984057, y: 2.1713202, z: 0.8104768}
+  m_Center: {x: -0.047793806, y: 0.9490212, z: 0.039397478}
 --- !u!1 &8868056909011058339
 GameObject:
   m_ObjectHideFlags: 0

@@ -294,8 +294,10 @@ public class LootChestItemDrop : MonoBehaviour {
 
             Vector3 firstHalf = Vector3.Lerp(startPosition, peakPosition, progress);
             Vector3 secondHalf = Vector3.Lerp(peakPosition, landingPosition, progress);
-            spawnedItem.transform.position = Vector3.Lerp(firstHalf, secondHalf, progress);
-            spawnedItem.transform.Rotate(Vector3.up, 120f * Time.deltaTime, Space.World);
+            if (spawnedItem != null) {
+                spawnedItem.transform.position = Vector3.Lerp(firstHalf, secondHalf, progress);
+                spawnedItem.transform.Rotate(Vector3.up, 120f * Time.deltaTime, Space.World);
+            }
 
             yield return null;
         }

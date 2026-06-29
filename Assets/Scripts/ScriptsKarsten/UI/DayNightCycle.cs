@@ -30,6 +30,11 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
     public TMP_Text notificationText;
 
     /// <summary>
+    /// UI text for saving the game
+    /// </summary>
+    public TextMeshProUGUI gameSavedUIText;
+
+    /// <summary>
     /// Speed of time progression (hours per real second).
     /// </summary>
     public float hoursPerRealSecond = 0.1f;
@@ -106,6 +111,26 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
     public Color nightColor = new Color(0.45f, 0.45f, 0.55f);
 
     /// <summary>
+    /// AudioClip of the day Music
+    /// </summary>
+    public AudioClip dayMusic;
+
+    /// <summary>
+    /// AudioClip of the night Music
+    /// </summary>
+    public AudioClip nightMusic;
+
+    /// <summary>
+    /// Volume of the day Music
+    /// </summary>
+    public float dayMusicVolume;
+
+    /// <summary>
+    /// Volume of the night Music
+    /// </summary>
+    public float nightMusicVolume;
+
+    /// <summary>
     /// Player object reference for disabling controls during extraction.
     /// </summary>
     public GameObject playerObject;
@@ -123,7 +148,7 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
     /// <summary>
     /// Name of the scene that will be loaded after the extraction sequence.
     /// </summary>
-    public string extractionSceneName = "ExtractionScene";
+    public Loader.Scene extractionScene = Loader.Scene.ExtractionScene;
 
     /// <summary>
     /// Delay before switching to the extraction scene.
@@ -151,27 +176,53 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
     private Player playerScript;
 
     /// <summary>
+    /// An AudioSource for the Day/Night Music playing in the background
+    /// </summary>
+    private AudioSource audioSource;
+
+    /// <summary>
+    /// Throws an event when the sun sets
+    /// </summary>
+    public static event Action OnSunsetStarted;
+
+    /// <summary>
+    /// Throws an event when the sun rises
+    /// </summary>
+    public static event Action OnSunriseStarted;
+
+    /// <summary>
     /// Initializes system and hides notification UI.
     /// </summary>
     void Start() {
+        gameSavedUIText.gameObject.SetActive(false);
+
         if (notificationText != null) {
             notificationText.gameObject.SetActive(false);
         }
-
         if (fadeCanvasGroup != null) {
             fadeCanvasGroup.alpha = 0f;
             fadeCanvasGroup.interactable = false;
             fadeCanvasGroup.blocksRaycasts = false;
         }
-
-        currentState = GetTimeState();
-
         if (playerObject != null) {
             playerScript = playerObject.GetComponent<Player>();
         }
+        audioSource = GetComponent<AudioSource>();
+
+        currentState = GetTimeState();
+
+        if (currentState == TimeState.Day) {
+            audioSource.clip = dayMusic;
+            audioSource.volume = dayMusicVolume * SoundManager.Instance.volume;
+            audioSource.Play();
+        }
+
         ShowNotification("Protect the Fuel Tank. Hold out until Night 10.");
 
-        SaveManager.Instance.LoadGame();
+        if (SaveManager.Instance != null)
+            SaveManager.Instance.LoadGame();
+
+        PlayerHealth.OnDeath += PlayerHealth_OnDeath;
     }
 
     /// <summary>
@@ -185,6 +236,14 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
         HandleState();
         UpdateUI();
         UpdateLighting();
+    }
+
+    /// <summary>
+    /// Funktion triggers when the Player dies
+    /// </summary>
+    /// <param name="position">The Position where the Player died</param>
+    private void PlayerHealth_OnDeath(Vector3 position) {
+        audioSource.Stop();
     }
 
     /// <summary>
@@ -206,7 +265,10 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
 
             switch (currentState) {
                 case TimeState.Sunrise:
+                    OnSunriseStarted?.Invoke();
                     ShowNotification("Sunrise begins...");
+
+                    StartCoroutine(FadeInOutMusic(audioSource, dayMusic, dayMusicVolume, 2f));
                     break;
 
                 case TimeState.Day:
@@ -214,6 +276,7 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
                     if (nightNumber > 0) {
                         survivedNights++;
                         SaveManager.Instance.SaveGame();
+                        StartCoroutine(ShowSavedGame());
                     }
 
                     ShowNotification($"Day {dayNumber} begins!");
@@ -226,6 +289,7 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
                     break;
 
                 case TimeState.Sunset:
+                    OnSunsetStarted?.Invoke();
                     ShowNotification("Sunset begins...");
                     break;
 
@@ -236,9 +300,39 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
                     dayNumber++;
                     nightNumber++;
 
+                    StartCoroutine(FadeInOutMusic(audioSource, nightMusic, nightMusicVolume, 2f));
+
                     break;
             }
         }
+    }
+
+    private IEnumerator FadeInOutMusic(AudioSource audioSource, AudioClip musicClip, float targetVolume, float duration) {
+        float startVolume = audioSource.volume;
+        while (audioSource.volume > 0) {
+            audioSource.volume -= startVolume * Time.deltaTime / duration;
+            yield return null;
+        }
+
+        audioSource.Stop();
+        audioSource.volume = startVolume;
+
+        audioSource.volume = 0f;
+        audioSource.clip = musicClip;
+        audioSource.Play();
+
+        while (audioSource.volume < targetVolume) {
+            audioSource.volume += targetVolume * Time.deltaTime / duration;
+            yield return null;
+        }
+
+        audioSource.volume = targetVolume;
+    }
+
+    private IEnumerator ShowSavedGame() {
+        gameSavedUIText.gameObject.SetActive(true);
+        yield return new WaitForSeconds(3f);
+        gameSavedUIText.gameObject.SetActive(false);
     }
 
     /// <summary>
@@ -267,7 +361,7 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
     private IEnumerator LoadExtractionSceneRoutine() {
         yield return new WaitForSeconds(extractionSceneDelay);
         yield return StartCoroutine(FadeToBlackRoutine());
-        SceneManager.LoadScene(extractionSceneName);
+        Loader.Load(extractionScene);
     }
 
     /// <summary>
@@ -407,8 +501,8 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
         );
 
         RenderSettings.ambientIntensity = Mathf.Lerp(
-            1f,
-            1.6f,
+            0.4f,
+            0.8f,
             t
         );
     }
@@ -450,7 +544,8 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
     #endregion
 
     private void OnEnable() {
-        SaveManager.Instance.Register(this);
+        if (SaveManager.Instance != null)
+            SaveManager.Instance.Register(this);
     }
 
     private void OnDisable() {

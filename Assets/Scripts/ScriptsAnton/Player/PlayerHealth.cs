@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// Handles player health, damage and death logic.
@@ -59,6 +60,11 @@ public class PlayerHealth : MonoBehaviour, ISaveable {
             healthBar.Initialize(playerStats);
     }
 
+    private void Update() {
+        if (playerStats.currentHealth <= 0)
+            Die();
+    }
+
     /// <summary>
     /// Applies damage to the player.
     /// </summary>
@@ -85,9 +91,6 @@ public class PlayerHealth : MonoBehaviour, ISaveable {
             healthBar.UpdateHealthBar();
 
         playerAnimation.SetHitTrigger();
-
-        if (playerStats.currentHealth <= 0)
-            Die();
     }
 
     /// <summary>
@@ -95,7 +98,11 @@ public class PlayerHealth : MonoBehaviour, ISaveable {
     /// inverse Kinematics are cleared so nothing weird happens
     /// </summary>
     private void Die() {
+        if (isDead) return;
+
         isDead = true;
+
+        Cursor.visible = true;
 
         if (playerIK.GetHasWeapon()) {
             playerGunSelector.ClearSetupCurrentWeapon();

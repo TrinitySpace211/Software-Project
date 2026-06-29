@@ -70,3 +70,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: b55640c6c8a2ab146a076cab469e3b03, type: 3}
   - {fileID: 8300000, guid: 4d975e795d3a2cb42ac8754e4f01f51b, type: 3}
   mapOpenVolume: 0.3
+  sunsetSound: {fileID: 8300000, guid: f95b1e2482b94a446b1ecbf67be7db76, type: 3}
+  sunsetSoundVolume: 0.35
+  objectiveExplosion: {fileID: 8300000, guid: 6354953e55305e645bb3f19ac2445bee, type: 3}
+  objectiveExplosionVolume: 1

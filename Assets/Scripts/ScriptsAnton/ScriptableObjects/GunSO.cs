@@ -55,7 +55,7 @@ public class GunSO : ScriptableObject {
             model.transform.localPosition = spawnPoint;
             model.transform.localRotation = Quaternion.Euler(spawnRotation);
 
-            if (!File.Exists(Path.Combine(Application.persistentDataPath, "save.json"))) {
+            if (gunData != null && gunData.effectiveDamage == 0f && gunData.effectiveMaxAmmo == 0f) {
                 gunData = new GunData();
                 gunData.UpdateStats(0, shootConfigSO.maxAmmo, shootConfigSO.damage);
             }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -25,6 +26,7 @@ public class Inventory : MonoBehaviour, ISaveable {
     [SerializeField] private ItemSO grenade;
     [SerializeField] private ItemSO[] healthItems;
     [SerializeField] private ItemSO[] ammunitions;
+    [SerializeField] private ItemSO scrap;
 
     [Header("Hotbar Swap Speed")]
     [SerializeField] private float swapSpeed = 0.8f;
@@ -101,9 +103,9 @@ public class Inventory : MonoBehaviour, ISaveable {
     private Slot selectedSlot = null;
 
     /// <summary>
-    /// Holds all the ItemSOs in a List
+    /// Path to the Save File
     /// </summary>
-    private List<ItemSO> items = new();
+    private string savePath;
 
     /// <summary>
     /// Initializes slot collections by retrieving
@@ -128,10 +130,17 @@ public class Inventory : MonoBehaviour, ISaveable {
 
         container.SetActive(false);
 
-        items.AddRange(guns);
-        items.AddRange(melees);
-        items.Add(grenade);
-        items.AddRange(healthItems);
+        string savePath = Path.Combine(Application.persistentDataPath, "save.json");
+        if (!File.Exists(savePath)) {
+            foreach (ItemSO gun in guns) {
+                if (gun.gunType == GunType.Pistol) {
+                    hotbarSlots[0].SetItem(gun);
+                    AddItem(ItemType.Ammunition, AmmunitionType.Ammo9mm, 30);
+                    AddItem(ItemType.Consumable, HealthItemType.Bandage, 4);
+                    AddItem(ItemType.Consumable, HealthItemType.HealthPack, 2);
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -176,7 +185,7 @@ public class Inventory : MonoBehaviour, ISaveable {
         ItemSO item = hotbarSlots[slot].GetItem();
 
         if (item != null) {
-            if (item.itemType == ItemType.Misc || item.itemType == ItemType.Ammunition) {
+            if (item.itemType == ItemType.Scrap || item.itemType == ItemType.Ammunition) {
                 return;
             }
         }
@@ -340,7 +349,7 @@ public class Inventory : MonoBehaviour, ISaveable {
         switch (itemType) {
             case ItemType.Grenade:
                 AddItem(grenade, amount);
-                return;
+                break;
             case ItemType.Consumable:
                 foreach (ItemSO healthItem in healthItems) {
                     if (EqualityComparer<T>.Default.Equals(type, (T)(object)healthItem.healthItemType)) {
@@ -358,9 +367,15 @@ public class Inventory : MonoBehaviour, ISaveable {
                     }
                 }
                 break;
+            case ItemType.Scrap:
+                AddItem(scrap, amount);
+                break;
+            default:
+                Debug.LogWarning($"No Item Found with that Type {type}");
+                break;
         }
 
-        Debug.LogWarning($"No Item Found with that Type {type}");
+
     }
 
     /// <summary>
@@ -689,10 +704,6 @@ public class Inventory : MonoBehaviour, ISaveable {
         return isDragging;
     }
 
-    public List<ItemSO> GetItemSOs() {
-        return items;
-    }
-
     /*
     *******************************************************************************
     * Ergänzugen für den NPC. Benötigt werden öffentliche Methoden.
@@ -829,7 +840,8 @@ public class Inventory : MonoBehaviour, ISaveable {
     #endregion
 
     private void OnEnable() {
-        SaveManager.Instance.Register(this);
+        if (SaveManager.Instance != null)
+            SaveManager.Instance.Register(this);
     }
 
     private void OnDisable() {

@@ -55,4 +55,14 @@ public class AudioClipRefsSO : ScriptableObject {
     [Header("Map")]
     public AudioClip[] mapOpen;
     public float mapOpenVolume;
+
+    [Space]
+    [Header("Sunset")]
+    public AudioClip sunsetSound;
+    public float sunsetSoundVolume;
+
+    [Space]
+    [Header("Objective Destroyed")]
+    public AudioClip objectiveExplosion;
+    public float objectiveExplosionVolume;
 }
