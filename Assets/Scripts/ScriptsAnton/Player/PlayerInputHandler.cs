@@ -19,6 +19,7 @@ public class PlayerInputHandler : MonoBehaviour {
     public bool UseTriggered { get; private set; }
     public bool TurnRightInput { get; private set; }
     public bool TurnLeftInput { get; private set; }
+    public bool DeselectWeaponTriggered { get; private set; }
 
     //Hotbar Key Events
     public event Action<int> OnHotbarSlotPressed;
@@ -26,6 +27,9 @@ public class PlayerInputHandler : MonoBehaviour {
     public static event Action OnInteractAction;
     public static event Action OnPauseAction;
     public static event Action OnReloadAction;
+    public static event Action OnToggleDebugAction;
+    public static event Action OnReturnAction;
+    public static event Action OnMapOpenAction;
 
     private void OnEnable() {
         playerInputActions = new InputSystem_Actions();
@@ -41,6 +45,14 @@ public class PlayerInputHandler : MonoBehaviour {
         playerInputActions.Player.Interact.performed -= Interact_performed;
         playerInputActions.Player.Pause.performed -= Pause_performed;
         playerInputActions.Player.Reloading.performed -= Reloading_performed;
+        playerInputActions.Player.ToggleDebug.performed -= ToggleDebug_performed;
+        playerInputActions.Player.Return.performed -= Return_performed;
+
+        playerInputActions.UI.One.performed -= HotbarKey_Pressed;
+        playerInputActions.UI.Two.performed -= HotbarKey_Pressed;
+        playerInputActions.UI.Three.performed -= HotbarKey_Pressed;
+        playerInputActions.UI.Four.performed -= HotbarKey_Pressed;
+        playerInputActions.UI.Five.performed -= HotbarKey_Pressed;
 
         playerInputActions.Dispose();
     }
@@ -78,6 +90,13 @@ public class PlayerInputHandler : MonoBehaviour {
         playerInputActions.Player.Use.performed += _ => UseTriggered = true;
         playerInputActions.Player.Use.canceled += _ => UseTriggered = false;
 
+        playerInputActions.Player.DeselectWeapon.performed += _ => DeselectWeaponTriggered = true;
+        playerInputActions.Player.DeselectWeapon.canceled += _ => DeselectWeaponTriggered = false;
+
+        playerInputActions.Player.ToggleDebug.performed += ToggleDebug_performed;
+        playerInputActions.Player.Return.performed += Return_performed;
+        playerInputActions.Player.OpenMap.performed += OpenMap_performed;
+
         playerInputActions.Player.Pause.performed += Pause_performed;
         playerInputActions.Player.Reloading.performed += Reloading_performed;
     }
@@ -92,7 +111,6 @@ public class PlayerInputHandler : MonoBehaviour {
         playerInputActions.UI.Three.performed += HotbarKey_Pressed;
         playerInputActions.UI.Four.performed += HotbarKey_Pressed;
         playerInputActions.UI.Five.performed += HotbarKey_Pressed;
-
     }
 
     /// <summary>
@@ -117,6 +135,30 @@ public class PlayerInputHandler : MonoBehaviour {
     /// <param name="context">The context that got send from the input key</param>
     private void Reloading_performed(InputAction.CallbackContext context) {
         OnReloadAction?.Invoke();
+    }
+
+    /// <summary>
+    /// Sends an Event when the Toggle Debug Input Key is triggered
+    /// </summary>
+    /// <param name="context">The context that got send from the input key</param>
+    private void ToggleDebug_performed(InputAction.CallbackContext context) {
+        OnToggleDebugAction?.Invoke();
+    }
+
+    /// <summary>
+    /// Sends an Event when the Toggle Debug Input Key is triggered
+    /// </summary>
+    /// <param name="context">The context that got send from the input key</param>
+    private void Return_performed(InputAction.CallbackContext context) {
+        OnReturnAction?.Invoke();
+    }
+
+    /// <summary>
+    /// Sends an Event when the Toggle Debug Input Key is triggered
+    /// </summary>
+    /// <param name="context">The context that got send from the input key</param>
+    private void OpenMap_performed(InputAction.CallbackContext context) {
+        OnMapOpenAction?.Invoke();
     }
 
     /// <summary>
@@ -163,5 +205,9 @@ public class PlayerInputHandler : MonoBehaviour {
 
     public void SetUseTriggered(bool UseTriggered) {
         this.UseTriggered = UseTriggered;
+    }
+
+    public void SetDeselectWeaponTriggered(bool DeselectWeaponTriggered) {
+        this.DeselectWeaponTriggered = DeselectWeaponTriggered;
     }
 }

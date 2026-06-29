@@ -22,6 +22,7 @@ public class ScrapHudDisplay : MonoBehaviour {
 
     private RectTransform hudRect;
     private Text scrapCountText;
+    private GameObject hudRoot;
 
     private void Awake() {
         HideOldImageOnThisObject();
@@ -30,6 +31,8 @@ public class ScrapHudDisplay : MonoBehaviour {
     }
 
     private void Update() {
+        if (hudRoot == null || !hudRoot.activeSelf)
+            return;
         FindWalletIfMissing();
         UpdateHudPosition();
         UpdateScrapCount();
@@ -55,21 +58,21 @@ public class ScrapHudDisplay : MonoBehaviour {
 
     private void CreateHud() {
         // Erstellt ein eigenes Canvas nur für die Scrap-Anzeige.
-        GameObject canvasObject = new GameObject("Scrap HUD Canvas");
-        Canvas canvas = canvasObject.AddComponent<Canvas>();
+        hudRoot = new GameObject("Scrap HUD Canvas");
+        Canvas canvas = hudRoot.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         canvas.sortingOrder = 1000;
 
-        CanvasScaler canvasScaler = canvasObject.AddComponent<CanvasScaler>();
+        CanvasScaler canvasScaler = hudRoot.AddComponent<CanvasScaler>();
         canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ConstantPixelSize;
         canvasScaler.scaleFactor = 1f;
         canvasScaler.referencePixelsPerUnit = 100f;
 
-        canvasObject.AddComponent<GraphicRaycaster>();
+        hudRoot.AddComponent<GraphicRaycaster>();
 
         // Container für Icon und Text.
         GameObject hudObject = new GameObject("Scrap HUD");
-        hudObject.transform.SetParent(canvas.transform, false);
+        hudObject.transform.SetParent(hudRoot.transform, false);
 
         hudRect = hudObject.AddComponent<RectTransform>();
         hudRect.anchorMin = new Vector2(0f, 1f);
@@ -148,5 +151,9 @@ public class ScrapHudDisplay : MonoBehaviour {
         }
 
         scrapCountText.text = $": {scrapAmount}";
+    }
+    public void SetVisible(bool visible) {
+        if (hudRoot != null)
+            hudRoot.SetActive(visible);
     }
 }

@@ -13,6 +13,7 @@ public class ZombieAI : MonoBehaviour, IDamageable {
     public int health = 100;
 
     [SerializeField] private SkinnedMeshRenderer skinnedMeshRenderer;
+    [SerializeField] private Material rageEyes;
 
     /// <summary>Transform of the current target. Assign via Inspector or Init().</summary>
     [SerializeField] public Transform target;
@@ -48,6 +49,12 @@ public class ZombieAI : MonoBehaviour, IDamageable {
     private bool isDead;
     private Color originalColor;
     private Material zombieMaterial;
+    private Material originalEyes;
+    private bool dissolveEnemy = false;
+    private float dissolveMeterMin;
+    private float dissolveMeterMax;
+    private float dissolveMeter;
+    private float dissolveSpeed = 1f;
 
     private void Start() {
         _agent = GetComponent<NavMeshAgent>();
@@ -56,7 +63,18 @@ public class ZombieAI : MonoBehaviour, IDamageable {
         if (skinnedMeshRenderer != null) {
             zombieMaterial = skinnedMeshRenderer.material;
             originalColor = zombieMaterial.color;
+
+            //The Normal Zombie has 2 Materials (one for the eyes and one for the rest)
+            if (skinnedMeshRenderer.materials.Length > 1) {
+                originalEyes = skinnedMeshRenderer.materials[1];
+            }
         }
+
+        Shader shader = zombieMaterial.shader;
+        int propertyIndex = shader.FindPropertyIndex("_DissolveMeter");
+        dissolveMeterMin = zombieMaterial.shader.GetPropertyRangeLimits(propertyIndex).x;
+        dissolveMeterMax = zombieMaterial.shader.GetPropertyRangeLimits(propertyIndex).y;
+        dissolveMeter = dissolveMeterMax;
 
         if (enemyStatsSO != null) _agent.speed = enemyStatsSO.moveSpeed;
 
@@ -70,6 +88,15 @@ public class ZombieAI : MonoBehaviour, IDamageable {
     }
 
     private void Update() {
+        if (dissolveEnemy) {
+            dissolveMeter -= Time.deltaTime * dissolveSpeed;
+            if (dissolveMeter > dissolveMeterMin) {
+                zombieMaterial.SetFloat("_DissolveMeter", dissolveMeter);
+            } else {
+                Destroy(gameObject);
+            }
+        }
+
         if (!_initialized || target is null || !_agent.isOnNavMesh) return;
 
         _attackTimer -= Time.deltaTime;
@@ -245,6 +272,12 @@ public class ZombieAI : MonoBehaviour, IDamageable {
         _isAttacking = false;
     }
 
+    /// <summary>
+    /// This Enemy Instance is going to take Damage (the health gets reduced).
+    /// Every time it takes damage it will blink red to give the Player a feedback, that the Enemy got damaged.
+    /// If this Enemy goes below 0 Health then it will die.
+    /// </summary>
+    /// <param name="damage">the amount of damage this Enemy should take</param>
     public void TakeDamage(int damage) {
         if (isDead) return;
 
@@ -260,13 +293,54 @@ public class ZombieAI : MonoBehaviour, IDamageable {
         StartCoroutine(HitFeedback());
     }
 
+    /// <summary>
+    /// If the Enemy dies the Animator will be deactivated and 
+    /// the Rigidbodys on all the limbs will be set to isKinematic = false (so that the Ragdoll takes Effect),
+    /// the Layers of the object and its children will be set to "Ignore Raycast", 
+    /// so that the Player is not aiming at the Enemy anymore and a Timer starts.
+    /// When the Timer reaches finishes, the Enemy gets dissolved and destroyed afterwards.
+    /// </summary>
     private void Die() {
         isDead = true;
         _animController?.SetDead(true);
-        _animController.enabled = false;
+        _animController.DeactivateAnimator();
+
+        LayerMask layer = LayerMask.NameToLayer("Ignore Raycast");
+        SetLayerRecursively(gameObject, layer);
+
         foreach (var joint in joints) joint.isKinematic = false;
+
+        StartCoroutine(DissolveEnemy(3f));
     }
 
+    /// <summary>
+    /// Sets the current objects Layer and every Layer of its children
+    /// to the one set in the parameter
+    /// </summary>
+    /// <param name="obj">The GameObject of which the Layer gets changed</param>
+    /// <param name="newLayer">The new Layer of the GameObject</param>
+    private void SetLayerRecursively(GameObject obj, int newLayer) {
+        if (obj == null) return;
+
+        // Ändere den Layer des aktuellen Objekts
+        obj.layer = newLayer;
+
+        // Gehe durch alle Kind-Objekte und ändere auch deren Layer
+        foreach (Transform child in obj.transform) {
+            SetLayerRecursively(child.gameObject, newLayer);
+        }
+    }
+
+    private IEnumerator DissolveEnemy(float secondsToWait) {
+        yield return new WaitForSeconds(secondsToWait);
+
+        dissolveEnemy = true;
+    }
+
+    /// <summary>
+    /// Paints the Enemy Instance red for a short time and
+    /// sets it back to the original Color.
+    /// </summary>
     private IEnumerator HitFeedback() {
         zombieMaterial.color = hitColor;
         yield return new WaitForSeconds(0.1f);
@@ -277,10 +351,10 @@ public class ZombieAI : MonoBehaviour, IDamageable {
         return isDead;
     }
 
-    private void OnDrawGizmos() {
+    /* private void OnDrawGizmos() {
         Gizmos.color = Color.red;
         Gizmos.DrawSphere(transform.position, enemyStatsSO.detectionRange);
 
         Gizmos.DrawWireSphere(transform.position, enemyStatsSO.detectionRange);
-    }
+    } */
 }

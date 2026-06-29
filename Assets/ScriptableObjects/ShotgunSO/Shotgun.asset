@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   impactType: {fileID: 11400000, guid: bf165e4fffbc43c44b5a52f06a7c05f2, type: 2}
   type: 3
+  ammunitionType: 3
   weaponSlot: 0
   gunName: Shotgun
   modelPrefab: {fileID: 1893640954530389767, guid: 1a89ed81f8fea634ea42f93bf148d770, type: 3}
