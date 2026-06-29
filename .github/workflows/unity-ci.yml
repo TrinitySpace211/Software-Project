@@ -11,10 +11,13 @@
 #
 #  WICHTIG - Damit die Pipeline laeuft, muessen in GitHub diese "Secrets"
 #  hinterlegt sein (Repo -> Settings -> Secrets and variables -> Actions):
-#    UNITY_LICENSE   - Inhalt der .ulf-Lizenzdatei (siehe unity-activation.yml)
+#    UNITY_SERIAL    - Seriennummer der Lizenz (Student/Plus/Pro),
+#                      Format XX-XXXX-XXXX-XXXX-XXXX-XXXX
 #    UNITY_EMAIL     - E-Mail des Unity-Accounts
 #    UNITY_PASSWORD  - Passwort des Unity-Accounts
 #  Ohne diese Secrets schlagen alle Jobs fehl (Unity kann nicht aktiviert werden).
+#  Hinweis: Unity Personal (ohne Serial) wird hier NICHT verwendet, da die
+#  manuelle .ulf-Aktivierung von Unity fuer Personal abgeschafft wurde.
 # ==============================================================================
 
 name: Unity CI/CD
@@ -74,7 +77,9 @@ jobs:
       - name: Run Edit Mode & Play Mode Tests
         uses: game-ci/unity-test-runner@v4
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          # Aktivierung ueber Seriennummer (Student/Plus/Pro-Lizenz).
+          # GameCI aktiviert damit automatisch - kein manuelles .ulf noetig.
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
@@ -123,7 +128,9 @@ jobs:
       - name: Build for Windows
         uses: game-ci/unity-builder@v4
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          # Aktivierung ueber Seriennummer (Student/Plus/Pro-Lizenz).
+          # GameCI aktiviert damit automatisch - kein manuelles .ulf noetig.
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
@@ -179,7 +186,9 @@ jobs:
       - name: Build for WebGL
         uses: game-ci/unity-builder@v4
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          # Aktivierung ueber Seriennummer (Student/Plus/Pro-Lizenz).
+          # GameCI aktiviert damit automatisch - kein manuelles .ulf noetig.
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
