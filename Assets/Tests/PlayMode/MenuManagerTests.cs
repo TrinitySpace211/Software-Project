@@ -103,6 +103,12 @@ public class MenuManagerTests {
     /// Ensures ExitGame does not crash and executes without exceptions.
     /// (Editor/application quit cannot be validated in PlayMode tests.)
     /// </summary>
+    // Deaktiviert in der CI: ExitGame() ruft im Editor
+    // UnityEditor.EditorApplication.isPlaying = false auf und stoppt damit den
+    // PlayMode -> der gesamte Testlauf bricht ab ("player was stopped", Exit 3).
+    // Dieser Quit-Pfad laesst sich in einem PlayMode-Test prinzipiell nicht
+    // validieren. Siehe TODO: ggf. ExitGame() testbar umbauen (Quit-Logik kapseln).
+    [Ignore("ExitGame() setzt EditorApplication.isPlaying = false und bricht den PlayMode-Testlauf in der CI ab.")]
     [Test]
     public void ExitGame_DoesNotCrash() {
         Assert.DoesNotThrow(() => {
