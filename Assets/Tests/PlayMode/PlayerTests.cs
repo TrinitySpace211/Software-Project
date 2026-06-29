@@ -16,6 +16,11 @@ public class PlayerTests {
     private Camera _camera;
 
     public void PlayerIntegrationTest() {
+        // Pfad korrigiert: das Prefab liegt im Unterordner ".../PrefabsAnton/Player/Player.prefab".
+        // Vorher zeigte der Pfad auf ".../PrefabsAnton/Player.prefab" (ohne Unterordner) ->
+        // LoadAssetAtPath lieferte null -> Instantiate(null) liess das gesamte Setup und damit
+        // alle PlayerTests fehlschlagen. Tipp: feste Asset-Pfade brechen bei Ordner-Umzuegen;
+        // robuster waere eine SerializeField-/Resources-Referenz.
         _playerPrefab = AssetDatabase.LoadAssetAtPath<Player>("Assets/Prefabs/PrefabsAnton/Player/Player.prefab");
 
         Application.targetFrameRate = 60;
