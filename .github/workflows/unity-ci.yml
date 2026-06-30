@@ -181,7 +181,10 @@ jobs:
     name: Build (WebGL)
     runs-on: ubuntu-latest
     needs: test
-    if: github.ref == 'refs/heads/main'
+    # TEMPORAER: laeuft auch auf test/webgl-build, um den WebGL-Build/Deploy zu testen,
+    # ohne nach develop/main zu mergen. Vor dem finalen Merge wieder auf nur main (bzw.
+    # main+develop) zuruecksetzen.
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test/webgl-build'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -245,7 +248,8 @@ jobs:
     name: Deploy WebGL to GitHub Pages
     runs-on: ubuntu-latest
     needs: build-webgl
-    if: github.ref == 'refs/heads/main'
+    # TEMPORAER: auch auf test/webgl-build (siehe build-webgl).
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test/webgl-build'
     # Diese Rechte braucht der offizielle Pages-Deploy zwingend:
     permissions:
       pages: write       # darf auf Pages veroeffentlichen
