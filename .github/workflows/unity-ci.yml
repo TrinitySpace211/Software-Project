@@ -33,7 +33,6 @@ on:
       - develop
       - 'feature/**'   # alle feature/-Branches, z.B. feature/CiCd-Pipe
       - 'fix/**'       # alle fix/-Branches
-      - 'test/**'      # temporaer fuer WebGL-Test (test/webgl-build)
   # Bei jedem Pull Request, der auf main oder develop zielt:
   pull_request:
     branches:
@@ -186,6 +185,16 @@ jobs:
   #  Die WebGL-Version ist als Demo/Review-App gedacht - die Windows-.exe bleibt
   #  die "richtige" spielbare Version.
   #
+  #  WICHTIG - WEBGL-SPIELBARKEIT (getestet 06/2026):
+  #  Der WebGL-Build BAUT erfolgreich durch und das HAUPTMENUE laeuft im Browser
+  #  (inkl. Musik). Beim Laden der Gameplay-Szene ("New Game") bricht WebGL aber mit
+  #  "abort(OOM)" / "Cannot grow memory" ab: die PC-skalierte 3D-Szene sprengt das
+  #  WASM-Speicherlimit (~2 GB) des Browsers.
+  #    -> Fuer volle Web-Spielbarkeit muesste das SPIEL angepasst werden: kleinere
+  #       Texturen, weniger gleichzeitig geladene Assets, Asset-Streaming, ggf. hoehere
+  #       WebGL-Memory-Size. Das ist Spiel-Optimierung, KEIN Pipeline-Problem.
+  #    -> Die Windows-.exe bleibt die vollstaendig spielbare Version.
+  #
   #  WICHTIG - WEBGL-KOMPRESSION FUER GITHUB PAGES:
   #  Standardmaessig komprimiert Unity WebGL-Builds (Brotli/Gzip). GitHub Pages
   #  sendet dafuer aber nicht die noetigen HTTP-Header -> das Spiel laedt dann
@@ -198,10 +207,7 @@ jobs:
     name: Build (WebGL)
     runs-on: ubuntu-latest
     needs: test
-    # TEMPORAER: laeuft auch auf test/webgl-build, um den WebGL-Build/Deploy zu testen,
-    # ohne nach develop/main zu mergen. Vor dem finalen Merge wieder auf nur main (bzw.
-    # main+develop) zuruecksetzen.
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test/webgl-build'
+    if: github.ref == 'refs/heads/main'
     steps:
       # Das WebGL-Docker-Image ist gross; zusammen mit Projekt + LFS + Cache sprengt es
       # sonst den ~14-GB-Speicher des Runners ("no space left on device", Exit 125).
@@ -274,7 +280,6 @@ jobs:
     name: Deploy WebGL to GitHub Pages
     runs-on: ubuntu-latest
     needs: build-webgl
-    # TEMPORAER: auch auf test/webgl-build (siehe build-webgl).
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test/webgl-build'
     # Diese Rechte braucht der offizielle Pages-Deploy zwingend:
     permissions:
