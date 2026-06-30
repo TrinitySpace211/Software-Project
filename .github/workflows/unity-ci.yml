@@ -280,7 +280,7 @@ jobs:
     name: Deploy WebGL to GitHub Pages
     runs-on: ubuntu-latest
     needs: build-webgl
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test/webgl-build'
+    if: github.ref == 'refs/heads/main'
     # Diese Rechte braucht der offizielle Pages-Deploy zwingend:
     permissions:
       pages: write       # darf auf Pages veroeffentlichen
