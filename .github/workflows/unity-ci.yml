@@ -187,6 +187,15 @@ jobs:
     # main+develop) zuruecksetzen.
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test/webgl-build'
     steps:
+      # Das WebGL-Docker-Image ist gross; zusammen mit Projekt + LFS + Cache sprengt es
+      # sonst den ~14-GB-Speicher des Runners ("no space left on device", Exit 125).
+      # Ungenutzte vorinstallierte Tools entfernen schafft ~25 GB Platz.
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force || true
+          df -h /
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
