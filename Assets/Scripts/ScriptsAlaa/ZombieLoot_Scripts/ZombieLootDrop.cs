@@ -1,82 +1,82 @@
 using UnityEngine;
 
 public enum ZombieLootDeliveryMode {
-    // Schrott geht direkt auf das Konto vom Spieler.
+    // Scrap is added directly to the player's wallet.
     AddDirectlyToPlayer,
 
-    // Schrott erscheint als aufsammelbares Objekt.
+    // Scrap appears as a collectible object.
     SpawnPickup
 }
 
 /// <summary>
-/// Gibt dem Spieler Schrott, wenn ein Zombie stirbt.
+/// Gives the player scrap when a zombie dies.
 /// </summary>
 public class ZombieLootDrop : MonoBehaviour {
     [Header("Scrap")]
-    // Optionales Scrap-Item aus dem Projekt.
+    // Optional scrap item from the project.
     [SerializeField] private ItemSO scrapItem;
 
-    // Wie viel Schrott ein Zombie gibt.
+    // Amount of scrap given by a zombie.
     [SerializeField] private int scrapAmount = 1;
 
-    // Legt fest, ob Schrott direkt kommt oder als Pickup gespawnt wird.
+    // Determines whether scrap is awarded directly or spawned as a pickup.
     [SerializeField] private ZombieLootDeliveryMode deliveryMode = ZombieLootDeliveryMode.AddDirectlyToPlayer;
 
     [Header("Pickup")]
-    // Optionales Prefab, wenn Schrott als Pickup erscheinen soll.
+    // Optional prefab used when scrap should appear as a pickup.
     [SerializeField] private GameObject scrapPickupPrefab;
 
-    // Icon, falls kein Scrap-Item mit Icon gesetzt wurde.
+    // Icon used when no scrap item with an icon was assigned.
     [SerializeField] private Sprite fallbackScrapIcon;
 
-    // Höhe, in der der Pickup gespawnt wird.
+    // Height at which the pickup is spawned.
     [SerializeField] private float pickupSpawnHeight = 0.35f;
 
     private ZombieAI zombieAI;
     private Animator animator;
 
-    // Verhindert, dass ein Zombie mehrmals Schrott gibt.
+    // Prevents a zombie from giving scrap more than once.
     private bool lootGiven;
 
     private void Awake() {
-        // Sucht die Zombie- und Animator-Komponenten auf demselben Objekt.
+        // Finds the zombie and animator components on the same object.
         zombieAI = GetComponent<ZombieAI>();
         animator = GetComponent<Animator>();
     }
 
     private void Update() {
-        // Wenn Loot schon gegeben wurde, passiert nichts mehr.
+        // Does nothing if the loot was already awarded.
         if (lootGiven) {
             return;
         }
 
-        // Prüft, ob der Zombie über ZombieAI tot ist.
+        // Checks whether ZombieAI reports that the zombie is dead.
         if (zombieAI != null && zombieAI.IsDead()) {
             GiveLootToCurrentPlayer();
             return;
         }
 
-        // Prüft, ob der Animator den Zombie als tot markiert.
+        // Checks whether the animator marks the zombie as dead.
         if (animator != null && animator.GetBool("isDead")) {
             GiveLootToCurrentPlayer();
         }
     }
 
     public void GiveLoot(Transform player) {
-        // Sicherheit: Loot darf nur einmal gegeben werden.
+        // Safety check: loot may only be awarded once.
         if (lootGiven) {
             return;
         }
 
         lootGiven = true;
 
-        // Mindestens 1 Schrott geben.
+        // Gives at least 1 scrap.
         int amountToGive = Mathf.Max(1, scrapAmount);
         if (amountToGive <= 0) {
             return;
         }
 
-        // Je nach Modus direkt geben oder als Pickup spawnen.
+        // Awards scrap directly or spawns a pickup depending on the mode.
         if (deliveryMode == ZombieLootDeliveryMode.SpawnPickup) {
             SpawnScrapPickup(amountToGive);
             return;
@@ -86,20 +86,20 @@ public class ZombieLootDrop : MonoBehaviour {
     }
 
     public void GiveLootToCurrentPlayer() {
-        // Sucht zuerst direkt nach dem Schrott-Konto vom Spieler.
+        // First looks directly for the player's scrap wallet.
         PlayerScrapWallet wallet = FindFirstObjectByType<PlayerScrapWallet>();
         if (wallet != null) {
             GiveLoot(wallet.transform);
             return;
         }
 
-        // Falls kein Konto gefunden wurde, wird der Player über den Tag gesucht.
+        // Looks for the player by tag if no wallet was found.
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         GiveLoot(player != null ? player.transform : null);
     }
 
     private void AddScrapToPlayer(Transform player, int scrapAmount) {
-        // Sucht das Schrott-Konto und schreibt den Schrott gut.
+        // Finds the scrap wallet and adds the scrap.
         PlayerScrapWallet wallet = FindPlayerWallet(player);
 
         if (wallet == null) {
@@ -111,30 +111,30 @@ public class ZombieLootDrop : MonoBehaviour {
     }
 
     private PlayerScrapWallet FindPlayerWallet(Transform player) {
-        // Wenn kein Player übergeben wurde, suchen wir ihn über den Player-Tag.
+        // Looks for the player by tag if no player was provided.
         if (player == null) {
             GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
             player = playerObject != null ? playerObject.transform : null;
         }
 
-        // Wenn kein Player gefunden wird, suchen wir irgendein Wallet in der Szene.
+        // Looks for any wallet in the scene if no player was found.
         if (player == null) {
             PlayerScrapWallet sceneWallet = FindFirstObjectByType<PlayerScrapWallet>();
             return sceneWallet;
         }
 
-        // Sucht das Wallet am Player oder an seinen Eltern/Kindern.
+        // Looks for the wallet on the player, its parents, or its children.
         PlayerScrapWallet wallet = player.GetComponentInParent<PlayerScrapWallet>();
         if (wallet == null) {
             wallet = player.GetComponentInChildren<PlayerScrapWallet>();
         }
 
-        // Letzte Suche in der ganzen Szene.
+        // Performs a final search throughout the scene.
         if (wallet == null) {
             wallet = FindFirstObjectByType<PlayerScrapWallet>();
         }
 
-        // Wenn wirklich keins existiert, wird eins am Player erstellt.
+        // Creates a wallet on the player if none exists.
         if (wallet == null) {
             wallet = player.gameObject.AddComponent<PlayerScrapWallet>();
         }
@@ -143,12 +143,12 @@ public class ZombieLootDrop : MonoBehaviour {
     }
 
     private void SpawnScrapPickup(int scrapAmount) {
-        // Erstellt entweder ein gesetztes Prefab oder einen einfachen Standard-Pickup.
+        // Creates either the assigned prefab or a simple default pickup.
         GameObject pickupObject = scrapPickupPrefab != null
             ? Instantiate(scrapPickupPrefab, GetPickupPosition(), Quaternion.identity)
             : CreateDefaultPickup();
 
-        // Sorgt dafür, dass der Pickup auch das richtige Script hat.
+        // Ensures that the pickup has the correct script.
         ScrapPickup pickup = pickupObject.GetComponent<ScrapPickup>();
         if (pickup == null) {
             pickup = pickupObject.AddComponent<ScrapPickup>();
@@ -158,16 +158,16 @@ public class ZombieLootDrop : MonoBehaviour {
     }
 
     private GameObject CreateDefaultPickup() {
-        // Baut einen einfachen Pickup, falls kein Prefab gesetzt wurde.
+        // Builds a simple pickup if no prefab was assigned.
         GameObject pickupObject = new GameObject("Scrap Pickup");
         pickupObject.transform.position = GetPickupPosition();
 
-        // Trigger, damit der Spieler den Pickup einsammeln kann.
+        // Trigger that allows the player to collect the pickup.
         SphereCollider collider = pickupObject.AddComponent<SphereCollider>();
         collider.isTrigger = true;
         collider.radius = 0.5f;
 
-        // Zeigt ein Icon für den Scrap-Pickup.
+        // Displays an icon for the scrap pickup.
         SpriteRenderer spriteRenderer = pickupObject.AddComponent<SpriteRenderer>();
         spriteRenderer.sprite = GetScrapIcon();
         spriteRenderer.sortingOrder = 5;
@@ -176,12 +176,12 @@ public class ZombieLootDrop : MonoBehaviour {
     }
 
     private Vector3 GetPickupPosition() {
-        // Position leicht über dem Zombie.
+        // Positions the pickup slightly above the zombie.
         return transform.position + Vector3.up * pickupSpawnHeight;
     }
 
     private Sprite GetScrapIcon() {
-        // Nimmt zuerst das Icon vom Scrap-Item, sonst das Fallback-Icon.
+        // Uses the scrap item's icon first, otherwise the fallback icon.
         if (scrapItem != null && scrapItem.icon != null) {
             return scrapItem.icon;
         }
