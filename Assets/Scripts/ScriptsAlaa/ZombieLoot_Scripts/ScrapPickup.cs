@@ -1,53 +1,53 @@
 using UnityEngine;
 
 /// <summary>
-/// Aufsammelbarer Schrott für den Spieler.
+/// Scrap that can be collected by the player.
 /// </summary>
 [RequireComponent(typeof(Collider))]
 public class ScrapPickup : MonoBehaviour {
-    // Wie viel Schrott dieser Pickup gibt.
+    // Amount of scrap provided by this pickup.
     [SerializeField] private int scrapAmount = 1;
 
-    // Drehgeschwindigkeit vom Pickup.
+    // Rotation speed of the pickup.
     [SerializeField] private float rotationSpeed = 90f;
 
     public void SetAmount(int amount) {
-        // Die Menge wird gesetzt, aber nie kleiner als 1.
+        // Sets the amount, but never below 1.
         scrapAmount = Mathf.Max(1, amount);
     }
 
     private void Awake() {
-        // Der Collider muss ein Trigger sein, damit der Spieler ihn einsammeln kann.
+        // The collider must be a trigger so the player can collect it.
         Collider pickupCollider = GetComponent<Collider>();
         pickupCollider.isTrigger = true;
     }
 
     private void Reset() {
-        // Wird im Editor benutzt, wenn das Script neu hinzugefügt wird.
+        // Used in the editor when the script is newly added.
         Collider pickupCollider = GetComponent<Collider>();
         pickupCollider.isTrigger = true;
     }
 
     private void Update() {
-        // Dreht den Pickup leicht, damit man ihn besser sieht.
+        // Slowly rotates the pickup to make it easier to see.
         transform.Rotate(Vector3.up, rotationSpeed * Time.deltaTime, Space.World);
     }
 
     private void OnTriggerEnter(Collider other) {
-        // Sucht das Schrott-Konto vom Spieler.
+        // Looks for the player's scrap wallet.
         PlayerScrapWallet wallet = other.GetComponentInParent<PlayerScrapWallet>();
 
-        // Falls der Player noch kein Konto hat, wird eins erstellt.
+        // Creates a wallet if the player does not have one yet.
         if (wallet == null && other.CompareTag("Player")) {
             wallet = other.gameObject.AddComponent<PlayerScrapWallet>();
         }
 
-        // Wenn kein Spieler-Konto gefunden wurde, passiert nichts.
+        // Does nothing if no player wallet was found.
         if (wallet == null) {
             return;
         }
 
-        // Schrott geben und Pickup löschen.
+        // Gives scrap and removes the pickup.
         wallet.AddScrap(scrapAmount);
         Destroy(gameObject);
     }

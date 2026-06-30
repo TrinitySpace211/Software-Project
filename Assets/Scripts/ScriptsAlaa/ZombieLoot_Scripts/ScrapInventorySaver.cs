@@ -2,26 +2,26 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Legt Scrap auch in das Inventar.
+/// Also stores scrap in the inventory.
 /// </summary>
 public class ScrapInventorySaver : MonoBehaviour {
-    // Das Inventar vom Spieler.
+    // The player's inventory.
     [SerializeField] private Inventory inventory;
 
-    // Das Scrap-Item aus dem Projekt.
+    // The scrap item from the project.
     [SerializeField] private ItemSO scrapItem;
 
-    // Damit andere Scripts dieses Script einfach erreichen koennen.
+    // Allows other scripts to access this script easily.
     private static ScrapInventorySaver instance;
 
     private void Awake() {
-        // Speichert dieses Script als aktuelle Instanz.
+        // Stores this script as the current instance.
         instance = this;
         FindInventoryIfMissing();
     }
 
     public static void AddScrapToInventory(int amount) {
-        // Wenn dieses Script nicht in der Szene ist, passiert nichts.
+        // Does nothing if this script is not in the scene.
         if (instance == null) {
             return;
         }
@@ -40,17 +40,17 @@ public class ScrapInventorySaver : MonoBehaviour {
     }
 
     public static bool IsScrapItem(ItemSO item) {
-        // Prueft, ob ein Item das Scrap-Item ist.
+        // Checks whether an item is the scrap item.
         return instance != null && item != null && item == instance.scrapItem;
     }
 
     private void AddScrap(int amount) {
-        // Keine ungueltigen Werte ins Inventar legen.
+        // Prevents invalid values from being added to the inventory.
         if (amount <= 0) {
             return;
         }
 
-        // Sucht das Inventar, falls es noch nicht gesetzt wurde.
+        // Finds the inventory if it has not been assigned yet.
         FindInventoryIfMissing();
 
         if (inventory == null) {
@@ -63,12 +63,12 @@ public class ScrapInventorySaver : MonoBehaviour {
             return;
         }
 
-        // Legt Scrap in das Inventar.
+        // Adds scrap to the inventory.
         inventory.AddItem(scrapItem, amount);
     }
 
     private bool TryCountScrapInInventory(out int amount) {
-        // Zaehlt, wie viel Scrap aktuell wirklich im Inventar liegt.
+        // Counts how much scrap is currently stored in the inventory.
         amount = 0;
 
         FindInventoryIfMissing();
@@ -92,7 +92,7 @@ public class ScrapInventorySaver : MonoBehaviour {
     }
 
     private void AddSlotsFromRoot(GameObject root, HashSet<Slot> slots) {
-        // Sammelt alle Slots aus einem UI-Bereich.
+        // Collects all slots from a UI area.
         if (root == null) {
             return;
         }
@@ -104,12 +104,12 @@ public class ScrapInventorySaver : MonoBehaviour {
     }
 
     private void FindInventoryIfMissing() {
-        // Wenn das Inventar schon gesetzt ist, muss nicht gesucht werden.
+        // No search is needed when the inventory is already assigned.
         if (inventory != null) {
             return;
         }
 
-        // Sucht automatisch ein Inventory in der Szene.
+        // Automatically finds an Inventory in the scene.
         inventory = FindFirstObjectByType<Inventory>();
     }
 }
