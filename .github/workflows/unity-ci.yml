@@ -62,6 +62,15 @@ jobs:
       checks: write
       contents: read
     steps:
+      # Speicher freiraeumen: Unity-Docker-Image + Projekt + LFS + (wachsender) Library-Cache
+      # sprengen sonst den ~14-GB-Runner ("no space left on device", Exit 125).
+      # Ungenutzte vorinstallierte Tools entfernen schafft ~25 GB Platz (im Docker irrelevant).
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force || true
+          df -h /
+
       # Holt unseren Code auf die Cloud-Maschine.
       # lfs: true -> laedt auch die grossen Dateien (Git LFS: Modelle, Texturen).
       - name: Checkout repository
@@ -123,6 +132,13 @@ jobs:
     needs: test
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
     steps:
+      # Speicher freiraeumen (siehe Test-Job) - verhindert "no space left on device".
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force || true
+          df -h /
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -169,6 +185,16 @@ jobs:
   #  Die WebGL-Version ist als Demo/Review-App gedacht - die Windows-.exe bleibt
   #  die "richtige" spielbare Version.
   #
+  #  WICHTIG - WEBGL-SPIELBARKEIT (getestet 06/2026):
+  #  Der WebGL-Build BAUT erfolgreich durch und das HAUPTMENUE laeuft im Browser
+  #  (inkl. Musik). Beim Laden der Gameplay-Szene ("New Game") bricht WebGL aber mit
+  #  "abort(OOM)" / "Cannot grow memory" ab: die PC-skalierte 3D-Szene sprengt das
+  #  WASM-Speicherlimit (~2 GB) des Browsers.
+  #    -> Fuer volle Web-Spielbarkeit muesste das SPIEL angepasst werden: kleinere
+  #       Texturen, weniger gleichzeitig geladene Assets, Asset-Streaming, ggf. hoehere
+  #       WebGL-Memory-Size. Das ist Spiel-Optimierung, KEIN Pipeline-Problem.
+  #    -> Die Windows-.exe bleibt die vollstaendig spielbare Version.
+  #
   #  WICHTIG - WEBGL-KOMPRESSION FUER GITHUB PAGES:
   #  Standardmaessig komprimiert Unity WebGL-Builds (Brotli/Gzip). GitHub Pages
   #  sendet dafuer aber nicht die noetigen HTTP-Header -> das Spiel laedt dann
@@ -183,6 +209,15 @@ jobs:
     needs: test
     if: github.ref == 'refs/heads/main'
     steps:
+      # Das WebGL-Docker-Image ist gross; zusammen mit Projekt + LFS + Cache sprengt es
+      # sonst den ~14-GB-Speicher des Runners ("no space left on device", Exit 125).
+      # Ungenutzte vorinstallierte Tools entfernen schafft ~25 GB Platz.
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force || true
+          df -h /
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -259,33 +294,9 @@ jobs:
         uses: actions/deploy-pages@v4
 
   # ============================================================================
-  #  JOB 4: GITHUB RELEASE
-  #  Erstellt automatisch ein GitHub Release mit der Windows-Version als ZIP.
-  #  if: startsWith(... 'refs/tags/v') -> laeuft NUR, wenn ein Git-Tag gepusht
-  #  wird, der mit "v" beginnt (z.B.  git tag v1.0  &&  git push --tags ).
-  #  Das ist unser "Artefakt-Deployment": jede Version bekommt einen Download.
+  #  KEIN AUTO-RELEASE-JOB (bewusste Entscheidung)
+  #  Releases werden MANUELL erstellt (Git-Tag + GitHub Release mit kuratierten
+  #  Release-Notes) -> volle Kontrolle ueber Versionierung und Inhalte.
+  #  Builds/Tests/Deploy laufen automatisch; das Veroeffentlichen einer
+  #  Spieler-Version ist eine bewusste, kuratierte Aktion.
   # ============================================================================
-  release:
-    name: Create GitHub Release
-    runs-on: ubuntu-latest
-    needs: [build-windows]
-    if: startsWith(github.ref, 'refs/tags/v')
-    steps:
-      # Holt das im Windows-Job erzeugte Build-Artefakt wieder herunter.
-      - name: Download Windows build
-        uses: actions/download-artifact@v4
-        with:
-          name: build-windows
-          path: build-windows
-
-      # Packt den Build in eine ZIP-Datei (Dateiname enthaelt den Tag-Namen).
-      - name: Zip Windows build
-        run: zip -r SurvivalGame-Windows-${{ github.ref_name }}.zip build-windows/
-
-      # Legt das Release an und haengt die ZIP als Download an.
-      # generate_release_notes -> erstellt automatisch eine Changelog-Liste.
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: SurvivalGame-Windows-${{ github.ref_name }}.zip
-          generate_release_notes: true
