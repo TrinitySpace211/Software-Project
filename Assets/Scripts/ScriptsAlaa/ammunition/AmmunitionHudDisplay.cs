@@ -9,7 +9,7 @@ using UnityEditor;
 /// </summary>
 public class AmmunitionHudDisplay : MonoBehaviour {
     // Player weapon selector used to read the current weapon.
-    [SerializeField] private PlayerWeaponSelector weaponSelector;
+    [SerializeField] private Player player;
 
     // Ammunition icon from the project.
     [SerializeField] private Sprite ammunitionIcon;
