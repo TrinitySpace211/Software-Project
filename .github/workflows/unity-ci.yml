@@ -33,6 +33,7 @@ on:
       - develop
       - 'feature/**'   # alle feature/-Branches, z.B. feature/CiCd-Pipe
       - 'fix/**'       # alle fix/-Branches
+      - 'test/**'      # temporaer fuer WebGL-Test (test/webgl-build)
   # Bei jedem Pull Request, der auf main oder develop zielt:
   pull_request:
     branches:
