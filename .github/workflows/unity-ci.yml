@@ -63,6 +63,15 @@ jobs:
       checks: write
       contents: read
     steps:
+      # Speicher freiraeumen: Unity-Docker-Image + Projekt + LFS + (wachsender) Library-Cache
+      # sprengen sonst den ~14-GB-Runner ("no space left on device", Exit 125).
+      # Ungenutzte vorinstallierte Tools entfernen schafft ~25 GB Platz (im Docker irrelevant).
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force || true
+          df -h /
+
       # Holt unseren Code auf die Cloud-Maschine.
       # lfs: true -> laedt auch die grossen Dateien (Git LFS: Modelle, Texturen).
       - name: Checkout repository
@@ -124,6 +133,13 @@ jobs:
     needs: test
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
     steps:
+      # Speicher freiraeumen (siehe Test-Job) - verhindert "no space left on device".
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force || true
+          df -h /
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
