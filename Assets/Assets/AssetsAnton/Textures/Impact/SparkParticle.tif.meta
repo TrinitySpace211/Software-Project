@@ -79,6 +79,5 @@ AssetOrigin:
   productId: 127325
   packageName: Particle Pack
   packageVersion: 3.1
-  assetPath: Assets/Assets/AssetsAnton/Ignore_Folder/UnityTechnologies/ParticlePack/EffectExamples/Misc
-    Effects/Textures/SparkParticle.tif
+  assetPath: Assets/Assets/AssetsAnton/Textures/Impact/SparkParticle.tif
   uploadId: 691001

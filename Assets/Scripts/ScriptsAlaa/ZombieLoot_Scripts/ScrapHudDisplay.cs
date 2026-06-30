@@ -22,6 +22,7 @@ public class ScrapHudDisplay : MonoBehaviour {
 
     private RectTransform hudRect;
     private Text scrapCountText;
+    private GameObject hudRoot;
 
     private void Awake() {
         HideOldImageOnThisObject();
@@ -30,6 +31,8 @@ public class ScrapHudDisplay : MonoBehaviour {
     }
 
     private void Update() {
+        if (hudRoot == null || !hudRoot.activeSelf)
+            return;
         FindWalletIfMissing();
         UpdateHudPosition();
         UpdateScrapCount();
@@ -60,16 +63,16 @@ public class ScrapHudDisplay : MonoBehaviour {
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         canvas.sortingOrder = 1000;
 
-        CanvasScaler canvasScaler = canvasObject.AddComponent<CanvasScaler>();
+        CanvasScaler canvasScaler = hudRoot.AddComponent<CanvasScaler>();
         canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ConstantPixelSize;
         canvasScaler.scaleFactor = 1f;
         canvasScaler.referencePixelsPerUnit = 100f;
 
-        canvasObject.AddComponent<GraphicRaycaster>();
+        hudRoot.AddComponent<GraphicRaycaster>();
 
         // Container for the icon and text.
         GameObject hudObject = new GameObject("Scrap HUD");
-        hudObject.transform.SetParent(canvas.transform, false);
+        hudObject.transform.SetParent(hudRoot.transform, false);
 
         hudRect = hudObject.AddComponent<RectTransform>();
         hudRect.anchorMin = new Vector2(0f, 1f);
@@ -148,5 +151,9 @@ public class ScrapHudDisplay : MonoBehaviour {
         }
 
         scrapCountText.text = $": {scrapAmount}";
+    }
+    public void SetVisible(bool visible) {
+        if (hudRoot != null)
+            hudRoot.SetActive(visible);
     }
 }

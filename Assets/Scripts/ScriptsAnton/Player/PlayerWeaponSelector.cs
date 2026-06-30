@@ -51,7 +51,7 @@ public class PlayerWeaponSelector : MonoBehaviour {
         }
     }
 
-    #region Unequip Weapons
+    #region Unequip Item
     /// <summary>
     /// Starts a Coroutine to Unequip a Gun.
     /// </summary>
@@ -407,7 +407,7 @@ public class PlayerWeaponSelector : MonoBehaviour {
     }
     #endregion
 
-    #region Equip Weapon
+    #region Equip Item
     /// <summary>
     /// Starts the "Weapon Select" Animation for Melee Weapons and Spawns the Weapon afterwards.
     /// </summary>
@@ -448,6 +448,7 @@ public class PlayerWeaponSelector : MonoBehaviour {
 
         playerIK.SetMelee(true, weaponSlotIndex);
         playerIK.SetGun(true);
+        playerIK.SetConsumable<Grenade>(false, null);
 
         switchLayer.weight = 0;
         meleeLayer.weight = 1;
@@ -464,6 +465,7 @@ public class PlayerWeaponSelector : MonoBehaviour {
     private IEnumerator SelectGun(GunSO gun, int weaponSlotIndex) {
         switchLayer.weight = 1;
         poseLayer.weight = 0;
+        meleeLayer.weight = 0;
 
         playerIK.ClearSetup();
         playerIK.SwitchWeapon();
@@ -494,6 +496,8 @@ public class PlayerWeaponSelector : MonoBehaviour {
         yield return new WaitForSeconds(0.3f);
 
         playerIK.SetGun(true);
+        playerIK.SetMelee(false, -1);
+        playerIK.SetConsumable<Grenade>(false, null);
 
         switchLayer.weight = 0;
         poseLayer.weight = 1;
@@ -551,6 +555,7 @@ public class PlayerWeaponSelector : MonoBehaviour {
 
         playerIK.SetConsumable(true, grenade);
         playerIK.SetGun(true);
+        playerIK.SetMelee(false, -1);
 
         switchLayer.weight = 0;
         consumableLayer.weight = 1;
@@ -603,6 +608,7 @@ public class PlayerWeaponSelector : MonoBehaviour {
 
         playerIK.SetConsumable(true, healthItem);
         playerIK.SetGun(false);
+        playerIK.SetMelee(false, -1);
 
         switchLayer.weight = 0;
         consumableLayer.weight = 1;
@@ -633,15 +639,6 @@ public class PlayerWeaponSelector : MonoBehaviour {
                     break;
                 case WeaponSlot.Secondary:
                     playerIK.Setup(gunParent, (int)WeaponSlot.Secondary);
-                    break;
-                case WeaponSlot.MeleeOneHanded:
-                    playerIK.Setup(gunParent, (int)WeaponSlot.MeleeOneHanded);
-                    break;
-                case WeaponSlot.MeleeTwoHanded:
-                    playerIK.Setup(gunParent, (int)WeaponSlot.MeleeTwoHanded);
-                    break;
-                case WeaponSlot.Consumable:
-                    playerIK.Setup(gunParent, (int)WeaponSlot.Consumable);
                     break;
             }
         }

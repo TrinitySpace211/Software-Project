@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// This is the Player Class. The Player Movement and Rotation will be calculated.
@@ -24,6 +26,7 @@ public class Player : MonoBehaviour {
     [SerializeField] private PlayerWeaponSelector weaponSelector;
     [SerializeField] private CurrentPlayerState playerState;
     [SerializeField] private PlayerIK playerIK;
+    [SerializeField] private Inventory inventory;
 
     [Header("Footsteps Reference")]
     [SerializeField] private ImpactType impactType;
@@ -72,6 +75,9 @@ public class Player : MonoBehaviour {
     public static event Action<Vector3, GunSO> OnReload;
     public static event Action<Vector3> OnGrenadeThrow;
     public static event Action<Vector3> OnHeal;
+
+    //Other Checks
+    private bool isMeleeAttacking = false;
     #endregion
 
     private void Start() {
@@ -83,14 +89,18 @@ public class Player : MonoBehaviour {
         if (!playerHealth.GetIsDead()) {
             UpdateMovementState();
             HandleMovement();
-            HandleAiming();
 
             HandleShooting();
+            HandleAiming();
+            if (!EventSystem.current.IsPointerOverGameObject() && !inventory.GetIsDragging()) {
+                HandleMeleeAttack();
+            }
+
             HandleReloadFinished();
-            HandleMeleeAttack();
             HandleGrenade();
             HandleHealingKits();
         }
+
     }
 
     private void FixedUpdate() {
@@ -298,10 +308,11 @@ public class Player : MonoBehaviour {
         if (playerInputHandler.AttackTriggered && playerInputHandler.AimingTriggered && !isSprinting && activeGun != null && !playerAnimation.GetIsReloading() && !weaponSelector.IsSelecting()) {
             activeGun.Shoot();
 
-            if (activeGun.GetEmptyMagazine()) {
+            if (activeGun.GetEmptyMagazine() && inventory.GetAmmoAvailable(activeGun, out int ammoNeed)) {
                 setupWeaponParent = playerIK.GetParent();
                 weaponSelector.ClearSetupCurrentWeapon();
-                playerAnimation.StartReloading();
+                //Debug.Log(ammoNeed);
+                playerAnimation.StartReloading(ammoNeed);
                 OnReload?.Invoke(transform.position, weaponSelector.activeGun);
             }
         }
@@ -314,11 +325,12 @@ public class Player : MonoBehaviour {
         GunSO activeGun = weaponSelector.activeGun;
 
         if (activeGun != null) {
-            if (!activeGun.MagazineIsFull() && !playerAnimation.GetIsReloading()) {
+            if (!activeGun.MagazineIsFull() && !playerAnimation.GetIsReloading() && inventory.GetAmmoAvailable(activeGun, out int ammoNeed)) {
                 setupWeaponParent = playerIK.GetParent();
                 weaponSelector.ClearSetupCurrentWeapon();
-                playerAnimation.StartReloading();
-                OnReload?.Invoke(transform.position, weaponSelector.activeGun);
+                //Debug.Log(ammoNeed);
+                playerAnimation.StartReloading(ammoNeed);
+                OnReload?.Invoke(transform.position, activeGun);
             }
         }
     }
@@ -327,9 +339,11 @@ public class Player : MonoBehaviour {
     /// Handles the Setup of the Weapon after Reloading
     /// </summary>
     private void HandleReloadFinished() {
-        if (weaponSelector.activeGun != null) {
+        GunSO activeGun = weaponSelector.activeGun;
+
+        if (activeGun != null) {
             if (setupWeaponParent != null) {
-                if ((!weaponSelector.activeGun.GetEmptyMagazine() || !weaponSelector.activeGun.MagazineIsFull()) && !playerAnimation.GetIsReloading()) {
+                if ((!activeGun.GetEmptyMagazine() || !activeGun.MagazineIsFull()) && !playerAnimation.GetIsReloading()) {
                     weaponSelector.SetupCurrentWeapon(setupWeaponParent);
                     setupWeaponParent = null;
                 }
@@ -346,10 +360,12 @@ public class Player : MonoBehaviour {
             MeleeSO melee = weaponSelector.activeMelee;
             if (melee != null) {
                 if (melee.weaponSlot == WeaponSlot.MeleeOneHanded && melee.CanSwing()) {
+                    isMeleeAttacking = true;
                     melee.RecordSwing();
                     playerAnimation.SetOneHandMeleeAttack();
                     playerAnimation.SetMeleeAttackSpeed(melee.attackSpeed);
                 } else if (melee.weaponSlot == WeaponSlot.MeleeTwoHanded && melee.CanSwing()) {
+                    isMeleeAttacking = true;
                     melee.RecordSwing();
                     playerAnimation.SetTwoHandMeleeAttack();
                     playerAnimation.SetMeleeAttackSpeed(melee.attackSpeed);
@@ -500,14 +516,19 @@ public class Player : MonoBehaviour {
     /// Used to allow a hit only at a certain point in the melee animations
     /// </summary>
     private void MeleeIsAttacking() {
-        weaponSelector.activeMelee.SetMeleeModelAttacking(true);
+        if (weaponSelector.activeMelee != null) {
+            weaponSelector.activeMelee.SetMeleeModelAttacking(true);
+        }
     }
 
     /// <summary>
     /// Does not allow to hit the enemy anymore if the animation was finished
     /// </summary>
     private void MeleeIsNotAttacking() {
-        weaponSelector.activeMelee.SetMeleeModelAttacking(false);
+        isMeleeAttacking = false;
+        if (weaponSelector.activeMelee != null) {
+            weaponSelector.activeMelee.SetMeleeModelAttacking(false);
+        }
     }
     #endregion
 
@@ -527,6 +548,10 @@ public class Player : MonoBehaviour {
 
     public float GetAimLayerWeight() {
         return aimLayer.weight;
+    }
+
+    public bool GetIsMeleeAttacking() {
+        return isMeleeAttacking;
     }
 
     public CurrentPlayerState GetCurrentPlayerState() {
@@ -551,6 +576,32 @@ public class Player : MonoBehaviour {
     public PlayerHealth GetPlayerHealth() {
         return playerHealth;
     }
+
+    public Inventory GetInventory() {
+        return inventory;
+    }
+
+    public Camera GetMainCamera() {
+        return playerCamera;
+    }
     #endregion
 
+    #region Save and Load
+    /* public object Save() {
+        return new PlayerData {
+            position = transform.position
+        };
+    }
+
+    public void Load(object data) {
+        characterController.enabled = false;
+        PlayerData playerData = (PlayerData)data;
+        transform.position = playerData.position;
+        characterController.enabled = true;
+    }
+
+    private class PlayerData {
+        public Vector3 position;
+    } */
+    #endregion
 }

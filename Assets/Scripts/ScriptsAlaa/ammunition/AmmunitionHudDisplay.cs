@@ -23,6 +23,9 @@ public class AmmunitionHudDisplay : MonoBehaviour {
     // Color of the ammunition text.
     [SerializeField] private Color textColor = new Color(0.85f, 0.95f, 1f);
 
+    private PlayerWeaponSelector weaponSelector;
+    private Inventory inventory;
+
     private RectTransform hudRect;
     private Image ammunitionIconImage;
     private Text ammunitionText;
@@ -34,6 +37,11 @@ public class AmmunitionHudDisplay : MonoBehaviour {
         HideOldImageOnThisObject();
         FindWeaponSelectorIfMissing();
         CreateHud();
+    }
+
+    private void Start() {
+        weaponSelector = player.GetPlayerGunSelector();
+        inventory = player.GetInventory();
     }
 
     private void Update() {
@@ -50,7 +58,7 @@ public class AmmunitionHudDisplay : MonoBehaviour {
             return;
         }
 
-        weaponSelector = FindFirstObjectByType<PlayerWeaponSelector>();
+        player = FindFirstObjectByType<Player>();
     }
 
     private void FindIconIfMissing() {
@@ -205,7 +213,7 @@ public class AmmunitionHudDisplay : MonoBehaviour {
         }
 
         ApplyTextColor();
-        ammunitionText.text = $": {activeGun.GetCurrentAmmo()} / {activeGun.GetMaxAmmo()}";
+        ammunitionText.text = $": {activeGun.currentAmmo} / {inventory.GetAllAmmo(activeGun)}";
         ammunitionText.SetVerticesDirty();
         ammunitionText.SetMaterialDirty();
         ammunitionText.SetAllDirty();

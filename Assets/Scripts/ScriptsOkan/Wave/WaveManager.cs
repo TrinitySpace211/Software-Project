@@ -5,10 +5,12 @@ using UnityEngine;
 ///     Called by DayNightCycle on new day and by the Start button on game start.
 /// </summary>
 public class WaveManager : MonoBehaviour {
-    [Header("Spawn Zones")] [SerializeField]
+    [Header("Spawn Zones")]
+    [SerializeField]
     private SpawnZone[] spawnZones;
 
-    [Header("Wave Scaling")] [SerializeField]
+    [Header("Wave Scaling")]
+    [SerializeField]
     private int baseZombieCount = 15;
 
     [SerializeField] private int zombiesPerDay = 5;
@@ -60,6 +62,12 @@ public class WaveManager : MonoBehaviour {
             spawnZones[i].sprinterCount =
                 sprintersPerZone + (i == 0 ? totalSprinters % spawnZones.Length : 0); // ← Rest auch verteilen
             spawnZones[i].SpawnWave();
+        }
+    }
+
+    private void ClearAllZombies() {
+        foreach (SpawnZone zone in spawnZones) {
+            zone.ClearZombies();
         }
     }
 }

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0659dd53b3ca625439ae534d06aca6dd, type: 3}
+  m_Name: 12Gauge Ammo Box
+  m_EditorClassIdentifier: 
+  itemType: 5
+  gunType: 0
+  meleeType: 0
+  healthItemType: 0
+  ammunitionType: 3
+  itemName: 12 Gauge Ammo Box
+  icon: {fileID: 21300000, guid: 1498d0d71cdcd4242a748f68c8489875, type: 3}
+  maxStackSize: 80
+  itemPrefab: {fileID: 9009053449070156770, guid: c3ab4f0a84ec78c48bf9915044fc0f67, type: 3}
+  handItemPrefab: {fileID: 0}
+  baseDamage: 0

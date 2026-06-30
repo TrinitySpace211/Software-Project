@@ -12,6 +12,7 @@ public class GunSO : ScriptableObject {
 
     public ImpactType impactType;
     public GunType type;
+    public AmmunitionType ammunitionType;
     public WeaponSlot weaponSlot;
     public string gunName;
     public GameObject modelPrefab;
@@ -36,7 +37,7 @@ public class GunSO : ScriptableObject {
     private ObjectPool<TrailRenderer> trailPool;
 
     /// <summary>
-    ///     Instantiates the Model of the Gun first then it will just turn it of and on
+    /// Instantiates the Model of the Gun first then it will just turn it of and on
     /// </summary>
     /// <param name="parent">The Position of the Parent where it should spawn</param>
     /// <param name="activeMonoBehaviour">The Instance which spawned the Weapon so that a Coroutine can be used</param>
@@ -51,8 +52,7 @@ public class GunSO : ScriptableObject {
             model.transform.localPosition = spawnPoint;
             model.transform.localRotation = Quaternion.Euler(spawnRotation);
 
-
-            currentAmmo = shootConfigSO.maxAmmo;
+            currentAmmo = 0;
         } else {
             model.SetActive(true);
 
@@ -64,10 +64,10 @@ public class GunSO : ScriptableObject {
     }
 
     /// <summary>
-    ///     The Shoot Function which is played depending of the firerate.
-    ///     It plays a Sound and Particle Effect at the Muzzle of the gun
-    ///     When the Weapon shoots then it will Shoot a Raycast and if it hits then it will play the bullet trail normally,
-    ///     otherwise the trail will be rendered until it reaches a certain duration
+    /// The Shoot Function which is played depending of the firerate.
+    /// It plays a Sound and Particle Effect at the Muzzle of the gun
+    /// When the Weapon shoots then it will Shoot a Raycast and if it hits then it will play the bullet trail normally,
+    /// otherwise the trail will be rendered until it reaches a certain duration
     /// </summary>
     public void Shoot() {
         if (Time.time > shootConfigSO.fireRate + lastShootTime && currentAmmo > 0) {
@@ -97,7 +97,7 @@ public class GunSO : ScriptableObject {
             }
 
             currentAmmo--;
-        } else if (currentAmmo == 0) {
+        } else if (currentAmmo <= 0) {
             emptyMagazine = true;
         }
     }
@@ -163,6 +163,10 @@ public class GunSO : ScriptableObject {
     }
     #endregion
 
+    private void CheckAvailableAmmo() {
+
+    }
+
     /// <summary>
     /// Deactivates the Weapon and sets the shoot Particle to null
     /// </summary>
@@ -183,9 +187,9 @@ public class GunSO : ScriptableObject {
             damageable.TakeDamage(shootConfigSO.damage);
     }
 
-    public void SetFullMagazine() {
+    public void SetAmmoAmount(int amount) {
         emptyMagazine = false;
-        currentAmmo = shootConfigSO.maxAmmo;
+        currentAmmo += amount;
     }
 
     public bool GetEmptyMagazine() {
@@ -194,10 +198,6 @@ public class GunSO : ScriptableObject {
 
     public bool MagazineIsFull() {
         return currentAmmo == shootConfigSO.maxAmmo;
-    }
-
-    public int GetCurrentAmmo() {
-        return currentAmmo;
     }
 
     public int GetMaxAmmo() {
