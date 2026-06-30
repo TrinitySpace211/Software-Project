@@ -17,7 +17,7 @@ MonoBehaviour:
   gunSO: {fileID: 11400000, guid: a62e8dbc9409ba342a8a90a25d0ecd92, type: 2}
   meleeType: 0
   healthItemType: 0
-  ammunitionType: 0
+  ammunitionType: 4
   itemName: Sniper
   icon: {fileID: 21300000, guid: 350accaa7d7f49849b15cce410b15e48, type: 3}
   maxStackSize: 1

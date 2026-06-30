@@ -14,7 +14,7 @@ OcclusionCullingSettings:
 RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 10
-  m_Fog: 1
+  m_Fog: 0
   m_FogColor: {r: 0.21698111, g: 0.21698111, b: 0.21698111, a: 1}
   m_FogMode: 1
   m_FogDensity: 0.03
@@ -3492,6 +3492,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inventory: {fileID: 140243712}
+  playerHealth: {fileID: 0}
+  objectiveHealth: {fileID: 0}
+  achievementDay1: {fileID: 0}
+  achievementDay5: {fileID: 0}
+  achievementDay10: {fileID: 0}
 --- !u!1001 &1089562509
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5847,6 +5852,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inventory: {fileID: 140243712}
+  playerHealth: {fileID: 0}
+  objectiveHealth: {fileID: 0}
+  achievementDay1: {fileID: 0}
+  achievementDay5: {fileID: 0}
+  achievementDay10: {fileID: 0}
 --- !u!1001 &1523296836
 PrefabInstance:
   m_ObjectHideFlags: 0
