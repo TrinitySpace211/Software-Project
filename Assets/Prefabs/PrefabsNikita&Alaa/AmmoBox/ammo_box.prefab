@@ -29,7 +29,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3564095358194110153}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: -0.70351875, z: 0, w: 0.71067667}
+  m_LocalRotation: {x: 0.000000015532379, y: -0.7035168, z: -0.00000001537585, w: 0.7106787}
   m_LocalPosition: {x: 10.34, y: 10.004, z: -4.724}
   m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
   m_ConstrainProportionsScale: 1
@@ -132,15 +132,14 @@ MonoBehaviour:
   openRotation: {x: -70, y: 0, z: 0}
   openSpeed: 8
   itemPrefabs:
-  - {fileID: 11400000, guid: 0679fcdfff705af4698537a0f18ca640, type: 2}
   - {fileID: 11400000, guid: c2e1e6611eed9bd488222e7776c1fc65, type: 2}
-  - {fileID: 11400000, guid: e313746778f7fe5438119fc759431fc6, type: 2}
   - {fileID: 11400000, guid: 95821470a96307b4b8e9c8d27a55b136, type: 2}
   - {fileID: 11400000, guid: e3a84eb1dde870f4e886c356c916c1ba, type: 2}
-  - {fileID: 11400000, guid: fe58986b643a1e34cb7a5fb3a84ba84c, type: 2}
-  - {fileID: 11400000, guid: a99b7304749752149b7b761d4f098879, type: 2}
-  - {fileID: 11400000, guid: 5619bc4e505e28545a23ec4e6dfeb7f3, type: 2}
-  - {fileID: 11400000, guid: 28e18aee8958ab342974eec00e792146, type: 2}
+  - {fileID: 11400000, guid: e313746778f7fe5438119fc759431fc6, type: 2}
+  - {fileID: 11400000, guid: dd4350791c348774dac3b2d39042056f, type: 2}
+  scrapItem: {fileID: 11400000, guid: dd4350791c348774dac3b2d39042056f, type: 2}
+  scrapDropChance: 0.65
+  scrapIconWorldSize: 0.35
   spawnPoint: {fileID: 0}
   minItems: 1
   maxItems: 3

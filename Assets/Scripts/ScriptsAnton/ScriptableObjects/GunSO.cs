@@ -1,16 +1,14 @@
 using System;
 using System.Collections;
-using System.IO;
-using NUnit.Framework.Internal;
 using UnityEngine;
 using UnityEngine.Pool;
-using UnityEngine.Rendering;
 
 /// <summary>
 ///     Creates a Sciptable Object for the Guns with Logic so every Weapon is the same
 /// </summary>
 [CreateAssetMenu(fileName = "Gun", menuName = "Guns/Gun", order = 0)]
-public class GunSO : ScriptableObject {
+public class GunSO : ScriptableObject
+{
 
     public ImpactType impactType;
     public GunType type;
@@ -39,13 +37,17 @@ public class GunSO : ScriptableObject {
     private ParticleSystem shootSystem;
     private ObjectPool<TrailRenderer> trailPool;
 
+    private const int maxUpgradeCount = 2;
+
     /// <summary>
     /// Instantiates the Model of the Gun first then it will just turn it of and on
     /// </summary>
     /// <param name="parent">The Position of the Parent where it should spawn</param>
     /// <param name="activeMonoBehaviour">The Instance which spawned the Weapon so that a Coroutine can be used</param>
-    public void Spawn(Transform parent, MonoBehaviour activeMonoBehaviour) {
-        if (model == null) {
+    public void Spawn(Transform parent, MonoBehaviour activeMonoBehaviour)
+    {
+        if (model == null)
+        {
             this.activeMonoBehaviour = activeMonoBehaviour;
             lastShootTime = 0f;
             trailPool = new ObjectPool<TrailRenderer>(CreateTrail);
@@ -55,13 +57,16 @@ public class GunSO : ScriptableObject {
             model.transform.localPosition = spawnPoint;
             model.transform.localRotation = Quaternion.Euler(spawnRotation);
 
-            if (gunData != null && gunData.effectiveDamage == 0f && gunData.effectiveMaxAmmo == 0f) {
+            if (gunData != null && gunData.effectiveDamage == 0f && gunData.effectiveMaxAmmo == 0f)
+            {
                 gunData = new GunData();
                 gunData.UpdateStats(0, shootConfigSO.maxAmmo, shootConfigSO.damage);
             }
 
             currentAmmo = gunData.currentAmmo;
-        } else {
+        }
+        else
+        {
             model.SetActive(true);
 
             currentAmmo = savedAmmo;
@@ -79,8 +84,10 @@ public class GunSO : ScriptableObject {
     /// When the Weapon shoots then it will Shoot a Raycast and if it hits then it will play the bullet trail normally,
     /// otherwise the trail will be rendered until it reaches a certain duration
     /// </summary>
-    public void Shoot() {
-        if (Time.time > shootConfigSO.fireRate + lastShootTime && currentAmmo > 0) {
+    public void Shoot()
+    {
+        if (Time.time > shootConfigSO.fireRate + lastShootTime && currentAmmo > 0)
+        {
             emptyMagazine = false;
             lastShootTime = Time.time;
 
@@ -90,7 +97,8 @@ public class GunSO : ScriptableObject {
             shootSound.volume = shootConfigSO.shootVolume;
             shootSound.Play();
 
-            for (int i = 0; i < shootConfigSO.bulletsPerShoot; i++) {
+            for (int i = 0; i < shootConfigSO.bulletsPerShoot; i++)
+            {
                 Vector3 shootDirection = shootSystem.transform.forward
                     + new Vector3(
                             UnityEngine.Random.Range(-shootConfigSO.spread.x, shootConfigSO.spread.x),
@@ -99,15 +107,20 @@ public class GunSO : ScriptableObject {
                         );
                 shootDirection.Normalize();
 
-                if (Physics.Raycast(shootSystem.transform.position, shootDirection, out RaycastHit hit, 100f, shootConfigSO.hitMask)) {
+                if (Physics.Raycast(shootSystem.transform.position, shootDirection, out RaycastHit hit, 100f, shootConfigSO.hitMask))
+                {
                     activeMonoBehaviour.StartCoroutine(PlayTrail(shootSystem.transform.position, hit.point, hit));
-                } else {
+                }
+                else
+                {
                     activeMonoBehaviour.StartCoroutine(PlayTrail(shootSystem.transform.position, shootSystem.transform.position + (shootDirection * trailConfigSO.missDistance), new RaycastHit()));
                 }
             }
 
             currentAmmo--;
-        } else if (currentAmmo <= 0) {
+        }
+        else if (currentAmmo <= 0)
+        {
             emptyMagazine = true;
         }
     }
@@ -119,7 +132,8 @@ public class GunSO : ScriptableObject {
     /// <param name="startPoint">The starting position of the "bullets"</param>
     /// <param name="endPoint">The end position of the "bullets"</param>
     /// <param name="hit">The hit object</param>
-    private IEnumerator PlayTrail(Vector3 startPoint, Vector3 endPoint, RaycastHit hit) {
+    private IEnumerator PlayTrail(Vector3 startPoint, Vector3 endPoint, RaycastHit hit)
+    {
         TrailRenderer instance = trailPool.Get();
         instance.transform.SetParent(poolParent.transform, false);
         instance.gameObject.SetActive(true);
@@ -130,7 +144,8 @@ public class GunSO : ScriptableObject {
 
         float distance = Vector3.Distance(startPoint, endPoint);
         float remainingDistance = distance;
-        while (remainingDistance > 0f) {
+        while (remainingDistance > 0f)
+        {
             instance.transform.position = Vector3.Lerp(startPoint, endPoint, Mathf.Clamp01(1 - (remainingDistance / distance)));
             remainingDistance -= trailConfigSO.simulationSpeed * Time.deltaTime;
 
@@ -139,7 +154,8 @@ public class GunSO : ScriptableObject {
 
         instance.transform.position = endPoint;
 
-        if (hit.collider != null) {
+        if (hit.collider != null)
+        {
             SurfaceManager.Instance.HandleImpact(hit.transform.gameObject, endPoint, hit.normal, impactType, hit.triangleIndex);
 
             HitEnemy(hit);
@@ -157,7 +173,8 @@ public class GunSO : ScriptableObject {
     /// Creates the bullet path trail
     /// </summary>
     /// <returns>the rendered trail</returns>
-    private TrailRenderer CreateTrail() {
+    private TrailRenderer CreateTrail()
+    {
         GameObject instance = new GameObject("Bullet Trail");
         TrailRenderer trail = instance.AddComponent<TrailRenderer>();
         trail.colorGradient = trailConfigSO.color;
@@ -176,7 +193,8 @@ public class GunSO : ScriptableObject {
     /// <summary>
     /// Deactivates the Weapon and sets the shoot Particle to null
     /// </summary>
-    public void Despawn() {
+    public void Despawn()
+    {
         savedAmmo = currentAmmo;
         model.gameObject.SetActive(false);
 
@@ -186,13 +204,16 @@ public class GunSO : ScriptableObject {
     /// <summary>
     /// Cleanup after closing the game or changing the scene
     /// </summary>
-    public void DestroyAll() {
-        if (model != null) {
+    public void DestroyAll()
+    {
+        if (model != null)
+        {
             Destroy(model);
             model = null;
         }
 
-        if (poolParent != null) {
+        if (poolParent != null)
+        {
             Destroy(poolParent);
             poolParent = null;
         }
@@ -207,53 +228,185 @@ public class GunSO : ScriptableObject {
     ///     The Damage logic so Zombies can be damaged
     /// </summary>
     /// <param name="hit">The hit info of the Raycast</param>
-    private void HitEnemy(RaycastHit hit) {
+    private void HitEnemy(RaycastHit hit)
+    {
         var damageable = hit.transform.GetComponentInParent<IDamageable>();
         if (damageable != null && !damageable.IsDead())
             damageable.TakeDamage(gunData.effectiveDamage);
     }
 
-    public void SetAmmoAmount(int amount) {
+    public void SetFullMagazine()
+    {
+        /*
+        emptyMagazine = false;
+        currentAmmo = shootConfigSO.maxAmmo;
+        */
+
+        emptyMagazine = false;
+
+        currentAmmo = gunData.effectiveMaxAmmo;
+        savedAmmo = currentAmmo;
+        gunData.currentAmmo = currentAmmo;
+    }
+    public void SetAmmoAmount(int amount)
+    {
         emptyMagazine = false;
         currentAmmo += amount;
     }
 
-    public bool GetEmptyMagazine() {
+    public bool GetEmptyMagazine()
+    {
         return emptyMagazine;
     }
 
-    public bool MagazineIsFull() {
+    public bool MagazineIsFull()
+    {
         return currentAmmo == gunData.effectiveMaxAmmo;
     }
 
-    public int GetMaxAmmo() {
+    public int GetMaxAmmo()
+    {
         return gunData.effectiveMaxAmmo;
     }
 
-    public GunData GetGunData() {
+    public GunData GetGunData()
+    {
         return gunData;
     }
 
-    public void SaveGunData() {
+    public void SaveGunData()
+    {
         gunData = new GunData();
         gunData.UpdateStats(currentAmmo, gunData.effectiveMaxAmmo, gunData.effectiveDamage);
     }
 
-    public void LoadGunData(GunData gunData) {
+    public void LoadGunData(GunData gunData)
+    {
         this.gunData = gunData;
     }
 
+    /// <summary>
+    /// Increases the effective damage of this gun.
+    /// </summary>
+    /// <param name="amount">The amount of damage added to the gun.</param>
+    public void UpgradeDamage(int amount)
+    {
+        if (gunData == null && gunData.effectiveDamage == 0f && gunData.effectiveMaxAmmo == 0f)
+        {
+            gunData = new GunData();
+            gunData.UpdateStats(0, shootConfigSO.maxAmmo, shootConfigSO.damage);
+        }
+
+        gunData.UpdateStats(currentAmmo, gunData.effectiveMaxAmmo, gunData.effectiveDamage + amount
+        );
+
+        gunData.damageUpgradeCount++;
+    }
+
+    /// <summary>
+    /// Increases the effective maximum ammo capacity of this gun.
+    /// </summary>
+    /// <param name="amount">The amount of ammo capacity added to the gun.</param>
+    public void UpgradeMaxAmmo(int amount)
+    {
+        if (gunData == null && gunData.effectiveDamage == 0f && gunData.effectiveMaxAmmo == 0f)
+        {
+            gunData = new GunData();
+            gunData.UpdateStats(0, shootConfigSO.maxAmmo, shootConfigSO.damage);
+        }
+
+        int newMaxAmmo = gunData.effectiveMaxAmmo + amount;
+        int newCurrentAmmo = currentAmmo + amount;
+
+        if (newCurrentAmmo > newMaxAmmo)
+        {
+            newCurrentAmmo = newMaxAmmo;
+        }
+
+        currentAmmo = newCurrentAmmo;
+        savedAmmo = currentAmmo;
+
+        gunData.UpdateStats(currentAmmo, newMaxAmmo, gunData.effectiveDamage
+        );
+
+        gunData.ammoUpgradeCount++;
+    }
+
+    /// <summary>
+    /// Resets all runtime data of this GunSO when the ScriptableObject is loaded.
+    /// This is important because ScriptableObjects can keep changed runtime values
+    /// after Play Mode in the Unity Editor.
+    /// </summary>
+    private void OnEnable()
+    {
+        gunData = null;
+        model = null;
+        poolParent = null;
+        shootSystem = null;
+        shootSound = null;
+        trailPool = null;
+        savedAmmo = 0;
+        currentAmmo = 0;
+        emptyMagazine = false;
+    }
+
+    /// <summary>
+    /// Returns true if the damage upgrade can still be bought for this gun.
+    /// </summary>
+    public bool CanUpgradeDamage()
+    {
+        if (gunData == null && gunData.effectiveDamage == 0f && gunData.effectiveMaxAmmo == 0f)
+        {
+            gunData = new GunData();
+            gunData.UpdateStats(0, shootConfigSO.maxAmmo, shootConfigSO.damage);
+        }
+
+        return gunData.damageUpgradeCount < maxUpgradeCount;
+    }
+
+    /// <summary>
+    /// Returns true if the ammo upgrade can still be bought for this gun.
+    /// </summary>
+    public bool CanUpgradeMaxAmmo()
+    {
+        if (gunData == null && gunData.effectiveDamage == 0f && gunData.effectiveMaxAmmo == 0f)
+        {
+            gunData = new GunData();
+            gunData.UpdateStats(0, shootConfigSO.maxAmmo, shootConfigSO.damage);
+        }
+
+        return gunData.ammoUpgradeCount < maxUpgradeCount;
+    }
+
+    /// <summary>
+    /// Returns the current effective damage value of this gun.
+    /// </summary>
+    public int GetDamage()
+    {
+        if (gunData == null && gunData.effectiveDamage == 0f && gunData.effectiveMaxAmmo == 0f)
+        {
+            gunData = new GunData();
+            gunData.UpdateStats(0, shootConfigSO.maxAmmo, shootConfigSO.damage);
+        }
+
+        return gunData.effectiveDamage;
+    }
+
     [Serializable]
-    public class GunData {
+    public class GunData
+    {
         public int currentAmmo;
         public int effectiveMaxAmmo;
         public int effectiveDamage;
+        public int damageUpgradeCount;
+        public int ammoUpgradeCount;
 
-        public void UpdateStats(int currentAmmo, int effectiveMaxAmmo, int effectiveDamage) {
+
+        public void UpdateStats(int currentAmmo, int effectiveMaxAmmo, int effectiveDamage)
+        {
             this.currentAmmo = currentAmmo;
             this.effectiveMaxAmmo = effectiveMaxAmmo;
             this.effectiveDamage = effectiveDamage;
         }
     }
 }
-

@@ -2,22 +2,22 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Zeigt oben im UI das Scrap-Icon und die aktuelle Scrap-Anzahl an.
+/// Displays the scrap icon and the current scrap amount at the top of the UI.
 /// </summary>
 public class ScrapHudDisplay : MonoBehaviour {
-    // Spieler-Konto, aus dem die Scrap-Anzahl gelesen wird.
+    // Player wallet used to read the scrap amount.
     [SerializeField] private PlayerScrapWallet playerWallet;
 
-    // Icon vom Scrap. Hier kann Icon_Scrap.png eingetragen werden.
+    // Scrap icon. Icon_Scrap.png can be assigned here.
     [SerializeField] private Sprite scrapIcon;
 
-    // Feste Position, falls keine Health-Bar gesetzt wurde.
+    // Fixed position used when no health bar is assigned.
     [SerializeField] private Vector2 fallbackHudPosition = new Vector2(20f, -90f);
 
-    // Größe vom Icon.
+    // Size of the icon.
     [SerializeField] private Vector2 iconSize = new Vector2(34f, 34f);
 
-    // Farbe vom Anzahl-Text.
+    // Color of the amount text.
     [SerializeField] private Color textColor = new Color(1f, 0.82f, 0.35f);
 
     private RectTransform hudRect;
@@ -43,7 +43,7 @@ public class ScrapHudDisplay : MonoBehaviour {
     }
 
     private void FindWalletIfMissing() {
-        // Sucht das Wallet automatisch, falls es im Inspector nicht gesetzt wurde.
+        // Finds the wallet automatically if it was not assigned in the Inspector.
         if (playerWallet != null) {
             return;
         }
@@ -52,8 +52,8 @@ public class ScrapHudDisplay : MonoBehaviour {
     }
 
     private void HideOldImageOnThisObject() {
-        // Falls dieses Script aus Versehen auf ein rotes UI-Image gelegt wurde,
-        // wird dieses alte Bild ausgeblendet.
+        // If this script was accidentally placed on a red UI image,
+        // the old image is hidden.
         Image oldImage = GetComponent<Image>();
         if (oldImage != null) {
             oldImage.enabled = false;
@@ -61,7 +61,7 @@ public class ScrapHudDisplay : MonoBehaviour {
     }
 
     private void CreateHud() {
-        // Erstellt ein eigenes Canvas nur für die Scrap-Anzeige.
+        // Creates a separate canvas for the scrap display.
         hudRoot = new GameObject("Scrap HUD Canvas");
         Canvas canvas = hudRoot.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
@@ -74,7 +74,7 @@ public class ScrapHudDisplay : MonoBehaviour {
 
         hudRoot.AddComponent<GraphicRaycaster>();
 
-        // Container für Icon und Text.
+        // Container for the icon and text.
         GameObject hudObject = new GameObject("Scrap HUD");
         hudObject.transform.SetParent(hudRoot.transform, false);
 
@@ -85,12 +85,12 @@ public class ScrapHudDisplay : MonoBehaviour {
         hudRect.anchoredPosition = fallbackHudPosition;
         hudRect.sizeDelta = new Vector2(126f, 46f);
 
-        // Kleiner dunkler Hintergrund, damit die Anzeige zum Zombie-Spiel passt.
+        // Small dark background that matches the zombie game.
         Image background = hudObject.AddComponent<Image>();
         background.color = new Color(0.02f, 0.03f, 0.025f, 0.82f);
         background.raycastTarget = false;
 
-        // Icon links in der Anzeige.
+        // Icon on the left side of the display.
         GameObject iconObject = new GameObject("Scrap Icon");
         iconObject.transform.SetParent(hudObject.transform, false);
 
@@ -106,7 +106,7 @@ public class ScrapHudDisplay : MonoBehaviour {
         iconImage.preserveAspect = true;
         iconImage.raycastTarget = false;
 
-        // Text rechts neben dem Icon.
+        // Text to the right of the icon.
         GameObject textObject = new GameObject("Scrap Count");
         textObject.transform.SetParent(hudObject.transform, false);
 
@@ -135,7 +135,7 @@ public class ScrapHudDisplay : MonoBehaviour {
     }
 
     private void UpdateHudPosition() {
-        // Hält das Scrap-HUD an einer festen Position.
+        // Keeps the scrap HUD at a fixed position.
         if (hudRect == null) {
             return;
         }
@@ -144,7 +144,7 @@ public class ScrapHudDisplay : MonoBehaviour {
     }
 
     private void UpdateScrapCount() {
-        // Aktualisiert die Zahl neben dem Scrap-Icon.
+        // Updates the number next to the scrap icon.
         if (scrapCountText == null) {
             return;
         }

@@ -23,7 +23,7 @@ public class FindEnemy : MonoBehaviour {
     /// <summary>
     /// The defined Enemy Tag to find the enemies as GameObjects.
     /// </summary>
-    public string enemyTag = "Enemy"; 
+    public string enemyTag = "Enemy";
 
 
     // We need function to see which GameObjects in our radius and wich Object has the Tag "Enemy".
@@ -52,11 +52,55 @@ public class FindEnemy : MonoBehaviour {
             ZombieAI zombie = hit.gameObject.GetComponentInParent<ZombieAI>();
             if (zombie != null) {
                 if(zombie.IsDead()) {
-                    return;
+                    continue;
+                }
+                if (IsBlockedByObject(zombie)) {
+                    continue;
                 }
                 this.zombie = zombie; // global variable becomes the local variable
             }
         }
+    }
+
+    /// <summary>
+    /// Checks if there is any collider between the tower and the target zombie.
+    /// </summary>
+    private bool IsBlockedByObject(ZombieAI targetZombie) {
+        Vector3 startPosition = transform.position + Vector3.up * 1.0f;
+        Vector3 targetPosition = targetZombie.transform.position + Vector3.up * 1.0f;
+
+        Vector3 direction = targetPosition - startPosition;
+        float distance = direction.magnitude;
+
+        RaycastHit[] hits = Physics.RaycastAll(
+            startPosition,
+            direction.normalized,
+            distance
+        );
+
+        System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+        foreach (RaycastHit hit in hits) {
+            // Ignore this tower itself
+            if (hit.collider.transform.IsChildOf(transform))
+                continue;
+
+            // Check if the hit object belongs to a zombie
+            ZombieAI hitZombie = hit.collider.GetComponentInParent<ZombieAI>();
+
+            // Ignore dead zombies. They should not block targeting.
+            if (hitZombie != null && hitZombie.IsDead())
+                continue;
+
+            // If the first relevant hit is the target zombie, line of sight is clear
+            if (hitZombie == targetZombie)
+                return false;
+
+            // If another zombie or another object is hit first, the target is blocked
+            return true;
+        }
+
+        return false;
     }
 
     /// <summary>
