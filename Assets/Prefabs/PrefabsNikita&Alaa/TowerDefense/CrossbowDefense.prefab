@@ -49,7 +49,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   zombie: {fileID: 0}
-  radius: 8
+  radius: 6
   searchInterval: 0.25
   enemyTag: Enemy
 --- !u!65 &-5825029728297004082
@@ -220,7 +220,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a3933006763405e429ceb029dd63b907, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.461
+      value: 0.455
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a3933006763405e429ceb029dd63b907, type: 3}
       propertyPath: m_LocalPosition.z

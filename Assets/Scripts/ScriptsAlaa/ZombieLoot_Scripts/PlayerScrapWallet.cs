@@ -53,7 +53,7 @@ public class PlayerScrapWallet : MonoBehaviour {
         currentScrap += amount;
         ScrapInventorySaver.AddScrapToInventory(amount);
         ShowScrapMessage(amount);
-        //Debug.Log($"Player received {amount} scrap. Total scrap: {currentScrap}");
+       
     }
 
     public bool TrySpendScrap(int amount) {
@@ -86,7 +86,7 @@ public class PlayerScrapWallet : MonoBehaviour {
         }
 
         // Updates and displays the text.
-        scrapMessageText.text = $"+{amount} Scrap received\nScrap: {currentScrap}";
+        scrapMessageText.text = $"+{amount} Scrap erhalten\nScrap: {currentScrap}";
         scrapMessageText.gameObject.SetActive(true);
         messageTimer = messageDuration;
     }

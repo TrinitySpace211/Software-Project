@@ -3660,7 +3660,7 @@ PrefabInstance:
       objectReference: {fileID: 758257482}
     - target: {fileID: 5427726534359471549, guid: 0c9fa39718c653b4c9b29a8aaa6e023e, type: 3}
       propertyPath: hoursPerRealSecond
-      value: 0.1
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5427726534359471549, guid: 0c9fa39718c653b4c9b29a8aaa6e023e, type: 3}
       propertyPath: onNightStarted.m_PersistentCalls.m_Calls.Array.size
@@ -5923,7 +5923,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1949609370620530080, guid: a1a50fc485dee7f4e8bbcbedbd10cd33, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 40
+      value: 40.000122
       objectReference: {fileID: 0}
     - target: {fileID: 1949609370620530080, guid: a1a50fc485dee7f4e8bbcbedbd10cd33, type: 3}
       propertyPath: m_AnchoredPosition.y

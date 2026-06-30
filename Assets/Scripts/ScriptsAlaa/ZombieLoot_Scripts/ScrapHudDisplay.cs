@@ -58,8 +58,8 @@ public class ScrapHudDisplay : MonoBehaviour {
 
     private void CreateHud() {
         // Creates a separate canvas for the scrap display.
-        GameObject canvasObject = new GameObject("Scrap HUD Canvas");
-        Canvas canvas = canvasObject.AddComponent<Canvas>();
+        hudRoot = new GameObject("Scrap HUD Canvas");
+        Canvas canvas = hudRoot.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         canvas.sortingOrder = 1000;
 

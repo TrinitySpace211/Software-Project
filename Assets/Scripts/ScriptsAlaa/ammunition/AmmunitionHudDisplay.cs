@@ -54,7 +54,7 @@ public class AmmunitionHudDisplay : MonoBehaviour {
 
     private void FindWeaponSelectorIfMissing() {
         // Finds the weapon selector automatically if it is empty in the Inspector.
-        if (weaponSelector != null) {
+        if (player != null) {
             return;
         }
 

@@ -47,16 +47,22 @@ public class ScrapPickup : MonoBehaviour {
     }
 
     private void OnTriggerEnter(Collider other) {
-        // Remembers the player without awarding scrap automatically.
-        Player player = other.GetComponentInParent<Player>();
-        if (player == null) {
+        // Looks for the player's scrap wallet.
+        PlayerScrapWallet wallet = other.GetComponentInParent<PlayerScrapWallet>();
+
+        // Creates a wallet if the player does not have one yet.
+        if (wallet == null && other.CompareTag("Player")) {
+            wallet = other.gameObject.AddComponent<PlayerScrapWallet>();
+        }
+
+        // Does nothing if no player wallet was found.
+        if (wallet == null) {
             return;
         }
 
-        playerWallet = player.GetComponent<PlayerScrapWallet>();
-        if (playerWallet == null) {
-            playerWallet = player.gameObject.AddComponent<PlayerScrapWallet>();
-        }
+        // Gives scrap and removes the pickup.
+        wallet.AddScrap(scrapAmount);
+        Destroy(gameObject);
     }
 
     private void HandleItemCollected(Item collectedItem) {
