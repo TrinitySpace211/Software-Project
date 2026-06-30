@@ -21,4 +21,4 @@ MonoBehaviour:
   maxStackSize: 1
   itemPrefab: {fileID: 7532257924388312432, guid: 02d2a1c83d71ebb44bf3db02d4ff627b, type: 3}
   handItemPrefab: {fileID: 0}
-  baseDamage: 10
+  baseDamage: 50
