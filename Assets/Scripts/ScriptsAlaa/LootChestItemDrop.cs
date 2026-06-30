@@ -6,29 +6,32 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
 
 /// <summary>
-/// Opens a chest visually and spawns random loot items when the player presses E nearby.
-/// This script can be added next to LootChest without changing LootChest itself.
+/// Opens a chest and creates random loot when F is pressed.
+/// Works together with the LootChest script.
 /// </summary>
 public class LootChestItemDrop : MonoBehaviour {
     [Header("References")]
-    // Player can be assigned in the Inspector.
-    // If it is empty, the script tries to find it automatically.
+    // The player can be assigned in the Inspector.
+    // An empty field is found automatically.
     [SerializeField] private Transform player;
 
     [Header("Interaction")]
-    // Use the same distance and key as the LootChest script.
+    // Uses the same distance and key as LootChest.
     [SerializeField] private float interactionDistance = 2.5f;
-    [SerializeField] private Key interactionKey = Key.E;
+    [SerializeField] private Key interactionKey = Key.F;
 
     [Header("Chest Opening")]
-    // Optional lid object. If assigned, it rotates when the chest opens.
+    // Optional lid that rotates when the chest is opened.
     [SerializeField] private Transform lid;
     [SerializeField] private Vector3 openRotation = new Vector3(-70f, 0f, 0f);
     [SerializeField] private float openSpeed = 8f;
 
     [Header("Loot Spawn")]
-    // Add item prefabs here. The script chooses random prefabs from this list.
+    // Random loot is selected from this list.
     [SerializeField] private ItemSO[] itemPrefabs;
+    [SerializeField] private ItemSO scrapItem;
+    [SerializeField, Range(0f, 1f)] private float scrapDropChance = 0.65f;
+    [SerializeField] private float scrapIconWorldSize = 0.35f;
     [SerializeField] private Transform spawnPoint;
     [SerializeField] private int minItems = 1;
     [SerializeField] private int maxItems = 3;
@@ -39,7 +42,7 @@ public class LootChestItemDrop : MonoBehaviour {
     [SerializeField] private float revealDuration = 0.65f;
 
     [Header("Loot Light")]
-    // Short light effect that appears when loot comes out of the chest.
+    // Short light effect when loot comes out of the chest.
     [SerializeField] private Color revealLightColor = new Color(1f, 0.92f, 0.45f);
     [SerializeField] private float revealLightRange = 2.5f;
     [SerializeField] private float revealLightIntensity = 4f;
@@ -54,14 +57,19 @@ public class LootChestItemDrop : MonoBehaviour {
     private Light revealLight;
 
     private void Awake() {
-        // Prepare all runtime references and effects before the first frame.
+        // Prepares references and effects on startup.
         FindMissingReferences();
         SaveLidRotations();
         CreateRevealLight();
+
+        // Automatically ensures that the chest receives new loot every day.
+        if (GetComponent<DailyLootChestReset>() == null) {
+            gameObject.AddComponent<DailyLootChestReset>();
+        }
     }
 
     private void Update() {
-        // Keep checking the player state and the interaction key every frame.
+        // Continuously checks the player and the key.
         FindMissingReferences();
         CheckPlayerDistance();
         ResetAfterPlayerLeaves();
@@ -69,7 +77,7 @@ public class LootChestItemDrop : MonoBehaviour {
     }
 
     private void FindMissingReferences() {
-        // Automatically find the player by using the "Player" tag.
+        // Finds the player automatically by using the Player tag.
         if (player == null) {
             GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
             if (playerObject != null) {
@@ -79,7 +87,7 @@ public class LootChestItemDrop : MonoBehaviour {
     }
 
     private void SaveLidRotations() {
-        // Store the closed and opened lid rotations.
+        // Stores the closed and open lid rotations.
         if (lid == null) {
             return;
         }
@@ -99,7 +107,7 @@ public class LootChestItemDrop : MonoBehaviour {
     }
 
     private void ResetAfterPlayerLeaves() {
-        // The chest can be opened again after the player has left its range once.
+        // The chest can be opened again after the player leaves.
         if (waitsForPlayerToLeave && !playerInRange) {
             waitsForPlayerToLeave = false;
             CloseLid();
@@ -107,7 +115,7 @@ public class LootChestItemDrop : MonoBehaviour {
     }
 
     private void CheckInteractionInput() {
-        // Only spawn loot once per visit, then wait until the player leaves.
+        // Waits after opening until the player leaves the area.
         if (waitsForPlayerToLeave || !playerInRange || Keyboard.current == null) {
             return;
         }
@@ -119,19 +127,28 @@ public class LootChestItemDrop : MonoBehaviour {
     }
 
     private void OpenAndDropItems() {
-        // Prevent another open action until the player leaves the chest area.
+        // Prevents another opening until the player leaves.
         waitsForPlayerToLeave = true;
         OpenLid();
 
-        // The chest can be opened multiple times, but the loot should only spawn once.
+        // Loot appears only once per available day.
         if (!hasSpawnedLoot) {
             hasSpawnedLoot = true;
             StartCoroutine(SpawnItemsWithReveal());
         }
     }
 
+    /// <summary>
+    /// Makes the loot available again for the new day.
+    /// </summary>
+    public void ResetForNewDay() {
+        hasSpawnedLoot = false;
+        waitsForPlayerToLeave = false;
+        CloseLid();
+    }
+
     private void OpenLid() {
-        // If no lid was assigned, only the loot items spawn.
+        // Only the loot appears if no lid is assigned.
         if (lid == null) {
             return;
         }
@@ -140,7 +157,7 @@ public class LootChestItemDrop : MonoBehaviour {
     }
 
     private void CloseLid() {
-        // The lid closes again when the player leaves the chest.
+        // The lid closes when the player leaves.
         if (lid == null) {
             return;
         }
@@ -149,7 +166,7 @@ public class LootChestItemDrop : MonoBehaviour {
     }
 
     private void StartLidRotation(Quaternion targetRotation) {
-        // Stop the old lid animation before starting a new one.
+        // Stops the previous lid movement before starting a new one.
         if (lidRoutine != null) {
             StopCoroutine(lidRoutine);
         }
@@ -158,7 +175,7 @@ public class LootChestItemDrop : MonoBehaviour {
     }
 
     private IEnumerator RotateLid(Quaternion targetRotation) {
-        // Smoothly rotate the lid until it reaches the target rotation.
+        // Smoothly rotates the lid to the target position.
         while (Quaternion.Angle(lid.localRotation, targetRotation) > 0.5f) {
             lid.localRotation = Quaternion.Slerp(lid.localRotation, targetRotation, openSpeed * Time.deltaTime);
             yield return null;
@@ -168,7 +185,7 @@ public class LootChestItemDrop : MonoBehaviour {
     }
 
     private void CreateRevealLight() {
-        // Create a light that is only used for the short loot reveal effect.
+        // Creates the light for the short loot effect.
         GameObject lightObject = new GameObject("LootRevealLight");
         lightObject.transform.SetParent(transform);
         lightObject.transform.localPosition = spawnPoint != null
@@ -186,17 +203,17 @@ public class LootChestItemDrop : MonoBehaviour {
     }
 
     private IEnumerator SpawnItemsWithReveal() {
-        // Stop here if no loot prefabs were assigned in the Inspector.
+        // Stops if no loot items are assigned.
         if (itemPrefabs == null || itemPrefabs.Length == 0) {
             Debug.LogWarning($"Loot chest '{name}' has no item prefabs assigned.");
             yield break;
         }
 
-        // Choose how many items should appear and start the short light flash.
+        // Determines the item count and starts the light effect.
         int itemCount = UnityEngine.Random.Range(minItems, maxItems + 1);
         StartCoroutine(PlayRevealLight());
 
-        // Spawn items with a small delay so the reveal feels less instant.
+        // Creates the items with a short delay.
         for (int i = 0; i < itemCount; i++) {
             SpawnSingleItem(i, itemCount);
             yield return new WaitForSeconds(0.12f);
@@ -204,7 +221,7 @@ public class LootChestItemDrop : MonoBehaviour {
     }
 
     private IEnumerator PlayRevealLight() {
-        // Fade the reveal light out over time.
+        // Slowly fades out the loot light.
         if (revealLight == null) {
             yield break;
         }
@@ -224,17 +241,33 @@ public class LootChestItemDrop : MonoBehaviour {
     }
 
     private void SpawnSingleItem(int itemIndex, int itemCount) {
-        // Pick one random prefab from the loot list.
-        ItemSO itemSO = itemPrefabs[UnityEngine.Random.Range(0, itemPrefabs.Length)];
+        // Scrap is common. Healing items are selected less often.
+        ItemSO itemSO = ChooseRandomLootItem();
         if (itemSO == null) {
             return;
         }
 
-        // Spawn the item at the chest, then animate it to its final landing position.
+        // Creates the item and moves it to its final position.
         Vector3 startPosition = GetSpawnPosition();
         Vector3 landingPosition = GetLandingPosition(itemIndex, itemCount);
 
+        // Scrap has no world prefab, so it is created here.
+        if (itemSO == scrapItem) {
+            SpawnScrapPickup(startPosition, landingPosition);
+            return;
+        }
+
+        if (itemSO.itemPrefab == null) {
+            Debug.LogWarning($"Loot item '{itemSO.itemName}' has no item prefab assigned.");
+            return;
+        }
+
         Item spawnedItem = Instantiate(itemSO.itemPrefab, startPosition, itemSO.itemPrefab.transform.rotation).GetComponentInChildren<Item>();
+
+        if (spawnedItem == null) {
+            Debug.LogWarning($"Loot item '{itemSO.itemName}' has no Item component.");
+            return;
+        }
 
         if (itemSO.itemType == ItemType.Gun) {
             SetItemType(() => spawnedItem.SetItemType(itemSO.gunType), itemSO.itemType, itemSO.gunType);
@@ -249,15 +282,82 @@ public class LootChestItemDrop : MonoBehaviour {
         StartCoroutine(RevealItem(spawnedItem.gameObject, startPosition, landingPosition));
     }
 
+    private ItemSO ChooseRandomLootItem() {
+        // Scrap has a high chance of appearing from the chest.
+        if (scrapItem != null && UnityEngine.Random.value < scrapDropChance) {
+            return scrapItem;
+        }
+
+        // Counts only healing items and excludes scrap from this selection.
+        int healingItemCount = 0;
+        foreach (ItemSO item in itemPrefabs) {
+            if (item != null && item != scrapItem) {
+                healingItemCount++;
+            }
+        }
+
+        // Uses scrap if no healing items are assigned.
+        if (healingItemCount == 0) {
+            return scrapItem;
+        }
+
+        int selectedHealingItem = UnityEngine.Random.Range(0, healingItemCount);
+        foreach (ItemSO item in itemPrefabs) {
+            if (item == null || item == scrapItem) {
+                continue;
+            }
+
+            if (selectedHealingItem == 0) {
+                return item;
+            }
+
+            selectedHealingItem--;
+        }
+
+        return scrapItem;
+    }
+
+    private void SpawnScrapPickup(Vector3 startPosition, Vector3 landingPosition) {
+        // Creates a visible scrap pickup using the existing scrap icon.
+        GameObject pickupObject = new GameObject("Scrap Pickup");
+        pickupObject.transform.position = startPosition;
+
+        SphereCollider pickupCollider = pickupObject.AddComponent<SphereCollider>();
+        pickupCollider.isTrigger = true;
+        pickupCollider.radius = 0.5f;
+
+        GameObject iconObject = new GameObject("Scrap Icon");
+        iconObject.transform.SetParent(pickupObject.transform, false);
+
+        SpriteRenderer spriteRenderer = iconObject.AddComponent<SpriteRenderer>();
+        spriteRenderer.sprite = scrapItem.icon;
+        spriteRenderer.sortingOrder = 5;
+
+        // Adjusts the icon to match the size of the healing items.
+        if (spriteRenderer.sprite != null) {
+            Vector2 spriteSize = spriteRenderer.sprite.bounds.size;
+            float largestSide = Mathf.Max(spriteSize.x, spriteSize.y);
+
+            if (largestSide > 0f) {
+                iconObject.transform.localScale = Vector3.one * (scrapIconWorldSize / largestSide);
+            }
+        }
+
+        ScrapPickup pickup = pickupObject.AddComponent<ScrapPickup>();
+        pickup.SetAmount(1);
+
+        StartCoroutine(RevealItem(pickupObject, startPosition, landingPosition));
+    }
+
     private Vector3 GetSpawnPosition() {
-        // Use the custom spawn point if one exists; otherwise spawn above the chest.
+        // Uses the spawn point or a position above the chest.
         return spawnPoint != null
             ? spawnPoint.position
             : transform.position + (Vector3.up * spawnHeight);
     }
 
     private Vector3 GetLandingPosition(int itemIndex, int itemCount) {
-        // Spread multiple items next to each other in front of the chest.
+        // Spreads multiple items next to each other in front of the chest.
         float centerOffset = (itemCount - 1) * 0.5f;
         float sideOffset = (itemIndex - centerOffset) * itemSpacing;
 
@@ -268,12 +368,12 @@ public class LootChestItemDrop : MonoBehaviour {
     }
 
     private IEnumerator RevealItem(GameObject spawnedItem, Vector3 startPosition, Vector3 landingPosition) {
-        // Animate one spawned item from the chest to the landing position.
+        // Moves an item from the chest to its final position.
         if (spawnedItem == null) {
             yield break;
         }
 
-        // Disable physics during the reveal animation so the item does not fall too early.
+        // Temporarily disables physics during the movement.
         Rigidbody itemRigidbody = spawnedItem.GetComponent<Rigidbody>();
 
         bool hadRigidbody = itemRigidbody != null;
@@ -282,7 +382,7 @@ public class LootChestItemDrop : MonoBehaviour {
             itemRigidbody.isKinematic = true;
         }
 
-        // Move the item upward first, then down to the final landing position.
+        // Moves the item upward first and then downward.
         Vector3 peakPosition = startPosition + (Vector3.up * revealHeight);
         float elapsedTime = 0f;
 
@@ -300,7 +400,7 @@ public class LootChestItemDrop : MonoBehaviour {
 
         spawnedItem.transform.position = landingPosition;
 
-        // Re-enable physics after the item has landed.
+        // Re-enables physics after landing.
         if (hadRigidbody) {
             itemRigidbody.isKinematic = false;
         }
@@ -321,7 +421,7 @@ public class LootChestItemDrop : MonoBehaviour {
     }
 
     /* private void OnDrawGizmosSelected() {
-        // Shows the interaction range and approximate spawn area in the editor.
+        // Shows the range and spawn area in the editor.
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, interactionDistance);
 

@@ -2,28 +2,28 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Speichert den Schrott vom Spieler.
+/// Stores the player's scrap.
 /// </summary>
 public class PlayerScrapWallet : MonoBehaviour {
-    // Schrott, mit dem der Spieler am Anfang startet.
+    // Scrap the player starts with.
     [SerializeField] private int startingScrap;
 
-    // Aktueller Schrott vom Spieler.
+    // Player's current scrap.
     [SerializeField] private int currentScrap;
 
-    // Text, der kurz angezeigt wird, wenn der Spieler Schrott bekommt.
+    // Text shown briefly when the player receives scrap.
     [SerializeField] private Text scrapMessageText;
 
-    // Wie lange die Schrott-Meldung sichtbar bleibt.
+    // How long the scrap message remains visible.
     [SerializeField] private float messageDuration = 2f;
 
-    // Andere Scripts können so den aktuellen Schrott lesen.
+    // Allows other scripts to read the current scrap amount.
     public int ScrapAmount => currentScrap;
 
     private float messageTimer;
 
     private void Awake() {
-        // Setzt den Startwert und erstellt den Text, falls keiner gesetzt wurde.
+        // Sets the starting value and creates the text if none was assigned.
         currentScrap = Mathf.Max(0, startingScrap);
         CreateMessageTextIfMissing();
     }
@@ -31,12 +31,12 @@ public class PlayerScrapWallet : MonoBehaviour {
     private void Update() {
         SyncScrapFromInventory();
 
-        // Wenn keine Meldung aktiv ist, muss nichts gemacht werden.
+        // Nothing needs to be done when no message is active.
         if (scrapMessageText == null || !scrapMessageText.gameObject.activeSelf) {
             return;
         }
 
-        // Versteckt die Meldung nach kurzer Zeit.
+        // Hides the message after a short time.
         messageTimer -= Time.deltaTime;
         if (messageTimer <= 0f) {
             scrapMessageText.gameObject.SetActive(false);
@@ -44,12 +44,12 @@ public class PlayerScrapWallet : MonoBehaviour {
     }
 
     public void AddScrap(int amount) {
-        // Negative oder leere Werte werden ignoriert.
+        // Ignores negative or empty values.
         if (amount <= 0) {
             return;
         }
 
-        // Schrott erhöhen und eine Meldung anzeigen.
+        // Increases the scrap amount and displays a message.
         currentScrap += amount;
         ScrapInventorySaver.AddScrapToInventory(amount);
         ShowScrapMessage(amount);
@@ -57,59 +57,59 @@ public class PlayerScrapWallet : MonoBehaviour {
     }
 
     public bool TrySpendScrap(int amount) {
-        // 0 oder weniger kostet nichts.
+        // An amount of 0 or less costs nothing.
         if (amount <= 0) {
             return true;
         }
 
-        // Wenn der Spieler nicht genug Schrott hat, kann er nicht bezahlen.
+        // The player cannot pay without enough scrap.
         if (currentScrap < amount) {
             return false;
         }
 
-        // Schrott abziehen, wenn genug vorhanden ist.
+        // Removes scrap when enough is available.
         currentScrap -= amount;
         return true;
     }
 
     private void SyncScrapFromInventory() {
-        // Wenn Scrap im Inventar geaendert wurde, wird die Wallet angepasst.
+        // Updates the wallet when the scrap amount in the inventory changes.
         if (ScrapInventorySaver.TryGetScrapAmount(out int inventoryScrap)) {
             currentScrap = inventoryScrap;
         }
     }
 
     private void ShowScrapMessage(int amount) {
-        // Ohne Textfeld kann keine Meldung angezeigt werden.
+        // A message cannot be displayed without a text field.
         if (scrapMessageText == null) {
             return;
         }
 
-        // Text aktualisieren und anzeigen.
-        scrapMessageText.text = $"+{amount} Scrap erhalten\nScrap: {currentScrap}";
+        // Updates and displays the text.
+        scrapMessageText.text = $"+{amount} Scrap received\nScrap: {currentScrap}";
         scrapMessageText.gameObject.SetActive(true);
         messageTimer = messageDuration;
     }
 
     private void CreateMessageTextIfMissing() {
-        // Wenn schon ein Text im Inspector gesetzt wurde, benutzen wir diesen.
+        // Uses the text already assigned in the Inspector when available.
         if (scrapMessageText != null) {
             scrapMessageText.gameObject.SetActive(false);
             return;
         }
 
-        // Erstellt ein einfaches Canvas für die Schrott-Meldung.
+        // Creates a simple canvas for the scrap message.
         GameObject canvasObject = new GameObject("Scrap Message Canvas");
         Canvas canvas = canvasObject.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         canvasObject.AddComponent<CanvasScaler>();
         canvasObject.AddComponent<GraphicRaycaster>();
 
-        // Erstellt das Text-Objekt oben auf dem Bildschirm.
+        // Creates the text object at the top of the screen.
         GameObject textObject = new GameObject("Scrap Message");
         textObject.transform.SetParent(canvas.transform, false);
 
-        // Position und Größe vom Text.
+        // Position and size of the text.
         RectTransform rectTransform = textObject.AddComponent<RectTransform>();
         rectTransform.anchorMin = new Vector2(0.5f, 1f);
         rectTransform.anchorMax = new Vector2(0.5f, 1f);
@@ -117,7 +117,7 @@ public class PlayerScrapWallet : MonoBehaviour {
         rectTransform.anchoredPosition = new Vector2(0f, -80f);
         rectTransform.sizeDelta = new Vector2(420f, 90f);
 
-        // Text optisch vorbereiten.
+        // Prepares the visual appearance of the text.
         scrapMessageText = textObject.AddComponent<Text>();
         scrapMessageText.alignment = TextAnchor.MiddleCenter;
         scrapMessageText.fontSize = 30;

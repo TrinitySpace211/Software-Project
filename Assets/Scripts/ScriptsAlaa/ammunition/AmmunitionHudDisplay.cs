@@ -5,22 +5,22 @@ using UnityEditor;
 #endif
 
 /// <summary>
-/// Zeigt die Munition der aktuell ausgeruesteten Waffe an.
+/// Displays the ammunition of the currently equipped weapon.
 /// </summary>
 public class AmmunitionHudDisplay : MonoBehaviour {
-    // Spieler-Waffenauswahl, aus der die aktuelle Waffe gelesen wird.
+    // Player weapon selector used to read the current weapon.
     [SerializeField] private PlayerWeaponSelector weaponSelector;
 
-    // Munition-Icon aus dem Projekt.
+    // Ammunition icon from the project.
     [SerializeField] private Sprite ammunitionIcon;
 
-    // Feste Position auf dem Bildschirm.
+    // Fixed position on the screen.
     [SerializeField] private Vector2 hudPosition = new Vector2(20f, -145f);
 
-    // Groesse vom Icon.
+    // Size of the icon.
     [SerializeField] private Vector2 iconSize = new Vector2(34f, 34f);
 
-    // Farbe vom Munitionstext.
+    // Color of the ammunition text.
     [SerializeField] private Color textColor = new Color(0.85f, 0.95f, 1f);
 
     private RectTransform hudRect;
@@ -45,7 +45,7 @@ public class AmmunitionHudDisplay : MonoBehaviour {
     }
 
     private void FindWeaponSelectorIfMissing() {
-        // Sucht die Waffenauswahl automatisch, falls sie im Inspector leer ist.
+        // Finds the weapon selector automatically if it is empty in the Inspector.
         if (weaponSelector != null) {
             return;
         }
@@ -54,7 +54,7 @@ public class AmmunitionHudDisplay : MonoBehaviour {
     }
 
     private void FindIconIfMissing() {
-        // Falls das Icon im Inspector leer ist, wird das Logo automatisch gesucht.
+        // Automatically finds the logo if the icon is empty in the Inspector.
         if (ammunitionIcon != null) {
             return;
         }
@@ -67,7 +67,7 @@ public class AmmunitionHudDisplay : MonoBehaviour {
     }
 
     private void RemoveOwnRuntimeHudCanvas() {
-        // Entfernt nur das HUD, das von diesem Objekt erstellt wurde.
+        // Removes only the HUD created by this object.
         Transform oldCanvas = transform.Find("Ammunition HUD Canvas");
         if (oldCanvas != null) {
             Destroy(oldCanvas.gameObject);
@@ -75,7 +75,7 @@ public class AmmunitionHudDisplay : MonoBehaviour {
     }
 
     private void HideOldImageOnThisObject() {
-        // Falls das Script auf einem UI-Bild liegt, wird dieses alte Bild versteckt.
+        // Hides the old image if the script is attached to a UI image.
         Image oldImage = GetComponent<Image>();
         if (oldImage != null) {
             oldImage.enabled = false;
@@ -83,7 +83,7 @@ public class AmmunitionHudDisplay : MonoBehaviour {
     }
 
     private void CreateHud() {
-        // Erstellt ein eigenes Canvas fuer die Munitionsanzeige.
+        // Creates a separate canvas for the ammunition display.
         canvasObject = new GameObject("Ammunition HUD Canvas");
         canvasObject.transform.SetParent(transform, false);
 
@@ -98,7 +98,7 @@ public class AmmunitionHudDisplay : MonoBehaviour {
 
         canvasObject.AddComponent<GraphicRaycaster>();
 
-        // Container fuer Icon und Text.
+        // Container for the icon and text.
         hudObject = new GameObject("Ammunition HUD");
         hudObject.transform.SetParent(canvas.transform, false);
 
@@ -109,12 +109,12 @@ public class AmmunitionHudDisplay : MonoBehaviour {
         hudRect.anchoredPosition = hudPosition;
         hudRect.sizeDelta = new Vector2(175f, 46f);
 
-        // Dunkler Hintergrund, damit man die Anzeige gut lesen kann.
+        // Dark background that makes the display easy to read.
         Image background = hudObject.AddComponent<Image>();
         background.color = new Color(0.02f, 0.025f, 0.03f, 0.82f);
         background.raycastTarget = false;
 
-        // Icon links in der Anzeige.
+        // Icon on the left side of the display.
         GameObject iconObject = new GameObject("Ammunition Icon");
         iconObject.transform.SetParent(hudObject.transform, false);
 
@@ -131,7 +131,7 @@ public class AmmunitionHudDisplay : MonoBehaviour {
         ammunitionIconImage.raycastTarget = false;
         UpdateAmmunitionIcon();
 
-        // Text rechts neben dem Icon.
+        // Text to the right of the icon.
         GameObject textObject = new GameObject("Ammunition Count");
         textObject.transform.SetParent(hudObject.transform, false);
 
@@ -159,7 +159,7 @@ public class AmmunitionHudDisplay : MonoBehaviour {
     }
 
     private void ApplyTextColor() {
-        // Nimmt immer die Farbe aus dem Inspector-Feld "Text Color".
+        // Always uses the color from the Inspector field "Text Color".
         if (ammunitionText == null) {
             return;
         }
@@ -171,7 +171,7 @@ public class AmmunitionHudDisplay : MonoBehaviour {
     }
 
     private void UpdateHudPosition() {
-        // Haelt die Anzeige an einer festen Position.
+        // Keeps the display at a fixed position.
         if (hudRect == null) {
             return;
         }
@@ -180,7 +180,7 @@ public class AmmunitionHudDisplay : MonoBehaviour {
     }
 
     private void UpdateAmmunitionIcon() {
-        // Aktualisiert das Icon auch nach einem Reimport oder Inspector-Wechsel.
+        // Updates the icon after a reimport or an Inspector change.
         if (ammunitionIconImage == null) {
             return;
         }
@@ -191,7 +191,7 @@ public class AmmunitionHudDisplay : MonoBehaviour {
     }
 
     private void UpdateAmmunitionText() {
-        // Wenn keine Waffe ausgeruestet ist, wird die Anzeige versteckt.
+        // Hides the display when no weapon is equipped.
         if (hudObject == null || ammunitionText == null) {
             return;
         }

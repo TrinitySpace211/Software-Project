@@ -1,54 +1,89 @@
 using UnityEngine;
 
 /// <summary>
-/// Aufsammelbarer Schrott für den Spieler.
+/// Scrap that can be collected by the player.
 /// </summary>
-[RequireComponent(typeof(Collider))]
+[RequireComponent(typeof(Collider), typeof(Item), typeof(Outline))]
 public class ScrapPickup : MonoBehaviour {
-    // Wie viel Schrott dieser Pickup gibt.
+    // Amount of scrap provided by this pickup.
     [SerializeField] private int scrapAmount = 1;
 
-    // Drehgeschwindigkeit vom Pickup.
+    // Rotation speed of the pickup.
     [SerializeField] private float rotationSpeed = 90f;
 
+    private Item item;
+    private PlayerScrapWallet playerWallet;
+
     public void SetAmount(int amount) {
-        // Die Menge wird gesetzt, aber nie kleiner als 1.
+        // Sets the amount, but never below 1.
         scrapAmount = Mathf.Max(1, amount);
     }
 
     private void Awake() {
-        // Der Collider muss ein Trigger sein, damit der Spieler ihn einsammeln kann.
+        // The collider must be a trigger so the player can collect it.
         Collider pickupCollider = GetComponent<Collider>();
         pickupCollider.isTrigger = true;
+        item = GetComponent<Item>();
+    }
+
+    private void OnEnable() {
+        // Waits for the player to collect the pickup with F.
+        Item.OnItemCollected += HandleItemCollected;
+    }
+
+    private void OnDisable() {
+        Item.OnItemCollected -= HandleItemCollected;
     }
 
     private void Reset() {
-        // Wird im Editor benutzt, wenn das Script neu hinzugefügt wird.
+        // Used in the editor when the script is newly added.
         Collider pickupCollider = GetComponent<Collider>();
         pickupCollider.isTrigger = true;
     }
 
     private void Update() {
-        // Dreht den Pickup leicht, damit man ihn besser sieht.
+        // Slowly rotates the pickup to make it easier to see.
         transform.Rotate(Vector3.up, rotationSpeed * Time.deltaTime, Space.World);
     }
 
     private void OnTriggerEnter(Collider other) {
-        // Sucht das Schrott-Konto vom Spieler.
-        PlayerScrapWallet wallet = other.GetComponentInParent<PlayerScrapWallet>();
-
-        // Falls der Player noch kein Konto hat, wird eins erstellt.
-        if (wallet == null && other.CompareTag("Player")) {
-            wallet = other.gameObject.AddComponent<PlayerScrapWallet>();
-        }
-
-        // Wenn kein Spieler-Konto gefunden wurde, passiert nichts.
-        if (wallet == null) {
+        // Remembers the player without awarding scrap automatically.
+        Player player = other.GetComponentInParent<Player>();
+        if (player == null) {
             return;
         }
 
-        // Schrott geben und Pickup löschen.
-        wallet.AddScrap(scrapAmount);
-        Destroy(gameObject);
+        playerWallet = player.GetComponent<PlayerScrapWallet>();
+        if (playerWallet == null) {
+            playerWallet = player.gameObject.AddComponent<PlayerScrapWallet>();
+        }
+    }
+
+    private void HandleItemCollected(Item collectedItem) {
+        // Reacts only when this exact scrap pickup is collected with F.
+        if (collectedItem != item) {
+            return;
+        }
+
+        FindPlayerWalletIfMissing();
+        if (playerWallet != null) {
+            playerWallet.AddScrap(scrapAmount);
+        }
+    }
+
+    private void FindPlayerWalletIfMissing() {
+        if (playerWallet != null) {
+            return;
+        }
+
+        Player player = FindFirstObjectByType<Player>();
+        if (player == null) {
+            return;
+        }
+
+        playerWallet = player.GetComponent<PlayerScrapWallet>();
+        if (playerWallet == null) {
+            playerWallet = player.gameObject.AddComponent<PlayerScrapWallet>();
+        }
     }
 }
