@@ -19,6 +19,8 @@ public class Inventory : MonoBehaviour, ISaveable {
     [SerializeField] private PlayerInputHandler playerInputHandler;
     [SerializeField] private List<RectTransform> hotbarSlotsRect;
     [SerializeField] private GameObject crosshair;
+    [SerializeField] private TooltipUI tooltipUI;
+    private bool visible = false;
 
     [Header("Item References")]
     [SerializeField] private ItemSO[] guns;
@@ -32,8 +34,6 @@ public class Inventory : MonoBehaviour, ISaveable {
     [SerializeField] private float swapSpeed = 0.8f;
 
     public PauseMenu pauseMenu;
-
-
 
     /// <summary>
     /// Reference to the hotbar object containing hotbar slots.
@@ -126,6 +126,7 @@ public class Inventory : MonoBehaviour, ISaveable {
     /// </summary>
     private void Start() {
         playerInputHandler.OnHotbarSlotPressed += PlayerInputHandler_OnHotbarSlotPressed;
+        playerInputHandler.OnRightClickUIAction += PlayerInputHandler_OnRightClickUIPressed;
         Item.OnItemCollected += Item_OnItemCollected;
 
         container.SetActive(false);
@@ -143,21 +144,32 @@ public class Inventory : MonoBehaviour, ISaveable {
         }
     }
 
+    private void PlayerInputHandler_OnRightClickUIPressed() {
+        foreach (Slot slot in inventorySlots) {
+            if (slot.hovering && slot.GetItem() != null && slot.GetItem().gunType == GunType.None && slot.GetItem().meleeType == MeleeType.None) {
+                tooltipUI.Visibile(true);
+                tooltipUI.SetSelectedSlot(slot);
+            }
+        }
+    }
+
     /// <summary>
     /// Handles input for testing item additions, inventory toggling,
     /// and drag-and-drop interactions.
     /// </summary>
     private void Update() {
-
-        if (pauseMenu.IsPaused)
+        if (pauseMenu.IsPaused || DebugController.Instance.GetConsoleVisibility())
             return;
 
         if (Keyboard.current.iKey.wasPressedThisFrame) {
-            container.SetActive(!container.activeInHierarchy);
-
-            // Cursor.lockState = Cursor.lockState == CursorLockMode.Locked
-            // ? CursorLockMode.None
-            // : CursorLockMode.Locked;
+            if (visible) {
+                container.SetActive(false);
+                visible = false;
+                tooltipUI.Visibile(false);
+            } else {
+                container.SetActive(true);
+                visible = true;
+            }
 
             if (container.activeInHierarchy || nPCDialog.IsDialogOpen) {
                 crosshair.SetActive(false);
@@ -166,8 +178,11 @@ public class Inventory : MonoBehaviour, ISaveable {
                 crosshair.SetActive(true);
                 Cursor.visible = false;
             }
+        }
 
-            //TogglePause();
+        if (playerInputHandler.MovementInput != Vector2.zero) {
+            tooltipUI.Visibile(false);
+            container.SetActive(false);
         }
 
         StartDrag();
@@ -182,6 +197,9 @@ public class Inventory : MonoBehaviour, ISaveable {
     /// </summary>
     /// <param name="slot">the key which represents the Hotbarslot</param>
     private void PlayerInputHandler_OnHotbarSlotPressed(int slot) {
+        if (pauseMenu.IsPaused || DebugController.Instance.GetConsoleVisibility())
+            return;
+
         ItemSO item = hotbarSlots[slot].GetItem();
 
         if (item != null) {
@@ -769,6 +787,10 @@ public class Inventory : MonoBehaviour, ISaveable {
         }
 
         return true;
+    }
+
+    public List<Slot> GetInventorySlots() {
+        return inventorySlots;
     }
 
     #region Save/Load

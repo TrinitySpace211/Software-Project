@@ -46,5 +46,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pauseMenuUI: {fileID: 0}
   inventory: {fileID: 0}
+  playerInputHandler: {fileID: 0}
   npcDialog: {fileID: 0}
   crosshair: {fileID: 0}
+  scrapHudDisplay: {fileID: 0}
+  firstSelectedButton: {fileID: 0}
+  clickSound: {fileID: 8300000, guid: c0e76ed8bb1c6564dabd23a24910f61a, type: 3}

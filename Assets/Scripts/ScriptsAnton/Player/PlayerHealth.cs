@@ -12,6 +12,8 @@ public class PlayerHealth : MonoBehaviour, ISaveable {
     [SerializeField] private BaseStats baseStats;
     [SerializeField] private DeathScreen deathScreen;
     [SerializeField] private DayNightCycle dayNightCycle;
+    [SerializeField] private AudioSource heartbeatAudioSource;
+    [SerializeField] private float heartbeatVolume;
 
     private bool isDead = false;
     private HealthBar healthBar;
@@ -61,6 +63,13 @@ public class PlayerHealth : MonoBehaviour, ISaveable {
     }
 
     private void Update() {
+        if (!isDead && !heartbeatAudioSource.isPlaying && playerStats.currentHealth <= playerStats.maxHealth * 0.2f) {
+            heartbeatAudioSource.volume = heartbeatVolume * SoundManager.Instance.volume;
+            heartbeatAudioSource.Play();
+        } else if (isDead || playerStats.currentHealth > playerStats.maxHealth * 0.2f) {
+            heartbeatAudioSource.Stop();
+        }
+
         if (playerStats.currentHealth <= 0)
             Die();
     }

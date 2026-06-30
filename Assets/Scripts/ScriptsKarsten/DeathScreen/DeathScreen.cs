@@ -100,7 +100,9 @@ public class DeathScreen : MonoBehaviour {
         }
 
         // Wait before showing buttons
-        yield return new WaitForSecondsRealtime(4f);
+        yield return new WaitForSecondsRealtime(3f);
+
+        Cursor.visible = true;
 
         buttonCanvas.interactable = true;
         buttonCanvas.blocksRaycasts = true;

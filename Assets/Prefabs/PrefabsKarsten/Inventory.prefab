@@ -1884,6 +1884,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8851946016241795020}
   - component: {fileID: 4207082910972103307}
+  - component: {fileID: 8226959065224321413}
   m_Layer: 5
   m_Name: Inventory
   m_TagString: Untagged
@@ -1934,6 +1935,7 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   crosshair: {fileID: 0}
+  debugController: {fileID: 0}
   guns:
   - {fileID: 11400000, guid: f4a4d9eb33a1d56478dfe29c92044a34, type: 2}
   - {fileID: 11400000, guid: 664bf7447e46c084fbd94c955f5edd87, type: 2}
@@ -1946,9 +1948,18 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 017373c6049138f49b26c24b7dd58dbe, type: 2}
   - {fileID: 11400000, guid: e3fad8f38e73cb649841514b71eeec57, type: 2}
   - {fileID: 11400000, guid: abdfe617a49b7d944895c1ad5c305438, type: 2}
-  grenade: {fileID: 0}
-  healthItems: []
-  ammunitions: []
+  grenade: {fileID: 11400000, guid: 0679fcdfff705af4698537a0f18ca640, type: 2}
+  healthItems:
+  - {fileID: 11400000, guid: c2e1e6611eed9bd488222e7776c1fc65, type: 2}
+  - {fileID: 11400000, guid: 95821470a96307b4b8e9c8d27a55b136, type: 2}
+  - {fileID: 11400000, guid: e313746778f7fe5438119fc759431fc6, type: 2}
+  - {fileID: 11400000, guid: e3a84eb1dde870f4e886c356c916c1ba, type: 2}
+  ammunitions:
+  - {fileID: 11400000, guid: fe58986b643a1e34cb7a5fb3a84ba84c, type: 2}
+  - {fileID: 11400000, guid: a99b7304749752149b7b761d4f098879, type: 2}
+  - {fileID: 11400000, guid: 5619bc4e505e28545a23ec4e6dfeb7f3, type: 2}
+  - {fileID: 11400000, guid: 28e18aee8958ab342974eec00e792146, type: 2}
+  scrap: {fileID: 11400000, guid: dd4350791c348774dac3b2d39042056f, type: 2}
   swapSpeed: 0.8
   pauseMenu: {fileID: 0}
   hotbarObj: {fileID: 7144540948442173002}
@@ -1956,6 +1967,20 @@ MonoBehaviour:
   container: {fileID: 2921163554298670276}
   dragIcon: {fileID: 7622492437922824262}
   nPCDialog: {fileID: 0}
+--- !u!114 &8226959065224321413
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2901428669615462473}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 280102d473a8edf4d891b3bc672b7ec8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inventory: {fileID: 4207082910972103307}
+  scrapItem: {fileID: 11400000, guid: dd4350791c348774dac3b2d39042056f, type: 2}
 --- !u!1 &2921163554298670276
 GameObject:
   m_ObjectHideFlags: 0

@@ -95,19 +95,9 @@ public class Player : MonoBehaviour {
     #endregion
 
     private void Start() {
-        for (int i = 0; i < flashlight.transform.childCount; i++) {
-            Light light = flashlight.transform.GetChild(i).GetComponent<Light>();
-            if (light != null) {
-                if (light.type == LightType.Spot) {
-                    spotLight = light;
-                } else if (light.type == LightType.Point) {
-                    pointLight = light;
-                }
-            }
+        if (flashlight != null) {
+            CheckFlashlight();
         }
-
-        spotLight.enabled = false;
-        pointLight.enabled = false;
 
         PlayerInputHandler.OnReloadAction += PlayerInputHandler_OnReloadAction;
         Item.OnItemCollected += Item_OnItemCollected;
@@ -116,7 +106,7 @@ public class Player : MonoBehaviour {
     }
 
     private void Update() {
-        if (!playerHealth.GetIsDead()) {
+        if (!playerHealth.GetIsDead() && !DebugController.Instance.GetConsoleVisibility()) {
             UpdateMovementState();
             HandleMovement();
 
@@ -190,6 +180,22 @@ public class Player : MonoBehaviour {
         if (itemsInRange.Contains(item)) {
             itemsInRange.Remove(item);
         }
+    }
+
+    private void CheckFlashlight() {
+        for (int i = 0; i < flashlight.transform.childCount; i++) {
+            Light light = flashlight.transform.GetChild(i).GetComponent<Light>();
+            if (light != null) {
+                if (light.type == LightType.Spot) {
+                    spotLight = light;
+                } else if (light.type == LightType.Point) {
+                    pointLight = light;
+                }
+            }
+        }
+
+        spotLight.enabled = false;
+        pointLight.enabled = false;
     }
 
     private IEnumerator TurnOnLight() {
@@ -376,7 +382,7 @@ public class Player : MonoBehaviour {
             aimLayer.weight = 1;
             playerAnimation.SetAimAnimation(true);
         } else {
-            if (playerInputHandler.AimingTriggered && !isSprinting && weaponSelector.activeGun != null && !playerAnimation.GetIsReloading()) {
+            if (playerInputHandler.AimingTriggered && !isSprinting && weaponSelector.activeGun != null && !playerAnimation.GetIsReloading() && !EventSystem.current.IsPointerOverGameObject()) {
                 aimLayer.weight += Time.deltaTime / aimDuration;
                 playerAnimation.SetAimAnimation(true);
             } else {
@@ -392,7 +398,7 @@ public class Player : MonoBehaviour {
     private void HandleShooting() {
         GunSO activeGun = weaponSelector.activeGun;
 
-        if (playerInputHandler.AttackTriggered && playerInputHandler.AimingTriggered && !isSprinting && activeGun != null && !playerAnimation.GetIsReloading() && !weaponSelector.IsSelecting()) {
+        if (playerInputHandler.AttackTriggered && playerInputHandler.AimingTriggered && !isSprinting && activeGun != null && !playerAnimation.GetIsReloading() && !weaponSelector.IsSelecting() && !EventSystem.current.IsPointerOverGameObject()) {
             activeGun.Shoot();
 
             if (activeGun.GetEmptyMagazine() && inventory.GetAmmoAvailable(activeGun, out int ammoNeed)) {

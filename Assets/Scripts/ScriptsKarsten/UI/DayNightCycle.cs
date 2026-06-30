@@ -5,6 +5,7 @@ using System.Collections;
 using UnityEngine.UI;
 using UnityEngine.Events;
 using System;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// Controls the full day-night cycle system including:
@@ -18,6 +19,11 @@ using System;
 public class DayNightCycle : MonoBehaviour, ISaveable {
 
     private static readonly string ID = "DayNightCycle";
+
+    public AchievementSO achievementDay1;
+    public AchievementSO achievementDay5;
+    private bool achievement1Gained = false;
+    private bool achievement2Gained = false;
 
     /// <summary>
     /// UI text showing current time and state.
@@ -279,6 +285,8 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
                         StartCoroutine(ShowSavedGame());
                     }
 
+                    CheckAchievement();
+
                     ShowNotification($"Day {dayNumber} begins!");
                     onNewDayStarted?.Invoke();
 
@@ -333,6 +341,16 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
         gameSavedUIText.gameObject.SetActive(true);
         yield return new WaitForSeconds(3f);
         gameSavedUIText.gameObject.SetActive(false);
+    }
+
+    private void CheckAchievement() {
+        if (dayNumber == 2 && !achievement1Gained) {
+            AchievementManager.triggerAchievement?.Invoke(achievementDay1);
+            achievement1Gained = true;
+        } else if (dayNumber == 6 && !achievement2Gained) {
+            AchievementManager.triggerAchievement?.Invoke(achievementDay5);
+            achievement2Gained = true;
+        }
     }
 
     /// <summary>
@@ -524,7 +542,9 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
 
     public object Save() {
         return new DayNightData {
-            survivedNights = survivedNights
+            survivedNights = survivedNights,
+            achievement1Gained = achievement1Gained,
+            achievement2Gained = achievement2Gained
         };
     }
 
@@ -533,6 +553,8 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
         survivedNights = dayNightData.survivedNights;
         dayNumber = 1 + survivedNights;
         nightNumber = survivedNights;
+        achievement1Gained = dayNightData.achievement1Gained;
+        achievement2Gained = dayNightData.achievement2Gained;
         timeOfDay = 6;
         //Debug.Log("Loaded Night: " + survivedNights);
     }
@@ -540,6 +562,8 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
     [Serializable]
     public class DayNightData {
         public int survivedNights;
+        public bool achievement1Gained;
+        public bool achievement2Gained;
     }
     #endregion
 

@@ -32,6 +32,7 @@ public class PlayerInputHandler : MonoBehaviour {
     public static event Action OnToggleDebugAction;
     public static event Action OnReturnAction;
     public static event Action OnMapOpenAction;
+    public event Action OnRightClickUIAction;
 
     private void OnEnable() {
         playerInputActions = new InputSystem_Actions();
@@ -55,6 +56,8 @@ public class PlayerInputHandler : MonoBehaviour {
         playerInputActions.UI.Three.performed -= HotbarKey_Pressed;
         playerInputActions.UI.Four.performed -= HotbarKey_Pressed;
         playerInputActions.UI.Five.performed -= HotbarKey_Pressed;
+
+        playerInputActions.UI.RightClick.performed -= RightClickUI_performed;
 
         playerInputActions.Dispose();
     }
@@ -117,8 +120,19 @@ public class PlayerInputHandler : MonoBehaviour {
         playerInputActions.UI.Click.performed += _ => LeftClickUITriggered = true;
         playerInputActions.UI.Click.canceled += _ => LeftClickUITriggered = false;
 
+        playerInputActions.UI.RightClick.performed += RightClickUI_performed;
+
         playerInputActions.UI.Close.performed += _ => CloseTriggered = true;
         playerInputActions.UI.Close.canceled += _ => CloseTriggered = false;
+    }
+
+    /// <summary>
+    /// Sends an Event when the right click Button is triggered
+    /// This one is only meant for UI
+    /// </summary>
+    /// <param name="context">The context that got send from the input key</param>
+    private void RightClickUI_performed(InputAction.CallbackContext context) {
+        OnRightClickUIAction?.Invoke();
     }
 
     /// <summary>

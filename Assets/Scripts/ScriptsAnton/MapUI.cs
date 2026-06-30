@@ -1,6 +1,4 @@
-using System;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class MapUI : MonoBehaviour {
 
@@ -17,11 +15,10 @@ public class MapUI : MonoBehaviour {
         HideMap();
     }
 
-    private void Update() {
-        if (pauseMenu.IsPaused)
-            return;
-    }
     private void PlayerInputHandler_OnMapOpenAction() {
+        if (pauseMenu.IsPaused || DebugController.Instance.GetConsoleVisibility())
+            return;
+
         ShowHideMap();
         PauseGame();
     }

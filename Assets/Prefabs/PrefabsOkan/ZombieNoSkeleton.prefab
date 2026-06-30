@@ -2646,6 +2646,7 @@ MonoBehaviour:
   health: 100
   skinnedMeshRenderer: {fileID: 3018985351847020328}
   rageEyes: {fileID: 2100000, guid: c25dd6220c4c36a468466184d3f5c633, type: 2}
+  dissolveParticle: {fileID: 3810651036681866420, guid: 93d22e25319d6614196a6056a2bb514b, type: 3}
   target: {fileID: 0}
   joints:
   - {fileID: 7631947350683265570}

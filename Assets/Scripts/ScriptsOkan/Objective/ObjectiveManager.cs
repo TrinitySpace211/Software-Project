@@ -59,6 +59,7 @@ public class ObjectiveManager : MonoBehaviour {
         var redirected = 0;
 
         foreach (var zombie in zombies) {
+            zombie.SetRageEyes();
             if (zombie.IsDead()) continue;
             var objective = GetRandomActiveObjective();
             if (objective == null) break;

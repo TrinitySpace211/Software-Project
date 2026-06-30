@@ -13,7 +13,6 @@ public class SoundManager : MonoBehaviour {
     [SerializeField] private AudioClipRefsSO audioClipRefsSO;
 
     [Header("Sound References")]
-    [SerializeField] private AudioSource backgroundMusic;
     [SerializeField] private AudioSource bulletImpactAudioSource;
     [SerializeField] private AudioSource footstepsAudioSource;
     [SerializeField] private AudioSource bulletShootAudioSource;

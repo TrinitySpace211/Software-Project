@@ -1469,6 +1469,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5732149735392703961, guid: 6a3f8a245ea41bf4b86f73a192216266, type: 3}
+      propertyPath: flashlight
+      value: 
+      objectReference: {fileID: 1370216518}
+    - target: {fileID: 5732149735392703961, guid: 6a3f8a245ea41bf4b86f73a192216266, type: 3}
       propertyPath: playerCamera
       value: 
       objectReference: {fileID: 2058889546}
@@ -1992,6 +1996,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c046bf553c604cb469868eb7f1aec626, type: 3}
+--- !u!1 &1370216518 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5874960111074013083, guid: 6a3f8a245ea41bf4b86f73a192216266, type: 3}
+  m_PrefabInstance: {fileID: 1025125996}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1489612015
 PrefabInstance:
   m_ObjectHideFlags: 0

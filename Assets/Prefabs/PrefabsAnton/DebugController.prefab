@@ -47,3 +47,6 @@ MonoBehaviour:
   inventory: {fileID: 0}
   playerHealth: {fileID: 0}
   objectiveHealth: {fileID: 0}
+  achievementDay1: {fileID: 11400000, guid: 7817a2c7edbda5e449c828699f507bd1, type: 2}
+  achievementDay5: {fileID: 11400000, guid: 7f9f527054c8b2545954653ed9b6cd07, type: 2}
+  achievementDay10: {fileID: 11400000, guid: 1c894fc08c16d774da2dd40c6c65d52a, type: 2}

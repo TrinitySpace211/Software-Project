@@ -11,6 +11,8 @@ public class GasTankHealth : MonoBehaviour, ISaveable {
     [SerializeField] private DeathScreen deathScreen;
     [SerializeField] private DayNightCycle dayNightCycle;
     [SerializeField] private GasTankHUD tankHUD;
+    [SerializeField] private AudioSource generatorAudioSource;
+    [SerializeField] private ParticleSystem explosion;
 
     [Header("Health")]
     [SerializeField] private int maxHP = 100;
@@ -18,7 +20,7 @@ public class GasTankHealth : MonoBehaviour, ISaveable {
     [Header("Generator")]
     [SerializeField] private float generatorVolume = 1f;
 
-    private AudioSource audioSource;
+
 
     private int currentHP;
 
@@ -42,19 +44,18 @@ public class GasTankHealth : MonoBehaviour, ISaveable {
     }
 
     private void Start() {
-        audioSource = GetComponentInChildren<AudioSource>();
         DayNightCycle.OnSunsetStarted += DayNightCycle_OnSunsetStarted;
         DayNightCycle.OnSunriseStarted += DayNightCycle_OnSunriseStarted;
     }
 
     private void DayNightCycle_OnSunsetStarted() {
         //Debug.Log(audioSource + " " + SoundManager.Instance.volume);
-        audioSource.volume = generatorVolume * SoundManager.Instance.volume;
-        audioSource.Play();
+        generatorAudioSource.volume = generatorVolume * SoundManager.Instance.volume;
+        generatorAudioSource.Play();
     }
 
     private void DayNightCycle_OnSunriseStarted() {
-        audioSource.Stop();
+        generatorAudioSource.Stop();
     }
 
     /// <summary>
@@ -98,7 +99,8 @@ public class GasTankHealth : MonoBehaviour, ISaveable {
     private void OnDestroyed() {
         Debug.Log("Gas Tank destroyed!");
 
-        audioSource.Stop();
+        generatorAudioSource.Stop();
+        Instantiate(explosion, transform.position + new Vector3(0, 2, 0), Quaternion.identity);
 
         if (deathScreen != null && dayNightCycle != null) {
             deathScreen.ShowDeathScreen(dayNightCycle.SurvivedNights);
@@ -108,6 +110,8 @@ public class GasTankHealth : MonoBehaviour, ISaveable {
         if (player != null) {
             player.SetActive(false);
         }
+
+        gameObject.SetActive(false);
     }
 
     /// <summary>

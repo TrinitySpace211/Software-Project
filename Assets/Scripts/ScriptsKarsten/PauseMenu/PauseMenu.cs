@@ -18,6 +18,7 @@ public class PauseMenu : MonoBehaviour {
     [SerializeField] private Inventory inventory;
     [SerializeField] private PlayerInputHandler playerInputHandler;
     [SerializeField] private NPCDialog npcDialog;
+    [SerializeField] private GasTankHealth gasTankHealth;
 
     /// <summary>
     /// Gameplay crosshair shown when the game is active.
@@ -73,7 +74,7 @@ public class PauseMenu : MonoBehaviour {
     /// Toggles pause with the Escape key.
     /// </summary>
     private void Update() {
-        if (Keyboard.current != null && playerInputHandler.CloseTriggered) {
+        if (Keyboard.current != null && playerInputHandler.CloseTriggered && gasTankHealth.CurrentHP > 0) {
             if (isPaused)
                 Resume();
             else
