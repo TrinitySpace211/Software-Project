@@ -282,8 +282,13 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
                     // Count a night as survived once the player reaches the next day.
                     if (nightNumber > 0) {
                         survivedNights++;
-                        SaveManager.Instance.SaveGame();
-                        StartCoroutine(ShowSavedGame());
+
+                        // Ohne Null-Check bricht die Exception HandleState ab und
+                        // onNewDayStarted feuert nie -> keine neuen Zombie-Wellen.
+                        if (SaveManager.Instance != null) {
+                            SaveManager.Instance.SaveGame();
+                            StartCoroutine(ShowSavedGame());
+                        }
                     }
 
                     CheckAchievement();
@@ -341,6 +346,9 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
     }
 
     private IEnumerator ShowSavedGame() {
+        if (gameSavedUIText == null)
+            yield break;
+
         gameSavedUIText.gameObject.SetActive(true);
         yield return new WaitForSeconds(3f);
         gameSavedUIText.gameObject.SetActive(false);
