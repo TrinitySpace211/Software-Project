@@ -18,6 +18,6 @@ MonoBehaviour:
   spread: {x: 0.05, y: 0.05, z: 0.05}
   fireRate: 1.2
   bulletsPerShoot: 8
-  damage: 5
+  damage: 10
   maxAmmo: 8
   shootVolume: 0.5
