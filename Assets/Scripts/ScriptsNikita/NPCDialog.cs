@@ -890,7 +890,7 @@ public class NPCDialog : MonoBehaviour {
         weaponDescriptionText.text = "A fast automatic weapon with good damage and high fire rate.";
 
         selectedWeaponItem = assaultRifleItem;
-        selectedWeaponCost = 3;
+        selectedWeaponCost = 20;
 
         UpdateWeaponInfo();
     }
@@ -905,7 +905,7 @@ public class NPCDialog : MonoBehaviour {
         weaponDescriptionText.text = "Reliable close-range weapon with high power.";
 
         selectedWeaponItem = shotgunItem;
-        selectedWeaponCost = 1;
+        selectedWeaponCost = 30;
 
         UpdateWeaponInfo();
     }
@@ -920,7 +920,7 @@ public class NPCDialog : MonoBehaviour {
         weaponDescriptionText.text = "A powerful long-range weapon for precise shots against zombies.";
 
         selectedWeaponItem = sniperItem;
-        selectedWeaponCost = 1;
+        selectedWeaponCost = 40;
 
         UpdateWeaponInfo();
     }
@@ -937,7 +937,7 @@ public class NPCDialog : MonoBehaviour {
         weaponDescriptionText.text = "A simple close combat weapon. Useful for basic defense against nearby zombies.";
 
         selectedWeaponItem = baseballBatItem;
-        selectedWeaponCost = 2;
+        selectedWeaponCost = 12;
 
         UpdateWeaponInfo();
     }
@@ -954,7 +954,7 @@ public class NPCDialog : MonoBehaviour {
         weaponDescriptionText.text = "A solid close combat weapon with good impact damage and practical survival use.";
 
         selectedWeaponItem = crowbarItem;
-        selectedWeaponCost = 1;
+        selectedWeaponCost = 5;
 
         UpdateWeaponInfo();
     }
@@ -971,7 +971,7 @@ public class NPCDialog : MonoBehaviour {
         weaponDescriptionText.text = "A sharp close combat weapon with high damage and good reach.";
 
         selectedWeaponItem = swordItem;
-        selectedWeaponCost = 1;
+        selectedWeaponCost = 18;
 
         UpdateWeaponInfo();
     }
@@ -988,7 +988,7 @@ public class NPCDialog : MonoBehaviour {
         weaponDescriptionText.text = "A light close combat weapon. Fast, cheap and useful in emergency situations.";
 
         selectedWeaponItem = knifeItem;
-        selectedWeaponCost = 2;
+        selectedWeaponCost = 15;
 
         UpdateWeaponInfo();
     }
@@ -1005,7 +1005,7 @@ public class NPCDialog : MonoBehaviour {
         weaponDescriptionText.text = "A close combat weapon with strong damage against zombies.";
 
         selectedWeaponItem = axeItem;
-        selectedWeaponCost = 1;
+        selectedWeaponCost = 8;
 
         UpdateWeaponInfo();
     }
@@ -1022,7 +1022,7 @@ public class NPCDialog : MonoBehaviour {
         weaponDescriptionText.text = "A compact close combat weapon with high damage. Useful for attacks against nearby zombies.";
 
         selectedWeaponItem = tomahawkItem;
-        selectedWeaponCost = 1;
+        selectedWeaponCost = 25;
 
         UpdateWeaponInfo();
     }
