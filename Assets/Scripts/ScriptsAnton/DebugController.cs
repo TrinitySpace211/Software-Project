@@ -57,6 +57,8 @@ public class DebugController : MonoBehaviour {
     public static DebugCommand ACHIEVEMENT3;
     //Damage Player
     public static DebugCommand<int> DAMAGE_PLAYER;
+    //Extraction
+    public static DebugCommand EXTRACTION;
 
     public List<object> commandList;
 
@@ -157,6 +159,10 @@ public class DebugController : MonoBehaviour {
         DAMAGE_PLAYER = new DebugCommand<int>("/damage", "Kills the Player", "/damage <amount>", (x) => {
             playerHealth.TakeDamage(x);
         });
+        //Extraction
+        EXTRACTION = new DebugCommand("/extraction", "Starts the extraction scene", "/extraction", () => {
+            Loader.Load(Loader.Scene.ExtractionScene);
+        });
 
         commandList = new List<object> {
             HELP,
@@ -183,7 +189,9 @@ public class DebugController : MonoBehaviour {
             DESTROY_OBJECTIVE,
             ACHIEVEMENT1,
             ACHIEVEMENT2,
-            ACHIEVEMENT3
+            ACHIEVEMENT3,
+            DAMAGE_PLAYER,
+            EXTRACTION
         };
     }
 
