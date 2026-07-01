@@ -146,6 +146,17 @@ public class MenuManager : MonoBehaviour {
         if (audioSection != null) audioSection.SetActive(false);
     }
 
+    public void SetFullscreen() {
+        PlayClick();
+        Resolution res = Screen.currentResolution;
+        Screen.SetResolution(res.width, res.height, FullScreenMode.FullScreenWindow);
+    }
+
+    public void SetWindowed() {
+        PlayClick();
+        Screen.SetResolution(1280, 720, FullScreenMode.Windowed);
+    }
+
     public void ContinueGame() {
         PlayClick();
     }
