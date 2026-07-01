@@ -237,7 +237,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: +10
+  m_text: +20
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: ff7d3a3b2c307a74db16a72c7d502342, type: 2}
@@ -2055,7 +2055,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: +10
+  m_text: +5
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: ff7d3a3b2c307a74db16a72c7d502342, type: 2}
@@ -16730,7 +16730,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: +10
+  m_text: +4
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: ff7d3a3b2c307a74db16a72c7d502342, type: 2}
@@ -18253,7 +18253,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: +10
+  m_text: +2
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: ff7d3a3b2c307a74db16a72c7d502342, type: 2}
@@ -22268,7 +22268,7 @@ MonoBehaviour:
   towerWarningText: {fileID: 782487764465471935}
   playerInventory: {fileID: 0}
   scrapItem: {fileID: 11400000, guid: dd4350791c348774dac3b2d39042056f, type: 2}
-  scrapCost: 0
+  scrapCost: 5
   scrapAmountText: {fileID: 1539940840712039499}
   warningBox: {fileID: 8736228844962927432}
   buildTowerButton: {fileID: 4873100470348914474}
@@ -22295,8 +22295,8 @@ MonoBehaviour:
   tomahawkItem: {fileID: 11400000, guid: abdfe617a49b7d944895c1ad5c305438, type: 2}
   upgradePanel: {fileID: 973493609510865475}
   upgradeInfoPanel: {fileID: 3885344873075722854}
-  gasTankHealScrapCost: 1
-  gasTankHealAmount: 10
+  gasTankHealScrapCost: 10
+  gasTankHealAmount: 20
   gasTankHealScrapText: {fileID: 1244465480639876989}
   gasTankHealWarningBox: {fileID: 5521872341477183037}
   gasTankHealButton: {fileID: 8671055600888764029}
@@ -22304,7 +22304,7 @@ MonoBehaviour:
   gasTankHealWarningText: {fileID: 9082747340248700321}
   npcWander: {fileID: 2819098105622009372}
   upgradeInfoPanelTower: {fileID: 6103826937994362660}
-  towerUpgradeScrapCost: 0
+  towerUpgradeScrapCost: 8
   towerUpgradeScrapText: {fileID: 3525452349164429756}
   towerUpgradeWarningBox: {fileID: 8946951988206085684}
   towerUpgradeWarningText: {fileID: 5010715010871179373}
@@ -22318,10 +22318,10 @@ MonoBehaviour:
   weaponUpgradeWarningBox: {fileID: 3109370291980762888}
   weaponUpgradeWarningText: {fileID: 8670407159172921286}
   weaponUpgradeBuyButton: {fileID: 3535565859714820006}
-  weaponDamageUpgradeScrapCost: 0
-  weaponAmmoUpgradeScrapCost: 0
-  weaponDamageIncrease: 5
-  weaponAmmoIncrease: 10
+  weaponDamageUpgradeScrapCost: 11
+  weaponAmmoUpgradeScrapCost: 7
+  weaponDamageIncrease: 10
+  weaponAmmoIncrease: 5
   shotgunGun: {fileID: 11400000, guid: fe8c164c47cedda4cbc0c00deb09224c, type: 2}
   assaultRifleGun: {fileID: 11400000, guid: f5f185b9689eb17478c5f798fef6bb6a, type: 2}
   sniperGun: {fileID: 11400000, guid: a62e8dbc9409ba342a8a90a25d0ecd92, type: 2}
