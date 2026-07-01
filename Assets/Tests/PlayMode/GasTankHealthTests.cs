@@ -37,7 +37,7 @@ public class GasTankHealthTests {
     public IEnumerator TakeDamage_ReducesHealth() {
         gasTank.TakeDamage(25);
 
-        Assert.AreEqual(75, gasTank.CurrentHP);
+        Assert.AreEqual(75, gasTank.CurrentHP, "Should be equal");
 
         yield return null;
     }
@@ -49,7 +49,7 @@ public class GasTankHealthTests {
     public IEnumerator TakeDamage_ClampsHealthToZero() {
         gasTank.TakeDamage(500);
 
-        Assert.AreEqual(0, gasTank.CurrentHP);
+        Assert.AreEqual(0, gasTank.CurrentHP, "Should be equal");
 
         yield return null;
     }
@@ -63,7 +63,7 @@ public class GasTankHealthTests {
 
         gasTank.Heal(20);
 
-        Assert.AreEqual(70, gasTank.CurrentHP);
+        Assert.AreEqual(70, gasTank.CurrentHP, "Should be equal");
 
         yield return null;
     }
@@ -75,7 +75,7 @@ public class GasTankHealthTests {
     public IEnumerator Heal_DoesNotExceedMaxHealth() {
         gasTank.Heal(100);
 
-        Assert.AreEqual(gasTank.MaxHP, gasTank.CurrentHP);
+        Assert.AreEqual(gasTank.MaxHP, gasTank.CurrentHP, "Should be equal");
 
         yield return null;
     }
@@ -89,7 +89,7 @@ public class GasTankHealthTests {
 
         gasTank.Heal(50);
 
-        Assert.AreEqual(0, gasTank.CurrentHP);
+        Assert.AreEqual(0, gasTank.CurrentHP, "Should be equal");
 
         yield return null;
     }
@@ -103,7 +103,7 @@ public class GasTankHealthTests {
 
         gasTank.ResetHP();
 
-        Assert.AreEqual(gasTank.MaxHP, gasTank.CurrentHP);
+        Assert.AreEqual(gasTank.MaxHP, gasTank.CurrentHP, "Should be equal");
 
         yield return null;
     }
@@ -117,7 +117,7 @@ public class GasTankHealthTests {
         gasTank.TakeDamage(15);
         gasTank.TakeDamage(10);
 
-        Assert.AreEqual(55, gasTank.CurrentHP);
+        Assert.AreEqual(55, gasTank.CurrentHP, "Should be equal");
 
         yield return null;
     }

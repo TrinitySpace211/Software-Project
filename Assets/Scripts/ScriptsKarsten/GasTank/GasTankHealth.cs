@@ -94,8 +94,14 @@ public class GasTankHealth : MonoBehaviour, ISaveable {
     private void OnDestroyed() {
         Debug.Log("Gas Tank destroyed!");
 
-        generatorAudioSource.Stop();
-        Instantiate(explosion, transform.position + new Vector3(0, 2, 0), Quaternion.identity);
+
+        if (generatorAudioSource != null) {
+            generatorAudioSource.Stop();
+        }
+
+        if (explosion != null) {
+            Instantiate(explosion, transform.position + new Vector3(0, 2, 0), Quaternion.identity);
+        }
 
         if (deathScreen != null && dayNightCycle != null) {
             deathScreen.ShowDeathScreen(dayNightCycle.SurvivedNights);

@@ -48,10 +48,6 @@ public class MenuManagerTests {
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
             .SetValue(_menu, 0.01f); // speed up tests
 
-        type.GetField("gameSceneName",
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .SetValue(_menu, "TestScene");
-
         // Ensure EventSystem exists (UI safety)
         if (Object.FindFirstObjectByType<EventSystem>() == null) {
             GameObject es = new GameObject("EventSystem");

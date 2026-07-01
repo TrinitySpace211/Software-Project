@@ -200,7 +200,8 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
     /// Initializes system and hides notification UI.
     /// </summary>
     void Start() {
-        gameSavedUIText.gameObject.SetActive(false);
+        if (gameSavedUIText != null)
+            gameSavedUIText.gameObject.SetActive(false);
 
         if (notificationText != null) {
             notificationText.gameObject.SetActive(false);
@@ -217,7 +218,7 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
 
         currentState = GetTimeState();
 
-        if (currentState == TimeState.Day) {
+        if (audioSource != null && currentState == TimeState.Day) {
             audioSource.clip = dayMusic;
             audioSource.volume = dayMusicVolume * SoundManager.Instance.volume;
             audioSource.Play();
@@ -272,7 +273,9 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
                     OnSunriseStarted?.Invoke();
                     ShowNotification("Sunrise begins...");
 
-                    StartCoroutine(FadeInOutMusic(audioSource, dayMusic, dayMusicVolume, 2f));
+                    if (audioSource != null) {
+                        StartCoroutine(FadeInOutMusic(audioSource, dayMusic, dayMusicVolume, 2f));
+                    }
                     break;
 
                 case TimeState.Day:
@@ -306,7 +309,9 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
                     dayNumber++;
                     nightNumber++;
 
-                    StartCoroutine(FadeInOutMusic(audioSource, nightMusic, nightMusicVolume, 2f));
+                    if (audioSource != null) {
+                        StartCoroutine(FadeInOutMusic(audioSource, nightMusic, nightMusicVolume, 2f));
+                    }
 
                     break;
             }
