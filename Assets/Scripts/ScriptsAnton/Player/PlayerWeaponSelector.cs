@@ -46,7 +46,11 @@ public class PlayerWeaponSelector : MonoBehaviour {
     private void StopActiveSelectionCoroutine() {
         if (selectCoroutine != null) {
             ResetItem();
-            StopCoroutine(selectCoroutine);
+            try {
+                StopCoroutine(selectCoroutine);
+            } catch (UnityException) {
+                // Objekt war bereits zerstört oder Coroutine nicht mehr gültig
+            }
             selectCoroutine = null;
         }
     }
@@ -731,6 +735,11 @@ public class PlayerWeaponSelector : MonoBehaviour {
     }
 
     private void OnDestroy() {
+        if (selectCoroutine != null) {
+            StopCoroutine(selectCoroutine);
+            selectCoroutine = null;
+        }
+
         if (activeGun != null) {
             activeGun.DestroyAll();
         }

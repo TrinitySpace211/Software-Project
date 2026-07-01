@@ -34,8 +34,16 @@ public class PlayerTests {
 
     private GunSO _assaultRifleSO;
 
+    //Dynamic Objects
+    private GameObject _groundPlane;
+    private GameObject _playerInputHandlerObject;
+    private GameObject _cameraObject;
+    private GameObject _eventSystemObject;
+    private GameObject _playerInstance;
+
     private EventSystem currentEventSystem;
 
+    [OneTimeSetUp]
     public void PlayerIntegrationTest() {
         // Pfad korrigiert: das Prefab liegt im Unterordner ".../PrefabsAnton/Player/Player.prefab".
         // Vorher zeigte der Pfad auf ".../PrefabsAnton/Player.prefab" (ohne Unterordner) ->
@@ -51,44 +59,60 @@ public class PlayerTests {
 
     [SetUp]
     public void Setup() {
-        PlayerIntegrationTest();
-
         // Erstelle Plane für den Raycast
-        var groundPlane = GameObject.CreatePrimitive(PrimitiveType.Plane);
-        groundPlane.name = "Ground";
-        groundPlane.layer = 6; // Ground Layer
-        groundPlane.transform.position = new Vector3(0, 0, 0);
-        groundPlane.transform.localScale = new Vector3(15, 1, 15);
+        _groundPlane = GameObject.CreatePrimitive(PrimitiveType.Plane);
+        _groundPlane.name = "Ground";
+        _groundPlane.layer = 6; // Ground Layer
+        _groundPlane.transform.position = new Vector3(0, 0, 0);
+        _groundPlane.transform.localScale = new Vector3(15, 1, 15);
 
         // Erstelle einen GameObject für den PlayerInputHandler
-        var playerInputHandlerObject = new GameObject("PlayerInputHandler");
-        _playerInputHandler = playerInputHandlerObject.AddComponent<PlayerInputHandler>();
+        _playerInputHandlerObject = new GameObject("PlayerInputHandler");
+        _playerInputHandler = _playerInputHandlerObject.AddComponent<PlayerInputHandler>();
 
         // Erstelle einen GameObject für die Camera
-        var cameraObject = new GameObject("Camera");
-        _camera = cameraObject.AddComponent<Camera>();
+        _cameraObject = new GameObject("Camera");
+        _camera = _cameraObject.AddComponent<Camera>();
         _camera.transform.position = new Vector3(0, 5.5f, -5f);
         _camera.transform.rotation = Quaternion.Euler(new Vector3(40f, 0f, 0f));
 
         // Player instanzieren + PlayerInputHandler und Camera initiieren
-        _player = Object.Instantiate(_playerPrefab);
+        _playerInstance = Object.Instantiate(_playerPrefab.gameObject);
+        _player = _playerInstance.GetComponent<Player>();
 
         // PlayerAnimation Komponente holen und PlayerInputHandler initiieren
         _playerAnimation = _player.GetComponent<PlayerAnimation>();
         _playerAnimation.Construct(_playerInputHandler);
 
         // Erstelle einen GameObject für den PlayerHealth
-        _playerHealth = _player.GetPlayerHealth();
-        _weaponSelector = _player.GetPlayerGunSelector();
+        _playerHealth = _player.GetComponent<PlayerHealth>();
+        _weaponSelector = _player.GetComponent<PlayerWeaponSelector>();
 
-        if (EventSystem.current == null) {
-            GameObject eventSystem = new GameObject("EventSystem");
-            eventSystem.AddComponent<EventSystem>();
-            eventSystem.AddComponent<InputSystemUIInputModule>();
-            currentEventSystem = eventSystem.GetComponent<EventSystem>();
-        }
+        _eventSystemObject = new GameObject("EventSystem");
+        _eventSystemObject.AddComponent<EventSystem>();
+        _eventSystemObject.AddComponent<InputSystemUIInputModule>();
+        currentEventSystem = _eventSystemObject.GetComponent<EventSystem>();
 
         _player.Construct(_playerInputHandler, _playerHealth, _camera, _weaponSelector, currentEventSystem);
+    }
+
+    [TearDown]
+    public void Teardown() {
+        // WICHTIG: Lösche ALLES, was im Setup mit "new" oder "Instantiate" gebaut wurde
+        if (_playerInstance != null) Object.DestroyImmediate(_playerInstance);
+        if (_groundPlane != null) Object.DestroyImmediate(_groundPlane);
+        if (_playerInputHandlerObject != null) Object.DestroyImmediate(_playerInputHandlerObject);
+        if (_cameraObject != null) Object.DestroyImmediate(_cameraObject);
+        if (_eventSystemObject != null) Object.DestroyImmediate(_eventSystemObject);
+
+        // Referenzen nullen, um zu verhindern, dass der nächste Test auf Alte zugreift
+        _player = null;
+        _playerInputHandler = null;
+        _camera = null;
+        _playerAnimation = null;
+        _playerHealth = null;
+        _weaponSelector = null;
+        currentEventSystem = null;
     }
 
     [UnityTest]
@@ -217,6 +241,8 @@ public class PlayerTests {
 
     [UnityTest]
     public IEnumerator Player_AimingAfterAimKeyPressed() {
+        yield return null;
+
         _weaponSelector.SelectAssaultRifle(_assaultRifleSO);
 
         for (int i = 0; i < 100f; i++) {
@@ -246,12 +272,6 @@ public class PlayerTests {
         Assert.IsTrue(_player.IsSprinting());
     }
 
-    [TearDown]
-    public void TearDown() {
-        if (_player) {
-            Object.DestroyImmediate(_player);
-        }
-    }
 }
 
 

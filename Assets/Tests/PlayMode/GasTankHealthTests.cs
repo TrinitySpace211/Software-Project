@@ -27,7 +27,8 @@ public class GasTankHealthTests {
     /// </summary>
     [TearDown]
     public void TearDown() {
-        Object.DestroyImmediate(gameObject);
+        if (gameObject != null)
+            Object.DestroyImmediate(gameObject);
     }
 
     /// <summary>
