@@ -32,9 +32,24 @@ public class WaveManager : MonoBehaviour {
     private void SpawnEarlyAction() {
         var earlyCount = Random.Range(day1MinZombies, day1MaxZombies + 1);
         var zone = spawnZones[Random.Range(0, spawnZones.Length)];
-        zone.zombieCount = earlyCount;
+        zone.zombieCount = 0;
         zone.sprinterCount = 0;
         zone.tankCount = 0;
+
+        // Spielmodus beruecksichtigen: In den "Only"-Modi spawnt auch die
+        // Tag-1-Early-Action den passenden Zombie-Typ.
+        switch (GameMode.Selected) {
+            case GameModeType.OnlySprinter:
+                zone.sprinterCount = earlyCount;
+                break;
+            case GameModeType.OnlyTanks:
+                zone.tankCount = earlyCount;
+                break;
+            default:
+                zone.zombieCount = earlyCount;
+                break;
+        }
+
         zone.SpawnWave();
     }
 
@@ -52,6 +67,8 @@ public class WaveManager : MonoBehaviour {
             ? Mathf.Min(_currentDay - (_config.tankStartDay - 1), _config.maxTanksTotal)
             : 0;
 
+        ApplyGameMode(ref total, ref totalSprinters, ref totalTanks);
+
         var perZone = total / spawnZones.Length;
         var remainder = total % spawnZones.Length;
         var sprintersPerZone = totalSprinters / spawnZones.Length;
@@ -64,6 +81,31 @@ public class WaveManager : MonoBehaviour {
             spawnZones[i].tankCount =
                 tanksPerZone + (i == 0 ? totalTanks % spawnZones.Length : 0);
             spawnZones[i].SpawnWave();
+        }
+    }
+
+    /// <summary>
+    ///     Wendet den gewaehlten Spielmodus auf die Zombie-Zusammensetzung an.
+    ///     In den "Only"-Modi wird die normale Zombie-Anzahl komplett in den
+    ///     jeweiligen Typ umgeleitet, im Easy Mode bleiben nur normale Zombies.
+    ///     Die Gesamtzahl skaliert weiterhin ueber die gewaehlte Schwierigkeit.
+    /// </summary>
+    private void ApplyGameMode(ref int normals, ref int sprinters, ref int tanks) {
+        switch (GameMode.Selected) {
+            case GameModeType.OnlySprinter:
+                sprinters = normals;
+                normals = 0;
+                tanks = 0;
+                break;
+            case GameModeType.OnlyTanks:
+                tanks = normals;
+                normals = 0;
+                sprinters = 0;
+                break;
+            case GameModeType.EasyMode:
+                sprinters = 0;
+                tanks = 0;
+                break;
         }
     }
 

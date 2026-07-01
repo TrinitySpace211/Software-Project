@@ -532,6 +532,13 @@ public class Inventory : MonoBehaviour {
             return;
         }
 
+        // Spielmodus: In Melee-Only sind keine Schusswaffen erlaubt,
+        // in Pistol+Melee nur die Pistole. Sonst gar nicht ausruesten.
+        if (!IsGunAllowedInGameMode(weapon.gunType)) {
+            player.GetPlayerGunSelector().DequipWeapon();
+            return;
+        }
+
         switch (weapon.gunType) {
             case GunType.AssaultRifle:
                 player.GetPlayerGunSelector().SelectAssaultRifle();
@@ -548,6 +555,21 @@ public class Inventory : MonoBehaviour {
             default:
                 player.GetPlayerGunSelector().DequipWeapon();
                 break;
+        }
+    }
+
+    /// <summary>
+    /// Returns whether the given gun type may be equipped in the current game mode.
+    /// MeleeOnly forbids all guns, PistolMelee allows only the pistol.
+    /// </summary>
+    private bool IsGunAllowedInGameMode(GunType gunType) {
+        switch (GameMode.Selected) {
+            case GameModeType.MeleeOnly:
+                return false;
+            case GameModeType.PistolMelee:
+                return gunType == GunType.Pistol;
+            default:
+                return true;
         }
     }
 
