@@ -2303,6 +2303,10 @@ PrefabInstance:
       propertyPath: currentHP
       value: 100
       objectReference: {fileID: 0}
+    - target: {fileID: 42500120006977969, guid: f3bfd22fa3869a145823c00402842a80, type: 3}
+      propertyPath: explosion
+      value: 
+      objectReference: {fileID: 198917022394846920, guid: e1b08032bec16ba4eb1ae23cbd572664, type: 3}
     - target: {fileID: 1635147777717753351, guid: f3bfd22fa3869a145823c00402842a80, type: 3}
       propertyPath: m_Name
       value: Objective
@@ -2348,7 +2352,8 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 6769797017575381173, guid: f3bfd22fa3869a145823c00402842a80, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f3bfd22fa3869a145823c00402842a80, type: 3}

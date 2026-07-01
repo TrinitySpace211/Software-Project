@@ -371,6 +371,63 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!1001 &81430636
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1929208310759317076, guid: 0c649500834c5d74689ca183941066d2, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1929208310759317076, guid: 0c649500834c5d74689ca183941066d2, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1929208310759317076, guid: 0c649500834c5d74689ca183941066d2, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1929208310759317076, guid: 0c649500834c5d74689ca183941066d2, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1929208310759317076, guid: 0c649500834c5d74689ca183941066d2, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1929208310759317076, guid: 0c649500834c5d74689ca183941066d2, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1929208310759317076, guid: 0c649500834c5d74689ca183941066d2, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1929208310759317076, guid: 0c649500834c5d74689ca183941066d2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1929208310759317076, guid: 0c649500834c5d74689ca183941066d2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1929208310759317076, guid: 0c649500834c5d74689ca183941066d2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4813257275533303848, guid: 0c649500834c5d74689ca183941066d2, type: 3}
+      propertyPath: m_Name
+      value: SoundManager
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 0c649500834c5d74689ca183941066d2, type: 3}
 --- !u!1 &204467589
 GameObject:
   m_ObjectHideFlags: 0
@@ -695,8 +752,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 406040681}
-  - component: {fileID: 406040683}
-  - component: {fileID: 406040682}
   m_Layer: 5
   m_Name: HoverOverlay
   m_TagString: Untagged
@@ -723,17 +778,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 750, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &406040682
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5732149735392703961, guid: 6a3f8a245ea41bf4b86f73a192216266, type: 3}
-  m_PrefabInstance: {fileID: 560373937}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 350507242}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4bf49cef5186c0d4a8b37f5289140fce, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &548315836
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1237,6 +1281,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1802205617}
+  - {fileID: 406040681}
   m_Father: {fileID: 22724305}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -1533,6 +1578,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 42500120006977969, guid: f3bfd22fa3869a145823c00402842a80, type: 3}
+      propertyPath: explosion
+      value: 
+      objectReference: {fileID: 198917022394846920, guid: e1b08032bec16ba4eb1ae23cbd572664, type: 3}
     - target: {fileID: 1635147777717753351, guid: f3bfd22fa3869a145823c00402842a80, type: 3}
       propertyPath: m_Name
       value: GasTank
@@ -1578,15 +1627,11 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 6769797017575381173, guid: f3bfd22fa3869a145823c00402842a80, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f3bfd22fa3869a145823c00402842a80, type: 3}
---- !u!20 &1679096036 stripped
-Camera:
-  m_CorrespondingSourceObject: {fileID: 7555188955924638363, guid: 6a3f8a245ea41bf4b86f73a192216266, type: 3}
-  m_PrefabInstance: {fileID: 560373937}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1729822462 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4422963303021875437, guid: 6a3f8a245ea41bf4b86f73a192216266, type: 3}
@@ -2276,4 +2321,4 @@ SceneRoots:
   - {fileID: 734841610}
   - {fileID: 2005935492}
   - {fileID: 1670902536}
-  - {fileID: 1825886729}
+  - {fileID: 81430636}
