@@ -8,7 +8,9 @@ using UnityEngine.UI;
 /// Controls the end-game extraction sequence including player movement,
 /// animation disabling, fade effects, and UI button reveal.
 /// </summary>
-public class ExtractionController : MonoBehaviour {
+public class ExtractionController : MonoBehaviour, ISaveable {
+    private static readonly string ID = "ExtractionController";
+
     [Header("Player")]
     public GameObject playerObject;
     public Animator playerAnimator;
@@ -31,6 +33,10 @@ public class ExtractionController : MonoBehaviour {
     public Button retryButton;
     public Button mainMenuButton;
     public Button exitButton;
+
+    [Header("Achievement")]
+    public AchievementSO achievementDay10;
+    private bool achievement3Gained;
 
     public float buttonFadeDuration = 1.5f;
 
@@ -106,6 +112,12 @@ public class ExtractionController : MonoBehaviour {
             exitButtonCanvasGroup.blocksRaycasts = false;
             exitButton.gameObject.SetActive(true);
         }
+
+        if (!achievement3Gained) {
+            AchievementManager.triggerAchievement?.Invoke(achievementDay10);
+            achievement3Gained = true;
+        }
+
     }
 
     /// <summary>
@@ -158,6 +170,8 @@ public class ExtractionController : MonoBehaviour {
 
         // Fade in black screen / overlay
         yield return FadeCanvasGroup(fadeGroup, 0f, 1f);
+
+        Cursor.visible = true;
 
         // Show end text
         if (endText != null) {
@@ -253,24 +267,53 @@ public class ExtractionController : MonoBehaviour {
     /// Exits the application (or stops play mode in the Unity Editor).
     /// </summary>
     public void OnExitClicked() {
-        #if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-        #else
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
             Application.Quit();
-        #endif
+#endif
     }
 
     /// <summary>
     /// Restarts the main gameplay scene.
     /// </summary>
     public void OnRetryClicked() {
-        UnityEngine.SceneManagement.SceneManager.LoadScene("MainScene");
+        Loader.Load(Loader.Scene.MainScene);
     }
 
     /// <summary>
     /// Loads the main menu scene.
     /// </summary>
     public void OnMainMenuClicked() {
-        UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
+        Loader.Load(Loader.Scene.MainMenu);
+    }
+
+    #region Save/Load
+    public string GetSaveID() => ID;
+
+    public object Save() {
+        return new ExtractionContollerData {
+            achievement3Gained = achievement3Gained
+        };
+    }
+
+    public void Load(object data) {
+        ExtractionContollerData extractionData = (ExtractionContollerData)data;
+        achievement3Gained = extractionData.achievement3Gained;
+    }
+
+    public class ExtractionContollerData {
+        public bool achievement3Gained;
+    }
+    #endregion
+
+    private void OnEnable() {
+        if (SaveManager.Instance != null)
+            SaveManager.Instance.Register(this);
+    }
+
+    private void OnDisable() {
+        if (SaveManager.Instance != null)
+            SaveManager.Instance.Unregister(this);
     }
 }

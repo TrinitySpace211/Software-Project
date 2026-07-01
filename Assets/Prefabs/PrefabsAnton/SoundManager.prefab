@@ -45,7 +45,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
   Loop: 0
@@ -90,7 +90,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
+      value: 0
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -147,4 +147,3 @@ MonoBehaviour:
   bulletImpactAudioSource: {fileID: 1926129016466624914, guid: 7e28f8ce175f8ac48bb69039b566b5cd, type: 3}
   footstepsAudioSource: {fileID: 7920627168369331545, guid: 3f8b131fe6e17194e8096fbf3fc2612b, type: 3}
   bulletShootAudioSource: {fileID: 290653507148150542, guid: f2ad8e5010760a346bc6a1cdda23b456, type: 3}
-  mapOpenAudioSource: {fileID: 0}

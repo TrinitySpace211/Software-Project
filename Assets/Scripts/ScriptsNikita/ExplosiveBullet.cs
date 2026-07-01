@@ -50,7 +50,7 @@ public class ExplosiveBullet : MonoBehaviour {
     /// <summary>
     /// Visual effect that is spawned when the projectile explodes.
     /// </summary>
-    public GameObject explosionEffect;
+    public ParticleSystem explosionEffect;
 
     private void Update() {
         if (target == null) {
@@ -80,8 +80,7 @@ public class ExplosiveBullet : MonoBehaviour {
     private void Explode() {
 
         if (explosionEffect != null) {
-            GameObject effect = Instantiate(explosionEffect, transform.position, Quaternion.identity);
-            Destroy(effect, 2f);
+            Instantiate(explosionEffect, transform.position, Quaternion.identity);
         }
 
         ZombieAI directTargetZombie = null;
@@ -114,8 +113,8 @@ public class ExplosiveBullet : MonoBehaviour {
         Destroy(gameObject);
     }
 
-    private void OnDrawGizmosSelected() {
+    /* private void OnDrawGizmosSelected() {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, explosionRadius);
-    }
+    } */
 }

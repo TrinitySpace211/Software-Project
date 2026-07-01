@@ -3,6 +3,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using System.IO;
+using TMPro;
 
 /// <summary>
 /// Manages the main menu logic including scene loading, settings UI,
@@ -10,14 +12,21 @@ using UnityEngine.UI;
 /// </summary>
 public class MenuManager : MonoBehaviour {
 
-    [SerializeField] private string gameSceneName = "TutorialScene";
+    [Header("Scene Names")]
+    [SerializeField] private Loader.Scene tutorialScene = Loader.Scene.TutorialScene;
+    [SerializeField] private Loader.Scene mainScene = Loader.Scene.MainScene;
 
     [SerializeField] private GameObject settingsPanel;
 
-
+    [Header("Audio")]
     [SerializeField] private AudioClip clickSound;
     [SerializeField] private AudioClip musicClip;
     [SerializeField] private AudioClip buttonSelect;
+
+    [Header("Buttons")]
+    [SerializeField] private Image continueButtonImage;
+    [SerializeField] private Button continueButton;
+    [SerializeField] private TextMeshProUGUI continueButtonText;
 
     [SerializeField] private GameObject firstSelectedButton;
     [SerializeField] private CanvasGroup fadeGroup;
@@ -31,6 +40,11 @@ public class MenuManager : MonoBehaviour {
     private AudioSource audioSource;
     private bool isTransitioning;
 
+    //Save Paths
+    private string savePath;
+    private string tutorialPath;
+    private bool hasTutorial = false;
+
     /// <summary>
     /// Initializes audio sources, starts background music,
     /// and prepares the fade overlay at startup.
@@ -38,13 +52,24 @@ public class MenuManager : MonoBehaviour {
     private void Awake() {
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.playOnAwake = false;
+        audioSource.volume = 0.2f;
 
+        musicSource = gameObject.AddComponent<AudioSource>();
+        musicSource.clip = musicClip;
+        musicSource.loop = true;
+        musicSource.volume = 0.2f;
+        musicSource.playOnAwake = false;
+
+        if (musicClip != null)
+            musicSource.Play();
 
         // Initialize fade overlay (fully transparent and non-blocking)
         if (fadeGroup != null) {
             fadeGroup.alpha = 0f;
             fadeGroup.blocksRaycasts = false;
         }
+
+        Time.timeScale = 1f;
     }
 
     /// <summary>
@@ -52,12 +77,25 @@ public class MenuManager : MonoBehaviour {
     /// including selected button and hidden settings panel.
     /// </summary>
     private void Start() {
-        
-
         // Ensure settings panel starts hidden
         if (settingsPanel != null)
             settingsPanel.SetActive(false);
 
+        savePath = Path.Combine(Application.persistentDataPath, "save.json");
+        tutorialPath = Path.Combine(Application.persistentDataPath, $"{TutorialManager.ID}.json");
+        hasTutorial = File.Exists(tutorialPath);
+
+        if (continueButton != null && continueButtonImage != null && continueButtonText != null) {
+            if (!hasTutorial) {
+                continueButton.interactable = false;
+                continueButtonImage.color = new Color32(100, 100, 100, 255);
+                continueButtonText.color = new Color32(100, 100, 100, 255);
+            } else {
+                continueButton.interactable = true;
+                continueButtonImage.color = new Color32(255, 255, 255, 255);
+                continueButtonText.color = new Color32(255, 255, 255, 255);
+            }
+        }
         // Ensure audio and controls starts hidden
         if (audioSection != null)
             audioSection.SetActive(false);
@@ -77,13 +115,20 @@ public class MenuManager : MonoBehaviour {
         if (isTransitioning)
             return;
 
-        StartCoroutine(FadeAndLoadScene());
+        if (File.Exists(tutorialPath)) {
+            File.Delete(tutorialPath);
+        }
+        if (File.Exists(savePath)) {
+            File.Delete(savePath);
+        }
+
+        StartCoroutine(FadeAndLoadScene(tutorialScene));
     }
 
     /// <summary>
     /// Handles fade-out animation and loads the target game scene.
     /// </summary>
-    private IEnumerator FadeAndLoadScene() {
+    private IEnumerator FadeAndLoadScene(Loader.Scene scene) {
         isTransitioning = true;
         PlayClick();
 
@@ -96,7 +141,7 @@ public class MenuManager : MonoBehaviour {
         // Small delay to ensure fade completes cleanly
         yield return new WaitForSeconds(0.1f);
 
-        SceneManager.LoadScene(gameSceneName);
+        Loader.Load(scene);
     }
 
     /// <summary>
@@ -152,13 +197,21 @@ public class MenuManager : MonoBehaviour {
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
-            Application.Quit();
+        Application.Quit();
 #endif
     }
 
     public void ContinueGame() {
-        PlayClick();
-        //hier Rest einfügen Anton
+        if (hasTutorial) {
+            TutorialManager.TutorialData tutorialData = SaveManager.Instance.LoadData<TutorialManager.TutorialData>(TutorialManager.ID);
+
+            bool tutorialFinished = tutorialData.tutorialFinished;
+            if (tutorialFinished) {
+                StartCoroutine(FadeAndLoadScene(mainScene));
+            } else {
+                StartCoroutine(FadeAndLoadScene(tutorialScene));
+            }
+        }
     }
 
     /// <summary>

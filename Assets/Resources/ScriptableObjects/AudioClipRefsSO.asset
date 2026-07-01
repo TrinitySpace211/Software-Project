@@ -1,0 +1,76 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c6920647df18714c96950275172f655, type: 3}
+  m_Name: AudioClipRefsSO
+  m_EditorClassIdentifier: 
+  assaultRifleSounds:
+  - {fileID: 8300000, guid: 53fe7e2b21622a545b70f0bc026673e9, type: 3}
+  - {fileID: 8300000, guid: f926cba00817c4e43a311751682e33d0, type: 3}
+  - {fileID: 8300000, guid: cf5820722edd6b74a958f2f748682f81, type: 3}
+  - {fileID: 8300000, guid: 5c43116e96fc3e74b9759b425a4eb9cc, type: 3}
+  pistolSounds:
+  - {fileID: 8300000, guid: 3ab8ed505e3925146a212f9e76650f3a, type: 3}
+  - {fileID: 8300000, guid: f4d4f053b1f02f2438046578fae7a89d, type: 3}
+  - {fileID: 8300000, guid: c6d1a0c1d3422f048a4e68ac189f6d2b, type: 3}
+  - {fileID: 8300000, guid: 16545ece9b8b7294692e825a4cc3a057, type: 3}
+  shotgunSounds:
+  - {fileID: 8300000, guid: 14c7e164977986f42afb3a04cf782fec, type: 3}
+  - {fileID: 8300000, guid: beefef55590cbf444abcaf34734cb0ab, type: 3}
+  - {fileID: 8300000, guid: b1956c4494432164fb75b45dd14ffd0b, type: 3}
+  - {fileID: 8300000, guid: a9ec7b1385509b74497843ab268ec977, type: 3}
+  sniperSounds:
+  - {fileID: 8300000, guid: 7a79365fa7b92164e8690d727700e052, type: 3}
+  assaultRifleReloadSounds:
+  - {fileID: 8300000, guid: d43fe812d6d81f84aa8b47baee8a7c98, type: 3}
+  pistolReloadSounds:
+  - {fileID: 8300000, guid: 220870ce594efaa4c947508bdeebac51, type: 3}
+  shotgunReloadSounds:
+  - {fileID: 8300000, guid: 29c26078f186d6343a9c6f651cd55adc, type: 3}
+  sniperReloadSounds:
+  - {fileID: 8300000, guid: d43fe812d6d81f84aa8b47baee8a7c98, type: 3}
+  reloadSoundVolume: 0.3
+  meleeSwing:
+  - {fileID: 8300000, guid: efcab393c3a5d4e4da38058d284a2005, type: 3}
+  - {fileID: 8300000, guid: 2901e574db7bb7c4ea7253f22cbb6fb4, type: 3}
+  - {fileID: 8300000, guid: a6a507248bcbdd04da8c8ae20021da04, type: 3}
+  - {fileID: 8300000, guid: bcabe2e86bac2bf4d95a102117cfeeea, type: 3}
+  grenadePin:
+  - {fileID: 8300000, guid: 415b5865e82b72f4eb3f2b021aca994d, type: 3}
+  grenadePinVolume: 1
+  explosionSounds:
+  - {fileID: 8300000, guid: a2bdbe8bfc9e1874aa3e50a036057c48, type: 3}
+  - {fileID: 8300000, guid: 841c48f4049eb1440adaf47fbdf89da7, type: 3}
+  - {fileID: 8300000, guid: 8cbfc50dcdcfa3c40b833a2dfa8412ae, type: 3}
+  explosionSoundsVolume: 1
+  zombieHurt:
+  - {fileID: 8300000, guid: 7244c2022bfb99248a9feab2e8df771d, type: 3}
+  - {fileID: 8300000, guid: 1e0e06c241f75aa45baf3d0cf6a7e2e5, type: 3}
+  - {fileID: 8300000, guid: 41cd8168bd2a46c46a9aaa462ac51fef, type: 3}
+  zombieHurtVolume: 0.9
+  playerHurt:
+  - {fileID: 8300000, guid: e96f0ba57c8754c43ae69b509c5d352d, type: 3}
+  - {fileID: 8300000, guid: c80356b852407474ebeaced2c688fb05, type: 3}
+  playerHurtVolume: 0.25
+  playerDeath: {fileID: 8300000, guid: 1ad9ac127580a4c4993e31e52fc66849, type: 3}
+  playerDeathVolume: 1
+  playerHeal: {fileID: 8300000, guid: 972ac064c9dbb1f40a319e00e0e6fc35, type: 3}
+  playerHealVolume: 1
+  mapOpen:
+  - {fileID: 8300000, guid: 9f8f20915ace873439906330f7424aad, type: 3}
+  - {fileID: 8300000, guid: e63c532c72d4a9b46b2c89189718e1f9, type: 3}
+  - {fileID: 8300000, guid: b55640c6c8a2ab146a076cab469e3b03, type: 3}
+  - {fileID: 8300000, guid: 4d975e795d3a2cb42ac8754e4f01f51b, type: 3}
+  mapOpenVolume: 0.3
+  sunsetSound: {fileID: 8300000, guid: f95b1e2482b94a446b1ecbf67be7db76, type: 3}
+  sunsetSoundVolume: 0.35
+  objectiveExplosion: {fileID: 8300000, guid: 6354953e55305e645bb3f19ac2445bee, type: 3}
+  objectiveExplosionVolume: 1

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 
 /// <summary>
 /// UpdateCursor is used to bring Objects to the Mouse Position so the Weapon of the Player has a target to look at
@@ -11,8 +12,11 @@ public class UpdateCursor : MonoBehaviour {
     [SerializeField] private RectTransform crosshair;
     [SerializeField] private bool cursorVisible = false;
     [SerializeField] private float cursorMinDistanceFromPlayer = 1f;
-    [SerializeField] private float yOffset = 1.5f;
-        public PauseMenu pauseMenu;
+    [SerializeField] private float yOffsetMin = 1.5f;
+    [SerializeField] private float yOffsetMax = 1.5f;
+    public PauseMenu pauseMenu;
+
+
 
     private void Start() {
         Cursor.visible = cursorVisible;
@@ -35,7 +39,14 @@ public class UpdateCursor : MonoBehaviour {
     private void LookAt() {
         //Bewegung des Objekts zum 3D-Raum der Maus
         Vector3 mouseWorldPos = player.GetMouseDirection();
-        transform.position = UpdatePositionAroundPlayer(new Vector3(mouseWorldPos.x, yOffset, mouseWorldPos.z));
+        //Vector3 direction = (mouseWorldPos - player.transform.position).normalized;
+
+        if (Time.timeScale == 1f)
+            transform.position = UpdatePositionAroundPlayer(new Vector3(mouseWorldPos.x, Mathf.Clamp(transform.position.y, yOffsetMin, yOffsetMax), mouseWorldPos.z));
+
+        /* player.transform.position + direction * cursorMinDistanceFromPlayer;
+        targetPos.y = Mathf.Clamp(targetPos.y, yOffsetMin, yOffsetMax);
+        transform.position = targetPos; */
 
         //Crosshair position vom Canvas anpassen
         if (crosshair != null) {
