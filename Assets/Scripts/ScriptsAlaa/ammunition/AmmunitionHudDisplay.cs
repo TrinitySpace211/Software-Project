@@ -50,6 +50,10 @@ public class AmmunitionHudDisplay : MonoBehaviour {
         UpdateAmmunitionIcon();
         UpdateHudPosition();
         UpdateAmmunitionText();
+
+        if (player.GetPlayerHealth().GetIsDead()) {
+            canvasObject.SetActive(false);
+        }
     }
 
     private void FindWeaponSelectorIfMissing() {

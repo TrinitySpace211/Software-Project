@@ -13,14 +13,23 @@ public class DeathScreen : MonoBehaviour {
     public CanvasGroup deathCanvas;
     public CanvasGroup buttonCanvas;
     public TMP_Text nightsText;
+    public TMP_Text youDiedText;
 
     [Header("Audio")]
     public AudioSource audioSource;
     public AudioClip deathSound;
+    public float deathSoundVolume;
+    public AudioClip youDiedSound;
+    public float youDiedSoundVolume;
 
     [Header("Scene")]
-    public string mainMenuScene = "MainMenu";
-    public string gameScene = "MainScene";
+    public Loader.Scene mainMenuScene = Loader.Scene.MainMenu;
+    public Loader.Scene gameScene = Loader.Scene.MainScene;
+
+    private void Start() {
+        youDiedText.alpha = 0f;
+        nightsText.alpha = 0f;
+    }
 
     /// <summary>
     /// Triggers the death screen sequence.
@@ -34,8 +43,9 @@ public class DeathScreen : MonoBehaviour {
     /// fade-in animations, audio playback, and interaction enabling.
     /// </summary>
     private IEnumerator DeathRoutine(int survivedNights) {
-        Time.timeScale = 0f;
+        yield return new WaitForSeconds(3f);
 
+        Time.timeScale = 0f;
 
         // Enable death UI
         deathCanvas.gameObject.SetActive(true);
@@ -53,9 +63,10 @@ public class DeathScreen : MonoBehaviour {
                 $"You survived {survivedNights} night{(survivedNights == 1 ? "" : "s")}";
         }
 
-        // Play death sound
-        if (audioSource != null && deathSound != null) {
-            audioSource.PlayOneShot(deathSound);
+        // Play you Died sound
+        if (audioSource != null && youDiedSound != null) {
+            audioSource.volume = youDiedSoundVolume * SoundManager.Instance.volume;
+            audioSource.PlayOneShot(youDiedSound);
         }
 
         // Fade in main death canvas
@@ -66,8 +77,32 @@ public class DeathScreen : MonoBehaviour {
             yield return null;
         }
 
+        // Play death sound
+        if (audioSource != null && deathSound != null) {
+            audioSource.volume = deathSoundVolume * SoundManager.Instance.volume;
+            audioSource.PlayOneShot(deathSound);
+        }
+
+        // Fade in death text
+        float dt = 0f;
+        while (dt < 1f) {
+            dt += Time.unscaledDeltaTime;
+            youDiedText.alpha = dt;
+            yield return null;
+        }
+
+        // Fade in nights text
+        float nt = 0f;
+        while (nt < 1f) {
+            nt += Time.unscaledDeltaTime;
+            nightsText.alpha = nt;
+            yield return null;
+        }
+
         // Wait before showing buttons
-        yield return new WaitForSecondsRealtime(4f);
+        yield return new WaitForSecondsRealtime(3f);
+
+        Cursor.visible = true;
 
         buttonCanvas.interactable = true;
         buttonCanvas.blocksRaycasts = true;
@@ -86,7 +121,7 @@ public class DeathScreen : MonoBehaviour {
     /// </summary>
     public void Retry() {
         Time.timeScale = 1f;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        Loader.Load(gameScene);
     }
 
     /// <summary>
@@ -94,7 +129,7 @@ public class DeathScreen : MonoBehaviour {
     /// </summary>
     public void MainMenu() {
         Time.timeScale = 1f;
-        SceneManager.LoadScene(mainMenuScene);
+        Loader.Load(mainMenuScene);
     }
 
     /// <summary>

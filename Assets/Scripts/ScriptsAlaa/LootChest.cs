@@ -6,8 +6,7 @@ using UnityEngine.UI;
 /// <summary>
 /// Displays a loot chest and allows it to be opened with F.
 /// </summary>
-public class LootChest : MonoBehaviour
-{
+public class LootChest : MonoBehaviour {
     private const string PromptText = "Press F to open chest";
 
     [Header("References")]
@@ -38,15 +37,13 @@ public class LootChest : MonoBehaviour
     private bool isCurrentlyOpen;
     private float textBaseScale;
 
-    private void Awake()
-    {
+    private void Awake() {
         FindMissingReferences();
         CreateHintText();
         CreateLootLight();
     }
 
-    private void Update()
-    {
+    private void Update() {
         FindMissingReferences();
         CheckPlayerDistance();
         ResetOpenStateAfterPlayerLeaves();
@@ -55,27 +52,22 @@ public class LootChest : MonoBehaviour
         CheckInteractionInput();
     }
 
-    private void FindMissingReferences()
-    {
+    private void FindMissingReferences() {
         // Finds the player automatically by using the Player tag.
-        if (player == null)
-        {
+        if (player == null) {
             GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
-            if (playerObject != null)
-            {
+            if (playerObject != null) {
                 player = playerObject.transform;
             }
         }
 
         // Finds the camera so the text can face it.
-        if (playerCamera == null)
-        {
+        if (playerCamera == null) {
             playerCamera = Camera.main;
         }
     }
 
-    private void CreateHintText()
-    {
+    private void CreateHintText() {
         // Creates a small hint above the chest.
         GameObject canvasObject = new GameObject("LootHint", typeof(RectTransform), typeof(Canvas));
         canvasObject.transform.SetParent(transform);
@@ -114,8 +106,7 @@ public class LootChest : MonoBehaviour
         hintText.raycastTarget = false;
 
         Font builtInFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        if (builtInFont == null)
-        {
+        if (builtInFont == null) {
             builtInFont = Resources.GetBuiltinResource<Font>("Arial.ttf");
         }
 
@@ -125,8 +116,7 @@ public class LootChest : MonoBehaviour
         hintText.gameObject.SetActive(false);
     }
 
-    private void CreateLootLight()
-    {
+    private void CreateLootLight() {
         // Creates the light so the loot chest stands out.
         GameObject lightObject = new GameObject("LootLight");
         lightObject.transform.SetParent(transform);
@@ -141,11 +131,9 @@ public class LootChest : MonoBehaviour
         lootLight.shadows = LightShadows.None;
     }
 
-    private void CheckPlayerDistance()
-    {
+    private void CheckPlayerDistance() {
         // Checks whether the player is close enough to the chest.
-        if (player == null)
-        {
+        if (player == null) {
             playerInRange = false;
             return;
         }
@@ -153,30 +141,24 @@ public class LootChest : MonoBehaviour
         playerInRange = Vector3.Distance(player.position, transform.position) <= interactionDistance;
     }
 
-    private void ResetOpenStateAfterPlayerLeaves()
-    {
+    private void ResetOpenStateAfterPlayerLeaves() {
         // After opening, the light stays off while the player remains nearby.
         // The chest can be used again after the player leaves.
-        if (isCurrentlyOpen && !playerInRange)
-        {
+        if (isCurrentlyOpen && !playerInRange) {
             isCurrentlyOpen = false;
         }
     }
 
-    private void UpdateHintText()
-    {
-        if (hintText == null)
-        {
+    private void UpdateHintText() {
+        if (hintText == null) {
             return;
         }
 
         // The hint always faces the camera.
         Transform textRoot = hintText.transform.parent;
-        if (playerCamera != null)
-        {
+        if (playerCamera != null) {
             Vector3 lookDirection = textRoot.position - playerCamera.transform.position;
-            if (lookDirection.sqrMagnitude > 0.001f)
-            {
+            if (lookDirection.sqrMagnitude > 0.001f) {
                 textRoot.rotation = Quaternion.LookRotation(lookDirection);
             }
         }
@@ -185,16 +167,13 @@ public class LootChest : MonoBehaviour
         hintText.gameObject.SetActive(playerInRange && !isCurrentlyOpen);
     }
 
-    private void UpdateLootLight()
-    {
-        if (lootLight == null)
-        {
+    private void UpdateLootLight() {
+        if (lootLight == null) {
             return;
         }
 
         // The light turns off immediately after opening.
-        if (isCurrentlyOpen)
-        {
+        if (isCurrentlyOpen) {
             lootLight.enabled = false;
             return;
         }
@@ -211,41 +190,35 @@ public class LootChest : MonoBehaviour
     /// <summary>
     /// Resets the chest display for a new day.
     /// </summary>
-    public void ResetForNewDay()
-    {
+    public void ResetForNewDay() {
         hasBeenOpened = false;
         isCurrentlyOpen = false;
         UpdateLootLight();
     }
 
-    private void CheckInteractionInput()
-    {
+    private void CheckInteractionInput() {
         // The player can open a closed chest while in range.
-        if (isCurrentlyOpen || !playerInRange || Keyboard.current == null)
-        {
+        if (isCurrentlyOpen || !playerInRange || Keyboard.current == null) {
             return;
         }
 
         KeyControl keyControl = Keyboard.current[interactionKey];
-        if (keyControl != null && keyControl.wasPressedThisFrame)
-        {
+        if (keyControl != null && keyControl.wasPressedThisFrame) {
             OpenChest();
         }
     }
 
-    private void OpenChest()
-    {
+    private void OpenChest() {
         // Remembers that the chest has just been opened.
         hasBeenOpened = true;
         isCurrentlyOpen = true;
         Debug.Log($"Loot chest '{name}' was opened.");
     }
 
-    private void OnDrawGizmosSelected()
-    {
+    /* private void OnDrawGizmosSelected() {
         // Shows the range and text height in the editor.
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, interactionDistance);
         Gizmos.DrawLine(transform.position, transform.position + textOffset);
-    }
+    } */
 }

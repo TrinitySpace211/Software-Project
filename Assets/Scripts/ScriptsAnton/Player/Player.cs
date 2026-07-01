@@ -1,9 +1,10 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using UnityEngine.EventSystems;
-using UnityEngine.InputSystem;
+using Random = UnityEngine.Random;
 
 /// <summary>
 /// This is the Player Class. The Player Movement and Rotation will be calculated.
@@ -27,6 +28,7 @@ public class Player : MonoBehaviour {
     [SerializeField] private CurrentPlayerState playerState;
     [SerializeField] private PlayerIK playerIK;
     [SerializeField] private Inventory inventory;
+    [SerializeField] private GameObject flashlight;
 
     [Header("Footsteps Reference")]
     [SerializeField] private ImpactType impactType;
@@ -41,6 +43,7 @@ public class Player : MonoBehaviour {
 
     [Header("Aim Parameters")]
     [SerializeField] private float aimDuration = 0.3f;
+    [SerializeField] private MultiAimConstraint weaponPoseSpineAim;
 
     [Header("Animation")]
     [SerializeField] private float rotationMouseDirAmount = 10f;
@@ -52,9 +55,15 @@ public class Player : MonoBehaviour {
     [Header("Grenade Throw")]
     [SerializeField] private float grenadeThrowForce = 10f;
 
+    [Header("Flashlight Parameters")]
+    [SerializeField] private float minIntensity;
+    [SerializeField] private float maxIntensitySpotLight;
+    [SerializeField] private float maxIntensityPointLight;
+
     [Header("Debugging")]
     [SerializeField] private bool alwaysAiming = false;
 
+    //Saved current active Weapon parent transform
     private Transform setupWeaponParent;
 
     //Player Movement Variables
@@ -78,29 +87,85 @@ public class Player : MonoBehaviour {
 
     //Other Checks
     private bool isMeleeAttacking = false;
+    private EventSystem eventSystem;
+
+    //Flashlight
+    private float waitBeforeActivate = 1f;
+    private Light spotLight;
+    private Light pointLight;
     #endregion
 
+    private void OnEnable() {
+        eventSystem = EventSystem.current;
+
+        SubscribeToEvents();
+    }
+
+    private void OnDisable() {
+        UnsubscribeFromEvents();
+        StopAllCoroutines();
+    }
+
     private void Start() {
+        if (flashlight != null) {
+            CheckFlashlight();
+        }
+    }
+
+    private void SubscribeToEvents() {
         PlayerInputHandler.OnReloadAction += PlayerInputHandler_OnReloadAction;
         Item.OnItemCollected += Item_OnItemCollected;
+        DayNightCycle.OnSunsetStarted += DayNightCycle_OnSunsetStarted;
+        DayNightCycle.OnSunriseStarted += DayNightCycle_OnSunriseStarted;
+    }
+
+    private void UnsubscribeFromEvents() {
+        PlayerInputHandler.OnReloadAction -= PlayerInputHandler_OnReloadAction;
+        Item.OnItemCollected -= Item_OnItemCollected;
+        DayNightCycle.OnSunsetStarted -= DayNightCycle_OnSunsetStarted;
+        DayNightCycle.OnSunriseStarted -= DayNightCycle_OnSunriseStarted;
     }
 
     private void Update() {
-        if (!playerHealth.GetIsDead()) {
-            UpdateMovementState();
-            HandleMovement();
-
-            HandleShooting();
-            HandleAiming();
-            if (!EventSystem.current.IsPointerOverGameObject() && !inventory.GetIsDragging()) {
-                HandleMeleeAttack();
-            }
-
-            HandleReloadFinished();
-            HandleGrenade();
-            HandleHealingKits();
+        if (!CanProcessUpdate()) {
+            return;
         }
 
+        UpdateMovementState();
+        HandleMovement();
+
+        HandleShooting();
+        HandleAiming();
+
+        if (inventory != null) {
+            if (!IsPointerOverUI() && !inventory.GetIsDragging()) {
+                HandleMeleeAttack();
+            }
+        }
+
+        HandleReloadFinished();
+        HandleGrenade();
+        HandleHealingKits();
+    }
+
+    private bool CanProcessUpdate() {
+        if (playerHealth == null || playerHealth.GetIsDead()) {
+            return false;
+        }
+
+        if (DebugController.Instance != null && DebugController.Instance.GetConsoleVisibility()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool IsPointerOverUI() {
+        if (eventSystem != null) {
+            return eventSystem.IsPointerOverGameObject();
+        }
+
+        return EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
     }
 
     private void FixedUpdate() {
@@ -126,9 +191,21 @@ public class Player : MonoBehaviour {
     /// </summary>
     /// <param name="playerInputHandler">Needs the PlayerInputHandler class so the Movement can be calculated</param>
     /// <param name="playerCamera">Needs the Main Camera to calculate the Mouse Direction</param>
-    public void Construct(PlayerInputHandler playerInputHandler, Camera playerCamera) {
+    public void Construct(PlayerInputHandler playerInputHandler, PlayerHealth playerHealth, Camera playerCamera, PlayerWeaponSelector weaponSelector, EventSystem eventSystem) {
         this.playerInputHandler = playerInputHandler;
+        this.playerHealth = playerHealth;
         this.playerCamera = playerCamera;
+        this.weaponSelector = weaponSelector;
+        this.eventSystem = eventSystem ?? EventSystem.current;
+    }
+
+    private void DayNightCycle_OnSunriseStarted() {
+        spotLight.enabled = false;
+        pointLight.enabled = false;
+    }
+
+    private void DayNightCycle_OnSunsetStarted() {
+        StartCoroutine(TurnOnLight());
     }
 
     /// <summary>
@@ -149,6 +226,66 @@ public class Player : MonoBehaviour {
         if (itemsInRange.Contains(item)) {
             itemsInRange.Remove(item);
         }
+    }
+
+    private void CheckFlashlight() {
+        for (int i = 0; i < flashlight.transform.childCount; i++) {
+            Light light = flashlight.transform.GetChild(i).GetComponent<Light>();
+            if (light != null) {
+                if (light.type == LightType.Spot) {
+                    spotLight = light;
+                } else if (light.type == LightType.Point) {
+                    pointLight = light;
+                }
+            }
+        }
+
+        spotLight.enabled = false;
+        pointLight.enabled = false;
+    }
+
+    private IEnumerator TurnOnLight() {
+        yield return new WaitForSeconds(waitBeforeActivate);
+
+        spotLight.enabled = true;
+        pointLight.enabled = true;
+
+        for (int i = 0; i < Random.Range(5, 10); i++) {
+            spotLight.enabled = !spotLight.enabled;
+            pointLight.enabled = !pointLight.enabled;
+
+            float intensityTempSpot = Random.Range(minIntensity, maxIntensitySpotLight);
+            float intensityTempPoint = Random.Range(minIntensity, maxIntensityPointLight);
+            spotLight.intensity = intensityTempSpot;
+            pointLight.intensity = intensityTempPoint;
+
+            yield return new WaitForSeconds(Random.Range(0.03f, 0.15f));
+        }
+
+        spotLight.enabled = true;
+        pointLight.enabled = true;
+        spotLight.intensity = 0f;
+        pointLight.intensity = 0f;
+
+        bool max1 = false;
+        bool max2 = false;
+        while (!max1 || !max2) {
+
+            if (spotLight.intensity < maxIntensitySpotLight) {
+                spotLight.intensity += Time.deltaTime * 30f;
+            } else {
+                max1 = true;
+            }
+
+            if (pointLight.intensity < maxIntensityPointLight) {
+                pointLight.intensity += Time.deltaTime * 15f;
+            } else {
+                max2 = true;
+            }
+
+            yield return null;
+        }
+
     }
 
     #region Movement
@@ -226,7 +363,7 @@ public class Player : MonoBehaviour {
         float walkFootstepDelay = 1f / walkSpeed * footstepSoundSpeed;
         float sprintFootstepDelay = 1f / (walkSpeed * sprintMultipier) * footstepSprintOffset;
 
-        if (playerInputHandler.MovementInput != Vector2.zero) {
+        if (playerInputHandler.MovementInput != Vector2.zero && SurfaceManager.Instance != null) {
             if (!isSprinting && Time.time > walkFootstepDelay + lastFootPlaced) {
                 lastFootPlaced = Time.time;
                 if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 0.2f, layerMask)) {
@@ -249,8 +386,10 @@ public class Player : MonoBehaviour {
     /// <param name="lookDir">The Direction to the Mouse Position in World Space</param>
     private void UpdatePlayerRotation(Vector3 moveDir, Vector3 lookDir) {
         if (moveDir.sqrMagnitude > 0.1f && (isSprinting || (!playerIK.GetHasWeapon() && !playerIK.GetHasOneHanded()))) {
+            weaponPoseSpineAim.weight = 0f;
             RotatePlayerToTarget(moveDir, rotationMoveDirAmount);
         } else if (lookDir.sqrMagnitude > 0.1f && !isSprinting && (playerIK.GetHasWeapon() || playerIK.GetHasOneHanded())) {
+            weaponPoseSpineAim.weight = 0.7f;
             RotatePlayerToTarget(lookDir, rotationMouseDirAmount);
         }
     }
@@ -289,7 +428,8 @@ public class Player : MonoBehaviour {
             aimLayer.weight = 1;
             playerAnimation.SetAimAnimation(true);
         } else {
-            if (playerInputHandler.AimingTriggered && !isSprinting && weaponSelector.activeGun != null && !playerAnimation.GetIsReloading()) {
+            bool canAim = playerInputHandler.AimingTriggered && !isSprinting && weaponSelector.activeGun != null && !playerAnimation.GetIsReloading() && !IsPointerOverUI();
+            if (canAim) {
                 aimLayer.weight += Time.deltaTime / aimDuration;
                 playerAnimation.SetAimAnimation(true);
             } else {
@@ -305,7 +445,7 @@ public class Player : MonoBehaviour {
     private void HandleShooting() {
         GunSO activeGun = weaponSelector.activeGun;
 
-        if (playerInputHandler.AttackTriggered && playerInputHandler.AimingTriggered && !isSprinting && activeGun != null && !playerAnimation.GetIsReloading() && !weaponSelector.IsSelecting()) {
+        if (playerInputHandler.AttackTriggered && playerInputHandler.AimingTriggered && !isSprinting && activeGun != null && !playerAnimation.GetIsReloading() && !weaponSelector.IsSelecting() && !IsPointerOverUI()) {
             activeGun.Shoot();
 
             if (activeGun.GetEmptyMagazine() && inventory.GetAmmoAvailable(activeGun, out int ammoNeed)) {
@@ -452,7 +592,7 @@ public class Player : MonoBehaviour {
     private void HandleHealingKits() {
         HealthItemSO healthItem = weaponSelector.activeHealthItem;
         if (healthItem != null) {
-            if (playerInputHandler.UseTriggered && playerHealth.stats.currentHealth <= playerHealth.stats.maxHealth) {
+            if (playerInputHandler.UseTriggered && playerHealth.stats.currentHealth < playerHealth.stats.maxHealth) {
                 healthItem.Heal(this);
 
                 OnHeal?.Invoke(transform.position);
@@ -586,22 +726,4 @@ public class Player : MonoBehaviour {
     }
     #endregion
 
-    #region Save and Load
-    /* public object Save() {
-        return new PlayerData {
-            position = transform.position
-        };
-    }
-
-    public void Load(object data) {
-        characterController.enabled = false;
-        PlayerData playerData = (PlayerData)data;
-        transform.position = playerData.position;
-        characterController.enabled = true;
-    }
-
-    private class PlayerData {
-        public Vector3 position;
-    } */
-    #endregion
 }

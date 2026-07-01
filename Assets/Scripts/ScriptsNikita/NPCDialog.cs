@@ -1,5 +1,5 @@
+using System;
 using TMPro;
-using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -7,7 +7,9 @@ using UnityEngine.UI;
 /// <summary>
 /// Handles the NPC dialog UI, function menu, tower spawning, and weapon upgrade.
 /// </summary>
-public class NPCDialog : MonoBehaviour {
+public class NPCDialog : MonoBehaviour, ISaveable {
+
+    private static readonly string ID = "NPCDialog";
 
     [Header("Dialog Panels")]
     /// <summary>
@@ -172,6 +174,14 @@ public class NPCDialog : MonoBehaviour {
     /// It is only interactable when the player has enough scrap.
     /// </summary>
     public Button buyWeaponButton;
+
+    /// <summary>
+    /// Button in the weapon type panel that opens the ranged (firearm) weapons.
+    /// It is greyed out (non-interactable) in the Melee-Only and Pistol+Melee
+    /// game modes, since no firearms may be bought there.
+    /// Optional: if not assigned, buying is still blocked in code.
+    /// </summary>
+    public Button rangedWeaponsButton;
 
     [Header("Weapon Item References")]
     /// <summary>
@@ -450,6 +460,10 @@ public class NPCDialog : MonoBehaviour {
     /// </summary>
     public PlayerWeaponSelector playerWeaponSelector;
 
+    private void Awake() {
+        InitializeTowerState();
+    }
+
     /// <summary>
     /// Prepares the UI panels by briefly activating them and then disabling them again.
     /// This helps avoid visual stuttering when switching between panels.
@@ -465,8 +479,30 @@ public class NPCDialog : MonoBehaviour {
         builtTowers = new GameObject[towerSpawnPoints.Length];
         towerUpgradeLevels = new int[towerSpawnPoints.Length];
 
+        ApplyGameModeRestrictions();
+
         // Force Unity to update the canvas layout immediately
         Canvas.ForceUpdateCanvases();
+    }
+
+    /// <summary>
+    /// Returns whether firearms may be bought in the current game mode.
+    /// The shop only sells assault rifle, shotgun and sniper, which are all
+    /// forbidden in Melee-Only and Pistol+Melee (the pistol is not sold here).
+    /// </summary>
+    private bool IsRangedShopAllowed() {
+        return GameMode.Selected != GameModeType.MeleeOnly
+            && GameMode.Selected != GameModeType.PistolMelee;
+    }
+
+    /// <summary>
+    /// Applies the current game mode to the shop UI. In weapon-restricted modes
+    /// the ranged weapons button is greyed out so the player can see it is disabled.
+    /// </summary>
+    private void ApplyGameModeRestrictions() {
+        if (rangedWeaponsButton != null) {
+            rangedWeaponsButton.interactable = IsRangedShopAllowed();
+        }
     }
 
     /// <summary>
@@ -759,6 +795,11 @@ public class NPCDialog : MonoBehaviour {
     }
 
     public void OpenRangedWeapons() {
+        // Spielmodus: In Melee-Only / Pistol+Melee sind keine Schusswaffen kaufbar.
+        if (!IsRangedShopAllowed()) {
+            return;
+        }
+
         HidePanel(weaponTypePanel);
         HidePanel(weaponInfoPanel);
 
@@ -890,7 +931,7 @@ public class NPCDialog : MonoBehaviour {
         weaponDescriptionText.text = "A fast automatic weapon with good damage and high fire rate.";
 
         selectedWeaponItem = assaultRifleItem;
-        selectedWeaponCost = 3;
+        selectedWeaponCost = 20;
 
         UpdateWeaponInfo();
     }
@@ -905,7 +946,7 @@ public class NPCDialog : MonoBehaviour {
         weaponDescriptionText.text = "Reliable close-range weapon with high power.";
 
         selectedWeaponItem = shotgunItem;
-        selectedWeaponCost = 1;
+        selectedWeaponCost = 30;
 
         UpdateWeaponInfo();
     }
@@ -920,7 +961,7 @@ public class NPCDialog : MonoBehaviour {
         weaponDescriptionText.text = "A powerful long-range weapon for precise shots against zombies.";
 
         selectedWeaponItem = sniperItem;
-        selectedWeaponCost = 1;
+        selectedWeaponCost = 40;
 
         UpdateWeaponInfo();
     }
@@ -937,7 +978,7 @@ public class NPCDialog : MonoBehaviour {
         weaponDescriptionText.text = "A simple close combat weapon. Useful for basic defense against nearby zombies.";
 
         selectedWeaponItem = baseballBatItem;
-        selectedWeaponCost = 2;
+        selectedWeaponCost = 12;
 
         UpdateWeaponInfo();
     }
@@ -954,7 +995,7 @@ public class NPCDialog : MonoBehaviour {
         weaponDescriptionText.text = "A solid close combat weapon with good impact damage and practical survival use.";
 
         selectedWeaponItem = crowbarItem;
-        selectedWeaponCost = 1;
+        selectedWeaponCost = 5;
 
         UpdateWeaponInfo();
     }
@@ -971,7 +1012,7 @@ public class NPCDialog : MonoBehaviour {
         weaponDescriptionText.text = "A sharp close combat weapon with high damage and good reach.";
 
         selectedWeaponItem = swordItem;
-        selectedWeaponCost = 1;
+        selectedWeaponCost = 18;
 
         UpdateWeaponInfo();
     }
@@ -988,7 +1029,7 @@ public class NPCDialog : MonoBehaviour {
         weaponDescriptionText.text = "A light close combat weapon. Fast, cheap and useful in emergency situations.";
 
         selectedWeaponItem = knifeItem;
-        selectedWeaponCost = 2;
+        selectedWeaponCost = 15;
 
         UpdateWeaponInfo();
     }
@@ -1005,7 +1046,7 @@ public class NPCDialog : MonoBehaviour {
         weaponDescriptionText.text = "A close combat weapon with strong damage against zombies.";
 
         selectedWeaponItem = axeItem;
-        selectedWeaponCost = 1;
+        selectedWeaponCost = 8;
 
         UpdateWeaponInfo();
     }
@@ -1022,7 +1063,7 @@ public class NPCDialog : MonoBehaviour {
         weaponDescriptionText.text = "A compact close combat weapon with high damage. Useful for attacks against nearby zombies.";
 
         selectedWeaponItem = tomahawkItem;
-        selectedWeaponCost = 1;
+        selectedWeaponCost = 25;
 
         UpdateWeaponInfo();
     }
@@ -1268,7 +1309,7 @@ public class NPCDialog : MonoBehaviour {
     public void SelectTowerUpgrade() {
         ShowPanel(upgradePanel);
         HidePanel(upgradeInfoPanel);
-        ShowPanel(upgradeInfoPanelTower); 
+        ShowPanel(upgradeInfoPanelTower);
 
         upgradeInfoPanelTower.transform.SetAsLastSibling();
 
@@ -1422,7 +1463,7 @@ public class NPCDialog : MonoBehaviour {
         }
 
         // Select one upgradeable tower randomly.
-        int randomListIndex = Random.Range(0, upgradeableTowerCount);
+        int randomListIndex = UnityEngine.Random.Range(0, upgradeableTowerCount);
         int selectedTowerIndex = upgradeableTowerIndexes[randomListIndex];
 
         // Calculate the next upgrade level.
@@ -1454,7 +1495,7 @@ public class NPCDialog : MonoBehaviour {
         // Create the upgraded tower at the original spawn point position and rotation.
         GameObject upgradedTower = Instantiate(
             towerPrefabsByLevel[nextUpgradeLevel],
-            towerPosition,
+            new Vector3(towerPosition.x, 0.3f, towerPosition.z),
             towerRotation
         );
 
@@ -1462,10 +1503,16 @@ public class NPCDialog : MonoBehaviour {
         builtTowers[selectedTowerIndex] = upgradedTower;
         towerUpgradeLevels[selectedTowerIndex] = nextUpgradeLevel;
 
+        Debug.Log(builtTowers[selectedTowerIndex]);
+        Debug.Log(towerUpgradeLevels[selectedTowerIndex]);
+
+
         // Count the bought upgrade.
         boughtTowerUpgradeCount++;
 
-        Debug.Log("Tower at index " + selectedTowerIndex + " upgraded to level " + nextUpgradeLevel + ".");
+        Debug.Log(boughtTowerUpgradeCount);
+
+        //Debug.Log("Tower at index " + selectedTowerIndex + " upgraded to level " + nextUpgradeLevel + ".");
 
         // Update the tower upgrade info panel after the scrap amount and upgrade state have changed.
         UpdateTowerUpgradeInfo();
@@ -1721,10 +1768,10 @@ public class NPCDialog : MonoBehaviour {
 
         if (selectedWeaponUpgradeType == WeaponUpgradeType.Damage) {
             currentGun.UpgradeDamage(weaponDamageIncrease);
-            Debug.Log("Damage upgrade bought for: " + currentGun.gunName);
+            //Debug.Log("Damage upgrade bought for: " + currentGun.gunName);
         } else if (selectedWeaponUpgradeType == WeaponUpgradeType.Ammo) {
             currentGun.UpgradeMaxAmmo(weaponAmmoIncrease);
-            Debug.Log("Ammo upgrade bought for: " + currentGun.gunName);
+            //Debug.Log("Ammo upgrade bought for: " + currentGun.gunName);
         }
 
         UpdateWeaponUpgradeInfo();
@@ -1768,6 +1815,127 @@ public class NPCDialog : MonoBehaviour {
 
         // Prevents the invisible panel from blocking clicks on other UI elements.
         panel.blocksRaycasts = false;
+    }
+
+    private void InitializeTowerState() {
+        if (towerSpawnPoints == null) {
+            builtTowers = Array.Empty<GameObject>();
+            towerUpgradeLevels = Array.Empty<int>();
+            builtTowerCount = 0;
+            boughtTowerUpgradeCount = 0;
+            return;
+        }
+
+        builtTowers = new GameObject[towerSpawnPoints.Length];
+        towerUpgradeLevels = new int[towerSpawnPoints.Length];
+        builtTowerCount = 0;
+        boughtTowerUpgradeCount = 0;
+    }
+
+    private void RebuildTowersFromSaveData() {
+        if (builtTowers == null) {
+            builtTowers = Array.Empty<GameObject>();
+        }
+
+        for (int i = 0; i < builtTowers.Length; i++) {
+            if (builtTowers[i] != null) {
+                Destroy(builtTowers[i]);
+                builtTowers[i] = null;
+            }
+        }
+
+        if (towerSpawnPoints == null || towerPrefabsByLevel == null || towerUpgradeLevels == null) {
+            return;
+        }
+
+        int maxTowerIndex = Mathf.Min(builtTowerCount, towerSpawnPoints.Length);
+
+        for (int i = 0; i < maxTowerIndex; i++) {
+            if (towerSpawnPoints[i] == null) {
+                continue;
+            }
+
+            int level = Mathf.Clamp(i < towerUpgradeLevels.Length ? towerUpgradeLevels[i] : 0, 0, towerPrefabsByLevel.Length - 1);
+
+            if (towerPrefabsByLevel[level] == null) {
+                continue;
+            }
+
+            GameObject tower = Instantiate(
+                towerPrefabsByLevel[level],
+                towerSpawnPoints[i].position,
+                towerSpawnPoints[i].rotation
+            );
+
+            builtTowers[i] = tower;
+        }
+    }
+
+    public string GetSaveID() => ID;
+    public object Save() {
+        int upgradeCount = 0;
+
+        if (towerUpgradeLevels != null) {
+            for (int i = 0; i < towerUpgradeLevels.Length; i++) {
+                upgradeCount += towerUpgradeLevels[i];
+            }
+        }
+
+        return new NPCDialogData {
+            builtTowerCount = builtTowerCount,
+            boughtTowerUpgradeCount = upgradeCount,
+            towerUpgradeLevels = towerUpgradeLevels != null ? (int[])towerUpgradeLevels.Clone() : Array.Empty<int>()
+        };
+    }
+
+    public void Load(object data) {
+        NPCDialogData dialogData = (NPCDialogData)data;
+
+        InitializeTowerState();
+
+        builtTowerCount = dialogData.builtTowerCount;
+        boughtTowerUpgradeCount = dialogData.boughtTowerUpgradeCount;
+
+        if (dialogData.towerUpgradeLevels != null) {
+            towerUpgradeLevels = (int[])dialogData.towerUpgradeLevels.Clone();
+        } else {
+            towerUpgradeLevels = Array.Empty<int>();
+        }
+
+        if (towerSpawnPoints != null && towerUpgradeLevels.Length < towerSpawnPoints.Length) {
+            int[] resizedLevels = new int[towerSpawnPoints.Length];
+            Array.Copy(towerUpgradeLevels, resizedLevels, towerUpgradeLevels.Length);
+            towerUpgradeLevels = resizedLevels;
+        }
+
+        if (builtTowerCount < 0) {
+            builtTowerCount = 0;
+        }
+
+        if (towerSpawnPoints != null && builtTowerCount > towerSpawnPoints.Length) {
+            builtTowerCount = towerSpawnPoints.Length;
+        }
+
+        RebuildTowersFromSaveData();
+        UpdateTowerInfo();
+        UpdateTowerUpgradeInfo();
+    }
+
+    [Serializable]
+    public class NPCDialogData {
+        public int builtTowerCount;
+        public int boughtTowerUpgradeCount;
+        public int[] towerUpgradeLevels;
+    }
+
+    private void OnEnable() {
+        if (SaveManager.Instance != null)
+            SaveManager.Instance.Register(this);
+    }
+
+    private void OnDisable() {
+        if (SaveManager.Instance != null)
+            SaveManager.Instance.Unregister(this);
     }
 }
 

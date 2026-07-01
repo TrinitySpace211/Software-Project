@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -9,7 +10,8 @@ using UnityEngine.UI;
 /// Manages the player's inventory system, including item storage,
 /// hotbar management, drag-and-drop functionality, and inventory UI handling.
 /// </summary>
-public class Inventory : MonoBehaviour {
+public class Inventory : MonoBehaviour, ISaveable {
+    private static readonly string ID = "Inventory";
     public static Inventory Instance { get; private set; }
 
     [Header("References")]
@@ -17,6 +19,8 @@ public class Inventory : MonoBehaviour {
     [SerializeField] private PlayerInputHandler playerInputHandler;
     [SerializeField] private List<RectTransform> hotbarSlotsRect;
     [SerializeField] private GameObject crosshair;
+    [SerializeField] private TooltipUI tooltipUI;
+    private bool visible = false;
 
     [Header("Item References")]
     [SerializeField] private ItemSO[] guns;
@@ -24,13 +28,12 @@ public class Inventory : MonoBehaviour {
     [SerializeField] private ItemSO grenade;
     [SerializeField] private ItemSO[] healthItems;
     [SerializeField] private ItemSO[] ammunitions;
+    [SerializeField] private ItemSO scrap;
 
     [Header("Hotbar Swap Speed")]
     [SerializeField] private float swapSpeed = 0.8f;
 
     public PauseMenu pauseMenu;
-
-    
 
     /// <summary>
     /// Reference to the hotbar object containing hotbar slots.
@@ -100,9 +103,9 @@ public class Inventory : MonoBehaviour {
     private Slot selectedSlot = null;
 
     /// <summary>
-    /// Holds all the ItemSOs in a List
+    /// Path to the Save File
     /// </summary>
-    private List<ItemSO> items = new();
+    private string savePath;
 
     /// <summary>
     /// Initializes slot collections by retrieving
@@ -123,14 +126,31 @@ public class Inventory : MonoBehaviour {
     /// </summary>
     private void Start() {
         playerInputHandler.OnHotbarSlotPressed += PlayerInputHandler_OnHotbarSlotPressed;
+        playerInputHandler.OnRightClickUIAction += PlayerInputHandler_OnRightClickUIPressed;
         Item.OnItemCollected += Item_OnItemCollected;
 
         container.SetActive(false);
 
-        items.AddRange(guns);
-        items.AddRange(melees);
-        items.Add(grenade);
-        items.AddRange(healthItems);
+        string savePath = Path.Combine(Application.persistentDataPath, "save.json");
+        if (!File.Exists(savePath)) {
+            foreach (ItemSO gun in guns) {
+                if (gun.gunType == GunType.Pistol) {
+                    hotbarSlots[0].SetItem(gun);
+                    AddItem(ItemType.Ammunition, AmmunitionType.Ammo9mm, 30);
+                    AddItem(ItemType.Consumable, HealthItemType.Bandage, 4);
+                    AddItem(ItemType.Consumable, HealthItemType.HealthPack, 2);
+                }
+            }
+        }
+    }
+
+    private void PlayerInputHandler_OnRightClickUIPressed() {
+        foreach (Slot slot in inventorySlots) {
+            if (slot.hovering && slot.GetItem() != null && slot.GetItem().gunType == GunType.None && slot.GetItem().meleeType == MeleeType.None) {
+                tooltipUI.Visibile(true);
+                tooltipUI.SetSelectedSlot(slot);
+            }
+        }
     }
 
     /// <summary>
@@ -138,16 +158,18 @@ public class Inventory : MonoBehaviour {
     /// and drag-and-drop interactions.
     /// </summary>
     private void Update() {
-
-        if (pauseMenu.IsPaused)
+        if (pauseMenu.IsPaused || DebugController.Instance.GetConsoleVisibility())
             return;
 
         if (Keyboard.current.iKey.wasPressedThisFrame) {
-            container.SetActive(!container.activeInHierarchy);
-
-            // Cursor.lockState = Cursor.lockState == CursorLockMode.Locked
-            // ? CursorLockMode.None
-            // : CursorLockMode.Locked;
+            if (visible) {
+                container.SetActive(false);
+                visible = false;
+                tooltipUI.Visibile(false);
+            } else {
+                container.SetActive(true);
+                visible = true;
+            }
 
             if (container.activeInHierarchy || nPCDialog.IsDialogOpen) {
                 crosshair.SetActive(false);
@@ -156,8 +178,11 @@ public class Inventory : MonoBehaviour {
                 crosshair.SetActive(true);
                 Cursor.visible = false;
             }
+        }
 
-            //TogglePause();
+        if (playerInputHandler.MovementInput != Vector2.zero) {
+            tooltipUI.Visibile(false);
+            container.SetActive(false);
         }
 
         StartDrag();
@@ -172,10 +197,13 @@ public class Inventory : MonoBehaviour {
     /// </summary>
     /// <param name="slot">the key which represents the Hotbarslot</param>
     private void PlayerInputHandler_OnHotbarSlotPressed(int slot) {
+        if (pauseMenu.IsPaused || DebugController.Instance.GetConsoleVisibility())
+            return;
+
         ItemSO item = hotbarSlots[slot].GetItem();
 
         if (item != null) {
-            if (item.itemType == ItemType.Misc || item.itemType == ItemType.Ammunition) {
+            if (item.itemType == ItemType.Scrap || item.itemType == ItemType.Ammunition) {
                 return;
             }
         }
@@ -339,7 +367,7 @@ public class Inventory : MonoBehaviour {
         switch (itemType) {
             case ItemType.Grenade:
                 AddItem(grenade, amount);
-                return;
+                break;
             case ItemType.Consumable:
                 foreach (ItemSO healthItem in healthItems) {
                     if (EqualityComparer<T>.Default.Equals(type, (T)(object)healthItem.healthItemType)) {
@@ -357,9 +385,15 @@ public class Inventory : MonoBehaviour {
                     }
                 }
                 break;
+            case ItemType.Scrap:
+                AddItem(scrap, amount);
+                break;
+            default:
+                Debug.LogWarning($"No Item Found with that Type {type}");
+                break;
         }
 
-        Debug.LogWarning($"No Item Found with that Type {type}");
+
     }
 
     /// <summary>
@@ -378,6 +412,12 @@ public class Inventory : MonoBehaviour {
             player.GetPlayerGunSelector().ResetItem();
         } else {
             selectedSlot.SetItem(selectedSlot.GetItem(), newAmount);
+        }
+    }
+
+    private void ClearAllSlots() {
+        foreach (var s in allSlots) {
+            s.SetItem(null);
         }
     }
 
@@ -532,22 +572,44 @@ public class Inventory : MonoBehaviour {
             return;
         }
 
+        // Spielmodus: In Melee-Only sind keine Schusswaffen erlaubt,
+        // in Pistol+Melee nur die Pistole. Sonst gar nicht ausruesten.
+        if (!IsGunAllowedInGameMode(weapon.gunType)) {
+            player.GetPlayerGunSelector().DequipWeapon();
+            return;
+        }
+
         switch (weapon.gunType) {
             case GunType.AssaultRifle:
-                player.GetPlayerGunSelector().SelectAssaultRifle();
+                player.GetPlayerGunSelector().SelectAssaultRifle(weapon.gunSO);
                 break;
             case GunType.Pistol:
-                player.GetPlayerGunSelector().SelectPistol();
+                player.GetPlayerGunSelector().SelectPistol(weapon.gunSO);
                 break;
             case GunType.Shotgun:
-                player.GetPlayerGunSelector().SelectShotgun();
+                player.GetPlayerGunSelector().SelectShotgun(weapon.gunSO);
                 break;
             case GunType.Sniper:
-                player.GetPlayerGunSelector().SelectSniper();
+                player.GetPlayerGunSelector().SelectSniper(weapon.gunSO);
                 break;
             default:
                 player.GetPlayerGunSelector().DequipWeapon();
                 break;
+        }
+    }
+
+    /// <summary>
+    /// Returns whether the given gun type may be equipped in the current game mode.
+    /// MeleeOnly forbids all guns, PistolMelee allows only the pistol.
+    /// </summary>
+    private bool IsGunAllowedInGameMode(GunType gunType) {
+        switch (GameMode.Selected) {
+            case GameModeType.MeleeOnly:
+                return false;
+            case GameModeType.PistolMelee:
+                return gunType == GunType.Pistol;
+            default:
+                return true;
         }
     }
 
@@ -632,7 +694,7 @@ public class Inventory : MonoBehaviour {
     }
 
     public bool GetAmmoAvailable(GunSO gun, out int ammoNeed) {
-        int maxAmmo = gun.shootConfigSO.maxAmmo;
+        int maxAmmo = gun.GetMaxAmmo();
 
         ammoNeed = maxAmmo - gun.currentAmmo;
 
@@ -680,10 +742,6 @@ public class Inventory : MonoBehaviour {
 
     public bool GetIsDragging() {
         return isDragging;
-    }
-
-    public List<ItemSO> GetItemSOs() {
-        return items;
     }
 
     /*
@@ -751,6 +809,95 @@ public class Inventory : MonoBehaviour {
         }
 
         return true;
+    }
+
+    public List<Slot> GetInventorySlots() {
+        return inventorySlots;
+    }
+
+    #region Save/Load
+    public string GetSaveID() => ID;
+
+    public object Save() {
+        InventoryData saveData = new InventoryData();
+
+        for (int i = 0; i < allSlots.Count; i++) {
+            var slot = allSlots[i];
+
+            if (slot.HasItem()) {
+                ItemSO item = slot.GetItem();
+
+                SlotSaveData slotData = new SlotSaveData {
+                    itemName = item.name,
+                    amount = slot.GetAmount(),
+                    slotIndex = i
+                };
+
+                if (item.gunSO != null) {
+                    slotData.isGun = true;
+
+                    item.gunSO.SaveGunData();
+
+                    slotData.gunName = item.gunSO.gunName;
+                    slotData.gunData = item.gunSO.GetGunData();
+                }
+                saveData.slots.Add(slotData);
+            }
+        }
+        return saveData;
+    }
+
+    public void Load(object data) {
+        InventoryData loadData = (InventoryData)data;
+
+        ClearAllSlots();
+
+        foreach (var slotData in loadData.slots) {
+            ItemSO item = Resources.Load<ItemSO>($"ScriptableObjects/ItemSO/{slotData.itemName}");
+
+            if (item != null && slotData.isGun) {
+                ItemSO runtimeItem = Instantiate(item);
+
+                if (item.gunSO != null) {
+                    GunSO gun = Instantiate(item.gunSO);
+                    gun.LoadGunData(slotData.gunData);
+                    runtimeItem.gunSO = gun;
+                }
+
+                allSlots[slotData.slotIndex].SetItem(runtimeItem, slotData.amount);
+                continue;
+            }
+
+            allSlots[slotData.slotIndex].SetItem(item, slotData.amount);
+        }
+    }
+
+    [Serializable]
+    public class SlotSaveData {
+        public string itemName;
+        public int amount;
+        public int slotIndex;
+
+        //Is the Item in the Slot a Gun?
+        public bool isGun;
+        public string gunName;
+        public GunSO.GunData gunData;
+    }
+
+    [Serializable]
+    public class InventoryData {
+        public List<SlotSaveData> slots = new();
+    }
+    #endregion
+
+    private void OnEnable() {
+        if (SaveManager.Instance != null)
+            SaveManager.Instance.Register(this);
+    }
+
+    private void OnDisable() {
+        if (SaveManager.Instance != null)
+            SaveManager.Instance.Unregister(this);
     }
 }
 

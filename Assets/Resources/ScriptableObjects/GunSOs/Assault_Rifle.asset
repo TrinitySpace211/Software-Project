@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e4e88d49f84bb54da2e78f54a937d41, type: 3}
+  m_Name: Assault_Rifle
+  m_EditorClassIdentifier: 
+  impactType: {fileID: 11400000, guid: bf165e4fffbc43c44b5a52f06a7c05f2, type: 2}
+  type: 1
+  ammunitionType: 1
+  weaponSlot: 0
+  gunName: Assault Rifle
+  modelPrefab: {fileID: 1752352189776943642, guid: 53e44d279923b9441b531cc46df7e77e, type: 3}
+  spawnPoint: {x: 0, y: 0.00209, z: 0.01441}
+  spawnRotation: {x: 0, y: 0, z: 0}
+  shootConfigSO: {fileID: 11400000, guid: 39ff4d6ba4144774ea2ef54b9f5672b5, type: 2}
+  trailConfigSO: {fileID: 11400000, guid: 7e4b124e012e625458c12440c926f8fe, type: 2}
+  shootSoundClips:
+  - {fileID: 8300000, guid: 53fe7e2b21622a545b70f0bc026673e9, type: 3}
+  - {fileID: 8300000, guid: f926cba00817c4e43a311751682e33d0, type: 3}
+  - {fileID: 8300000, guid: cf5820722edd6b74a958f2f748682f81, type: 3}
+  - {fileID: 8300000, guid: 5c43116e96fc3e74b9759b425a4eb9cc, type: 3}

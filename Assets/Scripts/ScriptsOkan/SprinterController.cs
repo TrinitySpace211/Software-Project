@@ -24,14 +24,10 @@ public class SprinterController : MonoBehaviour, IDamageable {
     [Header("Health")] public int health = 60;
     public bool isDead;
 
-    // Rotes Aufblinken bei Treffer (wie beim Standard-Zombie in ZombieAI).
-    [Header("Hit Feedback")] [SerializeField]
-    private SkinnedMeshRenderer skinnedMeshRenderer;
-
-    private readonly Color hitColor = Color.red;
-    private Material hitMaterial;
-    private Color originalColor;
-    private Coroutine hitRoutine;
+    [Header("Material & Dissolve")]
+    [SerializeField] private ParticleSystem dissolveParticle;
+    [SerializeField] private SkinnedMeshRenderer skinnedMeshRenderer;
+    [SerializeField] private Transform particlePoint;
 
     private NavMeshAgent agent;
     private Animator animator;
@@ -50,6 +46,18 @@ public class SprinterController : MonoBehaviour, IDamageable {
     private GasTankHealth targetObjectiveHealth;
     private float waitTimer;
 
+    //Material
+    private Color originalColor;
+    private Material zombieMaterial;
+    private readonly Color hitColor = Color.red;
+
+    //Dissolve Parameters
+    private bool dissolveEnemy = false;
+    private float dissolveMeterMin;
+    private float dissolveMeterMax;
+    private float dissolveMeter;
+    private float dissolveSpeed = 1f;
+
     private void Start() {
         boxCollider = GetComponent<BoxCollider>();
         animator = GetComponent<Animator>();
@@ -58,18 +66,31 @@ public class SprinterController : MonoBehaviour, IDamageable {
         playerHealth = player.GetComponent<PlayerHealth>();
         currentTarget = player;
         animator.speed = animationSpeed;
+        SetNewRoamTarget();
 
-        if (skinnedMeshRenderer == null)
-            skinnedMeshRenderer = GetComponentInChildren<SkinnedMeshRenderer>();
         if (skinnedMeshRenderer != null) {
-            hitMaterial = skinnedMeshRenderer.material;
-            originalColor = hitMaterial.color;
+            zombieMaterial = skinnedMeshRenderer.material;
+            originalColor = zombieMaterial.color;
         }
 
-        SetNewRoamTarget();
+        Shader shader = zombieMaterial.shader;
+        int propertyIndex = shader.FindPropertyIndex("_DissolveMeter");
+        dissolveMeterMin = zombieMaterial.shader.GetPropertyRangeLimits(propertyIndex).x;
+        dissolveMeterMax = zombieMaterial.shader.GetPropertyRangeLimits(propertyIndex).y;
+        dissolveMeter = dissolveMeterMax;
     }
 
     private void Update() {
+        if (dissolveEnemy) {
+            dissolveMeter -= Time.deltaTime * dissolveSpeed;
+            if (dissolveMeter > dissolveMeterMin) {
+                zombieMaterial.SetFloat("_DissolveMeter", dissolveMeter);
+            } else {
+                dissolveEnemy = false;
+                Destroy(gameObject);
+            }
+        }
+
         if (isDead) return;
 
         if (attackTimer > 0f)
@@ -123,20 +144,8 @@ public class SprinterController : MonoBehaviour, IDamageable {
             return;
         }
 
-        if (hitMaterial != null) {
-            if (hitRoutine != null) StopCoroutine(hitRoutine);
-            hitRoutine = StartCoroutine(HitFeedback());
-        }
-    }
-
-    /// <summary>
-    ///     Faerbt den Sprinter kurz rot ein und setzt die Farbe danach wieder zurueck.
-    /// </summary>
-    private IEnumerator HitFeedback() {
-        hitMaterial.color = hitColor;
-        yield return new WaitForSeconds(0.1f);
-        hitMaterial.color = originalColor;
-        hitRoutine = null;
+        StopAllCoroutines();
+        StartCoroutine(HitFeedback());
     }
 
     public bool IsDead() {
@@ -301,5 +310,21 @@ public class SprinterController : MonoBehaviour, IDamageable {
 
         if (boxCollider != null)
             boxCollider.enabled = false;
+
+        StartCoroutine(DissolveEnemy(3f));
+    }
+
+    private IEnumerator HitFeedback() {
+        zombieMaterial.color = hitColor;
+        yield return new WaitForSeconds(0.1f);
+        zombieMaterial.color = originalColor;
+    }
+
+    private IEnumerator DissolveEnemy(float secondsToWait) {
+        yield return new WaitForSeconds(secondsToWait);
+
+        Instantiate(dissolveParticle, particlePoint.position, Quaternion.identity, particlePoint);
+
+        dissolveEnemy = true;
     }
 }

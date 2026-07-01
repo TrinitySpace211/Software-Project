@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.Animations.Rigging;
 using UnityEditor;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.UI;
 
 // Komplette PlayerTests-Klasse in der CI deaktiviert (skipped).
 // Diese Integrationstests instanziieren das echte Player-Prefab und lassen Player.Update()
@@ -17,17 +19,31 @@ using UnityEditor;
 // TODO (Anton/Team): PlayerTests CI-tauglich machen - Player.Update von der direkten
 // EventSystem.current-Abhaengigkeit entkoppeln (Null-Check) und/oder Active Input Handling
 // projektweit auf "Both" stellen bzw. Prefab auf InputSystemUIInputModule migrieren.
-[Ignore("Headless nicht lauffaehig: Player.Update braucht Laufzeit-/UI-Kontext (EventSystem.current null, StandaloneInputModule vs. neues Input System). Siehe Klassen-Kommentar.")]
+//[Ignore("Headless nicht lauffaehig: Player.Update braucht Laufzeit-/UI-Kontext (EventSystem.current null, StandaloneInputModule vs. neues Input System). Siehe Klassen-Kommentar.")]
 [TestFixture]
 public class PlayerTests {
 
     private Player _playerPrefab;
     private PlayerInputHandler _playerInputHandler;
+    private PlayerHealth _playerHealth;
+    private PlayerWeaponSelector _weaponSelector;
 
     private Player _player;
     private PlayerAnimation _playerAnimation;
     private Camera _camera;
 
+    private GunSO _assaultRifleSO;
+
+    //Dynamic Objects
+    private GameObject _groundPlane;
+    private GameObject _playerInputHandlerObject;
+    private GameObject _cameraObject;
+    private GameObject _eventSystemObject;
+    private GameObject _playerInstance;
+
+    private EventSystem currentEventSystem;
+
+    [OneTimeSetUp]
     public void PlayerIntegrationTest() {
         // Pfad korrigiert: das Prefab liegt im Unterordner ".../PrefabsAnton/Player/Player.prefab".
         // Vorher zeigte der Pfad auf ".../PrefabsAnton/Player.prefab" (ohne Unterordner) ->
@@ -35,6 +51,7 @@ public class PlayerTests {
         // alle PlayerTests fehlschlagen. Tipp: feste Asset-Pfade brechen bei Ordner-Umzuegen;
         // robuster waere eine SerializeField-/Resources-Referenz.
         _playerPrefab = AssetDatabase.LoadAssetAtPath<Player>("Assets/Prefabs/PrefabsAnton/Player/Player.prefab");
+        _assaultRifleSO = AssetDatabase.LoadAssetAtPath<GunSO>("Assets/Resources/ScriptableObjects/GunSOs/Assault_Rifle.asset");
 
         Application.targetFrameRate = 60;
         Time.fixedDeltaTime = 1f / 60;
@@ -42,38 +59,66 @@ public class PlayerTests {
 
     [SetUp]
     public void Setup() {
-        PlayerIntegrationTest();
-
         // Erstelle Plane für den Raycast
-        var groundPlane = GameObject.CreatePrimitive(PrimitiveType.Plane);
-        groundPlane.name = "Ground";
-        groundPlane.layer = 6; // Ground Layer
-        groundPlane.transform.position = new Vector3(0, 0, 0);
-        groundPlane.transform.localScale = new Vector3(15, 1, 15);
+        _groundPlane = GameObject.CreatePrimitive(PrimitiveType.Plane);
+        _groundPlane.name = "Ground";
+        _groundPlane.layer = 6; // Ground Layer
+        _groundPlane.transform.position = new Vector3(0, 0, 0);
+        _groundPlane.transform.localScale = new Vector3(15, 1, 15);
 
         // Erstelle einen GameObject für den PlayerInputHandler
-        var playerInputHandlerObject = new GameObject("PlayerInputHandler");
-        _playerInputHandler = playerInputHandlerObject.AddComponent<PlayerInputHandler>();
+        _playerInputHandlerObject = new GameObject("PlayerInputHandler");
+        _playerInputHandler = _playerInputHandlerObject.AddComponent<PlayerInputHandler>();
 
         // Erstelle einen GameObject für die Camera
-        var cameraObject = new GameObject("Camera");
-        _camera = cameraObject.AddComponent<Camera>();
+        _cameraObject = new GameObject("Camera");
+        _camera = _cameraObject.AddComponent<Camera>();
         _camera.transform.position = new Vector3(0, 5.5f, -5f);
         _camera.transform.rotation = Quaternion.Euler(new Vector3(40f, 0f, 0f));
 
         // Player instanzieren + PlayerInputHandler und Camera initiieren
-        _player = Object.Instantiate(_playerPrefab);
-        _player.Construct(_playerInputHandler, _camera);
+        _playerInstance = Object.Instantiate(_playerPrefab.gameObject);
+        _player = _playerInstance.GetComponent<Player>();
 
         // PlayerAnimation Komponente holen und PlayerInputHandler initiieren
         _playerAnimation = _player.GetComponent<PlayerAnimation>();
         _playerAnimation.Construct(_playerInputHandler);
+
+        // Erstelle einen GameObject für den PlayerHealth
+        _playerHealth = _player.GetComponent<PlayerHealth>();
+        _weaponSelector = _player.GetComponent<PlayerWeaponSelector>();
+
+        _eventSystemObject = new GameObject("EventSystem");
+        _eventSystemObject.AddComponent<EventSystem>();
+        _eventSystemObject.AddComponent<InputSystemUIInputModule>();
+        currentEventSystem = _eventSystemObject.GetComponent<EventSystem>();
+
+        _player.Construct(_playerInputHandler, _playerHealth, _camera, _weaponSelector, currentEventSystem);
+    }
+
+    [TearDown]
+    public void Teardown() {
+        // WICHTIG: Lösche ALLES, was im Setup mit "new" oder "Instantiate" gebaut wurde
+        if (_playerInstance != null) Object.DestroyImmediate(_playerInstance);
+        if (_groundPlane != null) Object.DestroyImmediate(_groundPlane);
+        if (_playerInputHandlerObject != null) Object.DestroyImmediate(_playerInputHandlerObject);
+        if (_cameraObject != null) Object.DestroyImmediate(_cameraObject);
+        if (_eventSystemObject != null) Object.DestroyImmediate(_eventSystemObject);
+
+        // Referenzen nullen, um zu verhindern, dass der nächste Test auf Alte zugreift
+        _player = null;
+        _playerInputHandler = null;
+        _camera = null;
+        _playerAnimation = null;
+        _playerHealth = null;
+        _weaponSelector = null;
+        currentEventSystem = null;
     }
 
     [UnityTest]
     public IEnumerator Player_MovesForwardAfterMovementInput() {
         // Speichere ursprüngliche Position
-        float initialPositionZ = _player.transform.position.y;
+        float initialPositionZ = _player.transform.position.z;
 
         // Simuliere Bewegungsinput
         _playerInputHandler.SetMovementInput(Vector2.up);
@@ -86,15 +131,12 @@ public class PlayerTests {
         //Debug.Log("After Input: " + _player.transform.position.y);
 
         // Prüfe, ob sich die Position geändert hat
-        Assert.AreNotEqual(initialPositionZ, _player.transform.position.y, "Player sollte sich auf der Y-Achse bewegen");
-        Assert.AreEqual(currentPlayerMovement.normalized, Vector3.forward, "Player bewegt sich nach vorne");
+        Assert.AreNotEqual(initialPositionZ, _player.transform.position.z, "Player sollte sich auf der 2D Y-Achse bewegen");
+        Assert.Positive(currentPlayerMovement.normalized.z, "Player bewegt sich nach vorne");
     }
 
     [UnityTest]
     public IEnumerator Player_MovesBackwardAfterMovementInput() {
-        // Speichere ursprüngliche Position
-        float initialPositionZ = _player.transform.position.y;
-
         // Simuliere Bewegungsinput
         _playerInputHandler.SetMovementInput(Vector2.down);
 
@@ -102,12 +144,12 @@ public class PlayerTests {
 
         Vector3 currentPlayerMovement = _player.GetCurrentPlayerMovement();
 
-        //Debug.Log("Initial Pos: " + initialPositionY);
-        //Debug.Log("After Input: " + _player.transform.position.y);
+        //Debug.Log("Current Player Movement: " + currentPlayerMovement);
+        //Debug.Log("Current Player Movement Normalized: " + currentPlayerMovement.normalized);
 
         // Prüfe, ob sich die Position geändert hat
-        Assert.AreNotEqual(initialPositionZ, _player.transform.position.y, "Player sollte sich auf der Y-Achse bewegen");
-        Assert.AreEqual(currentPlayerMovement.normalized, Vector3.back, "Player bewegt sich nach vorne");
+        Assert.AreNotEqual(Vector3.zero, currentPlayerMovement, "Player sollte sich auf der 2D Y-Achse bewegen");
+        Assert.Negative(currentPlayerMovement.normalized.z, "Player bewegt sich nach hinten");
     }
 
     [UnityTest]
@@ -126,8 +168,8 @@ public class PlayerTests {
         //Debug.Log("After Input: " + _player.transform.position.x);
 
         // Prüfe, ob sich die Position geändert hat
-        Assert.AreNotEqual(initialPositionX, _player.transform.position.x, "Player sollte sich nicht auf der X-Achse bewegen");
-        Assert.AreEqual(currentPlayerMovement.normalized, Vector3.left, "Player bewegt sich nach vorne");
+        Assert.AreNotEqual(initialPositionX, _player.transform.position.x, "Player sollte sich nicht auf der 2D X-Achse bewegen");
+        Assert.Negative(currentPlayerMovement.normalized.x, "Player bewegt sich nach links");
     }
 
     [UnityTest]
@@ -146,8 +188,8 @@ public class PlayerTests {
         //Debug.Log("After Input: " + _player.transform.position.x);
 
         // Prüfe, ob sich die Position geändert hat
-        Assert.AreNotEqual(initialPositionX, _player.transform.position.x, "Player sollte sich nicht auf der X-Achse bewegen");
-        Assert.AreEqual(currentPlayerMovement.normalized, Vector3.right, "Player bewegt sich nach vorne");
+        Assert.AreNotEqual(initialPositionX, _player.transform.position.x, "Player sollte sich nicht auf der 2D X-Achse bewegen");
+        Assert.Positive(currentPlayerMovement.normalized.x, "Player bewegt sich nach rechts");
     }
 
     [UnityTest]
@@ -166,7 +208,7 @@ public class PlayerTests {
         }
 
         Quaternion rotatedRotation = _player.transform.rotation;
-        Debug.Log("After Mouse Move: " + rotatedRotation.eulerAngles);
+        //Debug.Log("After Mouse Move: " + rotatedRotation.eulerAngles);
 
         // Prüfe, ob sich die Rotation geändert hat
         float rotationDifference = Quaternion.Angle(initialRotation, rotatedRotation);
@@ -190,7 +232,7 @@ public class PlayerTests {
         }
 
         Quaternion rotatedRotation = _player.transform.rotation;
-        Debug.Log("After Mouse Move: " + rotatedRotation.eulerAngles);
+        //Debug.Log("After Mouse Move: " + rotatedRotation.eulerAngles);
 
         // Prüfe, ob sich die Rotation geändert hat, trotz Maus Position
         float expectedY = 90f;
@@ -199,6 +241,14 @@ public class PlayerTests {
 
     [UnityTest]
     public IEnumerator Player_AimingAfterAimKeyPressed() {
+        yield return null;
+
+        _weaponSelector.SelectAssaultRifle(_assaultRifleSO);
+
+        for (int i = 0; i < 100f; i++) {
+            yield return null;
+        }
+
         // Speichern der Gewichtung
         float initialWeight = _player.GetAimLayerWeight();
 
@@ -222,12 +272,6 @@ public class PlayerTests {
         Assert.IsTrue(_player.IsSprinting());
     }
 
-    [TearDown]
-    public void TearDown() {
-        if (_player) {
-            Object.DestroyImmediate(_player);
-        }
-    }
 }
 
 

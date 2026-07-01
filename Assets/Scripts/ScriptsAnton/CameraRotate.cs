@@ -12,6 +12,9 @@ public class CameraRotate : MonoBehaviour {
     }
 
     private void Update() {
+        if (DebugController.Instance.GetConsoleVisibility())
+            return;
+
         transform.position = player.transform.position;
 
         if (playerInputHandler.TurnRightInput) {

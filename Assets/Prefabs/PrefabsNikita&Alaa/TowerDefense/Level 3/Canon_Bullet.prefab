@@ -126,11 +126,11 @@ MonoBehaviour:
   target: {fileID: 0}
   speed: 25
   hitDistance: 0.35
-  directDamage: 20
+  directDamage: 16
   areaDamage: 1
   explosionRadius: 3
   rotationOffset: {x: 0, y: 90, z: 90}
   enemyLayerMask:
     serializedVersion: 2
     m_Bits: 128
-  explosionEffect: {fileID: 2708721927796039769, guid: 9c632d73365de2e48aa1dc785d53cfc1, type: 3}
+  explosionEffect: {fileID: 198656289721292014, guid: 0a9999b9d8d6798448326803562a8a7e, type: 3}
