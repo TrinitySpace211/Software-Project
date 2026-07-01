@@ -1,65 +1,55 @@
 using UnityEngine;
 
-/// <summary>
-///     Central script for the wave spawn system.
-///     Called by DayNightCycle on new day and by the Start button on game start.
-/// </summary>
 public class WaveManager : MonoBehaviour {
-    [Header("Spawn Zones")]
-    [SerializeField]
+    [Header("Spawn Zones")] [SerializeField]
     private SpawnZone[] spawnZones;
 
-    [Header("Wave Scaling")]
-    [SerializeField]
-    private int baseZombieCount = 15;
+    [Header("Day 1 Early Action")] [SerializeField]
+    private int day1MinZombies = 1;
 
-    [SerializeField] private int zombiesPerDay = 5;
-    [SerializeField] private int maxZombiesTotal = 60;
+    [SerializeField] private int day1MaxZombies = 3;
 
-    [Header("Tank (ab Welle 6)")]
-    [SerializeField] private int maxTanksTotal = 4;
-
+    private WaveDifficultyConfig _config;
     private int _currentDay;
 
     private void Awake() {
         LeanTween.init(800);
+        _config = DifficultyPresets.Get(GameDifficulty.Selected);
     }
 
-    /// <summary>
-    ///     Called by the Start button. Resets the day counter and spawns the first wave.
-    /// </summary>
     [ContextMenu("Test Spawn")]
     public void OnGameStart() {
         _currentDay = 0;
+        SpawnEarlyAction();
         SpawnAllZones();
     }
 
-    /// <summary>
-    ///     Called by DayNightCycle when a new day begins. Increments day and spawns next wave.
-    /// </summary>
     public void OnNewDay() {
         _currentDay++;
         SpawnAllZones();
     }
 
-    /// <summary>
-    ///     Distributes the total zombie count evenly across all spawn zones.
-    /// </summary>
+    private void SpawnEarlyAction() {
+        var earlyCount = Random.Range(day1MinZombies, day1MaxZombies + 1);
+        var zone = spawnZones[Random.Range(0, spawnZones.Length)];
+        zone.zombieCount = earlyCount;
+        zone.sprinterCount = 0;
+        zone.tankCount = 0;
+        zone.SpawnWave();
+    }
+
     private void SpawnAllZones() {
         var total = Mathf.Min(
-            baseZombieCount + _currentDay * zombiesPerDay,
-            maxZombiesTotal
+            _config.baseZombieCount + _currentDay * _config.zombiesPerDay,
+            _config.maxZombiesTotal
         );
 
-        // Ab Tag 2 (Welle 3): 1 Sprinter, danach +1 pro Welle bis max 8
-        var totalSprinters = _currentDay >= 2
-            ? Mathf.Min(_currentDay - 1, 8)
+        var totalSprinters = _currentDay >= _config.sprinterStartDay
+            ? Mathf.Min(_currentDay - (_config.sprinterStartDay - 1), _config.maxSprinters)
             : 0;
 
-        // Ab Tag 5 (Welle 6): 1 Tank, danach +1 pro Welle bis max maxTanksTotal.
-        // (Welle = Tag + 1, vgl. Sprinter-Kommentar "Tag 2 = Welle 3".)
-        var totalTanks = _currentDay >= 5
-            ? Mathf.Min(_currentDay - 4, maxTanksTotal)
+        var totalTanks = _currentDay >= _config.tankStartDay
+            ? Mathf.Min(_currentDay - (_config.tankStartDay - 1), _config.maxTanksTotal)
             : 0;
 
         var perZone = total / spawnZones.Length;
@@ -70,7 +60,7 @@ public class WaveManager : MonoBehaviour {
         for (var i = 0; i < spawnZones.Length; i++) {
             spawnZones[i].zombieCount = perZone + (i == 0 ? remainder : 0);
             spawnZones[i].sprinterCount =
-                sprintersPerZone + (i == 0 ? totalSprinters % spawnZones.Length : 0); // ← Rest auch verteilen
+                sprintersPerZone + (i == 0 ? totalSprinters % spawnZones.Length : 0);
             spawnZones[i].tankCount =
                 tanksPerZone + (i == 0 ? totalTanks % spawnZones.Length : 0);
             spawnZones[i].SpawnWave();
@@ -78,8 +68,27 @@ public class WaveManager : MonoBehaviour {
     }
 
     private void ClearAllZombies() {
-        foreach (SpawnZone zone in spawnZones) {
-            zone.ClearZombies();
+        foreach (var zone in spawnZones) zone.ClearZombies();
+    }
+
+    // --- Vorbereitet für ISaveable ---
+
+    public string GetSaveID() {
+        return "WaveManager";
+    }
+
+    public object Save() {
+        return new WaveSaveData {
+            currentWave = _currentDay,
+            difficulty = GameDifficulty.Selected
+        };
+    }
+
+    public void Load(object data) {
+        if (data is WaveSaveData save) {
+            _currentDay = save.currentWave;
+            GameDifficulty.Selected = save.difficulty;
+            _config = DifficultyPresets.Get(GameDifficulty.Selected);
         }
     }
 }
