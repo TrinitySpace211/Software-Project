@@ -12,10 +12,10 @@ public class ScrapHudDisplay : MonoBehaviour {
     [SerializeField] private Sprite scrapIcon;
 
     // Fixed position used when no health bar is assigned.
-    [SerializeField] private Vector2 fallbackHudPosition = new Vector2(20f, -90f);
+    [SerializeField] private Vector2 fallbackHudPosition = new Vector2(20f, -125f);
 
     // Size of the icon.
-    [SerializeField] private Vector2 iconSize = new Vector2(34f, 34f);
+    [SerializeField] private Vector2 iconSize = new Vector2(38f, 38f);
 
     // Color of the amount text.
     [SerializeField] private Color textColor = new Color(1f, 0.82f, 0.35f);
@@ -79,7 +79,7 @@ public class ScrapHudDisplay : MonoBehaviour {
         hudRect.anchorMax = new Vector2(0f, 1f);
         hudRect.pivot = new Vector2(0f, 1f);
         hudRect.anchoredPosition = fallbackHudPosition;
-        hudRect.sizeDelta = new Vector2(126f, 46f);
+        hudRect.sizeDelta = new Vector2(140f, 52f);
 
         // Small dark background that matches the zombie game.
         Image background = hudObject.AddComponent<Image>();
@@ -109,12 +109,12 @@ public class ScrapHudDisplay : MonoBehaviour {
         RectTransform textRect = textObject.AddComponent<RectTransform>();
         textRect.anchorMin = new Vector2(0f, 0f);
         textRect.anchorMax = new Vector2(1f, 1f);
-        textRect.offsetMin = new Vector2(50f, 0f);
+        textRect.offsetMin = new Vector2(55f, 0f);
         textRect.offsetMax = new Vector2(-8f, 0f);
 
         scrapCountText = textObject.AddComponent<Text>();
         scrapCountText.alignment = TextAnchor.MiddleLeft;
-        scrapCountText.fontSize = 24;
+        scrapCountText.fontSize = 26;
         scrapCountText.fontStyle = FontStyle.Bold;
         scrapCountText.color = textColor;
         scrapCountText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
