@@ -58,8 +58,15 @@ public class SurfaceManager : MonoBehaviour {
             }
         } else {
             ZombieAI zombie = hitObject.GetComponentInParent<ZombieAI>();
+            SprinterController sprinter = hitObject.GetComponentInParent<SprinterController>();
+            Renderer renderer = null;
             if (zombie != null) {
-                Renderer renderer = zombie.GetComponentInChildren<SkinnedMeshRenderer>();
+                renderer = zombie.GetComponentInChildren<SkinnedMeshRenderer>();
+            } else if (sprinter != null) {
+                renderer = sprinter.GetComponentInChildren<SkinnedMeshRenderer>();
+            }
+
+            if (renderer != null) {
                 SurfaceType surfaceType = null;
                 Texture activeTexture = null;
                 if (renderer != null) {
@@ -81,7 +88,7 @@ public class SurfaceManager : MonoBehaviour {
                     }
                 }
             } else {
-                Renderer renderer = hitObject.GetComponent<Renderer>();
+                renderer = hitObject.GetComponent<Renderer>();
                 if (renderer == null) {
                     renderer = hitObject.GetComponentInParent<Renderer>();
                 }
@@ -175,8 +182,11 @@ public class SurfaceManager : MonoBehaviour {
                 }
 
             } else {
-                Debug.Log(skinnedMeshRenderer.sharedMaterial.mainTexture);
-                return skinnedMeshRenderer.sharedMaterial.mainTexture;
+                if (skinnedMeshRenderer.sharedMaterial.mainTexture == null) {
+                    return skinnedMeshRenderer.sharedMaterials[0].GetTexture("_MainTexture");
+                } else {
+                    return skinnedMeshRenderer.sharedMaterial.mainTexture;
+                }
             }
 
         } else if (renderer.TryGetComponent(out MeshFilter meshFilter)) {

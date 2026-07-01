@@ -14,19 +14,19 @@ public class ZombieAI : MonoBehaviour, IDamageable {
 
     [SerializeField] private SkinnedMeshRenderer skinnedMeshRenderer;
     [SerializeField] private Material rageEyes;
+    [SerializeField] private ParticleSystem dissolveParticle;
 
     /// <summary>Transform of the current target. Assign via Inspector or Init().</summary>
     [SerializeField] public Transform target;
 
     [SerializeField] private Rigidbody[] joints;
+    [SerializeField] private CapsuleCollider[] capsuleCollider;
     [SerializeField] private GameObject attackPoint;
     [SerializeField] private Transform[] patrolPoints;
     [SerializeField] private float patrolWaitTime = 2f;
 
     /// <summary>ScriptableObject containing speed, damage, attack range, and detection range.</summary>
     public EnemyStatsSO enemyStatsSO;
-
-    private readonly Color hitColor = Color.red;
 
     private NavMeshAgent _agent;
     private ZombieAnimationController _animController;
@@ -50,6 +50,9 @@ public class ZombieAI : MonoBehaviour, IDamageable {
     private Color originalColor;
     private Material zombieMaterial;
     private Material originalEyes;
+    private readonly Color hitColor = Color.red;
+
+    //Dissolve
     private bool dissolveEnemy = false;
     private float dissolveMeterMin;
     private float dissolveMeterMax;
@@ -85,6 +88,7 @@ public class ZombieAI : MonoBehaviour, IDamageable {
         }
 
         foreach (var joint in joints) joint.isKinematic = true;
+        foreach (var collider in capsuleCollider) collider.isTrigger = true;
     }
 
     private void Update() {
@@ -93,6 +97,7 @@ public class ZombieAI : MonoBehaviour, IDamageable {
             if (dissolveMeter > dissolveMeterMin) {
                 zombieMaterial.SetFloat("_DissolveMeter", dissolveMeter);
             } else {
+                dissolveEnemy = false;
                 Destroy(gameObject);
             }
         }
@@ -309,6 +314,7 @@ public class ZombieAI : MonoBehaviour, IDamageable {
         SetLayerRecursively(gameObject, layer);
 
         foreach (var joint in joints) joint.isKinematic = false;
+        foreach (var collider in capsuleCollider) collider.isTrigger = false;
 
         StartCoroutine(DissolveEnemy(3f));
     }
@@ -334,6 +340,9 @@ public class ZombieAI : MonoBehaviour, IDamageable {
     private IEnumerator DissolveEnemy(float secondsToWait) {
         yield return new WaitForSeconds(secondsToWait);
 
+        if (joints.Length > 0)
+            Instantiate(dissolveParticle, joints[0].transform.position, Quaternion.identity);
+
         dissolveEnemy = true;
     }
 
@@ -345,6 +354,18 @@ public class ZombieAI : MonoBehaviour, IDamageable {
         zombieMaterial.color = hitColor;
         yield return new WaitForSeconds(0.1f);
         zombieMaterial.color = originalColor;
+    }
+
+    public void SetRageEyes() {
+        if (rageEyes != null && skinnedMeshRenderer.materials.Length > 1) {
+            skinnedMeshRenderer.materials[1] = rageEyes;
+        }
+    }
+
+    public void SetDefaultEyes() {
+        if (originalEyes != null && skinnedMeshRenderer.materials.Length > 1) {
+            skinnedMeshRenderer.materials[1] = originalEyes;
+        }
     }
 
     public bool IsDead() {

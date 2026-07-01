@@ -1,94 +1,132 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class SaveManager : MonoBehaviour {
     public static SaveManager Instance { get; private set; }
 
-    [SerializeField] private SaveableRef[] saveables;
+    private readonly List<ISaveable> saveables = new();
     private string savePath;
 
-    //temp
-    private bool pressed = false;
-    private bool pressedEnter = false;
+    private void Awake() {
+        if (Instance != null && Instance != this) {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+
+        savePath = Path.Combine(Application.persistentDataPath, "save.json");
+    }
 
     private void Start() {
         LoadGame();
     }
 
-    private void OnValidate() {
-        if (saveables == null) return;
-        for (int i = 0; i < saveables.Length; i++) {
-            saveables[i].OnValidate();
-        }
+    public void Register(ISaveable saveable) {
+        if (!saveables.Contains(saveable))
+            saveables.Add(saveable);
     }
 
-    private void Update() {
-        if (Keyboard.current.spaceKey.wasPressedThisFrame && !pressed) {
-            SaveGame();
-            pressed = true;
-        } else {
-            pressed = false;
-        }
-        if (Keyboard.current.enterKey.wasPressedThisFrame && !pressedEnter) {
-            LoadGame();
-            pressedEnter = true;
-        } else {
-            pressedEnter = false;
-        }
+    public void Unregister(ISaveable saveable) {
+        saveables.Remove(saveable);
     }
 
-    private void Awake() {
-        Instance = this;
-
-        savePath = Path.Combine(Application.persistentDataPath, "save.json");
-    }
-
+    /// <summary>
+    /// Executes all Save Functions for every object in the saveables Array and puts it in a json file
+    /// </summary>
     public void SaveGame() {
-        List<string> jsonList = new();
+        List<ObjectWrapper> objects = new();
 
         foreach (var s in saveables) {
-            string json = JsonUtility.ToJson(new ObjectWrapper { json = JsonUtility.ToJson(s.Interface.Save()) });
-            jsonList.Add(json);
+            object data = s.Save();
+
+            objects.Add(new ObjectWrapper {
+                id = s.GetSaveID(),
+                type = data.GetType().AssemblyQualifiedName,
+                json = JsonUtility.ToJson(data)
+            });
         }
 
-        SaveWrapper wrapper = new SaveWrapper { objects = jsonList };
-        string finalJson = JsonUtility.ToJson(wrapper, true);
-        File.WriteAllText(savePath, finalJson);
+        SaveWrapper wrapper = new SaveWrapper { objects = objects };
+        File.WriteAllText(savePath, JsonUtility.ToJson(wrapper, true));
 
         //Debug.Log("Saved!");
     }
 
+    /// <summary>
+    /// Loads everything from the save.json file
+    /// </summary>
     public void LoadGame() {
         if (!File.Exists(savePath)) {
             Debug.LogWarning("No Save File found!");
             return;
         }
 
-        string finalJson = File.ReadAllText(savePath);
-        SaveWrapper wrapper = JsonUtility.FromJson<SaveWrapper>(finalJson);
+        SaveWrapper wrapper = JsonUtility.FromJson<SaveWrapper>(File.ReadAllText(savePath));
 
-        if (wrapper.objects.Count != saveables.Length) {
-            Debug.LogWarning("Mismatch between saved objects and scene objects");
+        foreach (var s in saveables) {
+            ObjectWrapper data = wrapper.objects.Find(o => o.id == s.GetSaveID());
+
+            if (data == null) {
+                continue;
+            }
+
+            Type type = Type.GetType(data.type);
+
+            object obj = JsonUtility.FromJson(data.json, type);
+
+            s.Load(obj);
         }
 
-        for (int i = 0; i < saveables.Length; i++) {
-            string objectJson = wrapper.objects[i];
-            ObjectWrapper wrapperObject = JsonUtility.FromJson<ObjectWrapper>(objectJson);
-
-            saveables[i].Interface.Load(JsonUtility.FromJson(wrapperObject.json, saveables[i].Interface.Save().GetType()));
-        }
         //Debug.Log("Loaded!");
     }
 
-    [System.Serializable]
+    /// <summary>
+    /// Saves any Data without implementing the ISaveable Interface
+    /// </summary>
+    /// <typeparam name="T">The Type of the Data that should be saved</typeparam>
+    /// <param name="id">The id of the data</param>
+    /// <param name="data">the data itself</param>
+    public void SaveData<T>(string id, T data) {
+        string path = Path.Combine(Application.persistentDataPath, $"{id}.json");
+
+        string json = JsonUtility.ToJson(data, true);
+
+        File.WriteAllText(path, json);
+
+        //Debug.Log("Saved!");
+    }
+
+    /// <summary>
+    /// Loads any Data without implementing the ISaveable Interface
+    /// </summary>
+    /// <typeparam name="T">The Type of the Data that should be loaded</typeparam>
+    /// <param name="id">The id of the data</param>
+    public T LoadData<T>(string id) {
+        string path = Path.Combine(Application.persistentDataPath, $"{id}.json");
+
+        if (!File.Exists(path))
+            return default;
+
+        string json = File.ReadAllText(path);
+
+        //Debug.Log("Loaded!");
+
+        return JsonUtility.FromJson<T>(json);
+    }
+
+    [Serializable]
     private class ObjectWrapper {
+        public string id;
+        public string type;
         public string json;
     }
 
-    [System.Serializable]
+    [Serializable]
     private class SaveWrapper {
-        public List<string> objects;
+        public List<ObjectWrapper> objects;
     }
 }

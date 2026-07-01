@@ -8,6 +8,11 @@ public class DebugController : MonoBehaviour {
     public static DebugController Instance { get; private set; }
 
     [SerializeField] private Inventory inventory;
+    [SerializeField] private PlayerHealth playerHealth;
+    [SerializeField] private GasTankHealth objectiveHealth;
+    [SerializeField] private AchievementSO achievementDay1;
+    [SerializeField] private AchievementSO achievementDay5;
+    [SerializeField] private AchievementSO achievementDay10;
 
     private GUIStyle customTextFieldStyle;
 
@@ -41,6 +46,19 @@ public class DebugController : MonoBehaviour {
     public static DebugCommand<int> GIVE_AMMO9;
     public static DebugCommand<int> GIVE_AMMO12G;
     public static DebugCommand<int> GIVE_AMMO_S;
+    //Scrap Command
+    public static DebugCommand<int> GIVE_SCRAP;
+    //Kill/Destroy
+    public static DebugCommand KILL_PLAYER;
+    public static DebugCommand DESTROY_OBJECTIVE;
+    //Achievement
+    public static DebugCommand ACHIEVEMENT1;
+    public static DebugCommand ACHIEVEMENT2;
+    public static DebugCommand ACHIEVEMENT3;
+    //Damage Player
+    public static DebugCommand<int> DAMAGE_PLAYER;
+    //Extraction
+    public static DebugCommand EXTRACTION;
 
     public List<object> commandList;
 
@@ -116,6 +134,35 @@ public class DebugController : MonoBehaviour {
         GIVE_AMMO_S = new DebugCommand<int>("/give SA", "Puts Sniper Bullets in the Player Inventory", "/give SA <amount>", (x) => {
             inventory.AddItem(ItemType.Ammunition, AmmunitionType.AmmoSniper, x);
         });
+        //Scrap
+        GIVE_SCRAP = new DebugCommand<int>("/give scrap", "Puts Scrap in the Player Inventory", "/give scrap <amount>", (x) => {
+            inventory.AddItem(ItemType.Scrap, ItemType.Scrap, x);
+        });
+        //Kill/Destroy
+        KILL_PLAYER = new DebugCommand("/kill", "Kills the Player", "/kill", () => {
+            playerHealth.TakeDamage(999);
+        });
+        DESTROY_OBJECTIVE = new DebugCommand("/destroy", "destroys the Objective", "/destroy", () => {
+            objectiveHealth.TakeDamage(999);
+        });
+        //Achievements
+        ACHIEVEMENT1 = new DebugCommand("/achievement1", "gives the achievement for surviving Day 1", "/achievement1", () => {
+            AchievementManager.triggerAchievement?.Invoke(achievementDay1);
+        });
+        ACHIEVEMENT2 = new DebugCommand("/achievement2", "gives the achievement for surviving Day 5", "/achievement2", () => {
+            AchievementManager.triggerAchievement?.Invoke(achievementDay5);
+        });
+        ACHIEVEMENT3 = new DebugCommand("/achievement3", "gives the achievement for surviving Day 10", "/achievement3", () => {
+            AchievementManager.triggerAchievement?.Invoke(achievementDay10);
+        });
+        //Damage Player
+        DAMAGE_PLAYER = new DebugCommand<int>("/damage", "Kills the Player", "/damage <amount>", (x) => {
+            playerHealth.TakeDamage(x);
+        });
+        //Extraction
+        EXTRACTION = new DebugCommand("/extraction", "Starts the extraction scene", "/extraction", () => {
+            Loader.Load(Loader.Scene.ExtractionScene);
+        });
 
         commandList = new List<object> {
             HELP,
@@ -136,7 +183,15 @@ public class DebugController : MonoBehaviour {
             GIVE_AMMO556,
             GIVE_AMMO9,
             GIVE_AMMO12G,
-            GIVE_AMMO_S
+            GIVE_AMMO_S,
+            GIVE_SCRAP,
+            KILL_PLAYER,
+            DESTROY_OBJECTIVE,
+            ACHIEVEMENT1,
+            ACHIEVEMENT2,
+            ACHIEVEMENT3,
+            DAMAGE_PLAYER,
+            EXTRACTION
         };
     }
 
@@ -150,12 +205,13 @@ public class DebugController : MonoBehaviour {
         if (showConsole) {
             HandleCommandText();
             input = "";
+
+            showConsole = false;
         }
     }
 
     private void PlayerInputHandler_OnToggleDebugAction() {
         showConsole = !showConsole;
-        PauseGame();
     }
 
     private void OnGUI() {
@@ -207,7 +263,7 @@ public class DebugController : MonoBehaviour {
         }
     }
 
-    private void PauseGame() {
-        _ = Time.timeScale == 0 ? Time.timeScale = 1f : Time.timeScale = 0;
+    public bool GetConsoleVisibility() {
+        return showConsole;
     }
 }

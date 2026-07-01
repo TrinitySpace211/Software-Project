@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8898659344680484687
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 68255962472948323}
+  m_Layer: 0
+  m_Name: ParticlePoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &68255962472948323
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8898659344680484687}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1382715679202596871}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &2368841231599160481
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -63,10 +94,13 @@ PrefabInstance:
     - target: {fileID: 8111781155169087978, guid: 54e1bb4daa67e464f813b1fd5e373ad2, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 48c45c06c8dd5f543a76bc1dc7b276b8, type: 2}
+      objectReference: {fileID: 2100000, guid: f9052785b1d27bc45a98a2f4eaa6a7c5, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 3742407835892290726, guid: 54e1bb4daa67e464f813b1fd5e373ad2, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 68255962472948323}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 54e1bb4daa67e464f813b1fd5e373ad2, type: 3}
       insertIndex: -1
@@ -81,6 +115,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 8493486588612870614}
   m_SourcePrefab: {fileID: 100100000, guid: 54e1bb4daa67e464f813b1fd5e373ad2, type: 3}
+--- !u!4 &1382715679202596871 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3742407835892290726, guid: 54e1bb4daa67e464f813b1fd5e373ad2, type: 3}
+  m_PrefabInstance: {fileID: 2368841231599160481}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &3179182197375070704 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 54e1bb4daa67e464f813b1fd5e373ad2, type: 3}
@@ -113,6 +152,9 @@ MonoBehaviour:
   roamWaitMax: 16
   health: 60
   isDead: 0
+  dissolveParticle: {fileID: 3810651036681866420, guid: 93d22e25319d6614196a6056a2bb514b, type: 3}
+  skinnedMeshRenderer: {fileID: 5786287105492385099}
+  particlePoint: {fileID: 68255962472948323}
 --- !u!195 &1482682547788469134
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -183,3 +225,8 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!137 &5786287105492385099 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 8111781155169087978, guid: 54e1bb4daa67e464f813b1fd5e373ad2, type: 3}
+  m_PrefabInstance: {fileID: 2368841231599160481}
+  m_PrefabAsset: {fileID: 0}

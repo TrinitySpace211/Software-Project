@@ -847,6 +847,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Close"",
+                    ""type"": ""Button"",
+                    ""id"": ""28091e4c-68c7-4a49-8077-01d7ab69918b"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -1322,6 +1331,17 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""action"": ""Five"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b9e2bf52-567c-4b99-a160-4751f8504718"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""Close"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -1426,6 +1446,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_UI_Three = m_UI.FindAction("Three", throwIfNotFound: true);
         m_UI_Four = m_UI.FindAction("Four", throwIfNotFound: true);
         m_UI_Five = m_UI.FindAction("Five", throwIfNotFound: true);
+        m_UI_Close = m_UI.FindAction("Close", throwIfNotFound: true);
     }
 
     ~@InputSystem_Actions()
@@ -1805,6 +1826,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_UI_Three;
     private readonly InputAction m_UI_Four;
     private readonly InputAction m_UI_Five;
+    private readonly InputAction m_UI_Close;
     /// <summary>
     /// Provides access to input actions defined in input action map "UI".
     /// </summary>
@@ -1877,6 +1899,10 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @Five => m_Wrapper.m_UI_Five;
         /// <summary>
+        /// Provides access to the underlying input action "UI/Close".
+        /// </summary>
+        public InputAction @Close => m_Wrapper.m_UI_Close;
+        /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
         public InputActionMap Get() { return m_Wrapper.m_UI; }
@@ -1947,6 +1973,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Five.started += instance.OnFive;
             @Five.performed += instance.OnFive;
             @Five.canceled += instance.OnFive;
+            @Close.started += instance.OnClose;
+            @Close.performed += instance.OnClose;
+            @Close.canceled += instance.OnClose;
         }
 
         /// <summary>
@@ -2003,6 +2032,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Five.started -= instance.OnFive;
             @Five.performed -= instance.OnFive;
             @Five.canceled -= instance.OnFive;
+            @Close.started -= instance.OnClose;
+            @Close.performed -= instance.OnClose;
+            @Close.canceled -= instance.OnClose;
         }
 
         /// <summary>
@@ -2347,5 +2379,12 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnFive(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Close" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnClose(InputAction.CallbackContext context);
     }
 }

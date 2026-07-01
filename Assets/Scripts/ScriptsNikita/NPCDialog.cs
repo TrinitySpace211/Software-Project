@@ -1,5 +1,5 @@
+using System;
 using TMPro;
-using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -7,7 +7,9 @@ using UnityEngine.UI;
 /// <summary>
 /// Handles the NPC dialog UI, function menu, tower spawning, and weapon upgrade.
 /// </summary>
-public class NPCDialog : MonoBehaviour {
+public class NPCDialog : MonoBehaviour, ISaveable {
+
+    private static readonly string ID = "NPCDialog";
 
     [Header("Dialog Panels")]
     /// <summary>
@@ -457,6 +459,10 @@ public class NPCDialog : MonoBehaviour {
     /// This is used to get the currently equipped gun for weapon upgrades.
     /// </summary>
     public PlayerWeaponSelector playerWeaponSelector;
+
+    private void Awake() {
+        InitializeTowerState();
+    }
 
     /// <summary>
     /// Prepares the UI panels by briefly activating them and then disabling them again.
@@ -1303,7 +1309,7 @@ public class NPCDialog : MonoBehaviour {
     public void SelectTowerUpgrade() {
         ShowPanel(upgradePanel);
         HidePanel(upgradeInfoPanel);
-        ShowPanel(upgradeInfoPanelTower); 
+        ShowPanel(upgradeInfoPanelTower);
 
         upgradeInfoPanelTower.transform.SetAsLastSibling();
 
@@ -1457,7 +1463,7 @@ public class NPCDialog : MonoBehaviour {
         }
 
         // Select one upgradeable tower randomly.
-        int randomListIndex = Random.Range(0, upgradeableTowerCount);
+        int randomListIndex = UnityEngine.Random.Range(0, upgradeableTowerCount);
         int selectedTowerIndex = upgradeableTowerIndexes[randomListIndex];
 
         // Calculate the next upgrade level.
@@ -1489,7 +1495,7 @@ public class NPCDialog : MonoBehaviour {
         // Create the upgraded tower at the original spawn point position and rotation.
         GameObject upgradedTower = Instantiate(
             towerPrefabsByLevel[nextUpgradeLevel],
-            towerPosition,
+            new Vector3(towerPosition.x, 0.3f, towerPosition.z),
             towerRotation
         );
 
@@ -1497,10 +1503,16 @@ public class NPCDialog : MonoBehaviour {
         builtTowers[selectedTowerIndex] = upgradedTower;
         towerUpgradeLevels[selectedTowerIndex] = nextUpgradeLevel;
 
+        Debug.Log(builtTowers[selectedTowerIndex]);
+        Debug.Log(towerUpgradeLevels[selectedTowerIndex]);
+
+
         // Count the bought upgrade.
         boughtTowerUpgradeCount++;
 
-        Debug.Log("Tower at index " + selectedTowerIndex + " upgraded to level " + nextUpgradeLevel + ".");
+        Debug.Log(boughtTowerUpgradeCount);
+
+        //Debug.Log("Tower at index " + selectedTowerIndex + " upgraded to level " + nextUpgradeLevel + ".");
 
         // Update the tower upgrade info panel after the scrap amount and upgrade state have changed.
         UpdateTowerUpgradeInfo();
@@ -1756,10 +1768,10 @@ public class NPCDialog : MonoBehaviour {
 
         if (selectedWeaponUpgradeType == WeaponUpgradeType.Damage) {
             currentGun.UpgradeDamage(weaponDamageIncrease);
-            Debug.Log("Damage upgrade bought for: " + currentGun.gunName);
+            //Debug.Log("Damage upgrade bought for: " + currentGun.gunName);
         } else if (selectedWeaponUpgradeType == WeaponUpgradeType.Ammo) {
             currentGun.UpgradeMaxAmmo(weaponAmmoIncrease);
-            Debug.Log("Ammo upgrade bought for: " + currentGun.gunName);
+            //Debug.Log("Ammo upgrade bought for: " + currentGun.gunName);
         }
 
         UpdateWeaponUpgradeInfo();
@@ -1803,6 +1815,127 @@ public class NPCDialog : MonoBehaviour {
 
         // Prevents the invisible panel from blocking clicks on other UI elements.
         panel.blocksRaycasts = false;
+    }
+
+    private void InitializeTowerState() {
+        if (towerSpawnPoints == null) {
+            builtTowers = Array.Empty<GameObject>();
+            towerUpgradeLevels = Array.Empty<int>();
+            builtTowerCount = 0;
+            boughtTowerUpgradeCount = 0;
+            return;
+        }
+
+        builtTowers = new GameObject[towerSpawnPoints.Length];
+        towerUpgradeLevels = new int[towerSpawnPoints.Length];
+        builtTowerCount = 0;
+        boughtTowerUpgradeCount = 0;
+    }
+
+    private void RebuildTowersFromSaveData() {
+        if (builtTowers == null) {
+            builtTowers = Array.Empty<GameObject>();
+        }
+
+        for (int i = 0; i < builtTowers.Length; i++) {
+            if (builtTowers[i] != null) {
+                Destroy(builtTowers[i]);
+                builtTowers[i] = null;
+            }
+        }
+
+        if (towerSpawnPoints == null || towerPrefabsByLevel == null || towerUpgradeLevels == null) {
+            return;
+        }
+
+        int maxTowerIndex = Mathf.Min(builtTowerCount, towerSpawnPoints.Length);
+
+        for (int i = 0; i < maxTowerIndex; i++) {
+            if (towerSpawnPoints[i] == null) {
+                continue;
+            }
+
+            int level = Mathf.Clamp(i < towerUpgradeLevels.Length ? towerUpgradeLevels[i] : 0, 0, towerPrefabsByLevel.Length - 1);
+
+            if (towerPrefabsByLevel[level] == null) {
+                continue;
+            }
+
+            GameObject tower = Instantiate(
+                towerPrefabsByLevel[level],
+                towerSpawnPoints[i].position,
+                towerSpawnPoints[i].rotation
+            );
+
+            builtTowers[i] = tower;
+        }
+    }
+
+    public string GetSaveID() => ID;
+    public object Save() {
+        int upgradeCount = 0;
+
+        if (towerUpgradeLevels != null) {
+            for (int i = 0; i < towerUpgradeLevels.Length; i++) {
+                upgradeCount += towerUpgradeLevels[i];
+            }
+        }
+
+        return new NPCDialogData {
+            builtTowerCount = builtTowerCount,
+            boughtTowerUpgradeCount = upgradeCount,
+            towerUpgradeLevels = towerUpgradeLevels != null ? (int[])towerUpgradeLevels.Clone() : Array.Empty<int>()
+        };
+    }
+
+    public void Load(object data) {
+        NPCDialogData dialogData = (NPCDialogData)data;
+
+        InitializeTowerState();
+
+        builtTowerCount = dialogData.builtTowerCount;
+        boughtTowerUpgradeCount = dialogData.boughtTowerUpgradeCount;
+
+        if (dialogData.towerUpgradeLevels != null) {
+            towerUpgradeLevels = (int[])dialogData.towerUpgradeLevels.Clone();
+        } else {
+            towerUpgradeLevels = Array.Empty<int>();
+        }
+
+        if (towerSpawnPoints != null && towerUpgradeLevels.Length < towerSpawnPoints.Length) {
+            int[] resizedLevels = new int[towerSpawnPoints.Length];
+            Array.Copy(towerUpgradeLevels, resizedLevels, towerUpgradeLevels.Length);
+            towerUpgradeLevels = resizedLevels;
+        }
+
+        if (builtTowerCount < 0) {
+            builtTowerCount = 0;
+        }
+
+        if (towerSpawnPoints != null && builtTowerCount > towerSpawnPoints.Length) {
+            builtTowerCount = towerSpawnPoints.Length;
+        }
+
+        RebuildTowersFromSaveData();
+        UpdateTowerInfo();
+        UpdateTowerUpgradeInfo();
+    }
+
+    [Serializable]
+    public class NPCDialogData {
+        public int builtTowerCount;
+        public int boughtTowerUpgradeCount;
+        public int[] towerUpgradeLevels;
+    }
+
+    private void OnEnable() {
+        if (SaveManager.Instance != null)
+            SaveManager.Instance.Register(this);
+    }
+
+    private void OnDisable() {
+        if (SaveManager.Instance != null)
+            SaveManager.Instance.Unregister(this);
     }
 }
 

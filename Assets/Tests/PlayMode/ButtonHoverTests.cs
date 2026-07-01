@@ -33,6 +33,11 @@ public class ButtonHoverTests {
             .SetValue(_hover, _rect);
     }
 
+    [TearDown]
+    public void Teardown() {
+        if (_obj != null) Object.DestroyImmediate(_obj);
+    }
+
     /// <summary>
     /// Ensures ResetVisualState restores default scale values.
     /// </summary>

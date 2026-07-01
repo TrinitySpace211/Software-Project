@@ -13,11 +13,11 @@ public class SoundManager : MonoBehaviour {
     [SerializeField] private AudioClipRefsSO audioClipRefsSO;
 
     [Header("Sound References")]
-    [SerializeField] private AudioSource backgroundMusic;
     [SerializeField] private AudioSource bulletImpactAudioSource;
     [SerializeField] private AudioSource footstepsAudioSource;
     [SerializeField] private AudioSource bulletShootAudioSource;
-    [SerializeField] private AudioSource mapOpenAudioSource;
+
+    private AudioSource audioSource;
 
     public float volume { get; private set; } = 1f;
 
@@ -27,6 +27,10 @@ public class SoundManager : MonoBehaviour {
         Instance = this;
     }
 
+    private void Start() {
+        audioSource = GetComponent<AudioSource>();
+    }
+
     private void OnEnable() {
         Player.OnHeal += Player_OnHeal;
         PlayerHealth.OnTakeDamage += Player_OnTakeDamage;
@@ -34,6 +38,8 @@ public class SoundManager : MonoBehaviour {
         PlayerHealth.OnDeath += Player_OnDeath;
         ZombieAI.OnTakeDamage += Enemy_OnTakeDamage;
         Player.OnGrenadeThrow += Player_OnGrenadeThrow;
+        DayNightCycle.OnSunsetStarted += DayNightCycle_OnSunsetStarted;
+        GasTankHealth.OnObjectiveDestroyed += GasTankHealth_OnObjectiveDestroyed;
     }
 
     private void OnDestroy() {
@@ -43,6 +49,7 @@ public class SoundManager : MonoBehaviour {
         PlayerHealth.OnDeath -= Player_OnDeath;
         ZombieAI.OnTakeDamage -= Enemy_OnTakeDamage;
         Player.OnGrenadeThrow -= Player_OnGrenadeThrow;
+        DayNightCycle.OnSunsetStarted -= DayNightCycle_OnSunsetStarted;
     }
 
     /// <summary>
@@ -151,7 +158,7 @@ public class SoundManager : MonoBehaviour {
     /// This is just for the Shotgun, because it reloads every bullet one at a time;
     /// </summary>
     private IEnumerator ReloadMultipleTimes(Vector3 position, float volume, GunSO gun) {
-        float missingAmmo = gun.shootConfigSO.maxAmmo - gun.currentAmmo;
+        float missingAmmo = gun.GetMaxAmmo() - gun.currentAmmo;
         for (int i = 0; i < missingAmmo; i++) {
             PlaySound(audioClipRefsSO.shotgunReloadSounds, position, volume);
 
@@ -175,6 +182,22 @@ public class SoundManager : MonoBehaviour {
     /// <param name="volume">Volume of the Sound Effects</param>
     public void Melee_Swing(Vector3 position, float volume) {
         PlaySound(audioClipRefsSO.meleeSwing, position, volume);
+    }
+
+    /// <summary>
+    /// Plays the Sunset Sound Effect
+    /// </summary>
+    public void DayNightCycle_OnSunsetStarted() {
+        audioSource.clip = audioClipRefsSO.sunsetSound;
+        audioSource.volume = audioClipRefsSO.sunsetSoundVolume;
+        audioSource.Play();
+    }
+
+    /// <summary>
+    /// Plays an Explosion Sound Effect if the Objective is destroyed
+    /// </summary>
+    private void GasTankHealth_OnObjectiveDestroyed(Vector3 position) {
+        PlaySound(audioClipRefsSO.objectiveExplosion, position, audioClipRefsSO.objectiveExplosionVolume);
     }
 
     /// <summary>
