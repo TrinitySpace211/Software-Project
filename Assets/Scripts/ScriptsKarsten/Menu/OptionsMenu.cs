@@ -433,6 +433,8 @@ public class OptionsMenu : MonoBehaviour {
             return false;
 
         foreach (var actionMap in ActiveInputActions.actionMaps) {
+            if (actionMap.name == "UI")
+                continue;
             foreach (var action in actionMap.actions) {
                 for (int i = 0; i < action.bindings.Count; i++) {
                     var binding = action.bindings[i];
