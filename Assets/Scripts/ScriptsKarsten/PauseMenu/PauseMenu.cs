@@ -28,6 +28,8 @@ public class PauseMenu : MonoBehaviour {
     /// </summary>
     [SerializeField] private ScrapHudDisplay scrapHudDisplay;
 
+    [SerializeField] private AmmunitionHudDisplay ammunitionHudDisplay;
+
     /// <summary>
     /// Button that gets selected when the pause menu opens.
     /// </summary>
@@ -94,6 +96,9 @@ public class PauseMenu : MonoBehaviour {
         if (scrapHudDisplay != null)
             scrapHudDisplay.SetVisible(true);
 
+        if (ammunitionHudDisplay != null)
+            ammunitionHudDisplay.SetVisible(true);
+
         if (crosshair != null)
             crosshair.SetActive(true);
 
@@ -129,6 +134,9 @@ public class PauseMenu : MonoBehaviour {
 
         if (scrapHudDisplay != null)
             scrapHudDisplay.SetVisible(false);
+
+        if (ammunitionHudDisplay != null)
+            ammunitionHudDisplay.SetVisible(false);
 
         if (crosshair != null)
             crosshair.SetActive(false);

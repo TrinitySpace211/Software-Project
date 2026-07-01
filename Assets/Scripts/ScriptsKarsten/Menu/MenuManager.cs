@@ -2,205 +2,197 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
-/// <summary>
-/// Manages the main menu logic including scene loading, settings UI,
-/// audio playback, UI selection handling, and fade transitions.
-/// </summary>
 public class MenuManager : MonoBehaviour {
-
+    [Header("Scene")]
     [SerializeField] private string gameSceneName = "TutorialScene";
 
+    [Header("Panels")]
+    [SerializeField] private GameObject mainMenuPanel;
     [SerializeField] private GameObject settingsPanel;
-
-
-    [SerializeField] private AudioClip clickSound;
-    [SerializeField] private AudioClip musicClip;
-    [SerializeField] private AudioClip buttonSelect;
-
-    [SerializeField] private GameObject firstSelectedButton;
-    [SerializeField] private CanvasGroup fadeGroup;
-    [SerializeField] private float fadeDuration = 1f;
-
+    [SerializeField] private GameObject gameModePanel;
     [SerializeField] private GameObject audioSection;
     [SerializeField] private GameObject controlsSection;
 
+    [Header("Selection")]
+    [SerializeField] private GameObject firstSelectedButton;
+    [SerializeField] private GameObject firstGameModeButton;
+
+    [Header("Fade")]
+    [SerializeField] private CanvasGroup fadeGroup;
+    [SerializeField] private float fadeDuration = 1f;
+
+    [Header("Audio")]
+    [SerializeField] private AudioClip clickSound;
+    [SerializeField] private AudioClip musicClip;
+    [SerializeField] private AudioClip buttonSelect;
     [SerializeField] private AudioSource musicSource;
 
     private AudioSource audioSource;
     private bool isTransitioning;
 
-    /// <summary>
-    /// Initializes audio sources, starts background music,
-    /// and prepares the fade overlay at startup.
-    /// </summary>
     private void Awake() {
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.playOnAwake = false;
 
-
-        // Initialize fade overlay (fully transparent and non-blocking)
         if (fadeGroup != null) {
             fadeGroup.alpha = 0f;
             fadeGroup.blocksRaycasts = false;
         }
     }
 
-    /// <summary>
-    /// Sets up the initial UI state when the menu scene starts,
-    /// including selected button and hidden settings panel.
-    /// </summary>
     private void Start() {
-        
-
-        // Ensure settings panel starts hidden
-        if (settingsPanel != null)
-            settingsPanel.SetActive(false);
-
-        // Ensure audio and controls starts hidden
-        if (audioSection != null)
-            audioSection.SetActive(false);
-
-        if (controlsSection != null)
-            controlsSection.SetActive(false);
+        if (settingsPanel != null) settingsPanel.SetActive(false);
+        if (gameModePanel != null) gameModePanel.SetActive(false);
+        if (audioSection != null) audioSection.SetActive(false);
+        if (controlsSection != null) controlsSection.SetActive(false);
+        if (mainMenuPanel != null) mainMenuPanel.SetActive(true);
 
         if (EventSystem.current != null)
             EventSystem.current.SetSelectedGameObject(null);
+
+        ApplyVolumeSettings();
+
+        if (musicSource != null && musicClip != null) {
+            musicSource.clip = musicClip;
+            musicSource.loop = true;
+            musicSource.Play();
+        }
+
+        ResetUISelection(firstSelectedButton);
     }
 
-
-    /// <summary>
-    /// Starts a new game by playing a transition effect and loading the game scene.
-    /// </summary>
     public void NewGame() {
-        if (isTransitioning)
-            return;
+        if (isTransitioning) return;
+
+        PlayClick();
+
+        if (mainMenuPanel != null) mainMenuPanel.SetActive(false);
+        if (settingsPanel != null) settingsPanel.SetActive(false);
+        if (audioSection != null) audioSection.SetActive(false);
+        if (controlsSection != null) controlsSection.SetActive(false);
+        if (gameModePanel != null) gameModePanel.SetActive(true);
+
+        ResetUISelection(firstGameModeButton);
+    }
+
+    public void StartGameMode(GameModeType mode) {
+        if (isTransitioning) return;
+
+        GameMode.Selected = mode;
+
+        if (gameModePanel != null)
+            gameModePanel.SetActive(false);
 
         StartCoroutine(FadeAndLoadScene());
     }
 
-    /// <summary>
-    /// Handles fade-out animation and loads the target game scene.
-    /// </summary>
-    private IEnumerator FadeAndLoadScene() {
-        isTransitioning = true;
+    public void OnCloseGameModeClicked() {
         PlayClick();
 
-        // Fade screen to black before loading
-        if (fadeGroup != null) {
-            fadeGroup.blocksRaycasts = true;
-            yield return Fade(0f, 1f);
-        }
+        if (gameModePanel != null)
+            gameModePanel.SetActive(false);
 
-        // Small delay to ensure fade completes cleanly
-        yield return new WaitForSeconds(0.1f);
+        if (mainMenuPanel != null)
+            mainMenuPanel.SetActive(true);
 
-        SceneManager.LoadScene(gameSceneName);
+        ResetUISelection(firstSelectedButton);
     }
 
-    /// <summary>
-    /// Smoothly interpolates the screen fade between two alpha values.
-    /// </summary>
-    /// <param name="from">Starting alpha value.</param>
-    /// <param name="to">Target alpha value.</param>
-    private IEnumerator Fade(float from, float to) {
-        float time = 0f;
+    public void CancelGameModeSelection() {
+        PlayClick();
 
-        while (time < fadeDuration) {
-            time += Time.deltaTime;
+        if (gameModePanel != null) gameModePanel.SetActive(false);
+        if (mainMenuPanel != null) mainMenuPanel.SetActive(true);
 
-            float t = Mathf.Clamp01(time / fadeDuration);
-            fadeGroup.alpha = Mathf.Lerp(from, to, t);
-
-            yield return null;
-        }
-
-        fadeGroup.alpha = to;
+        ResetUISelection(firstSelectedButton);
     }
 
-    /// <summary>
-    /// Opens the settings menu and updates UI selection.
-    /// </summary>
     public void OnSettingsPressed() {
         PlayClick();
 
         if (settingsPanel != null)
             settingsPanel.SetActive(true);
 
+        if (mainMenuPanel != null)
+            mainMenuPanel.SetActive(false);
+
         ResetUISelection(null);
     }
 
-    /// <summary>
-    /// Closes the settings menu and restores main menu selection.
-    /// </summary>
     public void OnCloseSettingsPressed() {
         PlayClick();
 
         if (settingsPanel != null)
             settingsPanel.SetActive(false);
 
+        if (mainMenuPanel != null)
+            mainMenuPanel.SetActive(true);
+
         ResetUISelection(firstSelectedButton);
     }
 
-    /// <summary>
-    /// Exits the application or stops play mode if running inside the Unity Editor.
-    /// </summary>
+    public void OnSoundPressed() {
+        PlayClick();
+
+        if (audioSection != null) audioSection.SetActive(true);
+        if (controlsSection != null) controlsSection.SetActive(false);
+    }
+
+    public void OnControlsPressed() {
+        PlayClick();
+
+        if (controlsSection != null) controlsSection.SetActive(true);
+        if (audioSection != null) audioSection.SetActive(false);
+    }
+
+    public void ContinueGame() {
+        PlayClick();
+    }
+
     public void ExitGame() {
         PlayClick();
 
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
-            Application.Quit();
+        Application.Quit();
 #endif
     }
 
-    public void ContinueGame() {
+    private IEnumerator FadeAndLoadScene() {
+        isTransitioning = true;
         PlayClick();
-        //hier Rest einfügen Anton
+
+        if (fadeGroup != null) {
+            fadeGroup.blocksRaycasts = true;
+            yield return Fade(0f, 1f);
+        }
+
+        yield return new WaitForSeconds(0.1f);
+        SceneManager.LoadScene(gameSceneName);
     }
 
-    /// <summary>
-    /// Plays a UI click sound effect if one is assigned.
-    /// </summary>
+    private IEnumerator Fade(float from, float to) {
+        float time = 0f;
+
+        while (time < fadeDuration) {
+            time += Time.deltaTime;
+            float t = Mathf.Clamp01(time / fadeDuration);
+            fadeGroup.alpha = Mathf.Lerp(from, to, t);
+            yield return null;
+        }
+
+        fadeGroup.alpha = to;
+    }
+
     private void PlayClick() {
         ApplyVolumeSettings();
 
-        if (clickSound == null)
-            return;
-
+        if (clickSound == null) return;
         audioSource.PlayOneShot(clickSound);
     }
 
-    /// <summary>
-    /// Clears current UI selection and schedules a new selection on the next frame.
-    /// This avoids EventSystem selection bugs.
-    /// </summary>
-    /// <param name="target">UI element to select after reset.</param>
-    private void ResetUISelection(GameObject target) {
-        if (EventSystem.current == null)
-            return;
-
-        EventSystem.current.SetSelectedGameObject(null);
-        StartCoroutine(SelectNextFrame(target));
-    }
-
-    /// <summary>
-    /// Selects a UI element after one frame delay to ensure proper EventSystem update.
-    /// </summary>
-    /// <param name="target">UI element to select.</param>
-    private IEnumerator SelectNextFrame(GameObject target) {
-        yield return null;
-
-        if (EventSystem.current != null && target != null) {
-            EventSystem.current.SetSelectedGameObject(target);
-        }
-    }
-
-    /// <summary>
-    /// Applies all saved audio settings to the audio sources.
-    /// </summary>
     public void ApplyVolumeSettings() {
         float master = OptionsMenu.MasterVolume;
         float music = OptionsMenu.MusicVolume;
@@ -215,23 +207,18 @@ public class MenuManager : MonoBehaviour {
             audioSource.volume = sfx * master;
     }
 
-    public void OnSoundPressed() {
-        PlayClick();
+    private void ResetUISelection(GameObject target) {
+        if (EventSystem.current == null)
+            return;
 
-        if (audioSection != null)
-            audioSection.SetActive(true);
-
-        if (controlsSection != null)
-            controlsSection.SetActive(false);
+        EventSystem.current.SetSelectedGameObject(null);
+        StartCoroutine(SelectNextFrame(target));
     }
 
-    public void OnControlsPressed() {
-        PlayClick();
+    private IEnumerator SelectNextFrame(GameObject target) {
+        yield return null;
 
-        if (controlsSection != null)
-            controlsSection.SetActive(true);
-
-        if (audioSection != null)
-            audioSection.SetActive(false);
+        if (EventSystem.current != null && target != null)
+            EventSystem.current.SetSelectedGameObject(target);
     }
 }
