@@ -12,6 +12,9 @@ public class SpawnZone : MonoBehaviour {
 
     public GameObject sprinterPrefab;
 
+    // Tank-Zombie-Prefab. Im Inspector zuweisen, sobald das Prefab existiert.
+    public GameObject tankPrefab;
+
     /// <summary>Number of zombies spawned per wave.</summary>
     public int zombieCount = 5;
 
@@ -19,6 +22,8 @@ public class SpawnZone : MonoBehaviour {
     public float spawnRadius = 5f;
 
     [HideInInspector] public int sprinterCount;
+
+    [HideInInspector] public int tankCount;
 
     [HideInInspector] public int currentDay;
 
@@ -45,9 +50,14 @@ public class SpawnZone : MonoBehaviour {
         for (var i = 0; i < zombieCount; i++) SpawnZombieAt(zombiePrefab);
         // Sprinter
         for (var i = 0; i < sprinterCount; i++) SpawnZombieAt(sprinterPrefab);
+        // Tanks
+        for (var i = 0; i < tankCount; i++) SpawnZombieAt(tankPrefab);
     }
 
     private void SpawnZombieAt(GameObject prefab) {
+        // Schutz: Prefab evtl. noch nicht im Inspector zugewiesen (z.B. tankPrefab) -> nicht crashen.
+        if (prefab == null) return;
+
         var randomOffset = Random.insideUnitCircle * spawnRadius;
         var spawnPos = new Vector3(
             transform.position.x + randomOffset.x,
