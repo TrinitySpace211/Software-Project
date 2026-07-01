@@ -221,6 +221,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0beb1aa9c5644ba4d8e782f705094b9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  audioSource: {fileID: 0}
+  selectSound: {fileID: 0}
   buttonRoot: {fileID: 3945015078508202699}
   hoverOverlay: {fileID: 2301962779016338013}
   overlayNormalColor: {r: 0, g: 0, b: 0, a: 0}
