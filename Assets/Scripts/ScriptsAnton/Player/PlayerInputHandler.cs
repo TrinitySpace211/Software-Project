@@ -9,6 +9,7 @@ using UnityEngine.InputSystem;
 public class PlayerInputHandler : MonoBehaviour
 {
     public InputSystem_Actions playerInputActions { get; private set; }
+    public static PlayerInputHandler Instance { get; private set; }
 
     public Vector2 MousePosition { get; private set; }
     public Vector2 MovementInput { get; private set; }
@@ -38,6 +39,7 @@ public class PlayerInputHandler : MonoBehaviour
 
     private void OnEnable()
     {
+        Instance = this;
         playerInputActions = new InputSystem_Actions();
 
         if (PlayerPrefs.HasKey(RebindKey))
@@ -56,6 +58,8 @@ public class PlayerInputHandler : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (Instance == this)
+            Instance = null;
         playerInputActions.Player.Interact.performed -= Interact_performed;
         playerInputActions.Player.Pause.performed -= Pause_performed;
         playerInputActions.Player.Reloading.performed -= Reloading_performed;
