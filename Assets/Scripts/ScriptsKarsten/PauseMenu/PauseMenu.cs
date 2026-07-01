@@ -73,7 +73,7 @@ public class PauseMenu : MonoBehaviour {
     /// </summary>
     private void Update() {
         if (Keyboard.current != null &&
-            Keyboard.current.escapeKey.wasPressedThisFrame) {
+            Keyboard.current.escapeKey.wasPressedThisFrame && !OptionsMenu.IsOpen) {
             if (isPaused)
                 Resume();
             else
