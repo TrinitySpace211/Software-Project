@@ -57,6 +57,13 @@ public class OptionsMenu : MonoBehaviour {
     private InputAction reloadAction;
     private InputAction mapAction;
 
+    public static bool IsOpen { get; private set; }
+
+    private InputActionAsset ActiveInputActions =>
+        PlayerInputHandler.Instance != null
+            ? PlayerInputHandler.Instance.playerInputActions.asset
+            : inputActions;
+
     // PlayerPrefs keys used for persistence.
     private const string RebindKey = "rebinds";
     private const string MasterKey = "master_volume";
@@ -84,6 +91,10 @@ public class OptionsMenu : MonoBehaviour {
     }
 
     private void OnEnable() {
+        CacheActions();
+        RefreshAllUI();
+        IsOpen = true;
+
         if (masterVolumeSlider != null)
             masterVolumeSlider.onValueChanged.AddListener(SetMasterVolume);
 
@@ -95,6 +106,7 @@ public class OptionsMenu : MonoBehaviour {
     }
 
     private void OnDisable() {
+        IsOpen = false;
         if (masterVolumeSlider != null)
             masterVolumeSlider.onValueChanged.RemoveListener(SetMasterVolume);
 
@@ -198,10 +210,10 @@ public class OptionsMenu : MonoBehaviour {
     /// Throws if the map or any expected action is missing (via the "true" lookup flag).
     /// </summary>
     private void CacheActions() {
-        if (inputActions == null)
+        if (ActiveInputActions == null)
             return;
 
-        var map = inputActions.FindActionMap("Player", true);
+        var map = ActiveInputActions.FindActionMap("Player", true);
 
         moveAction = map.FindAction("Move", true);
         sprintAction = map.FindAction("Sprint", true);
@@ -255,6 +267,7 @@ public class OptionsMenu : MonoBehaviour {
             .WithControlsExcluding("<Keyboard>/i")
             .WithControlsExcluding("<Keyboard>/e")
             .WithControlsExcluding("<Keyboard>/q")
+            .WithControlsExcluding("<Keyboard>/anyKey")
             .WithControlsExcluding("<Mouse>/leftButton")
             .WithControlsExcluding("<Mouse>/rightButton")
             .WithCancelingThrough("<Keyboard>/escape")
@@ -280,7 +293,7 @@ public class OptionsMenu : MonoBehaviour {
                 if (conflict) {
                     action.RemoveBindingOverride(bindingIndex);
                     rebindWasCanceledByConflict = true;
-                    ShowErrorThenClose("Button already in use", 3f);
+                    ShowErrorThenClose("Button already in use", 2f);
                     return;
                 }
 
@@ -294,7 +307,7 @@ public class OptionsMenu : MonoBehaviour {
                 HideRebindPopup();
 
                 if (rebindWasCanceledByConflict)
-                    ShowErrorThenClose("Button already in use", 3f);
+                    ShowErrorThenClose("Button already in use", 2f);
 
                 RefreshAllUI();
             });
@@ -334,6 +347,7 @@ public class OptionsMenu : MonoBehaviour {
             .WithControlsExcluding("<Keyboard>/i")
             .WithControlsExcluding("<Keyboard>/e")
             .WithControlsExcluding("<Keyboard>/q")
+            .WithControlsExcluding("<Keyboard>/anyKey")
             .WithControlsExcluding("<Mouse>/leftButton")
             .WithControlsExcluding("<Mouse>/rightButton")
             .WithCancelingThrough("<Keyboard>/escape")
@@ -359,7 +373,7 @@ public class OptionsMenu : MonoBehaviour {
                 if (conflict) {
                     action.RemoveBindingOverride(bindingIndex);
                     rebindWasCanceledByConflict = true;
-                    ShowErrorThenClose("Button already in use", 3f);
+                    ShowErrorThenClose("Button already in use", 2f);
                     return;
                 }
 
@@ -373,7 +387,7 @@ public class OptionsMenu : MonoBehaviour {
                 HideRebindPopup();
 
                 if (rebindWasCanceledByConflict)
-                    ShowErrorThenClose("Button already in use", 3f);
+                    ShowErrorThenClose("Button already in use", 2f);
 
                 RefreshAllUI();
             });
@@ -415,10 +429,12 @@ public class OptionsMenu : MonoBehaviour {
     /// <param name="currentBindingIndex">The specific binding index being edited (excluded from the check).</param>
     /// <returns>True if the control is already used elsewhere; otherwise false.</returns>
     private bool IsBindingAlreadyUsed(InputControl control, InputAction currentAction, int currentBindingIndex = -1) {
-        if (control == null || inputActions == null)
+        if (control == null || ActiveInputActions == null)
             return false;
 
-        foreach (var actionMap in inputActions.actionMaps) {
+        foreach (var actionMap in ActiveInputActions.actionMaps) {
+            if (actionMap.name == "UI")
+                continue;
             foreach (var action in actionMap.actions) {
                 for (int i = 0; i < action.bindings.Count; i++) {
                     var binding = action.bindings[i];
@@ -471,7 +487,7 @@ public class OptionsMenu : MonoBehaviour {
     /// Serializes all current binding overrides to JSON and saves them to PlayerPrefs.
     /// </summary>
     private void SaveRebinds() {
-        PlayerPrefs.SetString(RebindKey, inputActions.SaveBindingOverridesAsJson());
+        PlayerPrefs.SetString(RebindKey, ActiveInputActions.SaveBindingOverridesAsJson());
         PlayerPrefs.Save();
     }
 
@@ -481,7 +497,7 @@ public class OptionsMenu : MonoBehaviour {
     /// </summary>
     private void LoadRebinds() {
         if (PlayerPrefs.HasKey(RebindKey))
-            inputActions.LoadBindingOverridesFromJson(PlayerPrefs.GetString(RebindKey));
+            ActiveInputActions.LoadBindingOverridesFromJson(PlayerPrefs.GetString(RebindKey));
     }
 
     /// <summary>
@@ -564,7 +580,7 @@ public class OptionsMenu : MonoBehaviour {
     /// Intended to be wired to a "Reset to Defaults" button.
     /// </summary>
     public void ResetRebinds() {
-        inputActions.RemoveAllBindingOverrides();
+        ActiveInputActions.RemoveAllBindingOverrides();
         PlayerPrefs.DeleteKey(RebindKey);
         RefreshAllUI();
     }
@@ -604,7 +620,7 @@ public class OptionsMenu : MonoBehaviour {
     /// </summary>
     /// <param name="message">The error text to display.</param>
     /// <param name="delay">How long (in seconds) to keep the message visible.</param>
-    private void ShowErrorThenClose(string message, float delay = 3f) {
+    private void ShowErrorThenClose(string message, float delay = 2f) {
         if (errorRoutine != null)
             StopCoroutine(errorRoutine);
 
@@ -618,7 +634,7 @@ public class OptionsMenu : MonoBehaviour {
     private IEnumerator ErrorRoutine(string message, float delay) {
         ShowRebindError(message);
 
-        yield return new WaitForSeconds(delay);
+        yield return new WaitForSecondsRealtime(delay);
 
         HideRebindPopup();
         RefreshAllUI();
