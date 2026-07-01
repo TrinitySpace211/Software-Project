@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -26,6 +27,15 @@ public class TankZombieController : MonoBehaviour, IDamageable {
     [Header("Health")] public int health = 250; // viel mehr als Sprinter (60)
     public bool isDead;
 
+    // Rotes Aufblinken bei Treffer (wie beim Standard-Zombie in ZombieAI).
+    [Header("Hit Feedback")] [SerializeField]
+    private SkinnedMeshRenderer skinnedMeshRenderer;
+
+    private readonly Color hitColor = Color.red;
+    private Material hitMaterial;
+    private Color originalColor;
+    private Coroutine hitRoutine;
+
     private NavMeshAgent agent;
     private Animator animator;
     private float attackTimer;
@@ -51,6 +61,14 @@ public class TankZombieController : MonoBehaviour, IDamageable {
         playerHealth = player.GetComponent<PlayerHealth>();
         currentTarget = player;
         animator.speed = animationSpeed;
+
+        if (skinnedMeshRenderer == null)
+            skinnedMeshRenderer = GetComponentInChildren<SkinnedMeshRenderer>();
+        if (skinnedMeshRenderer != null) {
+            hitMaterial = skinnedMeshRenderer.material;
+            originalColor = hitMaterial.color;
+        }
+
         SetNewRoamTarget();
     }
 
@@ -100,8 +118,25 @@ public class TankZombieController : MonoBehaviour, IDamageable {
         if (isDead) return;
         health -= damage;
         ZombieAI.OnTakeDamage?.Invoke(transform.position);
-        if (health <= 0)
+        if (health <= 0) {
             Die();
+            return;
+        }
+
+        if (hitMaterial != null) {
+            if (hitRoutine != null) StopCoroutine(hitRoutine);
+            hitRoutine = StartCoroutine(HitFeedback());
+        }
+    }
+
+    /// <summary>
+    ///     Faerbt den Tank kurz rot ein und setzt die Farbe danach wieder zurueck.
+    /// </summary>
+    private IEnumerator HitFeedback() {
+        hitMaterial.color = hitColor;
+        yield return new WaitForSeconds(0.1f);
+        hitMaterial.color = originalColor;
+        hitRoutine = null;
     }
 
     public bool IsDead() {
