@@ -2091,7 +2091,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8694702426136048811, guid: 0cf9ce32ee86c024aa784cec100613b8, type: 3}
   m_PrefabInstance: {fileID: 1961027640}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 880913222}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4bf49cef5186c0d4a8b37f5289140fce, type: 3}
@@ -4365,7 +4365,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6889118dc6fbdf14dba32f2083842d58, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  weaponSelector: {fileID: 0}
+  player: {fileID: 0}
   ammunitionIcon: {fileID: 0}
   hudPosition: {x: 20, y: -145}
   iconSize: {x: 34, y: 34}
