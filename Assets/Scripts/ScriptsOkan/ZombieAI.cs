@@ -226,8 +226,11 @@ public class ZombieAI : MonoBehaviour, IDamageable {
         // auf einer nicht erreichbaren NavMesh-Insel wie einem Dach). Sonst bleibt
         // der Zombie fuer immer am letzten erreichbaren Punkt stehen, weil
         // remainingDistance nie unter den Schwellwert faellt.
+        // Wichtig: stoppingDistance einrechnen - der Agent haelt regulaer schon
+        // stoppingDistance vor dem Ziel an, remainingDistance faellt also nie
+        // darunter und eine fixe 0.5er-Schwelle wuerde nie erreicht.
         var arrivedOrBlocked = !_agent.hasPath
-            || _agent.remainingDistance < 0.5f
+            || _agent.remainingDistance <= _agent.stoppingDistance + 0.5f
             || _agent.pathStatus != NavMeshPathStatus.PathComplete;
 
         if (arrivedOrBlocked) {
@@ -286,9 +289,10 @@ public class ZombieAI : MonoBehaviour, IDamageable {
             _homePosition.z + randomOffset.y
         );
 
-        // Kandidat aufs NavMesh projizieren (wie beim Sprinter). Kleiner Radius,
-        // damit der Punkt nicht auf ein Dach/eine andere Ebene springt.
-        if (NavMesh.SamplePosition(candidate, out var hit, 4f, NavMesh.AllAreas))
+        // Kandidat aufs NavMesh projizieren (wie beim Sprinter). Grosszuegiger
+        // Radius, damit auch auf huegeligem Gelaende ein Punkt gefunden wird -
+        // unerreichbare Punkte (z.B. Daecher) faengt der PathStatus-Check ab.
+        if (NavMesh.SamplePosition(candidate, out var hit, Mathf.Max(_patrolRadius, 4f), NavMesh.AllAreas))
             return hit.position;
 
         return transform.position;
