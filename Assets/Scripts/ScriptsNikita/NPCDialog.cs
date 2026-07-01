@@ -175,6 +175,14 @@ public class NPCDialog : MonoBehaviour, ISaveable {
     /// </summary>
     public Button buyWeaponButton;
 
+    /// <summary>
+    /// Button in the weapon type panel that opens the ranged (firearm) weapons.
+    /// It is greyed out (non-interactable) in the Melee-Only and Pistol+Melee
+    /// game modes, since no firearms may be bought there.
+    /// Optional: if not assigned, buying is still blocked in code.
+    /// </summary>
+    public Button rangedWeaponsButton;
+
     [Header("Weapon Item References")]
     /// <summary>
     /// Item definition for the shotgun.
@@ -468,8 +476,33 @@ public class NPCDialog : MonoBehaviour, ISaveable {
         HidePanel(upgradeInfoPanel);
         HidePanel(upgradeInfoPanelTower);
 
+        builtTowers = new GameObject[towerSpawnPoints.Length];
+        towerUpgradeLevels = new int[towerSpawnPoints.Length];
+
+        ApplyGameModeRestrictions();
+
         // Force Unity to update the canvas layout immediately
         Canvas.ForceUpdateCanvases();
+    }
+
+    /// <summary>
+    /// Returns whether firearms may be bought in the current game mode.
+    /// The shop only sells assault rifle, shotgun and sniper, which are all
+    /// forbidden in Melee-Only and Pistol+Melee (the pistol is not sold here).
+    /// </summary>
+    private bool IsRangedShopAllowed() {
+        return GameMode.Selected != GameModeType.MeleeOnly
+            && GameMode.Selected != GameModeType.PistolMelee;
+    }
+
+    /// <summary>
+    /// Applies the current game mode to the shop UI. In weapon-restricted modes
+    /// the ranged weapons button is greyed out so the player can see it is disabled.
+    /// </summary>
+    private void ApplyGameModeRestrictions() {
+        if (rangedWeaponsButton != null) {
+            rangedWeaponsButton.interactable = IsRangedShopAllowed();
+        }
     }
 
     /// <summary>
@@ -762,6 +795,11 @@ public class NPCDialog : MonoBehaviour, ISaveable {
     }
 
     public void OpenRangedWeapons() {
+        // Spielmodus: In Melee-Only / Pistol+Melee sind keine Schusswaffen kaufbar.
+        if (!IsRangedShopAllowed()) {
+            return;
+        }
+
         HidePanel(weaponTypePanel);
         HidePanel(weaponInfoPanel);
 
