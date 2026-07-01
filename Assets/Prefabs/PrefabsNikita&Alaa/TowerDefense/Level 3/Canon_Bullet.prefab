@@ -126,7 +126,7 @@ MonoBehaviour:
   target: {fileID: 0}
   speed: 25
   hitDistance: 0.35
-  directDamage: 20
+  directDamage: 16
   areaDamage: 1
   explosionRadius: 3
   rotationOffset: {x: 0, y: 90, z: 90}
