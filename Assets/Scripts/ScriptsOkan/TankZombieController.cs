@@ -2,21 +2,22 @@ using UnityEngine;
 using UnityEngine.AI;
 
 /// <summary>
-///     Tank-Zombie: langsamer, aber deutlich mehr HP und mehr Schaden pro Treffer.
-///     Bewusst strukturell identisch zum <see cref="SprinterController" /> aufgebaut
-///     (gleiche KI: Roam -> Spieler erkennen -> verfolgen -> angreifen, plus Objective-Mode),
-///     damit dieselbe Animator-Einrichtung wiederverwendet werden kann.
+///     Tank-Zombie: langsam, aber deutlich mehr HP und mehr Schaden pro Treffer.
+///     KI-Aufbau wie der <see cref="SprinterController" /> (Roam -> Spieler erkennen ->
+///     verfolgen -> angreifen, plus Objective-Mode) - aber BEWUSST OHNE Sprint:
+///     der Tank hat nur eine langsame Gehgeschwindigkeit.
 ///
 ///     Animator-Parameter (Bool), die dieses Script setzt - im Animator Controller anlegen:
-///       isWalking, isSprinting, isAttacking, isDead
+///       isWalking, isAttacking, isDead
+///     (kein isSprinting mehr - der Tank kennt keinen schnellen Modus)
 ///     Der Treffer-Schaden wird ueber ein Animation-Event ausgeloest, das DealDamage() aufruft
 ///     (im Attack-Clip auf den Treffer-Frame legen - genau wie beim Sprinter).
 ///
-///     Unterschied zum Sprinter = nur die Werte unten:
-///       - viel mehr HP (haelt deutlich mehr aus)
-///       - mehr Schaden pro Treffer
-///       - alle Geschwindigkeiten niedriger (auch der "Sprint" ist langsam)
-///       - langsamerer, dafuer haerterer Angriff (groesserer attackCooldown)
+///     Empfohlenes Clip-Mapping:
+///       - Idle (default, nichts gesetzt) -> Ground-Stomp (stampft in den Roam-Pausen)
+///       - isWalking -> Limping Walk (schwerer, langsamer Gang)
+///       - isAttacking -> Schlag
+///       - isDead -> Death (z.B. vom Sprinter wiederverwendet, da Humanoid)
 ///
 ///     HINWEIS "Tank erscheint erst ab Welle 6": das ist Spawn-/Wellen-Logik und gehoert in den
 ///     WaveManager (Spawn-Tabelle pro Welle), NICHT in dieses Verhaltensskript.
@@ -24,18 +25,15 @@ using UnityEngine.AI;
 public class TankZombieController : MonoBehaviour, IDamageable {
     [Header("Detection")] public float roamRadius = 10f;
     public float detectionRange = 15f;
-    public float sprintDistance = 12f;
 
     [Header("Attack")] public float attackDistance = 2f;
     public float attackCooldown = 2.5f; // langsamer als Sprinter (1.5) -> seltener, aber haerter
     public int attackDamage = 40;       // deutlich mehr als Sprinter (20)
 
     [Header("Speed")] public float roamSpeed = 1f;
-    public float walkSpeed = 1.4f;   // langsamer als Sprinter (2)
-    public float sprintSpeed = 2.8f; // "Sprint" des Tanks ist langsamer als der WALK des Sprinters
+    public float walkSpeed = 1.4f; // EINE langsame Gehgeschwindigkeit - der Tank hat keinen Sprint
 
     [Header("Animation")] public float animationSpeed = 1f;
-    public float sprintAnimationSpeed = 0.9f;
 
     [Header("Roam Wait")] public float roamWaitMin = 1f;
     public float roamWaitMax = 3f;
@@ -105,11 +103,8 @@ public class TankZombieController : MonoBehaviour, IDamageable {
 
         if (distance <= attackDistance) {
             TryStartAttack();
-        } else if (distance <= sprintDistance) {
-            Sprint();
-            agent.isStopped = false;
-            agent.SetDestination(player.position);
         } else {
+            // Nur eine langsame Verfolgung (kein Sprint).
             Walk();
             agent.isStopped = false;
             agent.SetDestination(player.position);
@@ -136,7 +131,6 @@ public class TankZombieController : MonoBehaviour, IDamageable {
         LookAtTarget(player.position);
 
         animator.SetBool("isWalking", false);
-        animator.SetBool("isSprinting", false);
 
         if (attackTimer > 0f) {
             animator.SetBool("isAttacking", false);
@@ -162,10 +156,6 @@ public class TankZombieController : MonoBehaviour, IDamageable {
 
         if (distToObjective <= attackDistance) {
             TryStartAttack();
-        } else if (distToObjective <= sprintDistance) {
-            Sprint();
-            agent.isStopped = false;
-            agent.SetDestination(targetPos);
         } else {
             Walk();
             agent.isStopped = false;
@@ -176,7 +166,6 @@ public class TankZombieController : MonoBehaviour, IDamageable {
     private void Roam() {
         agent.speed = roamSpeed;
         animator.speed = animationSpeed;
-        animator.SetBool("isSprinting", false);
         animator.SetBool("isAttacking", false);
 
         if (isWaiting) {
@@ -206,16 +195,6 @@ public class TankZombieController : MonoBehaviour, IDamageable {
         agent.speed = walkSpeed;
         animator.speed = animationSpeed;
         animator.SetBool("isWalking", true);
-        animator.SetBool("isSprinting", false);
-        animator.SetBool("isAttacking", false);
-    }
-
-    private void Sprint() {
-        agent.isStopped = false;
-        agent.speed = sprintSpeed;
-        animator.speed = sprintAnimationSpeed;
-        animator.SetBool("isWalking", false);
-        animator.SetBool("isSprinting", true);
         animator.SetBool("isAttacking", false);
     }
 
