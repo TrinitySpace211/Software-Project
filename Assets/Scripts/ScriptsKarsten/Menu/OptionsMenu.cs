@@ -198,6 +198,9 @@ public class OptionsMenu : MonoBehaviour {
     /// Throws if the map or any expected action is missing (via the "true" lookup flag).
     /// </summary>
     private void CacheActions() {
+        if (inputActions == null)
+            return;
+
         var map = inputActions.FindActionMap("Player", true);
 
         moveAction = map.FindAction("Move", true);

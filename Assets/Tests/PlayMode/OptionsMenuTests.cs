@@ -2,67 +2,88 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Reflection;
 
 /// <summary>
-/// Unit tests for OptionsMenu.
-/// Validates audio volume handling, UI updates, and clamping behavior.
+/// NUnit tests for OptionsMenu.
+/// These tests only verify audio and text behavior.
 /// </summary>
 public class OptionsMenuTests {
     private GameObject _obj;
     private OptionsMenu _menu;
-    private Slider _slider;
-    private TextMeshProUGUI _text;
 
-    /// <summary>
-    /// Creates UI dependencies and injects them into OptionsMenu.
-    /// </summary>
+    private Slider _masterSlider;
+    private TextMeshProUGUI _masterText;
+
     [SetUp]
     public void Setup() {
+        PlayerPrefs.DeleteAll();
+        AudioListener.volume = 1f;
+
         _obj = new GameObject("OptionsMenu");
         _menu = _obj.AddComponent<OptionsMenu>();
 
-        GameObject sliderObj = new GameObject("Slider");
-        _slider = sliderObj.AddComponent<Slider>();
+        var sliderObj = new GameObject("MasterSlider");
+        _masterSlider = sliderObj.AddComponent<Slider>();
 
-        GameObject textObj = new GameObject("Text");
-        _text = textObj.AddComponent<TextMeshProUGUI>();
+        var textObj = new GameObject("MasterText");
+        _masterText = textObj.AddComponent<TextMeshProUGUI>();
 
-        _menu.GetType().GetField("masterVolumeSlider",
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .SetValue(_menu, _slider);
+        typeof(OptionsMenu)
+            .GetField("masterVolumeSlider", BindingFlags.NonPublic | BindingFlags.Instance)
+            .SetValue(_menu, _masterSlider);
 
-        _menu.GetType().GetField("volumeValueText",
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .SetValue(_menu, _text);
+        typeof(OptionsMenu)
+            .GetField("masterVolumeValueText", BindingFlags.NonPublic | BindingFlags.Instance)
+            .SetValue(_menu, _masterText);
     }
 
-    /// <summary>
-    /// Ensures that SetMasterVolume correctly updates global audio volume.
-    /// </summary>
+    [TearDown]
+    public void TearDown() {
+        PlayerPrefs.DeleteAll();
+
+        if (_obj != null) Object.DestroyImmediate(_obj);
+        if (_masterSlider != null) Object.DestroyImmediate(_masterSlider.gameObject);
+        if (_masterText != null) Object.DestroyImmediate(_masterText.gameObject);
+    }
+
+    [Test]
+    public void SetMasterVolume_UpdatesPlayerPrefs() {
+        _menu.SetMasterVolume(0.5f);
+
+        Assert.AreEqual(0.5f, PlayerPrefs.GetFloat("master_volume"), 0.001f);
+    }
+
     [Test]
     public void SetMasterVolume_UpdatesAudioListener() {
         _menu.SetMasterVolume(0.5f);
 
-        Assert.AreEqual(0.5f, AudioListener.volume, 0.01f);
+        Assert.AreEqual(0.5f, AudioListener.volume, 0.001f);
     }
 
-    /// <summary>
-    /// Ensures that volume percentage text is updated correctly.
-    /// </summary>
     [Test]
     public void SetMasterVolume_UpdatesText() {
         _menu.SetMasterVolume(0.75f);
 
-        Assert.IsTrue(_text.text.Contains("75"));
+        Assert.AreEqual("75%", _masterText.text);
     }
 
-    /// <summary>
-    /// Ensures that volume values are clamped between 0 and 1.
-    /// </summary>
     [Test]
-    public void SetMasterVolume_ClampsValue() {
+    public void LoadVolumes_SetsSliderAndTextFromPrefs() {
+        PlayerPrefs.SetFloat("master_volume", 0.33f);
+
+        typeof(OptionsMenu)
+            .GetMethod("LoadVolumes", BindingFlags.NonPublic | BindingFlags.Instance)
+            .Invoke(_menu, null);
+
+        Assert.AreEqual(0.33f, _masterSlider.value, 0.001f);
+        Assert.AreEqual("33%", _masterText.text);
+    }
+
+    [Test]
+    public void SetMasterVolume_DoesNotClampInput() {
         _menu.SetMasterVolume(2f);
 
-        Assert.LessOrEqual(AudioListener.volume, 1f);
+        Assert.AreEqual(2f, PlayerPrefs.GetFloat("master_volume"), 0.001f);
     }
 }
