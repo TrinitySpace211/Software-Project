@@ -23,8 +23,12 @@ public class MenuManager : MonoBehaviour {
     [SerializeField] private CanvasGroup fadeGroup;
     [SerializeField] private float fadeDuration = 1f;
 
+    [SerializeField] private GameObject audioSection;
+    [SerializeField] private GameObject controlsSection;
+
+    [SerializeField] private AudioSource musicSource;
+
     private AudioSource audioSource;
-    private AudioSource musicSource;
     private bool isTransitioning;
 
     /// <summary>
@@ -34,15 +38,7 @@ public class MenuManager : MonoBehaviour {
     private void Awake() {
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.playOnAwake = false;
-        audioSource.volume = 0.5f;
 
-        musicSource = gameObject.AddComponent<AudioSource>();
-        musicSource.clip = musicClip;
-        musicSource.loop = true;
-        musicSource.playOnAwake = false;
-
-        if (musicClip != null)
-            musicSource.Play();
 
         // Initialize fade overlay (fully transparent and non-blocking)
         if (fadeGroup != null) {
@@ -56,16 +52,23 @@ public class MenuManager : MonoBehaviour {
     /// including selected button and hidden settings panel.
     /// </summary>
     private void Start() {
-        if (firstSelectedButton != null && EventSystem.current != null) {
-            EventSystem.current.SetSelectedGameObject(null);
-            EventSystem.current.SetSelectedGameObject(firstSelectedButton);
-        }
+        
 
         // Ensure settings panel starts hidden
         if (settingsPanel != null)
             settingsPanel.SetActive(false);
 
+        // Ensure audio and controls starts hidden
+        if (audioSection != null)
+            audioSection.SetActive(false);
+
+        if (controlsSection != null)
+            controlsSection.SetActive(false);
+
+        if (EventSystem.current != null)
+            EventSystem.current.SetSelectedGameObject(null);
     }
+
 
     /// <summary>
     /// Starts a new game by playing a transition effect and loading the game scene.
@@ -162,6 +165,8 @@ public class MenuManager : MonoBehaviour {
     /// Plays a UI click sound effect if one is assigned.
     /// </summary>
     private void PlayClick() {
+        ApplyVolumeSettings();
+
         if (clickSound == null)
             return;
 
@@ -193,4 +198,40 @@ public class MenuManager : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Applies all saved audio settings to the audio sources.
+    /// </summary>
+    public void ApplyVolumeSettings() {
+        float master = OptionsMenu.MasterVolume;
+        float music = OptionsMenu.MusicVolume;
+        float sfx = OptionsMenu.SfxVolume;
+
+        AudioListener.volume = master;
+
+        if (musicSource != null)
+            musicSource.volume = music * master;
+
+        if (audioSource != null)
+            audioSource.volume = sfx * master;
+    }
+
+    public void OnSoundPressed() {
+        PlayClick();
+
+        if (audioSection != null)
+            audioSection.SetActive(true);
+
+        if (controlsSection != null)
+            controlsSection.SetActive(false);
+    }
+
+    public void OnControlsPressed() {
+        PlayClick();
+
+        if (controlsSection != null)
+            controlsSection.SetActive(true);
+
+        if (audioSection != null)
+            audioSection.SetActive(false);
+    }
 }
