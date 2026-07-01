@@ -4,23 +4,8 @@ using UnityEngine.AI;
 /// <summary>
 ///     Tank-Zombie: langsam, aber deutlich mehr HP und mehr Schaden pro Treffer.
 ///     KI-Aufbau wie der <see cref="SprinterController" /> (Roam -> Spieler erkennen ->
-///     verfolgen -> angreifen, plus Objective-Mode) - aber BEWUSST OHNE Sprint:
+///     verfolgen -> angreifen, plus Objective-Mode)
 ///     der Tank hat nur eine langsame Gehgeschwindigkeit.
-///
-///     Animator-Parameter (Bool), die dieses Script setzt - im Animator Controller anlegen:
-///       isWalking, isAttacking, isDead
-///     (kein isSprinting mehr - der Tank kennt keinen schnellen Modus)
-///     Der Treffer-Schaden wird ueber ein Animation-Event ausgeloest, das DealDamage() aufruft
-///     (im Attack-Clip auf den Treffer-Frame legen - genau wie beim Sprinter).
-///
-///     Empfohlenes Clip-Mapping:
-///       - Idle (default, nichts gesetzt) -> Ground-Stomp (stampft in den Roam-Pausen)
-///       - isWalking -> Limping Walk (schwerer, langsamer Gang)
-///       - isAttacking -> Schlag
-///       - isDead -> Death (z.B. vom Sprinter wiederverwendet, da Humanoid)
-///
-///     HINWEIS "Tank erscheint erst ab Welle 6": das ist Spawn-/Wellen-Logik und gehoert in den
-///     WaveManager (Spawn-Tabelle pro Welle), NICHT in dieses Verhaltensskript.
 /// </summary>
 public class TankZombieController : MonoBehaviour, IDamageable {
     [Header("Detection")] public float roamRadius = 10f;
@@ -28,7 +13,7 @@ public class TankZombieController : MonoBehaviour, IDamageable {
 
     [Header("Attack")] public float attackDistance = 2f;
     public float attackCooldown = 2.5f; // langsamer als Sprinter (1.5) -> seltener, aber haerter
-    public int attackDamage = 40;       // deutlich mehr als Sprinter (20)
+    public int attackDamage = 40; // deutlich mehr als Sprinter (20)
 
     [Header("Speed")] public float roamSpeed = 1f;
     public float walkSpeed = 1.4f; // EINE langsame Gehgeschwindigkeit - der Tank hat keinen Sprint
