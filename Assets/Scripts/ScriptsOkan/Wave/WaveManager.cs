@@ -16,6 +16,9 @@ public class WaveManager : MonoBehaviour {
     [SerializeField] private int zombiesPerDay = 5;
     [SerializeField] private int maxZombiesTotal = 60;
 
+    [Header("Tank (ab Welle 6)")]
+    [SerializeField] private int maxTanksTotal = 4;
+
     private int _currentDay;
 
     private void Awake() {
@@ -53,14 +56,23 @@ public class WaveManager : MonoBehaviour {
             ? Mathf.Min(_currentDay - 1, 8)
             : 0;
 
+        // Ab Tag 5 (Welle 6): 1 Tank, danach +1 pro Welle bis max maxTanksTotal.
+        // (Welle = Tag + 1, vgl. Sprinter-Kommentar "Tag 2 = Welle 3".)
+        var totalTanks = _currentDay >= 5
+            ? Mathf.Min(_currentDay - 4, maxTanksTotal)
+            : 0;
+
         var perZone = total / spawnZones.Length;
         var remainder = total % spawnZones.Length;
         var sprintersPerZone = totalSprinters / spawnZones.Length;
+        var tanksPerZone = totalTanks / spawnZones.Length;
 
         for (var i = 0; i < spawnZones.Length; i++) {
             spawnZones[i].zombieCount = perZone + (i == 0 ? remainder : 0);
             spawnZones[i].sprinterCount =
                 sprintersPerZone + (i == 0 ? totalSprinters % spawnZones.Length : 0); // ← Rest auch verteilen
+            spawnZones[i].tankCount =
+                tanksPerZone + (i == 0 ? totalTanks % spawnZones.Length : 0);
             spawnZones[i].SpawnWave();
         }
     }

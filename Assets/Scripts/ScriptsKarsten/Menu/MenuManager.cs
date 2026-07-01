@@ -10,7 +10,8 @@ using TMPro;
 /// Manages the main menu logic including scene loading, settings UI,
 /// audio playback, UI selection handling, and fade transitions.
 /// </summary>
-public class MenuManager : MonoBehaviour {
+public class MenuManager : MonoBehaviour
+{
 
     [Header("Scene Names")]
     [SerializeField] private Loader.Scene tutorialScene = Loader.Scene.TutorialScene;
@@ -32,8 +33,12 @@ public class MenuManager : MonoBehaviour {
     [SerializeField] private CanvasGroup fadeGroup;
     [SerializeField] private float fadeDuration = 1f;
 
+    [SerializeField] private GameObject audioSection;
+    [SerializeField] private GameObject controlsSection;
+
+    [SerializeField] private AudioSource musicSource;
+
     private AudioSource audioSource;
-    private AudioSource musicSource;
     private bool isTransitioning;
 
     //Save Paths
@@ -45,7 +50,8 @@ public class MenuManager : MonoBehaviour {
     /// Initializes audio sources, starts background music,
     /// and prepares the fade overlay at startup.
     /// </summary>
-    private void Awake() {
+    private void Awake()
+    {
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.playOnAwake = false;
         audioSource.volume = 0.2f;
@@ -60,7 +66,8 @@ public class MenuManager : MonoBehaviour {
             musicSource.Play();
 
         // Initialize fade overlay (fully transparent and non-blocking)
-        if (fadeGroup != null) {
+        if (fadeGroup != null)
+        {
             fadeGroup.alpha = 0f;
             fadeGroup.blocksRaycasts = false;
         }
@@ -72,12 +79,8 @@ public class MenuManager : MonoBehaviour {
     /// Sets up the initial UI state when the menu scene starts,
     /// including selected button and hidden settings panel.
     /// </summary>
-    private void Start() {
-        if (firstSelectedButton != null && EventSystem.current != null) {
-            EventSystem.current.SetSelectedGameObject(null);
-            EventSystem.current.SetSelectedGameObject(firstSelectedButton);
-        }
-
+    private void Start()
+    {
         // Ensure settings panel starts hidden
         if (settingsPanel != null)
             settingsPanel.SetActive(false);
@@ -86,23 +89,38 @@ public class MenuManager : MonoBehaviour {
         tutorialPath = Path.Combine(Application.persistentDataPath, $"{TutorialManager.ID}.json");
         hasTutorial = File.Exists(tutorialPath);
 
-        if (continueButton != null && continueButtonImage != null && continueButtonText != null) {
-            if (!hasTutorial) {
+        if (continueButton != null && continueButtonImage != null && continueButtonText != null)
+        {
+            if (!hasTutorial)
+            {
                 continueButton.interactable = false;
                 continueButtonImage.color = new Color32(100, 100, 100, 255);
                 continueButtonText.color = new Color32(100, 100, 100, 255);
-            } else {
+            }
+            else
+            {
                 continueButton.interactable = true;
                 continueButtonImage.color = new Color32(255, 255, 255, 255);
                 continueButtonText.color = new Color32(255, 255, 255, 255);
             }
         }
+        // Ensure audio and controls starts hidden
+        if (audioSection != null)
+            audioSection.SetActive(false);
+
+        if (controlsSection != null)
+            controlsSection.SetActive(false);
+
+        if (EventSystem.current != null)
+            EventSystem.current.SetSelectedGameObject(null);
     }
+
 
     /// <summary>
     /// Starts a new game by playing a transition effect and loading the game scene.
     /// </summary>
-    public void NewGame() {
+    public void NewGame()
+    {
         if (isTransitioning)
             return;
 
@@ -115,12 +133,14 @@ public class MenuManager : MonoBehaviour {
     /// <summary>
     /// Handles fade-out animation and loads the target game scene.
     /// </summary>
-    private IEnumerator FadeAndLoadScene(Loader.Scene scene) {
+    private IEnumerator FadeAndLoadScene(Loader.Scene scene)
+    {
         isTransitioning = true;
         PlayClick();
 
         // Fade screen to black before loading
-        if (fadeGroup != null) {
+        if (fadeGroup != null)
+        {
             fadeGroup.blocksRaycasts = true;
             yield return Fade(0f, 1f);
         }
@@ -136,10 +156,12 @@ public class MenuManager : MonoBehaviour {
     /// </summary>
     /// <param name="from">Starting alpha value.</param>
     /// <param name="to">Target alpha value.</param>
-    private IEnumerator Fade(float from, float to) {
+    private IEnumerator Fade(float from, float to)
+    {
         float time = 0f;
 
-        while (time < fadeDuration) {
+        while (time < fadeDuration)
+        {
             time += Time.deltaTime;
 
             float t = Mathf.Clamp01(time / fadeDuration);
@@ -154,7 +176,8 @@ public class MenuManager : MonoBehaviour {
     /// <summary>
     /// Opens the settings menu and updates UI selection.
     /// </summary>
-    public void OnSettingsPressed() {
+    public void OnSettingsPressed()
+    {
         PlayClick();
 
         if (settingsPanel != null)
@@ -166,7 +189,8 @@ public class MenuManager : MonoBehaviour {
     /// <summary>
     /// Closes the settings menu and restores main menu selection.
     /// </summary>
-    public void OnCloseSettingsPressed() {
+    public void OnCloseSettingsPressed()
+    {
         PlayClick();
 
         if (settingsPanel != null)
@@ -178,24 +202,30 @@ public class MenuManager : MonoBehaviour {
     /// <summary>
     /// Exits the application or stops play mode if running inside the Unity Editor.
     /// </summary>
-    public void ExitGame() {
+    public void ExitGame()
+    {
         PlayClick();
 
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
-            Application.Quit();
+        Application.Quit();
 #endif
     }
 
-    public void ContinueGame() {
-        if (hasTutorial) {
+    public void ContinueGame()
+    {
+        if (hasTutorial)
+        {
             TutorialManager.TutorialData tutorialData = SaveManager.Instance.LoadData<TutorialManager.TutorialData>(TutorialManager.ID);
 
             bool tutorialFinished = tutorialData.tutorialFinished;
-            if (tutorialFinished) {
+            if (tutorialFinished)
+            {
                 StartCoroutine(FadeAndLoadScene(mainScene));
-            } else {
+            }
+            else
+            {
                 StartCoroutine(FadeAndLoadScene(tutorialScene));
             }
         }
@@ -204,7 +234,10 @@ public class MenuManager : MonoBehaviour {
     /// <summary>
     /// Plays a UI click sound effect if one is assigned.
     /// </summary>
-    private void PlayClick() {
+    private void PlayClick()
+    {
+        ApplyVolumeSettings();
+
         if (clickSound == null)
             return;
 
@@ -216,7 +249,8 @@ public class MenuManager : MonoBehaviour {
     /// This avoids EventSystem selection bugs.
     /// </summary>
     /// <param name="target">UI element to select after reset.</param>
-    private void ResetUISelection(GameObject target) {
+    private void ResetUISelection(GameObject target)
+    {
         if (EventSystem.current == null)
             return;
 
@@ -228,12 +262,53 @@ public class MenuManager : MonoBehaviour {
     /// Selects a UI element after one frame delay to ensure proper EventSystem update.
     /// </summary>
     /// <param name="target">UI element to select.</param>
-    private IEnumerator SelectNextFrame(GameObject target) {
+    private IEnumerator SelectNextFrame(GameObject target)
+    {
         yield return null;
 
-        if (EventSystem.current != null && target != null) {
+        if (EventSystem.current != null && target != null)
+        {
             EventSystem.current.SetSelectedGameObject(target);
         }
     }
 
+    /// <summary>
+    /// Applies all saved audio settings to the audio sources.
+    /// </summary>
+    public void ApplyVolumeSettings()
+    {
+        float master = OptionsMenu.MasterVolume;
+        float music = OptionsMenu.MusicVolume;
+        float sfx = OptionsMenu.SfxVolume;
+
+        AudioListener.volume = master;
+
+        if (musicSource != null)
+            musicSource.volume = music * master;
+
+        if (audioSource != null)
+            audioSource.volume = sfx * master;
+    }
+
+    public void OnSoundPressed()
+    {
+        PlayClick();
+
+        if (audioSection != null)
+            audioSection.SetActive(true);
+
+        if (controlsSection != null)
+            controlsSection.SetActive(false);
+    }
+
+    public void OnControlsPressed()
+    {
+        PlayClick();
+
+        if (controlsSection != null)
+            controlsSection.SetActive(true);
+
+        if (audioSection != null)
+            audioSection.SetActive(false);
+    }
 }

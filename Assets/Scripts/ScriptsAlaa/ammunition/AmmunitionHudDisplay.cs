@@ -15,10 +15,10 @@ public class AmmunitionHudDisplay : MonoBehaviour {
     [SerializeField] private Sprite ammunitionIcon;
 
     // Fixed position on the screen.
-    [SerializeField] private Vector2 hudPosition = new Vector2(20f, -145f);
+    [SerializeField] private Vector2 hudPosition = new Vector2(20f, -70f);
 
     // Size of the icon.
-    [SerializeField] private Vector2 iconSize = new Vector2(34f, 34f);
+    [SerializeField] private Vector2 iconSize = new Vector2(38f, 38f);
 
     // Color of the ammunition text.
     [SerializeField] private Color textColor = new Color(0.85f, 0.95f, 1f);
@@ -119,7 +119,7 @@ public class AmmunitionHudDisplay : MonoBehaviour {
         hudRect.anchorMax = new Vector2(0f, 1f);
         hudRect.pivot = new Vector2(0f, 1f);
         hudRect.anchoredPosition = hudPosition;
-        hudRect.sizeDelta = new Vector2(175f, 46f);
+        hudRect.sizeDelta = new Vector2(190f, 52f);
 
         // Dark background that makes the display easy to read.
         Image background = hudObject.AddComponent<Image>();
@@ -150,12 +150,12 @@ public class AmmunitionHudDisplay : MonoBehaviour {
         RectTransform textRect = textObject.AddComponent<RectTransform>();
         textRect.anchorMin = new Vector2(0f, 0f);
         textRect.anchorMax = new Vector2(1f, 1f);
-        textRect.offsetMin = new Vector2(50f, 0f);
+        textRect.offsetMin = new Vector2(55f, 0f);
         textRect.offsetMax = new Vector2(-4f, 0f);
 
         ammunitionText = textObject.AddComponent<Text>();
         ammunitionText.alignment = TextAnchor.MiddleLeft;
-        ammunitionText.fontSize = 23;
+        ammunitionText.fontSize = 26;
         ammunitionText.fontStyle = FontStyle.Bold;
         ammunitionText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         if (ammunitionText.font == null) {

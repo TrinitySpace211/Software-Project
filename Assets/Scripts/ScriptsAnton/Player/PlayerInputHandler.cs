@@ -6,7 +6,8 @@ using UnityEngine.InputSystem;
 /// Handles the inputs of the Player
 /// </summary>
 [DefaultExecutionOrder(-2)]
-public class PlayerInputHandler : MonoBehaviour {
+public class PlayerInputHandler : MonoBehaviour
+{
     public InputSystem_Actions playerInputActions { get; private set; }
 
     public Vector2 MousePosition { get; private set; }
@@ -33,18 +34,28 @@ public class PlayerInputHandler : MonoBehaviour {
     public static event Action OnReturnAction;
     public static event Action OnMapOpenAction;
     public event Action OnRightClickUIAction;
+    private const string RebindKey = "rebinds";
 
-    private void OnEnable() {
+    private void OnEnable()
+    {
         playerInputActions = new InputSystem_Actions();
+
+        if (PlayerPrefs.HasKey(RebindKey))
+        {
+            playerInputActions.LoadBindingOverridesFromJson(PlayerPrefs.GetString(RebindKey));
+        }
+
         playerInputActions.Enable();
     }
 
-    private void Start() {
+    private void Start()
+    {
         SubscribeToPlayerInputs();
         SubscribeToUIInputs();
     }
 
-    private void OnDestroy() {
+    private void OnDestroy()
+    {
         playerInputActions.Player.Interact.performed -= Interact_performed;
         playerInputActions.Player.Pause.performed -= Pause_performed;
         playerInputActions.Player.Reloading.performed -= Reloading_performed;
@@ -65,7 +76,8 @@ public class PlayerInputHandler : MonoBehaviour {
     /// <summary>
     /// Subscribes and unsubscribes to all Actions that were made in the last frame
     /// </summary>
-    private void SubscribeToPlayerInputs() {
+    private void SubscribeToPlayerInputs()
+    {
         playerInputActions.Player.Move.performed += inputInfo => MovementInput = inputInfo.ReadValue<Vector2>();
         playerInputActions.Player.Move.canceled += _ => MovementInput = Vector2.zero;
 
@@ -110,7 +122,8 @@ public class PlayerInputHandler : MonoBehaviour {
     /// Key Inputs 1-5 subscribe to the HotbarKey_Pressed function
     /// If a button gets pressed then the function will be executed
     /// </summary>
-    private void SubscribeToUIInputs() {
+    private void SubscribeToUIInputs()
+    {
         playerInputActions.UI.One.performed += HotbarKey_Pressed;
         playerInputActions.UI.Two.performed += HotbarKey_Pressed;
         playerInputActions.UI.Three.performed += HotbarKey_Pressed;
@@ -131,7 +144,8 @@ public class PlayerInputHandler : MonoBehaviour {
     /// This one is only meant for UI
     /// </summary>
     /// <param name="context">The context that got send from the input key</param>
-    private void RightClickUI_performed(InputAction.CallbackContext context) {
+    private void RightClickUI_performed(InputAction.CallbackContext context)
+    {
         OnRightClickUIAction?.Invoke();
     }
 
@@ -139,7 +153,8 @@ public class PlayerInputHandler : MonoBehaviour {
     /// Sends an Event when the interact Key is triggered
     /// </summary>
     /// <param name="context">The context that got send from the input key</param>
-    private void Interact_performed(InputAction.CallbackContext context) {
+    private void Interact_performed(InputAction.CallbackContext context)
+    {
         OnInteractAction?.Invoke();
     }
 
@@ -147,7 +162,8 @@ public class PlayerInputHandler : MonoBehaviour {
     /// Sends an Event when the pause Key is triggered
     /// </summary>
     /// <param name="context">The context that got send from the input key</param>
-    private void Pause_performed(InputAction.CallbackContext context) {
+    private void Pause_performed(InputAction.CallbackContext context)
+    {
         OnPauseAction?.Invoke();
     }
 
@@ -155,7 +171,8 @@ public class PlayerInputHandler : MonoBehaviour {
     /// Sends an Event when the Reload Key is triggered
     /// </summary>
     /// <param name="context">The context that got send from the input key</param>
-    private void Reloading_performed(InputAction.CallbackContext context) {
+    private void Reloading_performed(InputAction.CallbackContext context)
+    {
         OnReloadAction?.Invoke();
     }
 
@@ -163,7 +180,8 @@ public class PlayerInputHandler : MonoBehaviour {
     /// Sends an Event when the Toggle Debug Input Key is triggered
     /// </summary>
     /// <param name="context">The context that got send from the input key</param>
-    private void ToggleDebug_performed(InputAction.CallbackContext context) {
+    private void ToggleDebug_performed(InputAction.CallbackContext context)
+    {
         OnToggleDebugAction?.Invoke();
     }
 
@@ -171,7 +189,8 @@ public class PlayerInputHandler : MonoBehaviour {
     /// Sends an Event when the Toggle Debug Input Key is triggered
     /// </summary>
     /// <param name="context">The context that got send from the input key</param>
-    private void Return_performed(InputAction.CallbackContext context) {
+    private void Return_performed(InputAction.CallbackContext context)
+    {
         OnReturnAction?.Invoke();
     }
 
@@ -179,7 +198,8 @@ public class PlayerInputHandler : MonoBehaviour {
     /// Sends an Event when the Toggle Debug Input Key is triggered
     /// </summary>
     /// <param name="context">The context that got send from the input key</param>
-    private void OpenMap_performed(InputAction.CallbackContext context) {
+    private void OpenMap_performed(InputAction.CallbackContext context)
+    {
         OnMapOpenAction?.Invoke();
     }
 
@@ -187,8 +207,10 @@ public class PlayerInputHandler : MonoBehaviour {
     /// Sends an Event when the Keys 1-5 are pressed
     /// </summary>
     /// <param name="context">The context that got send from the input key</param>
-    private void HotbarKey_Pressed(InputAction.CallbackContext context) {
-        int slot = context.action switch {
+    private void HotbarKey_Pressed(InputAction.CallbackContext context)
+    {
+        int slot = context.action switch
+        {
             InputAction action when action == playerInputActions.UI.One => 1,
             InputAction action when action == playerInputActions.UI.Two => 2,
             InputAction action when action == playerInputActions.UI.Three => 3,
@@ -201,39 +223,48 @@ public class PlayerInputHandler : MonoBehaviour {
             OnHotbarSlotPressed?.Invoke(slot - 1);
     }
 
-    public void SetMovementInput(Vector2 MovementInput) {
+    public void SetMovementInput(Vector2 MovementInput)
+    {
         this.MovementInput = MovementInput;
     }
 
-    public void SetMousePosition(Vector2 MousePosition) {
+    public void SetMousePosition(Vector2 MousePosition)
+    {
         this.MousePosition = MousePosition;
     }
 
-    public void SetAttackTriggered(bool AttackTriggered) {
+    public void SetAttackTriggered(bool AttackTriggered)
+    {
         this.AttackTriggered = AttackTriggered;
     }
 
-    public void SetAimingInput(bool AimingTriggered) {
+    public void SetAimingInput(bool AimingTriggered)
+    {
         this.AimingTriggered = AimingTriggered;
     }
 
-    public void SetSprintInput(bool SprintTriggered) {
+    public void SetSprintInput(bool SprintTriggered)
+    {
         this.SprintTriggered = SprintTriggered;
     }
 
-    public void SetInteractInput(bool InteractTriggered) {
+    public void SetInteractInput(bool InteractTriggered)
+    {
         this.InteractTriggered = InteractTriggered;
     }
 
-    public void SetUseTriggered(bool UseTriggered) {
+    public void SetUseTriggered(bool UseTriggered)
+    {
         this.UseTriggered = UseTriggered;
     }
 
-    public void SetDeselectWeaponTriggered(bool DeselectWeaponTriggered) {
+    public void SetDeselectWeaponTriggered(bool DeselectWeaponTriggered)
+    {
         this.DeselectWeaponTriggered = DeselectWeaponTriggered;
     }
 
-    public void SetCloseTriggered(bool CloseTriggered) {
+    public void SetCloseTriggered(bool CloseTriggered)
+    {
         this.CloseTriggered = CloseTriggered;
     }
 }
