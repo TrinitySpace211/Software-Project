@@ -1,38 +1,24 @@
 # 10DayZ
 
-A survival game where players must endure increasingly dangerous days while managing resources and fighting enemies.
+Welcome to the final version of 10DayZ.
+
+Explore the world, collect useful items, improve your chances of survival, and prepare for each new day. 
+As the threat grows stronger, every decision can make the difference between surviving and being overrun.
 
 # Download
 
 ➡️ [Download the latest version](https://github.com/TrinitySpace211/Software-Project/releases/tag/v0.2.0/10DayZ.zip)
 
-## Playtest Information
+## Game information
 
-Thank you for participating in our playtest!
-
-### Important Notes
-
-* The in-game time has been accelerated so testers don't have to wait long for events to happen.
-* Press **I** to open the inventory.
-* Weapons can be spawned using the following keys:
-
-  * **V**
-  * **B**
-  * **N**
-  * **M**
-* Enemies spawn every day at **06:00 AM**.
-* The game currently has no final objective. However, surviving until **Day 10** will trigger the extraction cutscene.
-* At the moment, the game is only available for **Windows**.
+A survival game where players must endure increasingly dangerous days while managing resources and fighting enemies.
 
 ## Feedback
 
-The purpose of this playtest is to:
+Feedback is still welcome.
 
-* Find and report bugs
-* Gather feedback on existing features
-* Collect suggestions for improvements
-
-If you encounter any issues or have ideas for the game, please create an issue on GitHub or contact the development team.
+If you encounter any issues or have suggestions for future improvements, 
+please create an issue on GitHub or contact the development team.
 
 ## Installation
 
