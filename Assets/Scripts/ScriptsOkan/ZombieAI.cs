@@ -220,7 +220,17 @@ public class ZombieAI : MonoBehaviour, IDamageable {
             return;
         }
 
-        if (_agent.remainingDistance < 0.5f) {
+        if (_agent.pathPending) return;
+
+        // "Angekommen" heisst auch: Weg unvollstaendig/ungueltig (Punkt liegt z.B.
+        // auf einer nicht erreichbaren NavMesh-Insel wie einem Dach). Sonst bleibt
+        // der Zombie fuer immer am letzten erreichbaren Punkt stehen, weil
+        // remainingDistance nie unter den Schwellwert faellt.
+        var arrivedOrBlocked = !_agent.hasPath
+            || _agent.remainingDistance < 0.5f
+            || _agent.pathStatus != NavMeshPathStatus.PathComplete;
+
+        if (arrivedOrBlocked) {
             _patrolWaitTimer -= Time.deltaTime;
             _animController?.SetWalking(false);
 
@@ -267,17 +277,18 @@ public class ZombieAI : MonoBehaviour, IDamageable {
     }
 
     private Vector3 GetRandomPatrolPoint() {
+        // XZ zufaellig um die Zone, Hoehe vom Zombie selbst (der steht sicher auf
+        // dem NavMesh) - die SpawnZone kann beliebig ueber/unter dem Boden liegen.
         var randomOffset = Random.insideUnitCircle * _patrolRadius;
         var candidate = new Vector3(
             _homePosition.x + randomOffset.x,
-            _homePosition.y,
+            transform.position.y,
             _homePosition.z + randomOffset.y
         );
 
-        // Kandidat aufs NavMesh projizieren (wie beim Sprinter): die SpawnZone
-        // kann ueber/unter dem Boden liegen, dann waere das Ziel sonst in der
-        // Luft und SetDestination schlaegt still fehl -> Zombie steht nur rum.
-        if (NavMesh.SamplePosition(candidate, out var hit, _patrolRadius, NavMesh.AllAreas))
+        // Kandidat aufs NavMesh projizieren (wie beim Sprinter). Kleiner Radius,
+        // damit der Punkt nicht auf ein Dach/eine andere Ebene springt.
+        if (NavMesh.SamplePosition(candidate, out var hit, 4f, NavMesh.AllAreas))
             return hit.position;
 
         return transform.position;
