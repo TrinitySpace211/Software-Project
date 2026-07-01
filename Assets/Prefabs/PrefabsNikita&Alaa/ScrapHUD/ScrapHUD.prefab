@@ -46,6 +46,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerWallet: {fileID: 0}
   scrapIcon: {fileID: 21300000, guid: ed85b552a6c398144b03a8ea43685b61, type: 3}
-  fallbackHudPosition: {x: 20, y: -90}
-  iconSize: {x: 34, y: 34}
+  fallbackHudPosition: {x: 20, y: -125}
+  iconSize: {x: 38, y: 38}
   textColor: {r: 1, g: 0, b: 0.11921883, a: 1}

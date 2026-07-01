@@ -53,6 +53,7 @@ MonoBehaviour:
   map: {fileID: 6564662718506547134}
   mapOpenAudioSource: {fileID: 797309658586641624}
   audioClipRefsSO: {fileID: 11400000, guid: 1359293ace21dbd4f80c840d88ae291f, type: 2}
+  pauseMenu: {fileID: 0}
 --- !u!82 &797309658586641624
 AudioSource:
   m_ObjectHideFlags: 0

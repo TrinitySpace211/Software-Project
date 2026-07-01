@@ -166,6 +166,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hovering: 0
+  selected: 0
+  slotNumberTxt: {fileID: 0}
 --- !u!1 &8044548172937763927
 GameObject:
   m_ObjectHideFlags: 0
