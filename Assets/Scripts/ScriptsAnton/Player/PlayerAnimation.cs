@@ -53,7 +53,7 @@ public class PlayerAnimation : MonoBehaviour {
     /// for animation blending. At the end the float parameters will be updated.
     /// </summary>
     private void UpdateAnimationState() {
-        if (DebugController.Instance.GetConsoleVisibility())
+        if (DebugController.Instance != null && DebugController.Instance.GetConsoleVisibility())
             return;
 
         isSprinting = player.GetCurrentPlayerState().CurrentPlayerMovementState == PlayerMovementState.Sprinting;

@@ -87,6 +87,7 @@ public class Player : MonoBehaviour {
 
     //Other Checks
     private bool isMeleeAttacking = false;
+    private EventSystem eventSystem;
 
     //Flashlight
     private float waitBeforeActivate = 1f;
@@ -95,6 +96,8 @@ public class Player : MonoBehaviour {
     #endregion
 
     private void OnEnable() {
+        eventSystem = EventSystem.current;
+
         SubscribeToEvents();
     }
 
@@ -124,23 +127,45 @@ public class Player : MonoBehaviour {
     }
 
     private void Update() {
-        if (!playerHealth.GetIsDead() && !DebugController.Instance.GetConsoleVisibility()) {
-            UpdateMovementState();
-            HandleMovement();
-
-            HandleShooting();
-            HandleAiming();
-
-            if (inventory != null) {
-                if (!EventSystem.current.IsPointerOverGameObject() && !inventory.GetIsDragging()) {
-                    HandleMeleeAttack();
-                }
-            }
-
-            HandleReloadFinished();
-            HandleGrenade();
-            HandleHealingKits();
+        if (!CanProcessUpdate()) {
+            return;
         }
+
+        UpdateMovementState();
+        HandleMovement();
+
+        HandleShooting();
+        HandleAiming();
+
+        if (inventory != null) {
+            if (!IsPointerOverUI() && !inventory.GetIsDragging()) {
+                HandleMeleeAttack();
+            }
+        }
+
+        HandleReloadFinished();
+        HandleGrenade();
+        HandleHealingKits();
+    }
+
+    private bool CanProcessUpdate() {
+        if (playerHealth == null || playerHealth.GetIsDead()) {
+            return false;
+        }
+
+        if (DebugController.Instance != null && DebugController.Instance.GetConsoleVisibility()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool IsPointerOverUI() {
+        if (eventSystem != null) {
+            return eventSystem.IsPointerOverGameObject();
+        }
+
+        return EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
     }
 
     private void FixedUpdate() {
@@ -166,9 +191,12 @@ public class Player : MonoBehaviour {
     /// </summary>
     /// <param name="playerInputHandler">Needs the PlayerInputHandler class so the Movement can be calculated</param>
     /// <param name="playerCamera">Needs the Main Camera to calculate the Mouse Direction</param>
-    public void Construct(PlayerInputHandler playerInputHandler, Camera playerCamera) {
+    public void Construct(PlayerInputHandler playerInputHandler, PlayerHealth playerHealth, Camera playerCamera, PlayerWeaponSelector weaponSelector, EventSystem eventSystem) {
         this.playerInputHandler = playerInputHandler;
+        this.playerHealth = playerHealth;
         this.playerCamera = playerCamera;
+        this.weaponSelector = weaponSelector;
+        this.eventSystem = eventSystem ?? EventSystem.current;
     }
 
     private void DayNightCycle_OnSunriseStarted() {
@@ -335,7 +363,7 @@ public class Player : MonoBehaviour {
         float walkFootstepDelay = 1f / walkSpeed * footstepSoundSpeed;
         float sprintFootstepDelay = 1f / (walkSpeed * sprintMultipier) * footstepSprintOffset;
 
-        if (playerInputHandler.MovementInput != Vector2.zero) {
+        if (playerInputHandler.MovementInput != Vector2.zero && SurfaceManager.Instance != null) {
             if (!isSprinting && Time.time > walkFootstepDelay + lastFootPlaced) {
                 lastFootPlaced = Time.time;
                 if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 0.2f, layerMask)) {
@@ -400,7 +428,8 @@ public class Player : MonoBehaviour {
             aimLayer.weight = 1;
             playerAnimation.SetAimAnimation(true);
         } else {
-            if (playerInputHandler.AimingTriggered && !isSprinting && weaponSelector.activeGun != null && !playerAnimation.GetIsReloading() && !EventSystem.current.IsPointerOverGameObject()) {
+            bool canAim = playerInputHandler.AimingTriggered && !isSprinting && weaponSelector.activeGun != null && !playerAnimation.GetIsReloading() && !IsPointerOverUI();
+            if (canAim) {
                 aimLayer.weight += Time.deltaTime / aimDuration;
                 playerAnimation.SetAimAnimation(true);
             } else {
@@ -416,7 +445,7 @@ public class Player : MonoBehaviour {
     private void HandleShooting() {
         GunSO activeGun = weaponSelector.activeGun;
 
-        if (playerInputHandler.AttackTriggered && playerInputHandler.AimingTriggered && !isSprinting && activeGun != null && !playerAnimation.GetIsReloading() && !weaponSelector.IsSelecting() && !EventSystem.current.IsPointerOverGameObject()) {
+        if (playerInputHandler.AttackTriggered && playerInputHandler.AimingTriggered && !isSprinting && activeGun != null && !playerAnimation.GetIsReloading() && !weaponSelector.IsSelecting() && !IsPointerOverUI()) {
             activeGun.Shoot();
 
             if (activeGun.GetEmptyMagazine() && inventory.GetAmmoAvailable(activeGun, out int ammoNeed)) {
