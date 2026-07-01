@@ -226,6 +226,8 @@ public class ZombieAI : MonoBehaviour, IDamageable {
 
             if (_patrolWaitTimer <= 0f) {
                 _currentPatrolTarget = GetRandomPatrolPoint();
+                // isStopped kann nach StopAndAttack noch true sein -> explizit loslaufen.
+                _agent.isStopped = false;
                 _agent.SetDestination(_currentPatrolTarget);
                 _patrolWaitTimer = patrolWaitTime;
             }
@@ -266,11 +268,19 @@ public class ZombieAI : MonoBehaviour, IDamageable {
 
     private Vector3 GetRandomPatrolPoint() {
         var randomOffset = Random.insideUnitCircle * _patrolRadius;
-        return new Vector3(
+        var candidate = new Vector3(
             _homePosition.x + randomOffset.x,
             _homePosition.y,
             _homePosition.z + randomOffset.y
         );
+
+        // Kandidat aufs NavMesh projizieren (wie beim Sprinter): die SpawnZone
+        // kann ueber/unter dem Boden liegen, dann waere das Ziel sonst in der
+        // Luft und SetDestination schlaegt still fehl -> Zombie steht nur rum.
+        if (NavMesh.SamplePosition(candidate, out var hit, _patrolRadius, NavMesh.AllAreas))
+            return hit.position;
+
+        return transform.position;
     }
 
     public void OnAttackAnimationEnd() {
