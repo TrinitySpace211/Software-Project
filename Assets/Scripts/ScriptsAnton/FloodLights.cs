@@ -16,9 +16,6 @@ public class FloodLights : MonoBehaviour {
     private void Start() {
         spotLight.enabled = false;
         pointLight.enabled = false;
-
-        DayNightCycle.OnSunsetStarted += DayNightCycle_OnSunsetStarted;
-        DayNightCycle.OnSunriseStarted += DayNightCycle_OnSunriseStarted;
     }
 
     private void DayNightCycle_OnSunsetStarted() {
@@ -52,6 +49,15 @@ public class FloodLights : MonoBehaviour {
             pointLight.intensity += Time.deltaTime * 15f;
             yield return null;
         }
+    }
 
+    private void OnEnable() {
+        DayNightCycle.OnSunsetStarted += DayNightCycle_OnSunsetStarted;
+        DayNightCycle.OnSunriseStarted += DayNightCycle_OnSunriseStarted;
+    }
+
+    private void OnDisable() {
+        DayNightCycle.OnSunsetStarted -= DayNightCycle_OnSunsetStarted;
+        DayNightCycle.OnSunriseStarted -= DayNightCycle_OnSunriseStarted;
     }
 }

@@ -86,6 +86,7 @@ public class SprinterController : MonoBehaviour, IDamageable {
             if (dissolveMeter > dissolveMeterMin) {
                 zombieMaterial.SetFloat("_DissolveMeter", dissolveMeter);
             } else {
+                dissolveEnemy = false;
                 Destroy(gameObject);
             }
         }

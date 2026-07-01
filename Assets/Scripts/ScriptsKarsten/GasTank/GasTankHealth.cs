@@ -43,11 +43,6 @@ public class GasTankHealth : MonoBehaviour, ISaveable {
         currentHP = maxHP;
     }
 
-    private void Start() {
-        DayNightCycle.OnSunsetStarted += DayNightCycle_OnSunsetStarted;
-        DayNightCycle.OnSunriseStarted += DayNightCycle_OnSunriseStarted;
-    }
-
     private void DayNightCycle_OnSunsetStarted() {
         //Debug.Log(audioSource + " " + SoundManager.Instance.volume);
         generatorAudioSource.volume = generatorVolume * SoundManager.Instance.volume;
@@ -142,11 +137,17 @@ public class GasTankHealth : MonoBehaviour, ISaveable {
     #endregion
 
     private void OnEnable() {
+        DayNightCycle.OnSunsetStarted += DayNightCycle_OnSunsetStarted;
+        DayNightCycle.OnSunriseStarted += DayNightCycle_OnSunriseStarted;
+
         if (SaveManager.Instance != null)
             SaveManager.Instance.Register(this);
     }
 
     private void OnDisable() {
+        DayNightCycle.OnSunsetStarted -= DayNightCycle_OnSunsetStarted;
+        DayNightCycle.OnSunriseStarted -= DayNightCycle_OnSunriseStarted;
+
         if (SaveManager.Instance != null)
             SaveManager.Instance.Unregister(this);
     }

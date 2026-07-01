@@ -26,9 +26,6 @@ public class PoleLight : MonoBehaviour {
         pointLight.enabled = false;
 
         if (ignore) return;
-
-        DayNightCycle.OnSunsetStarted += DayNightCycle_OnSunsetStarted;
-        DayNightCycle.OnSunriseStarted += DayNightCycle_OnSunriseStarted;
     }
 
     private void DayNightCycle_OnSunriseStarted() {
@@ -96,5 +93,14 @@ public class PoleLight : MonoBehaviour {
             pointLight.intensity = Random.Range(minIntensity, maxIntensityPointLight);
             yield return new WaitForSeconds(Random.Range(minInterval, maxInterval));
         }
+    }
+    private void OnEnable() {
+        DayNightCycle.OnSunsetStarted += DayNightCycle_OnSunsetStarted;
+        DayNightCycle.OnSunriseStarted += DayNightCycle_OnSunriseStarted;
+    }
+
+    private void OnDisable() {
+        DayNightCycle.OnSunsetStarted -= DayNightCycle_OnSunsetStarted;
+        DayNightCycle.OnSunriseStarted -= DayNightCycle_OnSunriseStarted;
     }
 }

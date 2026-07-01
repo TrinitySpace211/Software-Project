@@ -574,16 +574,16 @@ public class Inventory : MonoBehaviour, ISaveable {
 
         switch (weapon.gunType) {
             case GunType.AssaultRifle:
-                player.GetPlayerGunSelector().SelectAssaultRifle();
+                player.GetPlayerGunSelector().SelectAssaultRifle(weapon.gunSO);
                 break;
             case GunType.Pistol:
-                player.GetPlayerGunSelector().SelectPistol();
+                player.GetPlayerGunSelector().SelectPistol(weapon.gunSO);
                 break;
             case GunType.Shotgun:
-                player.GetPlayerGunSelector().SelectShotgun();
+                player.GetPlayerGunSelector().SelectShotgun(weapon.gunSO);
                 break;
             case GunType.Sniper:
-                player.GetPlayerGunSelector().SelectSniper();
+                player.GetPlayerGunSelector().SelectSniper(weapon.gunSO);
                 break;
             default:
                 player.GetPlayerGunSelector().DequipWeapon();
@@ -672,7 +672,7 @@ public class Inventory : MonoBehaviour, ISaveable {
     }
 
     public bool GetAmmoAvailable(GunSO gun, out int ammoNeed) {
-        int maxAmmo = gun.shootConfigSO.maxAmmo;
+        int maxAmmo = gun.GetMaxAmmo();
 
         ammoNeed = maxAmmo - gun.currentAmmo;
 
@@ -834,9 +834,16 @@ public class Inventory : MonoBehaviour, ISaveable {
             ItemSO item = Resources.Load<ItemSO>($"ScriptableObjects/ItemSO/{slotData.itemName}");
 
             if (item != null && slotData.isGun) {
-                GunSO gun = Instantiate(item.gunSO);
+                ItemSO runtimeItem = Instantiate(item);
 
-                gun.LoadGunData(slotData.gunData);
+                if (item.gunSO != null) {
+                    GunSO gun = Instantiate(item.gunSO);
+                    gun.LoadGunData(slotData.gunData);
+                    runtimeItem.gunSO = gun;
+                }
+
+                allSlots[slotData.slotIndex].SetItem(runtimeItem, slotData.amount);
+                continue;
             }
 
             allSlots[slotData.slotIndex].SetItem(item, slotData.amount);

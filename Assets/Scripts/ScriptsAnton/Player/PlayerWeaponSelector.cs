@@ -9,7 +9,7 @@ using UnityEngine.InputSystem;
 public class PlayerWeaponSelector : MonoBehaviour {
 
     [SerializeField] private Transform[] gunParent;
-    [SerializeField] private List<GunSO> guns;
+    //[SerializeField] private List<GunSO> guns;
     [SerializeField] private List<MeleeSO> melees;
     [SerializeField] private List<HealthItemSO> healthItems;
     [SerializeField] private Grenade grenade;
@@ -306,9 +306,7 @@ public class PlayerWeaponSelector : MonoBehaviour {
     /// <summary>
     /// Selects the AssaultRifle and starts a Coroutine to select a Gun
     /// </summary>
-    public void SelectAssaultRifle() {
-        GunSO gun = guns.Find(gun => gun.type == GunType.AssaultRifle);
-
+    public void SelectAssaultRifle(GunSO gun) {
         if (gun == null) {
             Debug.LogError($"No GunSO found for GunType: {GunType.AssaultRifle}");
             return;
@@ -323,9 +321,7 @@ public class PlayerWeaponSelector : MonoBehaviour {
     /// <summary>
     /// Selects the Pistol and starts a Coroutine to select a Gun
     /// </summary>
-    public void SelectPistol() {
-        GunSO gun = guns.Find(gun => gun.type == GunType.Pistol);
-
+    public void SelectPistol(GunSO gun) {
         if (gun == null) {
             Debug.LogError($"No GunSO found for GunType: {GunType.Pistol}");
             return;
@@ -340,9 +336,7 @@ public class PlayerWeaponSelector : MonoBehaviour {
     /// <summary>
     /// Selects the Shotgun and starts a Coroutine to select a Gun
     /// </summary>
-    public void SelectShotgun() {
-        GunSO gun = guns.Find(gun => gun.type == GunType.Shotgun);
-
+    public void SelectShotgun(GunSO gun) {
         if (gun == null) {
             Debug.LogError($"No GunSO found for GunType: {GunType.Shotgun}");
             return;
@@ -357,9 +351,7 @@ public class PlayerWeaponSelector : MonoBehaviour {
     /// <summary>
     /// Selects the Sniper and starts a Coroutine to select a Gun
     /// </summary>
-    public void SelectSniper() {
-        GunSO gun = guns.Find(gun => gun.type == GunType.Sniper);
-
+    public void SelectSniper(GunSO gun) {
         if (gun == null) {
             Debug.LogError($"No GunSO found for GunType: {GunType.Sniper}");
             return;

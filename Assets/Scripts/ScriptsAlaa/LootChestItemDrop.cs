@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.Controls;
 
 /// <summary>
 /// Opens a chest and creates random loot when F is pressed.
@@ -13,22 +12,17 @@ public class LootChestItemDrop : MonoBehaviour {
     [Header("References")]
     // The player can be assigned in the Inspector.
     // An empty field is found automatically.
-    [SerializeField] private Transform player;
-
-    [Header("Interaction")]
-    // Uses the same distance and key as LootChest.
-    [SerializeField] private float interactionDistance = 2.5f;
-    [SerializeField] private Key interactionKey = Key.F;
+    [SerializeField] private Player player;
 
     [Header("Chest Opening")]
     // Optional lid that rotates when the chest is opened.
+    [SerializeField] private MeshRenderer lidMeshRenderer;
+    [SerializeField] private Transform lidPivot;
     [SerializeField] private Transform lid;
-    [SerializeField] private Vector3 openRotation = new Vector3(-70f, 0f, 0f);
-    [SerializeField] private float openSpeed = 8f;
 
     [Header("Loot Spawn")]
     // Random loot is selected from this list.
-    [SerializeField] private ItemSO[] itemPrefabs;
+    [SerializeField] private List<ItemSO> itemPrefabs;
     [SerializeField] private ItemSO scrapItem;
     [SerializeField, Range(0f, 1f)] private float scrapDropChance = 0.65f;
     [SerializeField] private float scrapIconWorldSize = 0.35f;
@@ -48,81 +42,64 @@ public class LootChestItemDrop : MonoBehaviour {
     [SerializeField] private float revealLightIntensity = 4f;
     [SerializeField] private float revealLightDuration = 1.2f;
 
-    private Quaternion closedRotation;
-    private Quaternion targetOpenRotation;
+    private Material lidMaterial;
     private bool playerInRange;
     private bool waitsForPlayerToLeave;
     private bool hasSpawnedLoot;
-    private Coroutine lidRoutine;
     private Light revealLight;
 
-    private void Awake() {
-        // Prepares references and effects on startup.
-        FindMissingReferences();
-        SaveLidRotations();
+    private List<ItemSO> itemToSpawn;
+
+    //Dissolve
+    private bool dissolveLid = false;
+    private float dissolveMeterMin;
+    private float dissolveMeterMax;
+    private float dissolveMeter;
+    private float dissolveSpeed = 1f;
+
+    private void Start() {
         CreateRevealLight();
 
         // Automatically ensures that the chest receives new loot every day.
         if (GetComponent<DailyLootChestReset>() == null) {
             gameObject.AddComponent<DailyLootChestReset>();
         }
+
+        if (lidMeshRenderer != null) {
+            lidMaterial = lidMeshRenderer.material;
+        }
+
+        Shader shader = lidMaterial.shader;
+        int propertyIndex = shader.FindPropertyIndex("_DissolveMeter");
+        dissolveMeterMin = lidMaterial.shader.GetPropertyRangeLimits(propertyIndex).x;
+        dissolveMeterMax = lidMaterial.shader.GetPropertyRangeLimits(propertyIndex).y;
+        dissolveMeter = dissolveMeterMax;
     }
 
     private void Update() {
         // Continuously checks the player and the key.
-        FindMissingReferences();
-        CheckPlayerDistance();
-        ResetAfterPlayerLeaves();
         CheckInteractionInput();
-    }
 
-    private void FindMissingReferences() {
-        // Finds the player automatically by using the Player tag.
-        if (player == null) {
-            GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
-            if (playerObject != null) {
-                player = playerObject.transform;
+        if (dissolveLid) {
+            dissolveMeter -= Time.deltaTime * dissolveSpeed;
+            if (dissolveMeter > dissolveMeterMin) {
+                lidMaterial.SetFloat("_DissolveMeter", dissolveMeter);
+            } else {
+                dissolveLid = false;
+                lid.gameObject.SetActive(false);
             }
-        }
-    }
-
-    private void SaveLidRotations() {
-        // Stores the closed and open lid rotations.
-        if (lid == null) {
-            return;
-        }
-
-        closedRotation = lid.localRotation;
-        targetOpenRotation = closedRotation * Quaternion.Euler(openRotation);
-    }
-
-    private void CheckPlayerDistance() {
-        // Checks whether the player is close enough to the chest.
-        if (player == null) {
-            playerInRange = false;
-            return;
-        }
-
-        playerInRange = Vector3.Distance(player.position, transform.position) <= interactionDistance;
-    }
-
-    private void ResetAfterPlayerLeaves() {
-        // The chest can be opened again after the player leaves.
-        if (waitsForPlayerToLeave && !playerInRange) {
-            waitsForPlayerToLeave = false;
-            CloseLid();
         }
     }
 
     private void CheckInteractionInput() {
         // Waits after opening until the player leaves the area.
-        if (waitsForPlayerToLeave || !playerInRange || Keyboard.current == null) {
+        if (waitsForPlayerToLeave || !playerInRange) {
             return;
         }
 
-        KeyControl keyControl = Keyboard.current[interactionKey];
-        if (keyControl != null && keyControl.wasPressedThisFrame) {
+        if (player.GetPlayerInputHandler().InteractTriggered) {
             OpenAndDropItems();
+            player.GetPlayerInputHandler().SetInteractInput(false);
         }
     }
 
@@ -148,40 +125,33 @@ public class LootChestItemDrop : MonoBehaviour {
     }
 
     private void OpenLid() {
-        // Only the loot appears if no lid is assigned.
-        if (lid == null) {
+        Rigidbody rb = lid.GetComponent<Rigidbody>();
+
+        if (rb != null) {
+            rb.isKinematic = false;
+            rb.linearVelocity = new Vector3(UnityEngine.Random.Range(0, 3f), 5f, UnityEngine.Random.Range(0, 3f));
+            rb.angularVelocity = new Vector3(
+                UnityEngine.Random.Range(-10f, 10f),
+                UnityEngine.Random.Range(-10f, 10f),
+                UnityEngine.Random.Range(-10f, 10f));
+
+            StartCoroutine(DissolveLid());
+        } else {
+            Debug.LogError("Lid has no Rigidbody!");
             return;
         }
-
-        StartLidRotation(targetOpenRotation);
     }
 
     private void CloseLid() {
-        // The lid closes when the player leaves.
-        if (lid == null) {
-            return;
-        }
-
-        StartLidRotation(closedRotation);
+        lid.gameObject.SetActive(true);
+        lid.position = lidPivot.position;
+        lid.rotation = Quaternion.Euler(0, 0, 0);
     }
 
-    private void StartLidRotation(Quaternion targetRotation) {
-        // Stops the previous lid movement before starting a new one.
-        if (lidRoutine != null) {
-            StopCoroutine(lidRoutine);
-        }
+    private IEnumerator DissolveLid() {
+        yield return new WaitForSeconds(2f);
 
-        lidRoutine = StartCoroutine(RotateLid(targetRotation));
-    }
-
-    private IEnumerator RotateLid(Quaternion targetRotation) {
-        // Smoothly rotates the lid to the target position.
-        while (Quaternion.Angle(lid.localRotation, targetRotation) > 0.5f) {
-            lid.localRotation = Quaternion.Slerp(lid.localRotation, targetRotation, openSpeed * Time.deltaTime);
-            yield return null;
-        }
-
-        lid.localRotation = targetRotation;
+        dissolveLid = true;
     }
 
     private void CreateRevealLight() {
@@ -204,20 +174,36 @@ public class LootChestItemDrop : MonoBehaviour {
 
     private IEnumerator SpawnItemsWithReveal() {
         // Stops if no loot items are assigned.
-        if (itemPrefabs == null || itemPrefabs.Length == 0) {
+        if (itemPrefabs == null || itemPrefabs.Count == 0) {
             Debug.LogWarning($"Loot chest '{name}' has no item prefabs assigned.");
             yield break;
         }
 
-        // Determines the item count and starts the light effect.
-        int itemCount = UnityEngine.Random.Range(minItems, maxItems + 1);
-        StartCoroutine(PlayRevealLight());
+        itemToSpawn = new List<ItemSO>(itemPrefabs);
 
         // Creates the items with a short delay.
+        for (int i = 0; i < itemToSpawn.Count; i++) {
+            int index = UnityEngine.Random.Range(i, itemToSpawn.Count);
+
+            (itemToSpawn[i], itemToSpawn[index]) = (itemToSpawn[index], itemToSpawn[i]);
+        }
+
+        int itemCount = Mathf.Min(UnityEngine.Random.Range(minItems, maxItems + 1), itemToSpawn.Count);
+
+        // Determines the item count and starts the light effect.
+        StartCoroutine(PlayRevealLight());
+
         for (int i = 0; i < itemCount; i++) {
-            SpawnSingleItem(i, itemCount);
+
+            ItemSO itemSO = itemToSpawn[i];
+            if (scrapItem != null && UnityEngine.Random.value < scrapDropChance) {
+                itemSO = scrapItem;
+            }
+
+            SpawnSingleItem(itemSO, i, itemCount);
             yield return new WaitForSeconds(0.12f);
         }
+
     }
 
     private IEnumerator PlayRevealLight() {
@@ -240,13 +226,7 @@ public class LootChestItemDrop : MonoBehaviour {
         revealLight.enabled = false;
     }
 
-    private void SpawnSingleItem(int itemIndex, int itemCount) {
-        // Scrap is common. Healing items are selected less often.
-        ItemSO itemSO = ChooseRandomLootItem();
-        if (itemSO == null) {
-            return;
-        }
-
+    private void SpawnSingleItem(ItemSO itemSO, int itemIndex, int itemCount) {
         // Creates the item and moves it to its final position.
         Vector3 startPosition = GetSpawnPosition();
         Vector3 landingPosition = GetLandingPosition(itemIndex, itemCount);
@@ -269,9 +249,9 @@ public class LootChestItemDrop : MonoBehaviour {
             return;
         }
 
-        if (itemSO.itemType == ItemType.Gun) {
+        if (itemSO.itemType == ItemType.Gun) {//Doesn't do anything
             SetItemType(() => spawnedItem.SetItemType(itemSO.gunType), itemSO.itemType, itemSO.gunType);
-        } else if (itemSO.itemType == ItemType.Melee) {
+        } else if (itemSO.itemType == ItemType.Melee) {//Doesn't do anything
             SetItemType(() => spawnedItem.SetItemType(itemSO.meleeType), itemSO.itemType, itemSO.meleeType);
         } else if (itemSO.itemType == ItemType.Grenade) {
             SetItemType(() => spawnedItem.SetItemType(itemSO.itemType), itemSO.itemType, itemSO.itemType);
@@ -282,41 +262,6 @@ public class LootChestItemDrop : MonoBehaviour {
         }
 
         StartCoroutine(RevealItem(spawnedItem.gameObject, startPosition, landingPosition));
-    }
-
-    private ItemSO ChooseRandomLootItem() {
-        // Scrap has a high chance of appearing from the chest.
-        if (scrapItem != null && UnityEngine.Random.value < scrapDropChance) {
-            return scrapItem;
-        }
-
-        // Counts only healing items and excludes scrap from this selection.
-        int healingItemCount = 0;
-        foreach (ItemSO item in itemPrefabs) {
-            if (item != null && item != scrapItem) {
-                healingItemCount++;
-            }
-        }
-
-        // Uses scrap if no healing items are assigned.
-        if (healingItemCount == 0) {
-            return scrapItem;
-        }
-
-        int selectedHealingItem = UnityEngine.Random.Range(0, healingItemCount);
-        foreach (ItemSO item in itemPrefabs) {
-            if (item == null || item == scrapItem) {
-                continue;
-            }
-
-            if (selectedHealingItem == 0) {
-                return item;
-            }
-
-            selectedHealingItem--;
-        }
-
-        return scrapItem;
     }
 
     private void SpawnScrapPickup(Vector3 startPosition, Vector3 landingPosition) {
@@ -402,7 +347,9 @@ public class LootChestItemDrop : MonoBehaviour {
             yield return null;
         }
 
-        spawnedItem.transform.position = landingPosition;
+
+        if (spawnedItem != null)
+            spawnedItem.transform.position = landingPosition;
 
         // Re-enables physics after landing.
         if (hadRigidbody) {
@@ -422,6 +369,18 @@ public class LootChestItemDrop : MonoBehaviour {
 
         if (isValid) {
             action?.Invoke();
+        }
+    }
+
+    private void OnTriggerEnter(Collider other) {
+        if (other.GetComponentInParent<Player>()) {
+            playerInRange = true;
+        }
+    }
+
+    private void OnTriggerExit(Collider other) {
+        if (other.GetComponentInParent<Player>()) {
+            playerInRange = false;
         }
     }
 

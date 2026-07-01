@@ -227,8 +227,6 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
 
         if (SaveManager.Instance != null)
             SaveManager.Instance.LoadGame();
-
-        PlayerHealth.OnDeath += PlayerHealth_OnDeath;
     }
 
     /// <summary>
@@ -568,11 +566,15 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
     #endregion
 
     private void OnEnable() {
+        PlayerHealth.OnDeath += PlayerHealth_OnDeath;
+
         if (SaveManager.Instance != null)
             SaveManager.Instance.Register(this);
     }
 
     private void OnDisable() {
+        PlayerHealth.OnDeath -= PlayerHealth_OnDeath;
+
         if (SaveManager.Instance != null)
             SaveManager.Instance.Unregister(this);
     }

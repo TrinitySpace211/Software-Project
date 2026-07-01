@@ -94,15 +94,33 @@ public class Player : MonoBehaviour {
     private Light pointLight;
     #endregion
 
+    private void OnEnable() {
+        SubscribeToEvents();
+    }
+
+    private void OnDisable() {
+        UnsubscribeFromEvents();
+        StopAllCoroutines();
+    }
+
     private void Start() {
         if (flashlight != null) {
             CheckFlashlight();
         }
+    }
 
+    private void SubscribeToEvents() {
         PlayerInputHandler.OnReloadAction += PlayerInputHandler_OnReloadAction;
         Item.OnItemCollected += Item_OnItemCollected;
         DayNightCycle.OnSunsetStarted += DayNightCycle_OnSunsetStarted;
         DayNightCycle.OnSunriseStarted += DayNightCycle_OnSunriseStarted;
+    }
+
+    private void UnsubscribeFromEvents() {
+        PlayerInputHandler.OnReloadAction -= PlayerInputHandler_OnReloadAction;
+        Item.OnItemCollected -= Item_OnItemCollected;
+        DayNightCycle.OnSunsetStarted -= DayNightCycle_OnSunsetStarted;
+        DayNightCycle.OnSunriseStarted -= DayNightCycle_OnSunriseStarted;
     }
 
     private void Update() {

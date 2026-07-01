@@ -54,6 +54,11 @@ public class GunSO : ScriptableObject {
             model.transform.localPosition = spawnPoint;
             model.transform.localRotation = Quaternion.Euler(spawnRotation);
 
+            //Debugging
+            /* if (gunData != null) {
+                Debug.Log("Spawn1: CurrentAmmo: " + gunData.currentAmmo + ", MaxAmmo: " + gunData.effectiveMaxAmmo + ", Damage: " + gunData.effectiveDamage);
+            } */
+
             if (gunData == null || gunData.effectiveDamage == 0f && gunData.effectiveMaxAmmo == 0f) {
                 gunData = new GunData();
                 gunData.UpdateStats(0, shootConfigSO.maxAmmo, shootConfigSO.damage);
@@ -212,18 +217,6 @@ public class GunSO : ScriptableObject {
             damageable.TakeDamage(gunData.effectiveDamage);
     }
 
-    public void SetFullMagazine() {
-        /*
-        emptyMagazine = false;
-        currentAmmo = shootConfigSO.maxAmmo;
-        */
-
-        emptyMagazine = false;
-
-        currentAmmo = gunData.effectiveMaxAmmo;
-        savedAmmo = currentAmmo;
-        gunData.currentAmmo = currentAmmo;
-    }
     public void SetAmmoAmount(int amount) {
         emptyMagazine = false;
         currentAmmo += amount;
@@ -246,7 +239,10 @@ public class GunSO : ScriptableObject {
     }
 
     public void SaveGunData() {
-        gunData = new GunData();
+        if (gunData == null) {
+            gunData = new GunData();
+        }
+
         gunData.UpdateStats(currentAmmo, gunData.effectiveMaxAmmo, gunData.effectiveDamage);
     }
 
@@ -263,9 +259,7 @@ public class GunSO : ScriptableObject {
             gunData = new GunData();
             gunData.UpdateStats(0, shootConfigSO.maxAmmo, shootConfigSO.damage);
         }
-
-        gunData.UpdateStats(currentAmmo, gunData.effectiveMaxAmmo, gunData.effectiveDamage + amount
-        );
+        gunData.UpdateStats(currentAmmo, gunData.effectiveMaxAmmo, gunData.effectiveDamage + amount);
 
         gunData.damageUpgradeCount++;
     }
@@ -288,10 +282,8 @@ public class GunSO : ScriptableObject {
         }
 
         currentAmmo = newCurrentAmmo;
-        savedAmmo = currentAmmo;
 
-        gunData.UpdateStats(currentAmmo, newMaxAmmo, gunData.effectiveDamage
-        );
+        gunData.UpdateStats(currentAmmo, newMaxAmmo, gunData.effectiveDamage);
 
         gunData.ammoUpgradeCount++;
     }
@@ -303,12 +295,14 @@ public class GunSO : ScriptableObject {
     /// </summary>
     private void OnEnable() {
         gunData = null;
-        model = null;
+        if (model != null) {
+            Destroy(model);
+            model = null;
+        }
         poolParent = null;
         shootSystem = null;
         shootSound = null;
         trailPool = null;
-        savedAmmo = 0;
         currentAmmo = 0;
         emptyMagazine = false;
     }
@@ -356,7 +350,6 @@ public class GunSO : ScriptableObject {
         public int effectiveDamage;
         public int damageUpgradeCount;
         public int ammoUpgradeCount;
-
 
         public void UpdateStats(int currentAmmo, int effectiveMaxAmmo, int effectiveDamage) {
             this.currentAmmo = currentAmmo;

@@ -158,7 +158,7 @@ public class SoundManager : MonoBehaviour {
     /// This is just for the Shotgun, because it reloads every bullet one at a time;
     /// </summary>
     private IEnumerator ReloadMultipleTimes(Vector3 position, float volume, GunSO gun) {
-        float missingAmmo = gun.shootConfigSO.maxAmmo - gun.currentAmmo;
+        float missingAmmo = gun.GetMaxAmmo() - gun.currentAmmo;
         for (int i = 0; i < missingAmmo; i++) {
             PlaySound(audioClipRefsSO.shotgunReloadSounds, position, volume);
 

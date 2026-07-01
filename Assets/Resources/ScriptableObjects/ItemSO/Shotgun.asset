@@ -17,7 +17,7 @@ MonoBehaviour:
   gunSO: {fileID: 11400000, guid: fe8c164c47cedda4cbc0c00deb09224c, type: 2}
   meleeType: 0
   healthItemType: 0
-  ammunitionType: 3
+  ammunitionType: 0
   itemName: Shotgun
   icon: {fileID: 21300000, guid: 2cacde15b6710424bbaf21d584de0d72, type: 3}
   maxStackSize: 1
