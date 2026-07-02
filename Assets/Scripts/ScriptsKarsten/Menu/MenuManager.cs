@@ -204,14 +204,10 @@ public class MenuManager : MonoBehaviour {
         if (audioSection != null) audioSection.SetActive(false);
     }
 
-    public void SetFullscreen() {
+    public void ToggleFullscreen() {
         PlayClick();
-        Resolution res = Screen.currentResolution;
-        if (fullScreenMode == FullScreenMode.Windowed) {
-            fullScreenMode = FullScreenMode.FullScreenWindow;
-            Screen.SetResolution(res.width, res.height, fullScreenMode);
-        }
 
+        Screen.fullScreen = !Screen.fullScreen;
     }
 
     public void SetWindowed() {
@@ -219,6 +215,11 @@ public class MenuManager : MonoBehaviour {
         if (fullScreenMode == FullScreenMode.FullScreenWindow) {
             fullScreenMode = FullScreenMode.Windowed;
             Screen.SetResolution(1280, 720, fullScreenMode);
+        } else if (fullScreenMode == FullScreenMode.Windowed) {
+            Resolution res = Screen.currentResolution;
+
+            fullScreenMode = FullScreenMode.FullScreenWindow;
+            Screen.SetResolution(res.width, res.height, fullScreenMode);
         }
     }
 

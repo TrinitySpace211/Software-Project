@@ -2341,7 +2341,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: {fileID: 8694702426204482713}
   ammunitionIcon: {fileID: 21300000, guid: 6313b0e510f6686409f2dbb1c7d7aae6, type: 3}
-  hudPosition: {x: 20, y: -145}
+  hudPosition: {x: 20, y: -70}
   iconSize: {x: 34, y: 34}
   textColor: {r: 0.7735849, g: 0.09559349, b: 0.07662869, a: 1}
 --- !u!4 &1003648317
