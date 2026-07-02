@@ -222,4 +222,9 @@ public class AmmunitionHudDisplay : MonoBehaviour {
         ammunitionText.SetMaterialDirty();
         ammunitionText.SetAllDirty();
     }
+
+    public void SetVisible(bool visible) {
+        if (hudObject != null)
+            hudObject.SetActive(visible);
+    }
 }
