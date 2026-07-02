@@ -229,26 +229,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tutorialScene: 2
   mainScene: 1
+  mainMenuPanel: {fileID: 1376890339}
   settingsPanel: {fileID: 528013239}
   gameModePanel: {fileID: 976966446}
+  clickSound: {fileID: 8300000, guid: c0e76ed8bb1c6564dabd23a24910f61a, type: 3}
+  musicClip: {fileID: 8300000, guid: f95e206fefc399740a9b681ac7a09021, type: 3}
+  buttonSelect: {fileID: 8300000, guid: ed4c43c834c0007409a4180561870ea7, type: 3}
+  musicSource: {fileID: 687490986}
+  continueButtonImage: {fileID: 2001715778}
+  continueButton: {fileID: 2001715777}
+  continueButtonText: {fileID: 1175311297}
+  fadeGroup: {fileID: 862205960}
+  fadeDuration: 1.2
   audioSection: {fileID: 703655182}
   controlsSection: {fileID: 1758598467}
   firstSelectedButton: {fileID: 0}
   firstGameModeButton: {fileID: 0}
-  fadeGroup: {fileID: 862205960}
-  fadeDuration: 1.2
-  clickSound: {fileID: 8300000, guid: c0e76ed8bb1c6564dabd23a24910f61a, type: 3}
-  musicClip: {fileID: 8300000, guid: f95e206fefc399740a9b681ac7a09021, type: 3}
-  buttonSelect: {fileID: 8300000, guid: ed4c43c834c0007409a4180561870ea7, type: 3}
-  continueButtonImage: {fileID: 2001715778}
-  continueButton: {fileID: 2001715777}
-  continueButtonText: {fileID: 1175311297}
-  firstSelectedButton: {fileID: 0}
-  fadeGroup: {fileID: 862205960}
-  fadeDuration: 1.2
-  audioSection: {fileID: 703655182}
-  controlsSection: {fileID: 1758598467}
-  musicSource: {fileID: 687490986}
 --- !u!4 &127881190
 Transform:
   m_ObjectHideFlags: 0

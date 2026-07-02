@@ -42,6 +42,10 @@ public class MenuManager : MonoBehaviour {
     private AudioSource audioSource;
     private bool isTransitioning;
 
+    private string savePath;
+    private string tutorialPath;
+    private bool hasTutorial;
+
     private void Awake() {
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.playOnAwake = false;
@@ -209,9 +213,6 @@ public class MenuManager : MonoBehaviour {
         Screen.SetResolution(1280, 720, FullScreenMode.Windowed);
     }
 
-    public void ContinueGame() {
-        PlayClick();
-    }
 
     public void ExitGame() {
         PlayClick();
