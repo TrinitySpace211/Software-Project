@@ -1,50 +1,20 @@
-# 10DayZ
+# Survive. Scavenge. Defend.
 
-Welcome to the final version of 10DayZ.
+The world has fallen to the undead, and rescue is only possible if you can hold out for **10 days**.
 
-Explore the world, collect useful items, improve your chances of survival, and prepare for each new day. 
-As the threat grows stronger, every decision can make the difference between surviving and being overrun.
+During the **day**, explore the surrounding area to search for ammunition, healing kits, and other valuable supplies. Every trip outside the base is a risk, but you'll need every resource you can find.
 
-# Download
+At **night**, the generator powers up to illuminate the fuel tank that keeps the rescue operation alive. The light attracts hordes of zombies, all determined to destroy the tank before the helicopter can reach you.
 
-➡️ [Download the latest version](https://github.com/TrinitySpace211/Software-Project/releases/tag/v0.2.0/10DayZ.zip)
+Protect the fuel tank, survive each night, and make it to **Day 10** to complete your mission and escape.
 
-## Game information
+## Features
 
-A survival game where players must endure increasingly dangerous days while managing resources and fighting enemies.
+* 🧟 Survive against relentless zombie hordes.
+* 🌄 Explore the world during the day to gather resources.
+* 🔫 Manage your ammunition and healing supplies.
+* ⛽ Defend the fuel tank from nightly attacks.
+* 🌙 Experience the shift between peaceful days and intense nights.
+* 🚁 Survive for 10 days and escape by helicopter.
 
-## Feedback
-
-Feedback is still welcome.
-
-If you encounter any issues or have suggestions for future improvements, 
-please create an issue on GitHub or contact the development team.
-
-## Installation
-
-1. Download the latest release.
-2. Extract the ZIP file.
-3. Run the game executable.
-
-## System Requirements
-
-### Minimum
-
-* Windows 10/11
-
-## Known Issues
-
-* List known bugs here.
-
-## Roadmap
-
-* End Goal
-* Tutorial
-* Sound
-* Looting around the Map
-* Melee Weapons
-* Equipment like Grenades and Healing Items
-* Night Lighting
-* Light Overhaul
-* and much more...
-
+Thank you for playing! We hope you enjoy the game, and we appreciate any feedback that helps us improve future updates.
