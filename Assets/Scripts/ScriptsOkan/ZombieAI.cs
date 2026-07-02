@@ -220,12 +220,27 @@ public class ZombieAI : MonoBehaviour, IDamageable {
             return;
         }
 
-        if (_agent.remainingDistance < 0.5f) {
+        if (_agent.pathPending) return;
+
+        // "Angekommen" heisst auch: Weg unvollstaendig/ungueltig (Punkt liegt z.B.
+        // auf einer nicht erreichbaren NavMesh-Insel wie einem Dach). Sonst bleibt
+        // der Zombie fuer immer am letzten erreichbaren Punkt stehen, weil
+        // remainingDistance nie unter den Schwellwert faellt.
+        // Wichtig: stoppingDistance einrechnen - der Agent haelt regulaer schon
+        // stoppingDistance vor dem Ziel an, remainingDistance faellt also nie
+        // darunter und eine fixe 0.5er-Schwelle wuerde nie erreicht.
+        var arrivedOrBlocked = !_agent.hasPath
+            || _agent.remainingDistance <= _agent.stoppingDistance + 0.5f
+            || _agent.pathStatus != NavMeshPathStatus.PathComplete;
+
+        if (arrivedOrBlocked) {
             _patrolWaitTimer -= Time.deltaTime;
             _animController?.SetWalking(false);
 
             if (_patrolWaitTimer <= 0f) {
                 _currentPatrolTarget = GetRandomPatrolPoint();
+                // isStopped kann nach StopAndAttack noch true sein -> explizit loslaufen.
+                _agent.isStopped = false;
                 _agent.SetDestination(_currentPatrolTarget);
                 _patrolWaitTimer = patrolWaitTime;
             }
@@ -265,12 +280,22 @@ public class ZombieAI : MonoBehaviour, IDamageable {
     }
 
     private Vector3 GetRandomPatrolPoint() {
+        // XZ zufaellig um die Zone, Hoehe vom Zombie selbst (der steht sicher auf
+        // dem NavMesh) - die SpawnZone kann beliebig ueber/unter dem Boden liegen.
         var randomOffset = Random.insideUnitCircle * _patrolRadius;
-        return new Vector3(
+        var candidate = new Vector3(
             _homePosition.x + randomOffset.x,
-            _homePosition.y,
+            transform.position.y,
             _homePosition.z + randomOffset.y
         );
+
+        // Kandidat aufs NavMesh projizieren (wie beim Sprinter). Grosszuegiger
+        // Radius, damit auch auf huegeligem Gelaende ein Punkt gefunden wird -
+        // unerreichbare Punkte (z.B. Daecher) faengt der PathStatus-Check ab.
+        if (NavMesh.SamplePosition(candidate, out var hit, Mathf.Max(_patrolRadius, 4f), NavMesh.AllAreas))
+            return hit.position;
+
+        return transform.position;
     }
 
     public void OnAttackAnimationEnd() {
