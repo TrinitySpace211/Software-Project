@@ -166,7 +166,7 @@ public class Inventory : MonoBehaviour, ISaveable {
                 container.SetActive(false);
                 visible = false;
                 tooltipUI.Visibile(false);
-            } else {
+            } else if (playerInputHandler.MovementInput == Vector2.zero && !visible) {
                 container.SetActive(true);
                 visible = true;
             }
@@ -180,9 +180,11 @@ public class Inventory : MonoBehaviour, ISaveable {
             }
         }
 
-        if (playerInputHandler.MovementInput != Vector2.zero) {
+        if (playerInputHandler.MovementInput != Vector2.zero && visible) {
             tooltipUI.Visibile(false);
             container.SetActive(false);
+            Cursor.visible = false;
+            crosshair.SetActive(true);
         }
 
         StartDrag();

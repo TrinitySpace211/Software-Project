@@ -14,9 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemType: 5
   gunType: 0
+  gunSO: {fileID: 0}
   meleeType: 0
   healthItemType: 0
   ammunitionType: 3
+  spawnWeight: 70
   itemName: 12 Gauge Ammo Box
   icon: {fileID: 21300000, guid: 1498d0d71cdcd4242a748f68c8489875, type: 3}
   maxStackSize: 80

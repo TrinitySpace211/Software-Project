@@ -9,8 +9,7 @@ using UnityEngine.SceneManagement;
 /// Controls pause menu behavior, including pause state, UI visibility,
 /// cursor handling, and menu sounds.
 /// </summary>
-public class PauseMenu : MonoBehaviour
-{
+public class PauseMenu : MonoBehaviour {
     /// <summary>
     /// Root object of the pause menu UI.
     /// </summary>
@@ -54,8 +53,7 @@ public class PauseMenu : MonoBehaviour
     /// <summary>
     /// Sets up the audio source and hides the pause menu at startup.
     /// </summary>
-    private void Awake()
-    {
+    private void Awake() {
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.playOnAwake = false;
         audioSource.volume = 0.1f;
@@ -67,10 +65,8 @@ public class PauseMenu : MonoBehaviour
     /// <summary>
     /// Sets the initial button selection once the scene is ready.
     /// </summary>
-    private void Start()
-    {
-        if (firstSelectedButton != null && EventSystem.current != null)
-        {
+    private void Start() {
+        if (firstSelectedButton != null && EventSystem.current != null) {
             EventSystem.current.SetSelectedGameObject(null);
             EventSystem.current.SetSelectedGameObject(firstSelectedButton);
         }
@@ -79,10 +75,8 @@ public class PauseMenu : MonoBehaviour
     /// <summary>
     /// Toggles pause with the Escape key.
     /// </summary>
-    private void Update()
-    {
-        if (Keyboard.current != null && playerInputHandler.CloseTriggered && gasTankHealth.CurrentHP > 0 && !OptionsMenu.IsOpen)
-        {
+    private void Update() {
+        if (Keyboard.current != null && playerInputHandler.CloseTriggered && gasTankHealth.CurrentHP > 0 && !OptionsMenu.IsOpen) {
             if (isPaused)
                 Resume();
             else
@@ -95,8 +89,7 @@ public class PauseMenu : MonoBehaviour
     /// <summary>
     /// Resumes gameplay and restores UI state.
     /// </summary>
-    public void Resume()
-    {
+    public void Resume() {
         PlayClick();
 
         pauseMenuUI.SetActive(false);
@@ -119,14 +112,12 @@ public class PauseMenu : MonoBehaviour
     /// <summary>
     /// Restores mouse cursor state after resuming.
     /// </summary>
-    private IEnumerator ResumeRoutine()
-    {
+    private IEnumerator ResumeRoutine() {
         yield return null;
 
         Cursor.visible = false;
 
-        if (Mouse.current != null)
-        {
+        if (Mouse.current != null) {
             var pos = playerInputHandler.MousePosition;
             Mouse.current.WarpCursorPosition(pos);
             InputSystem.QueueStateEvent(Mouse.current, new MouseState { position = pos });
@@ -137,8 +128,7 @@ public class PauseMenu : MonoBehaviour
     /// <summary>
     /// Pauses gameplay and shows the pause menu.
     /// </summary>
-    private void Pause()
-    {
+    private void Pause() {
         PlayClick();
 
         pauseMenuUI.SetActive(true);
@@ -162,8 +152,7 @@ public class PauseMenu : MonoBehaviour
     /// <summary>
     /// Loads the main menu scene.
     /// </summary>
-    public void LoadMainMenu()
-    {
+    public void LoadMainMenu() {
         PlayClick();
         Time.timeScale = 1f;
         SceneManager.LoadScene("MainMenu");
@@ -172,8 +161,7 @@ public class PauseMenu : MonoBehaviour
     /// <summary>
     /// Exits the game or stops play mode in the editor.
     /// </summary>
-    public void ExitGame()
-    {
+    public void ExitGame() {
         PlayClick();
 
 #if UNITY_EDITOR
@@ -186,8 +174,7 @@ public class PauseMenu : MonoBehaviour
     /// <summary>
     /// Plays the configured click sound.
     /// </summary>
-    private void PlayClick()
-    {
+    private void PlayClick() {
         if (clickSound == null)
             return;
 
@@ -197,8 +184,7 @@ public class PauseMenu : MonoBehaviour
     /// <summary>
     /// Clears the current UI selection and assigns a new one on the next frame.
     /// </summary>
-    private void ResetUISelection(GameObject target)
-    {
+    private void ResetUISelection(GameObject target) {
         if (EventSystem.current == null)
             return;
 
@@ -209,8 +195,7 @@ public class PauseMenu : MonoBehaviour
     /// <summary>
     /// Selects the requested UI object on the next frame.
     /// </summary>
-    private IEnumerator SelectNextFrame(GameObject target)
-    {
+    private IEnumerator SelectNextFrame(GameObject target) {
         yield return null;
 
         if (EventSystem.current != null && target != null)

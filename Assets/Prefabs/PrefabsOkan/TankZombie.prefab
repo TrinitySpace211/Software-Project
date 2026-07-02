@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6324066644306956141
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6579775418708699466}
+  m_Layer: 0
+  m_Name: ParticlePivot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6579775418708699466
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6324066644306956141}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.18713722, y: 0.043684356, z: 0.043684356, w: 0.98038924}
+  m_LocalPosition: {x: 0.002643484, y: -0.06684544, z: -0.019699508}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8236958867873286884}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &4728843843395968578
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -172,6 +203,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 7
       objectReference: {fileID: 0}
+    - target: {fileID: 8111781155169087978, guid: abf60e737ca11294f911736466e07723, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: fb1565ccec1853140925c0cdd7655998, type: 2}
     - target: {fileID: 8324922376569700957, guid: abf60e737ca11294f911736466e07723, type: 3}
       propertyPath: m_Layer
       value: 7
@@ -186,7 +221,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 3742407835892290726, guid: abf60e737ca11294f911736466e07723, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6579775418708699466}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: abf60e737ca11294f911736466e07723, type: 3}
       insertIndex: -1
@@ -198,6 +236,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 6200757821667061137}
   m_SourcePrefab: {fileID: 100100000, guid: abf60e737ca11294f911736466e07723, type: 3}
+--- !u!137 &3545159259562405800 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 8111781155169087978, guid: abf60e737ca11294f911736466e07723, type: 3}
+  m_PrefabInstance: {fileID: 4728843843395968578}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &5575829872794002195 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: abf60e737ca11294f911736466e07723, type: 3}
@@ -227,6 +270,9 @@ MonoBehaviour:
   roamWaitMax: 3
   health: 250
   isDead: 0
+  skinnedMeshRenderer: {fileID: 3545159259562405800}
+  dissolveParticle: {fileID: 3810651036681866420, guid: 93d22e25319d6614196a6056a2bb514b, type: 3}
+  particlePoint: {fileID: 6579775418708699466}
 --- !u!195 &7257723274032403413
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -268,5 +314,10 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 2, z: 1}
-  m_Center: {x: 0, y: 1, z: 0}
+  m_Size: {x: 0.7816124, y: 1.6403525, z: 1}
+  m_Center: {x: -0.0013065338, y: 0.82017624, z: 0}
+--- !u!4 &8236958867873286884 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3742407835892290726, guid: abf60e737ca11294f911736466e07723, type: 3}
+  m_PrefabInstance: {fileID: 4728843843395968578}
+  m_PrefabAsset: {fileID: 0}

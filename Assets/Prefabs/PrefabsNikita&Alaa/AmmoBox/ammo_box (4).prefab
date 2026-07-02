@@ -110,8 +110,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9009055592559353249}
   serializedVersion: 2
-  m_LocalRotation: {x: -1.7763566e-15, y: -0.70459104, z: -1.7763566e-15, w: 0.7096136}
-  m_LocalPosition: {x: 42.294388, y: -0.40866506, z: 37.610535}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.22, z: -0.29}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -245,13 +245,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 0}
-  interactionDistance: 2.5
-  interactionKey: 20
   lidMeshRenderer: {fileID: 2748674174416273866}
   lidPivot: {fileID: 5800431588184626268}
   lid: {fileID: 4615568506734447017}
-  openRotation: {x: -70, y: 0, z: 0}
-  openSpeed: 8
   itemPrefabs:
   - {fileID: 11400000, guid: c2e1e6611eed9bd488222e7776c1fc65, type: 2}
   - {fileID: 11400000, guid: 95821470a96307b4b8e9c8d27a55b136, type: 2}

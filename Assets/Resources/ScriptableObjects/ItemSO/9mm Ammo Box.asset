@@ -14,9 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemType: 5
   gunType: 0
+  gunSO: {fileID: 0}
   meleeType: 0
   healthItemType: 0
   ammunitionType: 2
+  spawnWeight: 70
   itemName: 9mm Ammo Box
   icon: {fileID: 21300000, guid: 716cdd974c1befc4c80a683590deba68, type: 3}
   maxStackSize: 100

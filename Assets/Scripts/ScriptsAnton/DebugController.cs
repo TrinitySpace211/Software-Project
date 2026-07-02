@@ -256,7 +256,7 @@ public class DebugController : MonoBehaviour {
             if (input.Contains(commandBase.commandId)) {
                 if (commandList[i] as DebugCommand != null) {
                     (commandList[i] as DebugCommand).Invoke();
-                } else if (commandList[i] as DebugCommand<int> != null) {
+                } else if (commandList[i] as DebugCommand<int> != null && properties.Length == 3) {
                     (commandList[i] as DebugCommand<int>).Invoke(int.Parse(properties[2]));
                 }
             }
