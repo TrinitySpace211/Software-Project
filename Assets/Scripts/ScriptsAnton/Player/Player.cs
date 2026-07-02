@@ -138,7 +138,7 @@ public class Player : MonoBehaviour {
         HandleAiming();
 
         if (inventory != null) {
-            if (!IsPointerOverUI() && !inventory.GetIsDragging()) {
+            if (!inventory.GetIsDragging()) {
                 HandleMeleeAttack();
             }
         }
@@ -158,14 +158,6 @@ public class Player : MonoBehaviour {
         }
 
         return true;
-    }
-
-    private bool IsPointerOverUI() {
-        if (eventSystem != null) {
-            return eventSystem.IsPointerOverGameObject();
-        }
-
-        return EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
     }
 
     private void FixedUpdate() {
@@ -196,7 +188,7 @@ public class Player : MonoBehaviour {
         this.playerHealth = playerHealth;
         this.playerCamera = playerCamera;
         this.weaponSelector = weaponSelector;
-        this.eventSystem = eventSystem ?? EventSystem.current;
+        this.eventSystem = eventSystem;
     }
 
     private void DayNightCycle_OnSunriseStarted() {
@@ -428,7 +420,7 @@ public class Player : MonoBehaviour {
             aimLayer.weight = 1;
             playerAnimation.SetAimAnimation(true);
         } else {
-            bool canAim = playerInputHandler.AimingTriggered && !isSprinting && weaponSelector.activeGun != null && !playerAnimation.GetIsReloading() && !IsPointerOverUI();
+            bool canAim = playerInputHandler.AimingTriggered && !isSprinting && weaponSelector.activeGun != null && !playerAnimation.GetIsReloading();
             if (canAim) {
                 aimLayer.weight += Time.deltaTime / aimDuration;
                 playerAnimation.SetAimAnimation(true);
@@ -445,7 +437,7 @@ public class Player : MonoBehaviour {
     private void HandleShooting() {
         GunSO activeGun = weaponSelector.activeGun;
 
-        if (playerInputHandler.AttackTriggered && playerInputHandler.AimingTriggered && !isSprinting && activeGun != null && !playerAnimation.GetIsReloading() && !weaponSelector.IsSelecting() && !IsPointerOverUI()) {
+        if (playerInputHandler.AttackTriggered && playerInputHandler.AimingTriggered && !isSprinting && activeGun != null && !playerAnimation.GetIsReloading() && !weaponSelector.IsSelecting()) {
             activeGun.Shoot();
 
             if (activeGun.GetEmptyMagazine() && inventory.GetAmmoAvailable(activeGun, out int ammoNeed)) {

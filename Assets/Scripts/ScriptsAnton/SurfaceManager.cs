@@ -59,11 +59,14 @@ public class SurfaceManager : MonoBehaviour {
         } else {
             ZombieAI zombie = hitObject.GetComponentInParent<ZombieAI>();
             SprinterController sprinter = hitObject.GetComponentInParent<SprinterController>();
+            TankZombieController tankZombie = hitObject.GetComponentInParent<TankZombieController>();
             Renderer renderer = null;
             if (zombie != null) {
                 renderer = zombie.GetComponentInChildren<SkinnedMeshRenderer>();
             } else if (sprinter != null) {
                 renderer = sprinter.GetComponentInChildren<SkinnedMeshRenderer>();
+            } else if (tankZombie != null) {
+                renderer = tankZombie.GetComponentInChildren<SkinnedMeshRenderer>();
             }
 
             if (renderer != null) {

@@ -14,9 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemType: 4
   gunType: 0
+  gunSO: {fileID: 0}
   meleeType: 0
   healthItemType: 3
+  ammunitionType: 0
+  spawnWeight: 40
   itemName: Syringe
   icon: {fileID: 21300000, guid: d269f117802a3c14e982c25b7ea8a26c, type: 3}
   maxStackSize: 3
   itemPrefab: {fileID: 7689076996944912441, guid: 9d43aead25481e942a30fe96d8c43d92, type: 3}
+  handItemPrefab: {fileID: 0}
+  baseDamage: 0

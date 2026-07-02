@@ -89,6 +89,10 @@ public class LootChestItemDrop : MonoBehaviour {
                 lid.gameObject.SetActive(false);
             }
         }
+
+        if (Keyboard.current.spaceKey.wasPressedThisFrame) {
+            CloseLid();
+        }
     }
 
     private void CheckInteractionInput() {
@@ -143,9 +147,18 @@ public class LootChestItemDrop : MonoBehaviour {
     }
 
     private void CloseLid() {
+        Rigidbody rb = lid.GetComponent<Rigidbody>();
+
+        lidMaterial.SetFloat("_DissolveMeter", 1);
+
         lid.gameObject.SetActive(true);
+
+        if (rb != null) {
+            rb.isKinematic = true;
+        }
+
         lid.position = lidPivot.position;
-        lid.rotation = Quaternion.Euler(0, 0, 0);
+        lid.localRotation = Quaternion.Euler(0, 0, 0);
     }
 
     private IEnumerator DissolveLid() {
@@ -195,7 +208,7 @@ public class LootChestItemDrop : MonoBehaviour {
 
         for (int i = 0; i < itemCount; i++) {
 
-            ItemSO itemSO = itemToSpawn[i];
+            ItemSO itemSO = GetWeightedRandomItem();
             if (scrapItem != null && UnityEngine.Random.value < scrapDropChance) {
                 itemSO = scrapItem;
             }
@@ -294,6 +307,26 @@ public class LootChestItemDrop : MonoBehaviour {
         pickup.SetAmount(1);
 
         StartCoroutine(RevealItem(pickupObject, startPosition, landingPosition));
+    }
+
+    private ItemSO GetWeightedRandomItem() {
+        int totalWeight = 0;
+
+        foreach (ItemSO item in itemToSpawn)
+            totalWeight += item.spawnWeight;
+
+        int random = UnityEngine.Random.Range(0, totalWeight);
+
+        foreach (ItemSO item in itemToSpawn) {
+            random -= item.spawnWeight;
+
+            if (random < 0) {
+                itemToSpawn.Remove(item);
+                return item;
+            }
+        }
+
+        return null;
     }
 
     private Vector3 GetSpawnPosition() {

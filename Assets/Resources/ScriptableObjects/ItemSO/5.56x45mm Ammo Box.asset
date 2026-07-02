@@ -14,9 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemType: 5
   gunType: 0
+  gunSO: {fileID: 0}
   meleeType: 0
   healthItemType: 0
   ammunitionType: 1
+  spawnWeight: 70
   itemName: 5.56x45mm Ammo Box
   icon: {fileID: 21300000, guid: a329263e854cf0d4896a167c54469aa2, type: 3}
   maxStackSize: 200

@@ -25,6 +25,8 @@ public class ItemSO : ScriptableObject {
     public HealthItemType healthItemType;
     public AmmunitionType ammunitionType;
 
+    public int spawnWeight;
+
     /// <summary>
     /// The display name of the item.
     /// </summary>

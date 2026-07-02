@@ -14,9 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemType: 5
   gunType: 0
+  gunSO: {fileID: 0}
   meleeType: 0
   healthItemType: 0
   ammunitionType: 4
+  spawnWeight: 70
   itemName: Sniper Ammo
   icon: {fileID: 21300000, guid: b22d0f5cfd4424b4a843911e7e693589, type: 3}
   maxStackSize: 30
