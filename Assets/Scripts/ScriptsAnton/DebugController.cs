@@ -196,8 +196,6 @@ public class DebugController : MonoBehaviour {
     }
 
     private void Start() {
-        PlayerInputHandler.OnToggleDebugAction += PlayerInputHandler_OnToggleDebugAction;
-        PlayerInputHandler.OnReturnAction += PlayerInputHandler_OnReturnAction;
         customTextFieldStyle = new GUIStyle();
     }
 
@@ -265,5 +263,15 @@ public class DebugController : MonoBehaviour {
 
     public bool GetConsoleVisibility() {
         return showConsole;
+    }
+
+    private void OnEnable() {
+        PlayerInputHandler.OnToggleDebugAction += PlayerInputHandler_OnToggleDebugAction;
+        PlayerInputHandler.OnReturnAction += PlayerInputHandler_OnReturnAction;
+    }
+
+    private void OnDisable() {
+        PlayerInputHandler.OnToggleDebugAction -= PlayerInputHandler_OnToggleDebugAction;
+        PlayerInputHandler.OnReturnAction -= PlayerInputHandler_OnReturnAction;
     }
 }

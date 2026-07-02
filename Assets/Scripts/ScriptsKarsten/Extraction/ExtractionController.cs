@@ -9,7 +9,7 @@ using UnityEngine.UI;
 /// animation disabling, fade effects, and UI button reveal.
 /// </summary>
 public class ExtractionController : MonoBehaviour, ISaveable {
-    private static readonly string ID = "ExtractionController";
+    public static readonly string ID = "ExtractionController";
 
     [Header("Player")]
     public GameObject playerObject;
@@ -116,6 +116,13 @@ public class ExtractionController : MonoBehaviour, ISaveable {
         if (!achievement3Gained) {
             AchievementManager.triggerAchievement?.Invoke(achievementDay10);
             achievement3Gained = true;
+
+            if (SaveManager.Instance != null) {
+                SaveManager.Instance.SaveData(ID, new ExtractionContollerData {
+                    achievement3Gained = achievement3Gained
+                });
+            }
+
         }
 
     }
@@ -270,7 +277,7 @@ public class ExtractionController : MonoBehaviour, ISaveable {
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
-            Application.Quit();
+        Application.Quit();
 #endif
     }
 

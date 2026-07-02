@@ -127,7 +127,7 @@ public class TutorialManager : MonoBehaviour {
         SaveManager.Instance.SaveData(ID, new TutorialData {
             tutorialFinished = tutorialFinished
         });
-        Debug.Log("Saved tutorialFinished!" + tutorialFinished);
+        //Debug.Log("Saved tutorialFinished!" + tutorialFinished);
 
         yield return new WaitForSeconds(2f);
 

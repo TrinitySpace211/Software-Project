@@ -931,7 +931,7 @@ public class NPCDialog : MonoBehaviour, ISaveable {
         weaponDescriptionText.text = "A fast automatic weapon with good damage and high fire rate.";
 
         selectedWeaponItem = assaultRifleItem;
-        selectedWeaponCost = 20;
+        selectedWeaponCost = 10;
 
         UpdateWeaponInfo();
     }
@@ -946,7 +946,7 @@ public class NPCDialog : MonoBehaviour, ISaveable {
         weaponDescriptionText.text = "Reliable close-range weapon with high power.";
 
         selectedWeaponItem = shotgunItem;
-        selectedWeaponCost = 30;
+        selectedWeaponCost = 25;
 
         UpdateWeaponInfo();
     }
@@ -961,7 +961,7 @@ public class NPCDialog : MonoBehaviour, ISaveable {
         weaponDescriptionText.text = "A powerful long-range weapon for precise shots against zombies.";
 
         selectedWeaponItem = sniperItem;
-        selectedWeaponCost = 40;
+        selectedWeaponCost = 30;
 
         UpdateWeaponInfo();
     }

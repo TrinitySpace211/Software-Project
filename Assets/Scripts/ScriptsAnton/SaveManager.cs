@@ -105,6 +105,7 @@ public class SaveManager : MonoBehaviour {
     /// </summary>
     /// <typeparam name="T">The Type of the Data that should be loaded</typeparam>
     /// <param name="id">The id of the data</param>
+    /// <returns>The json as a string</returns>
     public T LoadData<T>(string id) {
         string path = Path.Combine(Application.persistentDataPath, $"{id}.json");
 
@@ -116,6 +117,39 @@ public class SaveManager : MonoBehaviour {
         //Debug.Log("Loaded!");
 
         return JsonUtility.FromJson<T>(json);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="id"></param>
+    /// <returns>The </returns>
+    public object LoadDataFromSave(string id) {
+        string path = Path.Combine(Application.persistentDataPath, savePath);
+
+        if (!File.Exists(path))
+            return null;
+
+        SaveWrapper wrapper = JsonUtility.FromJson<SaveWrapper>(File.ReadAllText(path));
+
+
+        ObjectWrapper data = wrapper.objects.Find(o => o.id == id);
+
+        if (data == null) {
+            return null;
+        }
+
+        Type type = Type.GetType(data.type);
+
+        object obj = JsonUtility.FromJson(data.json, type);
+
+        //Debug.Log("Loaded!");
+
+        return obj;
+
+
+
     }
 
     [Serializable]

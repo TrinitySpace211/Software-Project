@@ -162,14 +162,10 @@ public class Inventory : MonoBehaviour, ISaveable {
             return;
 
         if (Keyboard.current.iKey.wasPressedThisFrame) {
-            if (visible) {
-                container.SetActive(false);
-                visible = false;
+            container.SetActive(!container.activeInHierarchy);
+
+            if (!container.activeInHierarchy)
                 tooltipUI.Visibile(false);
-            } else if (playerInputHandler.MovementInput == Vector2.zero && !visible) {
-                container.SetActive(true);
-                visible = true;
-            }
 
             if (container.activeInHierarchy || nPCDialog.IsDialogOpen) {
                 crosshair.SetActive(false);
@@ -178,13 +174,6 @@ public class Inventory : MonoBehaviour, ISaveable {
                 crosshair.SetActive(true);
                 Cursor.visible = false;
             }
-        }
-
-        if (playerInputHandler.MovementInput != Vector2.zero && visible) {
-            tooltipUI.Visibile(false);
-            container.SetActive(false);
-            Cursor.visible = false;
-            crosshair.SetActive(true);
         }
 
         StartDrag();

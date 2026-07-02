@@ -18,7 +18,7 @@ using UnityEngine.InputSystem;
 /// </summary>
 public class DayNightCycle : MonoBehaviour, ISaveable {
 
-    private static readonly string ID = "DayNightCycle";
+    public static readonly string ID = "DayNightCycle";
 
     public AchievementSO achievementDay1;
     public AchievementSO achievementDay5;
@@ -280,6 +280,8 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
 
                 case TimeState.Day:
                     // Count a night as survived once the player reaches the next day.
+                    CheckAchievement();
+
                     if (nightNumber > 0) {
                         survivedNights++;
 
@@ -290,8 +292,6 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
                             StartCoroutine(ShowSavedGame());
                         }
                     }
-
-                    CheckAchievement();
 
                     ShowNotification($"Day {dayNumber} begins!");
                     onNewDayStarted?.Invoke();

@@ -89,10 +89,6 @@ public class LootChestItemDrop : MonoBehaviour {
                 lid.gameObject.SetActive(false);
             }
         }
-
-        if (Keyboard.current.spaceKey.wasPressedThisFrame) {
-            CloseLid();
-        }
     }
 
     private void CheckInteractionInput() {
