@@ -2,30 +2,12 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Pool;
-using UnityEngine.Rendering;
 
 /// <summary>
 ///     Creates a Sciptable Object for the Guns with Logic so every Weapon is the same
 /// </summary>
 [CreateAssetMenu(fileName = "Gun", menuName = "Guns/Gun", order = 0)]
 public class GunSO : ScriptableObject {
-
-    [Serializable]
-    public class GunData {
-        public string gunName;
-        public int currentAmmo;
-        public int effectiveMaxAmmo;
-        public int effectiveDamage;
-        public int damageUpgradeCount;
-        public int ammoUpgradeCount;
-
-        public void UpdateStats(string gunName, int currentAmmo, int effectiveMaxAmmo, int effectiveDamage) {
-            this.gunName = gunName;
-            this.currentAmmo = currentAmmo;
-            this.effectiveMaxAmmo = effectiveMaxAmmo;
-            this.effectiveDamage = effectiveDamage;
-        }
-    }
 
     public ImpactType impactType;
     public GunType type;
@@ -46,14 +28,14 @@ public class GunSO : ScriptableObject {
     private float lastShootTime;
     private AudioSource shootSound;
     private GameObject poolParent;
+    private GunData gunData;
 
-    public int currentAmmo { get; private set; }
+    public int currentAmmo { get; private set; } = 0;
     private bool emptyMagazine;
     private int savedAmmo;
     private ParticleSystem shootSystem;
     private ObjectPool<TrailRenderer> trailPool;
 
-    private GunData gunData;
     private const int maxUpgradeCount = 2;
 
     /// <summary>
@@ -72,12 +54,17 @@ public class GunSO : ScriptableObject {
             model.transform.localPosition = spawnPoint;
             model.transform.localRotation = Quaternion.Euler(spawnRotation);
 
-            if (gunData == null) {
+            //Debugging
+            /* if (gunData != null) {
+                Debug.Log("Spawn1: CurrentAmmo: " + gunData.currentAmmo + ", MaxAmmo: " + gunData.effectiveMaxAmmo + ", Damage: " + gunData.effectiveDamage);
+            } */
+
+            if (gunData == null || gunData.effectiveDamage == 0f && gunData.effectiveMaxAmmo == 0f) {
                 gunData = new GunData();
-                gunData.UpdateStats(gunName, currentAmmo, shootConfigSO.maxAmmo, shootConfigSO.damage);
+                gunData.UpdateStats(0, shootConfigSO.maxAmmo, shootConfigSO.damage);
             }
 
-            currentAmmo = 0;
+            currentAmmo = gunData.currentAmmo;
         } else {
             model.SetActive(true);
 
@@ -190,10 +177,6 @@ public class GunSO : ScriptableObject {
     }
     #endregion
 
-    private void CheckAvailableAmmo() {
-
-    }
-
     /// <summary>
     /// Deactivates the Weapon and sets the shoot Particle to null
     /// </summary>
@@ -202,6 +185,26 @@ public class GunSO : ScriptableObject {
         model.gameObject.SetActive(false);
 
         shootSystem = null;
+    }
+
+    /// <summary>
+    /// Cleanup after closing the game or changing the scene
+    /// </summary>
+    public void DestroyAll() {
+        if (model != null) {
+            Destroy(model);
+            model = null;
+        }
+
+        if (poolParent != null) {
+            Destroy(poolParent);
+            poolParent = null;
+        }
+
+        activeMonoBehaviour = null;
+        trailPool = null;
+        shootSystem = null;
+        gunData = null;
     }
 
     /// <summary>
@@ -214,18 +217,6 @@ public class GunSO : ScriptableObject {
             damageable.TakeDamage(gunData.effectiveDamage);
     }
 
-    public void SetFullMagazine() {
-        /*
-        emptyMagazine = false;
-        currentAmmo = shootConfigSO.maxAmmo;
-        */
-
-        emptyMagazine = false;
-
-        currentAmmo = gunData.effectiveMaxAmmo;
-        savedAmmo = currentAmmo;
-        gunData.currentAmmo = currentAmmo;
-    }
     public void SetAmmoAmount(int amount) {
         emptyMagazine = false;
         currentAmmo += amount;
@@ -243,22 +234,32 @@ public class GunSO : ScriptableObject {
         return gunData.effectiveMaxAmmo;
     }
 
+    public GunData GetGunData() {
+        return gunData;
+    }
+
+    public void SaveGunData() {
+        if (gunData == null) {
+            gunData = new GunData();
+        }
+
+        gunData.UpdateStats(currentAmmo, gunData.effectiveMaxAmmo, gunData.effectiveDamage);
+    }
+
+    public void LoadGunData(GunData gunData) {
+        this.gunData = gunData;
+    }
+
     /// <summary>
     /// Increases the effective damage of this gun.
     /// </summary>
     /// <param name="amount">The amount of damage added to the gun.</param>
     public void UpgradeDamage(int amount) {
-        if (gunData == null) {
+        if (gunData == null && gunData.effectiveDamage == 0f && gunData.effectiveMaxAmmo == 0f) {
             gunData = new GunData();
-            gunData.UpdateStats(gunName, currentAmmo, shootConfigSO.maxAmmo, shootConfigSO.damage);
+            gunData.UpdateStats(0, shootConfigSO.maxAmmo, shootConfigSO.damage);
         }
-
-        gunData.UpdateStats(
-            gunName,
-            currentAmmo,
-            gunData.effectiveMaxAmmo,
-            gunData.effectiveDamage + amount
-        );
+        gunData.UpdateStats(currentAmmo, gunData.effectiveMaxAmmo, gunData.effectiveDamage + amount);
 
         gunData.damageUpgradeCount++;
     }
@@ -268,9 +269,9 @@ public class GunSO : ScriptableObject {
     /// </summary>
     /// <param name="amount">The amount of ammo capacity added to the gun.</param>
     public void UpgradeMaxAmmo(int amount) {
-        if (gunData == null) {
+        if (gunData == null && gunData.effectiveDamage == 0f && gunData.effectiveMaxAmmo == 0f) {
             gunData = new GunData();
-            gunData.UpdateStats(gunName, currentAmmo, shootConfigSO.maxAmmo, shootConfigSO.damage);
+            gunData.UpdateStats(0, shootConfigSO.maxAmmo, shootConfigSO.damage);
         }
 
         int newMaxAmmo = gunData.effectiveMaxAmmo + amount;
@@ -281,14 +282,8 @@ public class GunSO : ScriptableObject {
         }
 
         currentAmmo = newCurrentAmmo;
-        savedAmmo = currentAmmo;
 
-        gunData.UpdateStats(
-            gunName,
-            currentAmmo,
-            newMaxAmmo,
-            gunData.effectiveDamage
-        );
+        gunData.UpdateStats(currentAmmo, newMaxAmmo, gunData.effectiveDamage);
 
         gunData.ammoUpgradeCount++;
     }
@@ -300,12 +295,14 @@ public class GunSO : ScriptableObject {
     /// </summary>
     private void OnEnable() {
         gunData = null;
-        model = null;
+        if (model != null) {
+            Destroy(model);
+            model = null;
+        }
         poolParent = null;
         shootSystem = null;
         shootSound = null;
         trailPool = null;
-        savedAmmo = 0;
         currentAmmo = 0;
         emptyMagazine = false;
     }
@@ -314,9 +311,9 @@ public class GunSO : ScriptableObject {
     /// Returns true if the damage upgrade can still be bought for this gun.
     /// </summary>
     public bool CanUpgradeDamage() {
-        if (gunData == null) {
+        if (gunData == null && gunData.effectiveDamage == 0f && gunData.effectiveMaxAmmo == 0f) {
             gunData = new GunData();
-            gunData.UpdateStats(gunName, currentAmmo, shootConfigSO.maxAmmo, shootConfigSO.damage);
+            gunData.UpdateStats(0, shootConfigSO.maxAmmo, shootConfigSO.damage);
         }
 
         return gunData.damageUpgradeCount < maxUpgradeCount;
@@ -326,9 +323,9 @@ public class GunSO : ScriptableObject {
     /// Returns true if the ammo upgrade can still be bought for this gun.
     /// </summary>
     public bool CanUpgradeMaxAmmo() {
-        if (gunData == null) {
+        if (gunData == null && gunData.effectiveDamage == 0f && gunData.effectiveMaxAmmo == 0f) {
             gunData = new GunData();
-            gunData.UpdateStats(gunName, currentAmmo, shootConfigSO.maxAmmo, shootConfigSO.damage);
+            gunData.UpdateStats(0, shootConfigSO.maxAmmo, shootConfigSO.damage);
         }
 
         return gunData.ammoUpgradeCount < maxUpgradeCount;
@@ -338,11 +335,26 @@ public class GunSO : ScriptableObject {
     /// Returns the current effective damage value of this gun.
     /// </summary>
     public int GetDamage() {
-        if (gunData == null) {
+        if (gunData == null && gunData.effectiveDamage == 0f && gunData.effectiveMaxAmmo == 0f) {
             gunData = new GunData();
-            gunData.UpdateStats(gunName, currentAmmo, shootConfigSO.maxAmmo, shootConfigSO.damage);
+            gunData.UpdateStats(0, shootConfigSO.maxAmmo, shootConfigSO.damage);
         }
 
         return gunData.effectiveDamage;
+    }
+
+    [Serializable]
+    public class GunData {
+        public int currentAmmo;
+        public int effectiveMaxAmmo;
+        public int effectiveDamage;
+        public int damageUpgradeCount;
+        public int ammoUpgradeCount;
+
+        public void UpdateStats(int currentAmmo, int effectiveMaxAmmo, int effectiveDamage) {
+            this.currentAmmo = currentAmmo;
+            this.effectiveMaxAmmo = effectiveMaxAmmo;
+            this.effectiveDamage = effectiveDamage;
+        }
     }
 }

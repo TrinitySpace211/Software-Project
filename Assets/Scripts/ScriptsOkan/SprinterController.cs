@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -23,6 +24,11 @@ public class SprinterController : MonoBehaviour, IDamageable {
     [Header("Health")] public int health = 60;
     public bool isDead;
 
+    [Header("Material & Dissolve")]
+    [SerializeField] private ParticleSystem dissolveParticle;
+    [SerializeField] private SkinnedMeshRenderer skinnedMeshRenderer;
+    [SerializeField] private Transform particlePoint;
+
     private NavMeshAgent agent;
     private Animator animator;
     private float attackTimer;
@@ -40,6 +46,18 @@ public class SprinterController : MonoBehaviour, IDamageable {
     private GasTankHealth targetObjectiveHealth;
     private float waitTimer;
 
+    //Material
+    private Color originalColor;
+    private Material zombieMaterial;
+    private readonly Color hitColor = Color.red;
+
+    //Dissolve Parameters
+    private bool dissolveEnemy = false;
+    private float dissolveMeterMin;
+    private float dissolveMeterMax;
+    private float dissolveMeter;
+    private float dissolveSpeed = 1f;
+
     private void Start() {
         boxCollider = GetComponent<BoxCollider>();
         animator = GetComponent<Animator>();
@@ -49,9 +67,30 @@ public class SprinterController : MonoBehaviour, IDamageable {
         currentTarget = player;
         animator.speed = animationSpeed;
         SetNewRoamTarget();
+
+        if (skinnedMeshRenderer != null) {
+            zombieMaterial = skinnedMeshRenderer.material;
+            originalColor = zombieMaterial.color;
+        }
+
+        Shader shader = zombieMaterial.shader;
+        int propertyIndex = shader.FindPropertyIndex("_DissolveMeter");
+        dissolveMeterMin = zombieMaterial.shader.GetPropertyRangeLimits(propertyIndex).x;
+        dissolveMeterMax = zombieMaterial.shader.GetPropertyRangeLimits(propertyIndex).y;
+        dissolveMeter = dissolveMeterMax;
     }
 
     private void Update() {
+        if (dissolveEnemy) {
+            dissolveMeter -= Time.deltaTime * dissolveSpeed;
+            if (dissolveMeter > dissolveMeterMin) {
+                zombieMaterial.SetFloat("_DissolveMeter", dissolveMeter);
+            } else {
+                dissolveEnemy = false;
+                Destroy(gameObject);
+            }
+        }
+
         if (isDead) return;
 
         if (attackTimer > 0f)
@@ -100,8 +139,13 @@ public class SprinterController : MonoBehaviour, IDamageable {
         if (isDead) return;
         health -= damage;
         ZombieAI.OnTakeDamage?.Invoke(transform.position);
-        if (health <= 0)
+        if (health <= 0) {
             Die();
+            return;
+        }
+
+        StopAllCoroutines();
+        StartCoroutine(HitFeedback());
     }
 
     public bool IsDead() {
@@ -266,5 +310,21 @@ public class SprinterController : MonoBehaviour, IDamageable {
 
         if (boxCollider != null)
             boxCollider.enabled = false;
+
+        StartCoroutine(DissolveEnemy(3f));
+    }
+
+    private IEnumerator HitFeedback() {
+        zombieMaterial.color = hitColor;
+        yield return new WaitForSeconds(0.1f);
+        zombieMaterial.color = originalColor;
+    }
+
+    private IEnumerator DissolveEnemy(float secondsToWait) {
+        yield return new WaitForSeconds(secondsToWait);
+
+        Instantiate(dissolveParticle, particlePoint.position, Quaternion.identity, particlePoint);
+
+        dissolveEnemy = true;
     }
 }

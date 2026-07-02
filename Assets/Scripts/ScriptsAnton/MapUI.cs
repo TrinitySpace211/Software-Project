@@ -1,6 +1,4 @@
-using System;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class MapUI : MonoBehaviour {
 
@@ -9,22 +7,18 @@ public class MapUI : MonoBehaviour {
     [SerializeField] private AudioClipRefsSO audioClipRefsSO;
 
     public PauseMenu pauseMenu;
+
+    private bool mapOpen = false;
+
     private void Start() {
         PlayerInputHandler.OnMapOpenAction += PlayerInputHandler_OnMapOpenAction;
         HideMap();
     }
 
-    private void Update() {
-
-        if (pauseMenu.IsPaused)
+    private void PlayerInputHandler_OnMapOpenAction() {
+        if (pauseMenu.IsPaused || DebugController.Instance.GetConsoleVisibility())
             return;
 
-        if (Keyboard.current.zKey.wasPressedThisFrame) {
-            ShowHideMap();
-            PauseGame();
-        }
-    }
-    private void PlayerInputHandler_OnMapOpenAction() {
         ShowHideMap();
         PauseGame();
     }
@@ -43,10 +37,12 @@ public class MapUI : MonoBehaviour {
 
     private void ShowMap() {
         map.SetActive(true);
+        mapOpen = true;
     }
 
     private void HideMap() {
         map.SetActive(false);
+        mapOpen = false;
     }
 
     private void PlayMapSound() {
@@ -56,6 +52,6 @@ public class MapUI : MonoBehaviour {
     }
 
     private void PauseGame() {
-        _ = Time.timeScale == 0f ? Time.timeScale = 1f : Time.timeScale = 0f;
+        _ = !mapOpen ? Time.timeScale = 1f : Time.timeScale = 0f;
     }
 }

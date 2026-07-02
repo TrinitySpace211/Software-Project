@@ -36,6 +36,10 @@ public class ScrapHudDisplay : MonoBehaviour {
         FindWalletIfMissing();
         UpdateHudPosition();
         UpdateScrapCount();
+
+        if (playerWallet.GetComponent<PlayerHealth>().GetIsDead()) {
+            SetVisible(false);
+        }
     }
 
     private void FindWalletIfMissing() {

@@ -11,6 +11,8 @@ using UnityEngine.SceneManagement;
 /// Supports skipping and fade-out to next scene.
 /// </summary>
 public class TutorialManager : MonoBehaviour {
+    public static readonly string ID = "TutorialManager";
+
     [Header("Player")]
     public GameObject playerObject;
     public Animator playerAnimator;
@@ -35,13 +37,15 @@ public class TutorialManager : MonoBehaviour {
     [Header("Scene Transition")]
     public Image fadeImage;
     public float fadeDuration = 2f;
-    public string nextSceneName;
+    public Loader.Scene nextScene = Loader.Scene.MainScene;
 
     [Header("UI")]
     public Button skipButton;
 
     private bool isSkipping;
     private bool isRunning;
+
+    private bool tutorialFinished = false;
 
     private Player playerScript;
     private PlayerInputHandler playerInputHandler;
@@ -118,9 +122,16 @@ public class TutorialManager : MonoBehaviour {
         if (tutorialText != null && tutorialMessages.Length > 0)
             tutorialText.text = tutorialMessages[tutorialMessages.Length - 1];
 
+        tutorialFinished = true;
+        //Save that the tutorial got saved
+        SaveManager.Instance.SaveData(ID, new TutorialData {
+            tutorialFinished = tutorialFinished
+        });
+        Debug.Log("Saved tutorialFinished!" + tutorialFinished);
+
         yield return new WaitForSeconds(2f);
 
-        yield return FadeToScene(nextSceneName);
+        yield return FadeToScene(nextScene);
     }
 
     /// <summary>
@@ -234,17 +245,23 @@ public class TutorialManager : MonoBehaviour {
 
         RestorePlayerControlState();
 
+        tutorialFinished = true;
+        //Save that the tutorial got saved
+        SaveManager.Instance.SaveData(ID, new TutorialData {
+            tutorialFinished = tutorialFinished
+        });
+
         yield return null;
 
-        yield return FadeToScene(nextSceneName);
+        yield return FadeToScene(nextScene);
     }
 
     /// <summary>
     /// Fades out and loads a new scene.
     /// </summary>
-    private IEnumerator FadeToScene(string sceneName) {
+    private IEnumerator FadeToScene(Loader.Scene scene) {
         if (fadeImage == null) {
-            SceneManager.LoadScene(sceneName);
+            Loader.Load(scene);
             yield break;
         }
 
@@ -261,7 +278,7 @@ public class TutorialManager : MonoBehaviour {
         c.a = 1f;
         fadeImage.color = c;
 
-        SceneManager.LoadScene(sceneName);
+        Loader.Load(scene);
     }
 
     /// <summary>
@@ -291,5 +308,9 @@ public class TutorialManager : MonoBehaviour {
             playerRigidbody.linearVelocity = Vector3.zero;
             playerRigidbody.angularVelocity = Vector3.zero;
         }
+    }
+
+    public class TutorialData {
+        public bool tutorialFinished = false;
     }
 }

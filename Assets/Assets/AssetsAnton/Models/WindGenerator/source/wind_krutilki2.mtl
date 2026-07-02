@@ -1,0 +1,12 @@
+# Blender 3.3.1 MTL File: 'wind_krutilki2.blend'
+# www.blender.org
+
+newmtl ventikyator
+Ns 20.000006
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Kd /run/media/user/7c065a7a-f023-4f2f-a9f9-3be1afefcce7/home/user/Документы/Blender/Фриланс/Клиенты/Роман Носов/Подготовить модели/Schneider/Export/Tech/wind_krutilki2/textures/koshmar.jpg

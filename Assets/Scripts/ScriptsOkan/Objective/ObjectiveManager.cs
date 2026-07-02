@@ -7,10 +7,11 @@ using Random = UnityEngine.Random;
 ///     Called by DayNightCycle events to switch zombie targets at night and back to player during day.
 /// </summary>
 public class ObjectiveManager : MonoBehaviour {
-    [Header("Player")] [SerializeField] private Transform player;
-    [Header("Objectives")] public GasTankHealth[] objectives;
 
     public static ObjectiveManager Instance { get; private set; }
+
+    [Header("Player")][SerializeField] private Transform player;
+    [Header("Objectives")] public GasTankHealth[] objectives;
 
     private void Awake() {
         if (Instance != null && Instance != this) {
@@ -58,6 +59,7 @@ public class ObjectiveManager : MonoBehaviour {
         var redirected = 0;
 
         foreach (var zombie in zombies) {
+            zombie.SetRageEyes();
             if (zombie.IsDead()) continue;
             var objective = GetRandomActiveObjective();
             if (objective == null) break;
@@ -83,4 +85,5 @@ public class ObjectiveManager : MonoBehaviour {
     public void OnDayStarted() {
         // Zombies behalten ihr Ziel bis sie sterben.
     }
+
 }

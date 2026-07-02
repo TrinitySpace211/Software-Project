@@ -49,8 +49,10 @@ MonoBehaviour:
   playerInputHandler: {fileID: 0}
   crosshair: {fileID: 0}
   cursorVisible: 0
-  cursorMinDistanceFromPlayer: 2
-  yOffset: 1.7
+  cursorMinDistanceFromPlayer: 5
+  yOffsetMin: 1.3
+  yOffsetMax: 2
+  pauseMenu: {fileID: 0}
 --- !u!1 &5211376706169761891
 GameObject:
   m_ObjectHideFlags: 0
@@ -80,7 +82,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5211376706169761891}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.28938547, y: -0.00000001336916, z: 0.000000004041777, w: 0.9572127}
+  m_LocalRotation: {x: 0.28938556, y: -0.000000035895834, z: 0.000000010852066, w: 0.9572126}
   m_LocalPosition: {x: 0, y: 0, z: -1.0000005}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -302,7 +304,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7251539479078182273}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.2893854, y: 0.000000028527165, z: -0.000000008624358, w: 0.9572127}
+  m_LocalRotation: {x: 0.28938544, y: -0.000000021787868, z: 0.0000000065869337, w: 0.9572127}
   m_LocalPosition: {x: 0, y: 0, z: -1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0

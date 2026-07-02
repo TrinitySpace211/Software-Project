@@ -1,15 +1,19 @@
 using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// Handles player health, damage and death logic.
 /// </summary>
-public class PlayerHealth : MonoBehaviour {
+public class PlayerHealth : MonoBehaviour, ISaveable {
+    private static readonly string ID = "PlayerHealth";
 
     [SerializeField] private PlayerStats playerStats;
     [SerializeField] private BaseStats baseStats;
     [SerializeField] private DeathScreen deathScreen;
     [SerializeField] private DayNightCycle dayNightCycle;
+    [SerializeField] private AudioSource heartbeatAudioSource;
+    [SerializeField] private float heartbeatVolume;
 
     private bool isDead = false;
     private HealthBar healthBar;
@@ -58,6 +62,18 @@ public class PlayerHealth : MonoBehaviour {
             healthBar.Initialize(playerStats);
     }
 
+    private void Update() {
+        if (!isDead && !heartbeatAudioSource.isPlaying && playerStats.currentHealth <= playerStats.maxHealth * 0.2f) {
+            heartbeatAudioSource.volume = heartbeatVolume * SoundManager.Instance.volume;
+            heartbeatAudioSource.Play();
+        } else if (isDead || playerStats.currentHealth > playerStats.maxHealth * 0.2f) {
+            heartbeatAudioSource.Stop();
+        }
+
+        if (playerStats.currentHealth <= 0)
+            Die();
+    }
+
     /// <summary>
     /// Applies damage to the player.
     /// </summary>
@@ -84,9 +100,6 @@ public class PlayerHealth : MonoBehaviour {
             healthBar.UpdateHealthBar();
 
         playerAnimation.SetHitTrigger();
-
-        if (playerStats.currentHealth <= 0)
-            Die();
     }
 
     /// <summary>
@@ -94,7 +107,11 @@ public class PlayerHealth : MonoBehaviour {
     /// inverse Kinematics are cleared so nothing weird happens
     /// </summary>
     private void Die() {
+        if (isDead) return;
+
         isDead = true;
+
+        Cursor.visible = true;
 
         if (playerIK.GetHasWeapon()) {
             playerGunSelector.ClearSetupCurrentWeapon();
@@ -130,4 +147,22 @@ public class PlayerHealth : MonoBehaviour {
     public bool GetIsDead() {
         return isDead;
     }
+
+    #region Save and Load
+    public string GetSaveID() => ID;
+    public object Save() {
+        return new PlayerData {
+            health = playerStats.currentHealth
+        };
+    }
+
+    public void Load(object data) {
+        PlayerData playerData = (PlayerData)data;
+        playerStats.currentHealth = playerData.health;
+    }
+
+    private class PlayerData {
+        public float health;
+    }
+    #endregion
 }

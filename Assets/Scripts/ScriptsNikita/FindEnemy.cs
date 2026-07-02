@@ -8,7 +8,7 @@ public class FindEnemy : MonoBehaviour {
     /// <summary>
     /// Stores the found enemy. Other scripts, such as LookAtEnemy.cs and Emmitter.cs, use this value.
     /// </summary>
-    public ZombieAI zombie; 
+    public ZombieAI zombie;
 
     /// <summary>
     /// The search radius of the tower.
@@ -32,7 +32,7 @@ public class FindEnemy : MonoBehaviour {
     private void OnEnable() { // If GamObject with this script activated, this method will be called
 
         // Calls the method FindNewEnemy() in a period of 0.25 seconds
-        InvokeRepeating(nameof(FindNewEnemy), 0f, searchInterval); 
+        InvokeRepeating(nameof(FindNewEnemy), 0f, searchInterval);
     }
 
     // If GameObject with this script deactivated, this method will be called
@@ -48,10 +48,10 @@ public class FindEnemy : MonoBehaviour {
     private void FindNewEnemy() {
         Collider[] hits = Physics.OverlapSphere(transform.position, radius);
 
-        foreach(Collider hit in hits) {
+        foreach (Collider hit in hits) {
             ZombieAI zombie = hit.gameObject.GetComponentInParent<ZombieAI>();
             if (zombie != null) {
-                if(zombie.IsDead()) {
+                if (zombie.IsDead()) {
                     continue;
                 }
                 if (IsBlockedByObject(zombie)) {
@@ -107,10 +107,10 @@ public class FindEnemy : MonoBehaviour {
     /// Gizmos = Lines or something like that are created from the developer. 
     /// This function show us the gizmo if we selected the object.
     /// </summary>
-    private void OnDrawGizmosSelected() {
+    /* private void OnDrawGizmosSelected() {
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, radius);
-    }
+    } */
 }
 
 /*
