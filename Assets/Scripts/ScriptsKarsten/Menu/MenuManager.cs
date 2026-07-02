@@ -39,6 +39,8 @@ public class MenuManager : MonoBehaviour {
     [SerializeField] private GameObject firstSelectedButton;
     [SerializeField] private GameObject firstGameModeButton;
 
+    private FullScreenMode fullScreenMode;
+
     private AudioSource audioSource;
     private bool isTransitioning;
 
@@ -153,7 +155,7 @@ public class MenuManager : MonoBehaviour {
         if (mainMenuPanel != null)
             mainMenuPanel.SetActive(true);
     }
-    
+
 
     public void CancelGameModeSelection() {
         PlayClick();
@@ -205,12 +207,19 @@ public class MenuManager : MonoBehaviour {
     public void SetFullscreen() {
         PlayClick();
         Resolution res = Screen.currentResolution;
-        Screen.SetResolution(res.width, res.height, FullScreenMode.FullScreenWindow);
+        if (fullScreenMode == FullScreenMode.Windowed) {
+            fullScreenMode = FullScreenMode.FullScreenWindow;
+            Screen.SetResolution(res.width, res.height, fullScreenMode);
+        }
+
     }
 
     public void SetWindowed() {
         PlayClick();
-        Screen.SetResolution(1280, 720, FullScreenMode.Windowed);
+        if (fullScreenMode == FullScreenMode.FullScreenWindow) {
+            fullScreenMode = FullScreenMode.Windowed;
+            Screen.SetResolution(1280, 720, fullScreenMode);
+        }
     }
 
 
