@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0659dd53b3ca625439ae534d06aca6dd, type: 3}
+  m_Name: Grenade
+  m_EditorClassIdentifier: 
+  itemType: 3
+  gunType: 0
+  gunSO: {fileID: 0}
+  meleeType: 0
+  healthItemType: 0
+  ammunitionType: 0
+  spawnWeight: 30
+  itemName: Grenade
+  icon: {fileID: 21300000, guid: ea6d96c9c743b9f4e805a8df5db4bbde, type: 3}
+  maxStackSize: 3
+  itemPrefab: {fileID: 885878932229173134, guid: e39260b21aeec3242b3a0fa3264bd0b1, type: 3}
+  handItemPrefab: {fileID: 0}
+  baseDamage: 0

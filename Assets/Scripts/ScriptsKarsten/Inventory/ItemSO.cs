@@ -1,5 +1,15 @@
 using UnityEngine;
 
+public enum ItemType {
+    None,
+    Gun,
+    Melee,
+    Grenade,
+    Consumable,
+    Ammunition,
+    Scrap
+}
+
 /// <summary>
 /// Represents an item definition stored as a ScriptableObject.
 /// Contains item-related data such as visuals, stack size,
@@ -7,6 +17,16 @@ using UnityEngine;
 /// </summary>
 [CreateAssetMenu(fileName = "Item", menuName = "NewItem")]
 public class ItemSO : ScriptableObject {
+    public ItemType itemType;
+    public GunType gunType;
+    public GunSO gunSO;
+
+    public MeleeType meleeType;
+    public HealthItemType healthItemType;
+    public AmmunitionType ammunitionType;
+
+    public int spawnWeight;
+
     /// <summary>
     /// The display name of the item.
     /// </summary>
@@ -34,4 +54,9 @@ public class ItemSO : ScriptableObject {
     /// when the item is equipped or held.
     /// </summary>
     public GameObject handItemPrefab;
+
+    /// <summary>
+    /// Damage value of the item if it is used as a weapon.
+    /// </summary>
+    public int baseDamage;
 }

@@ -1,90 +1,308 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
+using UnityEngine.EventSystems;
+using Random = UnityEngine.Random;
 
 /// <summary>
-/// This is the Player Class. The Player Movement, Jumping and Rotation will be calculated.
-/// The Method HandleJumping() doesn't have any animations yet.
+/// This is the Player Class. The Player Movement and Rotation will be calculated.
 /// The Player needs the Component "CharacterController" to work properly.
-/// The inputs will be handled in the "PlayerInputHandler" Script.
+/// The Inputs will be handled in the "PlayerInputHandler" Script.
 /// </summary>
-[DefaultExecutionOrder(-1)]
+[DefaultExecutionOrder(-1), DisallowMultipleComponent]
 public class Player : MonoBehaviour {
 
     #region Class Variables
     [Header("References")]
     [SerializeField] private PlayerInputHandler playerInputHandler;
     [SerializeField] private CharacterController characterController;
+    [SerializeField] private PlayerAnimation playerAnimation;
+    [SerializeField] private PlayerHealth playerHealth;
     [SerializeField] private Camera playerCamera;
     [SerializeField] private LayerMask layerMask;
     [SerializeField] private Rig aimLayer;
     [SerializeField] private BaseStats baseStats;
+    [SerializeField] private PlayerWeaponSelector weaponSelector;
+    [SerializeField] private CurrentPlayerState playerState;
+    [SerializeField] private PlayerIK playerIK;
+    [SerializeField] private Inventory inventory;
+    [SerializeField] private GameObject flashlight;
+
+    [Header("Footsteps Reference")]
+    [SerializeField] private ImpactType impactType;
+    [SerializeField, Range(0, 1)] private float footstepSoundSpeed;
+    [SerializeField] private float footstepSprintOffset = 0.5f;
 
     [Header("Movement Parameters")]
     [SerializeField] private float walkSpeed = 4f;
     [SerializeField] private float sprintMultipier = 1.5f;
     [SerializeField] private float movingThreshold = 0.01f;
-
-    [Header("Attack Parameters")]
-    [SerializeField] private float aimDuration = 0.3f;
-
-    [Header("Jump Parameters")]
-    [SerializeField] private float jumpForce = 5f;
     [SerializeField] private float gravityMultiplier = 1f;
 
-    [Header("Look Parameter")]
+    [Header("Aim Parameters")]
+    [SerializeField] private float aimDuration = 0.3f;
+    [SerializeField] private MultiAimConstraint weaponPoseSpineAim;
+
+    [Header("Animation")]
     [SerializeField] private float rotationMouseDirAmount = 10f;
     [SerializeField] private float rotationMoveDirAmount = 10f;
 
-    //Define Stats for this Player Instance
-    public PlayerStats currentPlayerStats { get; private set; }
+    [Header("Collect Radius")]
+    [SerializeField] private float collectRadius = 10f;
+
+    [Header("Grenade Throw")]
+    [SerializeField] private float grenadeThrowForce = 10f;
+
+    [Header("Flashlight Parameters")]
+    [SerializeField] private float minIntensity;
+    [SerializeField] private float maxIntensitySpotLight;
+    [SerializeField] private float maxIntensityPointLight;
+
+    [Header("Debugging")]
+    [SerializeField] private bool alwaysAiming = false;
+
+    //Saved current active Weapon parent transform
+    private Transform setupWeaponParent;
 
     //Player Movement Variables
     private Vector3 worldMousePos;
     private Vector3 currentMovement;
     private float currentSpeed => walkSpeed * (playerInputHandler.SprintTriggered ? sprintMultipier : 1f);
 
-    //PlayerState and Movement Checks
-    private CurrentPlayerState _playerState;
+    //Movement Checks
     private bool isWalking;
     private bool isMovingLaterally;
     private bool isSprinting;
-    private bool _isDead;
+    private float lastFootPlaced = 0f;
+
+    //Items in Players Range ready to be collected
+    private List<Item> itemsInRange = new();
+
+    //Event
+    public static event Action<Vector3, GunSO> OnReload;
+    public static event Action<Vector3> OnGrenadeThrow;
+    public static event Action<Vector3> OnHeal;
+
+    //Other Checks
+    private bool isMeleeAttacking = false;
+    private EventSystem eventSystem;
+
+    //Flashlight
+    private float waitBeforeActivate = 1f;
+    private Light spotLight;
+    private Light pointLight;
     #endregion
 
-    private void Start() {
-        _playerState = GetComponent<CurrentPlayerState>();
+    private void OnEnable() {
+        eventSystem = EventSystem.current;
 
-        currentPlayerStats = new PlayerStats {
-            maxHealth = baseStats.health,
-            armor = baseStats.armor
-        };
+        SubscribeToEvents();
+    }
+
+    private void OnDisable() {
+        UnsubscribeFromEvents();
+        StopAllCoroutines();
+    }
+
+    private void Start() {
+        if (flashlight != null) {
+            CheckFlashlight();
+        }
+    }
+
+    private void SubscribeToEvents() {
+        PlayerInputHandler.OnReloadAction += PlayerInputHandler_OnReloadAction;
+        Item.OnItemCollected += Item_OnItemCollected;
+        DayNightCycle.OnSunsetStarted += DayNightCycle_OnSunsetStarted;
+        DayNightCycle.OnSunriseStarted += DayNightCycle_OnSunriseStarted;
+    }
+
+    private void UnsubscribeFromEvents() {
+        PlayerInputHandler.OnReloadAction -= PlayerInputHandler_OnReloadAction;
+        Item.OnItemCollected -= Item_OnItemCollected;
+        DayNightCycle.OnSunsetStarted -= DayNightCycle_OnSunsetStarted;
+        DayNightCycle.OnSunriseStarted -= DayNightCycle_OnSunriseStarted;
     }
 
     private void Update() {
+        if (!CanProcessUpdate()) {
+            return;
+        }
+
         UpdateMovementState();
         HandleMovement();
+
+        HandleShooting();
         HandleAiming();
+
+        if (inventory != null) {
+            if (!inventory.GetIsDragging()) {
+                HandleMeleeAttack();
+            }
+        }
+
+        HandleReloadFinished();
+        HandleGrenade();
+        HandleHealingKits();
+    }
+
+    private bool CanProcessUpdate() {
+        if (playerHealth == null || playerHealth.GetIsDead()) {
+            return false;
+        }
+
+        if (DebugController.Instance != null && DebugController.Instance.GetConsoleVisibility()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private void FixedUpdate() {
+        if (playerInputHandler != null && !playerHealth.GetIsDead()) {
+            if (playerInputHandler.InteractTriggered) {
+                Collider[] hits = Physics.OverlapSphere(transform.position, collectRadius);
+
+                foreach (Collider hit in hits) {
+                    Item item = hit.GetComponent<Item>();
+                    if (item != null) {
+                        itemsInRange.Add(item);
+                    }
+                }
+
+                HandleInteract();
+                playerInputHandler.SetInteractInput(false);
+            }
+        }
     }
 
     /// <summary>
-    /// Constructor for testing purposes
+    /// Constructor for testing
     /// </summary>
     /// <param name="playerInputHandler">Needs the PlayerInputHandler class so the Movement can be calculated</param>
     /// <param name="playerCamera">Needs the Main Camera to calculate the Mouse Direction</param>
-    public void Construct(PlayerInputHandler playerInputHandler, Camera playerCamera) {
+    public void Construct(PlayerInputHandler playerInputHandler, PlayerHealth playerHealth, Camera playerCamera, PlayerWeaponSelector weaponSelector, EventSystem eventSystem) {
         this.playerInputHandler = playerInputHandler;
+        this.playerHealth = playerHealth;
         this.playerCamera = playerCamera;
+        this.weaponSelector = weaponSelector;
+        this.eventSystem = eventSystem;
+    }
+
+    private void DayNightCycle_OnSunriseStarted() {
+        spotLight.enabled = false;
+        pointLight.enabled = false;
+    }
+
+    private void DayNightCycle_OnSunsetStarted() {
+        StartCoroutine(TurnOnLight());
+    }
+
+    /// <summary>
+    /// If the Player pressed the "R" Key and is not Dead then HandleReloadButton() will be called
+    /// and the Player is going to Reload
+    /// </summary>
+    private void PlayerInputHandler_OnReloadAction() {
+        if (!playerHealth.GetIsDead()) {
+            HandleReloadStart();
+        }
+    }
+
+    /// <summary>
+    /// If the Item got collected it will be removed from the List of collectable Items
+    /// </summary>
+    /// <param name="item">The Item that has been collected</param>
+    private void Item_OnItemCollected(Item item) {
+        if (itemsInRange.Contains(item)) {
+            itemsInRange.Remove(item);
+        }
+    }
+
+    private void CheckFlashlight() {
+        for (int i = 0; i < flashlight.transform.childCount; i++) {
+            Light light = flashlight.transform.GetChild(i).GetComponent<Light>();
+            if (light != null) {
+                if (light.type == LightType.Spot) {
+                    spotLight = light;
+                } else if (light.type == LightType.Point) {
+                    pointLight = light;
+                }
+            }
+        }
+
+        spotLight.enabled = false;
+        pointLight.enabled = false;
+    }
+
+    private IEnumerator TurnOnLight() {
+        yield return new WaitForSeconds(waitBeforeActivate);
+
+        spotLight.enabled = true;
+        pointLight.enabled = true;
+
+        for (int i = 0; i < Random.Range(5, 10); i++) {
+            spotLight.enabled = !spotLight.enabled;
+            pointLight.enabled = !pointLight.enabled;
+
+            float intensityTempSpot = Random.Range(minIntensity, maxIntensitySpotLight);
+            float intensityTempPoint = Random.Range(minIntensity, maxIntensityPointLight);
+            spotLight.intensity = intensityTempSpot;
+            pointLight.intensity = intensityTempPoint;
+
+            yield return new WaitForSeconds(Random.Range(0.03f, 0.15f));
+        }
+
+        spotLight.enabled = true;
+        pointLight.enabled = true;
+        spotLight.intensity = 0f;
+        pointLight.intensity = 0f;
+
+        bool max1 = false;
+        bool max2 = false;
+        while (!max1 || !max2) {
+
+            if (spotLight.intensity < maxIntensitySpotLight) {
+                spotLight.intensity += Time.deltaTime * 30f;
+            } else {
+                max1 = true;
+            }
+
+            if (pointLight.intensity < maxIntensityPointLight) {
+                pointLight.intensity += Time.deltaTime * 15f;
+            } else {
+                max2 = true;
+            }
+
+            yield return null;
+        }
+
     }
 
     #region Movement
-
     /// <summary>
-    /// Calculates the normalized Direction of the input.
+    /// Calculates the normalized Direction of the input relative to the camera's orientation.
+    /// This ensures that "forward" always means towards where the camera is looking.
     /// </summary>
-    /// <returns>The normalized Direction of the Movement input</returns>
-    private Vector3 CalculateWorldDirection() {
-        Vector3 inputDirection = new Vector3(playerInputHandler.MovementInput.x, 0f, playerInputHandler.MovementInput.y);
+    /// <returns>The normalized Direction of the Movement input in world space</returns>
+    public Vector3 CalculateWorldDirection() {
+        // Get camera's forward and right directions
+        Vector3 cameraForward = playerCamera.transform.forward;
+        Vector3 cameraRight = playerCamera.transform.right;
+
+        // Remove vertical component to keep movement on the ground plane
+        cameraForward.y = 0f;
+        cameraRight.y = 0f;
+
+        // Normalize to avoid diagonal movement being faster
+        cameraForward = cameraForward.normalized;
+        cameraRight = cameraRight.normalized;
+
+        // Build movement direction relative to camera orientation
+        Vector3 inputDirection = (cameraRight * playerInputHandler.MovementInput.x +
+                                  cameraForward * playerInputHandler.MovementInput.y);
+
         return inputDirection.normalized;
     }
 
@@ -111,74 +329,279 @@ public class Player : MonoBehaviour {
     /// The Movement for the next frame will be calculated via CharacterController.Move()
     /// </summary>
     private void HandleMovement() {
+        //Calculation of the current Player Direction multiplied with the current Speed (Walk Speed or Sprint Speed)
         Vector3 worldDirectionNorm = CalculateWorldDirection();
         currentMovement.x = worldDirectionNorm.x * currentSpeed;
         currentMovement.z = worldDirectionNorm.z * currentSpeed;
 
-        Vector3 mouseDir = CalculateMouseDirection();
+        //Mouse Position in the World
+        Vector3 mousePos = CalculateMouseDirection();
 
-        //Blickrichtung ist die Position von der Maus subtrahiert mit der Position des Players 
-        Vector3 lookDir = mouseDir - transform.position;
-        lookDir.y = 0;
+        //Direction of the mouse subtracted from the player position
+        Vector3 lookDir = mousePos - transform.position;
+        lookDir.y = 0f;
 
-        //Blickrichtung zur Bewegungsrichtung
+        //Direction of the Movement Input
         Vector3 moveDir = new Vector3(currentMovement.x, 0f, currentMovement.z);
 
-        //Wenn der Spieler sprintet, dann dreht sich der Spieler zum Bewegungsrichtung, sonst zur Mausrichtung
-        if (lookDir.sqrMagnitude > 0.1f && !isSprinting) {
-            Quaternion targetRotation = Quaternion.LookRotation(lookDir);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationMouseDirAmount * Time.deltaTime);
+        //If the Player is sprinting, then the player will turn to the move direction, otherwise the player will look to the mouse
+        UpdatePlayerRotation(moveDir, lookDir);
 
-            Ray ray = new Ray(new Vector3(transform.position.x, 1f, transform.position.z), lookDir);
-
-            if (playerInputHandler.AttackTriggered && playerInputHandler.AimingTriggered) {
-                if (Physics.Raycast(ray, out RaycastHit hit, 5f)) { //Hit with bullets
-                    if (hit.transform.TryGetComponent(out ZombieAI zombie)) {
-                        if (!zombie.IsDead()) {
-                            zombie.TakeDamage(50);
-                        }
-                    }
-                }
-
-                // Nur einmal pro Klick Schaden verursachen.
-                playerInputHandler.SetAttackTriggered(false);
-            }
-        } else if (moveDir.sqrMagnitude > 0.1f && isSprinting) {
-            Quaternion targetRotation = Quaternion.LookRotation(moveDir);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationMoveDirAmount * Time.deltaTime);
-        }
-
-        //HandleJumping();
+        //Moves the Character
         characterController.Move(currentMovement * Time.deltaTime);
+        HandleFall();
+
+        // Footstep Sound
+        float walkFootstepDelay = 1f / walkSpeed * footstepSoundSpeed;
+        float sprintFootstepDelay = 1f / (walkSpeed * sprintMultipier) * footstepSprintOffset;
+
+        if (playerInputHandler.MovementInput != Vector2.zero && SurfaceManager.Instance != null) {
+            if (!isSprinting && Time.time > walkFootstepDelay + lastFootPlaced) {
+                lastFootPlaced = Time.time;
+                if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 0.2f, layerMask)) {
+                    SurfaceManager.Instance.HandleImpact(hit.transform.gameObject, hit.point, hit.normal, impactType, hit.triangleIndex);
+                }
+            } else if (isSprinting && Time.time > sprintFootstepDelay + lastFootPlaced) {
+                lastFootPlaced = Time.time;
+                if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 0.2f, layerMask)) {
+                    SurfaceManager.Instance.HandleImpact(hit.transform.gameObject, hit.point, hit.normal, impactType, hit.triangleIndex);
+                }
+            }
+        }
     }
 
     /// <summary>
-    /// This Method handles the Jumping, but due to the Player not having animations it is marked as deprecated for now
+    /// Updates the Player Rotation to the Movement Input direction 
+    /// if the Player is sprinting or has no Weapon
     /// </summary>
-    [Obsolete("There are no Animations right now for the Player Jumping", true)]
-    private void HandleJumping() {
+    /// <param name="moveDir">The Direction of the Movement Input</param>
+    /// <param name="lookDir">The Direction to the Mouse Position in World Space</param>
+    private void UpdatePlayerRotation(Vector3 moveDir, Vector3 lookDir) {
+        if (moveDir.sqrMagnitude > 0.1f && (isSprinting || (!playerIK.GetHasWeapon() && !playerIK.GetHasOneHanded()))) {
+            weaponPoseSpineAim.weight = 0f;
+            RotatePlayerToTarget(moveDir, rotationMoveDirAmount);
+        } else if (lookDir.sqrMagnitude > 0.1f && !isSprinting && (playerIK.GetHasWeapon() || playerIK.GetHasOneHanded())) {
+            weaponPoseSpineAim.weight = 0.7f;
+            RotatePlayerToTarget(lookDir, rotationMouseDirAmount);
+        }
+    }
+
+    /// <summary>
+    /// Rotates the Player to a given target direction
+    /// </summary>
+    /// <param name="direction">The direction to turn to</param>
+    /// <param name="dirAmount">for smoother transition</param>
+    private void RotatePlayerToTarget(Vector3 direction, float dirAmount) {
+        Quaternion targetRotation = Quaternion.LookRotation(direction);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, dirAmount * Time.deltaTime);
+    }
+
+    /// <summary>
+    /// If the Player goes over a ledge it checks if the Player is Grounded.
+    /// If not then gravity will pull him down.
+    /// </summary>
+    private void HandleFall() {
         if (characterController.isGrounded) {
             currentMovement.y = -0.5f;
-            if (playerInputHandler.JumpTriggered) {
-                currentMovement.y = jumpForce;
-            }
         } else {
             currentMovement.y += Physics.gravity.y * gravityMultiplier * Time.deltaTime;
         }
     }
+    #endregion
 
+    #region Weapon Aiming, Shooting & Melee Attack 
     /// <summary>
     /// Handles the Aiming of the Player by increasing/decreasing the weight of the Rig Layer
     /// It switches from RigLayer_WeaponPose to RigLayer_WeaponAiming
     /// </summary>
     private void HandleAiming() {
-        if (playerInputHandler.AimingTriggered && !isSprinting) {
-            aimLayer.weight += Time.deltaTime / aimDuration;
+        if (alwaysAiming) {
+            //Debug
+            aimLayer.weight = 1;
+            playerAnimation.SetAimAnimation(true);
         } else {
-            aimLayer.weight -= Time.deltaTime / aimDuration;
+            bool canAim = playerInputHandler.AimingTriggered && !isSprinting && weaponSelector.activeGun != null && !playerAnimation.GetIsReloading();
+            if (canAim) {
+                aimLayer.weight += Time.deltaTime / aimDuration;
+                playerAnimation.SetAimAnimation(true);
+            } else {
+                aimLayer.weight -= Time.deltaTime / aimDuration;
+                playerAnimation.SetAimAnimation(false);
+            }
         }
     }
 
+    /// <summary>
+    /// When the Player has a gun and is pressing right click (aim) and left click (shoot) the gun will shoot
+    /// </summary>
+    private void HandleShooting() {
+        GunSO activeGun = weaponSelector.activeGun;
+
+        if (playerInputHandler.AttackTriggered && playerInputHandler.AimingTriggered && !isSprinting && activeGun != null && !playerAnimation.GetIsReloading() && !weaponSelector.IsSelecting()) {
+            activeGun.Shoot();
+
+            if (activeGun.GetEmptyMagazine() && inventory.GetAmmoAvailable(activeGun, out int ammoNeed)) {
+                setupWeaponParent = playerIK.GetParent();
+                weaponSelector.ClearSetupCurrentWeapon();
+                //Debug.Log(ammoNeed);
+                playerAnimation.StartReloading(ammoNeed);
+                OnReload?.Invoke(transform.position, weaponSelector.activeGun);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Handles the Start of the Reload Animation
+    /// </summary>
+    private void HandleReloadStart() {
+        GunSO activeGun = weaponSelector.activeGun;
+
+        if (activeGun != null) {
+            if (!activeGun.MagazineIsFull() && !playerAnimation.GetIsReloading() && inventory.GetAmmoAvailable(activeGun, out int ammoNeed)) {
+                setupWeaponParent = playerIK.GetParent();
+                weaponSelector.ClearSetupCurrentWeapon();
+                //Debug.Log(ammoNeed);
+                playerAnimation.StartReloading(ammoNeed);
+                OnReload?.Invoke(transform.position, activeGun);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Handles the Setup of the Weapon after Reloading
+    /// </summary>
+    private void HandleReloadFinished() {
+        GunSO activeGun = weaponSelector.activeGun;
+
+        if (activeGun != null) {
+            if (setupWeaponParent != null) {
+                if ((!activeGun.GetEmptyMagazine() || !activeGun.MagazineIsFull()) && !playerAnimation.GetIsReloading()) {
+                    weaponSelector.SetupCurrentWeapon(setupWeaponParent);
+                    setupWeaponParent = null;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// When the Player has a melee and is pressing left click (attack) the player swings the weapon 
+    /// based on if it is a one handed or two handed
+    /// </summary>
+    private void HandleMeleeAttack() {
+        if (playerInputHandler.AttackTriggered && !weaponSelector.IsSelecting()) {
+            MeleeSO melee = weaponSelector.activeMelee;
+            if (melee != null) {
+                if (melee.weaponSlot == WeaponSlot.MeleeOneHanded && melee.CanSwing()) {
+                    isMeleeAttacking = true;
+                    melee.RecordSwing();
+                    playerAnimation.SetOneHandMeleeAttack();
+                    playerAnimation.SetMeleeAttackSpeed(melee.attackSpeed);
+                } else if (melee.weaponSlot == WeaponSlot.MeleeTwoHanded && melee.CanSwing()) {
+                    isMeleeAttacking = true;
+                    melee.RecordSwing();
+                    playerAnimation.SetTwoHandMeleeAttack();
+                    playerAnimation.SetMeleeAttackSpeed(melee.attackSpeed);
+                }
+            }
+        }
+    }
+    #endregion
+
+    #region Item Interact, Grenade Throw & use Heal
+    /// <summary>
+    /// Handles the Interact Input to collect Items that are dropped via the Loot Chests.
+    /// The Item that is closest to the Player is going to be collected first.
+    /// </summary>
+    private void HandleInteract() {
+        if (itemsInRange.Count > 0) {
+            Item closestItem = null;
+            float closestDistance = float.MaxValue;
+
+            foreach (Item item in itemsInRange) {
+                if (item == null) continue;
+
+                float distance = Vector3.Distance(transform.position, item.transform.position);
+
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    closestItem = item;
+                }
+            }
+
+            if (closestItem != null) {
+                closestItem.Collect();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Handles the Input of the Grenade Throw, starts the animation and Sound Effect
+    /// </summary>
+    private void HandleGrenade() {
+        Grenade grenade = weaponSelector.activeGrenade;
+        if (grenade != null) {
+            if (playerInputHandler.ThrowTriggered && !playerAnimation.GetIsThrowingGrenade()) {
+                playerAnimation.SetGrenadeAnimation();
+                playerAnimation.SetIsThrowingGrenade(true);
+
+                OnGrenadeThrow?.Invoke(grenade.transform.position);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Is getting activated via Animation Event.
+    /// The Player cuts the connection to the inverse Kinematics so that the Grenade can be moved.
+    /// It plays the Throw-Animation and consumes it in the Inventory
+    /// </summary>
+    private void ThrowGrenade() {
+        Grenade grenade = weaponSelector.activeGrenade;
+        if (grenade != null) {
+            Vector3 throwDirection = (transform.forward + Vector3.up * 0.25f).normalized * grenadeThrowForce;
+            grenade.Throw(throwDirection);
+            playerIK.ClearSetup();
+            weaponSelector.SetGrenadeNull();
+            playerAnimation.SetIsThrowingGrenade(false);
+
+            Inventory.Instance.ConsumeEquippedItem(1);
+        }
+    }
+
+    /// <summary>
+    /// Is getting activated via Animation Event.
+    /// After the grenade got thrown if the Player still has 
+    /// some grenades left in the Inventor it will spawn more.
+    /// </summary>
+    private void TakeNewGrenade() {
+        if (Inventory.Instance.GetSelectedItemAmount() > 0) {
+            weaponSelector.SelectGrenade();
+        }
+    }
+
+    /// <summary>
+    /// Player is getting healed when the "Use" Key is pressed, default "F"
+    /// </summary>
+    private void HandleHealingKits() {
+        HealthItemSO healthItem = weaponSelector.activeHealthItem;
+        if (healthItem != null) {
+            if (playerInputHandler.UseTriggered && playerHealth.stats.currentHealth < playerHealth.stats.maxHealth) {
+                healthItem.Heal(this);
+
+                OnHeal?.Invoke(transform.position);
+
+                Inventory.Instance.ConsumeEquippedItem(1);
+                if (Inventory.Instance.GetSelectedItemAmount() <= 0) {
+                    weaponSelector.ResetItem();
+                    healthItem.DestroySelf();
+                }
+
+                playerInputHandler.SetUseTriggered(false);
+            }
+        }
+    }
+    #endregion
+
+    #region State Checks
     /// <summary>
     /// Updates the State of the Player Movement not the Movement itself
     /// </summary>
@@ -190,29 +613,8 @@ public class Player : MonoBehaviour {
 
         PlayerMovementState lateralState = isSprinting ? PlayerMovementState.Sprinting : isMovingLaterally || isWalking ? PlayerMovementState.Walking : PlayerMovementState.Idling;
 
-        _playerState.SetPlayerMovementState(lateralState);
+        playerState.SetPlayerMovementState(lateralState);
     }
-    #endregion
-
-    public void TakeDamage(int damage) {
-        if (_isDead) return;
-
-        currentPlayerStats.maxHealth -= damage;
-        currentPlayerStats.maxHealth = Mathf.Max(0, currentPlayerStats.maxHealth);
-        Debug.Log($"Player HP: {currentPlayerStats.maxHealth}/{100}");
-
-        //Event
-
-        if (currentPlayerStats.maxHealth <= 0)
-            Die();
-    }
-
-    private void Die() {
-        _isDead = true;
-        Debug.Log("Player gestorben");
-    }
-
-    #region State Checks
 
     /// <summary>
     /// Checks if the Player moves
@@ -240,6 +642,28 @@ public class Player : MonoBehaviour {
     }
     #endregion
 
+    #region Animation Event
+
+    /// <summary>
+    /// Used to allow a hit only at a certain point in the melee animations
+    /// </summary>
+    private void MeleeIsAttacking() {
+        if (weaponSelector.activeMelee != null) {
+            weaponSelector.activeMelee.SetMeleeModelAttacking(true);
+        }
+    }
+
+    /// <summary>
+    /// Does not allow to hit the enemy anymore if the animation was finished
+    /// </summary>
+    private void MeleeIsNotAttacking() {
+        isMeleeAttacking = false;
+        if (weaponSelector.activeMelee != null) {
+            weaponSelector.activeMelee.SetMeleeModelAttacking(false);
+        }
+    }
+    #endregion
+
     #region Setter and Getter
 
     public Vector3 GetMouseDirection() {
@@ -256,6 +680,41 @@ public class Player : MonoBehaviour {
 
     public float GetAimLayerWeight() {
         return aimLayer.weight;
+    }
+
+    public bool GetIsMeleeAttacking() {
+        return isMeleeAttacking;
+    }
+
+    public CurrentPlayerState GetCurrentPlayerState() {
+        return playerState;
+    }
+
+    public PlayerIK GetPlayerIK() {
+        return playerIK;
+    }
+    public PlayerWeaponSelector GetPlayerGunSelector() {
+        return weaponSelector;
+    }
+
+    public PlayerAnimation GetPlayerAnimation() {
+        return playerAnimation;
+    }
+
+    public PlayerInputHandler GetPlayerInputHandler() {
+        return playerInputHandler;
+    }
+
+    public PlayerHealth GetPlayerHealth() {
+        return playerHealth;
+    }
+
+    public Inventory GetInventory() {
+        return inventory;
+    }
+
+    public Camera GetMainCamera() {
+        return playerCamera;
     }
     #endregion
 

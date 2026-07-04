@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c6c07ca5f9ec9b4594c308445c4734d, type: 3}
+  m_Name: HealthBottle
+  m_EditorClassIdentifier: 
+  healthPackName: HealthBottle
+  healAmount: 15
+  weaponSlot: 4
+  type: 2
+  modelPrefab: {fileID: 7782659780579260783, guid: 86fd3c219a4a6d9428467328ca437fb1, type: 3}

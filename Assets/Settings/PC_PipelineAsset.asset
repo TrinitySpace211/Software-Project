@@ -17,9 +17,10 @@ MonoBehaviour:
   m_RendererType: 1
   m_RendererData: {fileID: 0}
   m_RendererDataList:
-  - {fileID: 11400000, guid: 4fe0bb3ef1beee84bbb65c3e5441ba5c, type: 2}
+  - {fileID: 11400000, guid: f288ae1f4751b564a96ac7587541f7a2, type: 2}
+  - {fileID: 11400000, guid: 1fd04bc5ca4a0cb4891d044011d0709f, type: 2}
   m_DefaultRendererIndex: 0
-  m_RequireDepthTexture: 0
+  m_RequireDepthTexture: 1
   m_RequireOpaqueTexture: 0
   m_OpaqueDownsampling: 1
   m_SupportsTerrainHoles: 1
@@ -84,7 +85,7 @@ MonoBehaviour:
   m_SupportScreenSpaceLensFlare: 1
   m_GPUResidentDrawerMode: 0
   m_SmallMeshScreenPercentage: 0
-  m_GPUResidentDrawerEnableOcclusionCullingInCameras: 0
+  m_GPUResidentDrawerEnableOcclusionCullingInCameras: 1
   m_ShadowType: 1
   m_LocalShadowsSupported: 0
   m_LocalShadowsAtlasResolution: 256
@@ -99,35 +100,35 @@ MonoBehaviour:
     obsoleteHasProbeVolumes:
       m_Keys: []
       m_Values: 
-  m_PrefilteringModeMainLightShadows: 1
-  m_PrefilteringModeAdditionalLight: 4
-  m_PrefilteringModeAdditionalLightShadows: 1
-  m_PrefilterXRKeywords: 0
-  m_PrefilteringModeForwardPlus: 1
-  m_PrefilteringModeDeferredRendering: 1
-  m_PrefilteringModeScreenSpaceOcclusion: 1
-  m_PrefilterDebugKeywords: 0
-  m_PrefilterWriteRenderingLayers: 0
-  m_PrefilterHDROutput: 0
-  m_PrefilterAlphaOutput: 0
+  m_PrefilteringModeMainLightShadows: 3
+  m_PrefilteringModeAdditionalLight: 0
+  m_PrefilteringModeAdditionalLightShadows: 2
+  m_PrefilterXRKeywords: 1
+  m_PrefilteringModeForwardPlus: 2
+  m_PrefilteringModeDeferredRendering: 0
+  m_PrefilteringModeScreenSpaceOcclusion: 0
+  m_PrefilterDebugKeywords: 1
+  m_PrefilterWriteRenderingLayers: 1
+  m_PrefilterHDROutput: 1
+  m_PrefilterAlphaOutput: 1
   m_PrefilterSSAODepthNormals: 0
-  m_PrefilterSSAOSourceDepthLow: 0
-  m_PrefilterSSAOSourceDepthMedium: 0
-  m_PrefilterSSAOSourceDepthHigh: 0
-  m_PrefilterSSAOInterleaved: 0
+  m_PrefilterSSAOSourceDepthLow: 1
+  m_PrefilterSSAOSourceDepthMedium: 1
+  m_PrefilterSSAOSourceDepthHigh: 1
+  m_PrefilterSSAOInterleaved: 1
   m_PrefilterSSAOBlueNoise: 0
-  m_PrefilterSSAOSampleCountLow: 0
+  m_PrefilterSSAOSampleCountLow: 1
   m_PrefilterSSAOSampleCountMedium: 0
-  m_PrefilterSSAOSampleCountHigh: 0
-  m_PrefilterDBufferMRT1: 0
-  m_PrefilterDBufferMRT2: 0
-  m_PrefilterDBufferMRT3: 0
-  m_PrefilterSoftShadowsQualityLow: 0
-  m_PrefilterSoftShadowsQualityMedium: 0
-  m_PrefilterSoftShadowsQualityHigh: 0
+  m_PrefilterSSAOSampleCountHigh: 1
+  m_PrefilterDBufferMRT1: 1
+  m_PrefilterDBufferMRT2: 1
+  m_PrefilterDBufferMRT3: 1
+  m_PrefilterSoftShadowsQualityLow: 1
+  m_PrefilterSoftShadowsQualityMedium: 1
+  m_PrefilterSoftShadowsQualityHigh: 1
   m_PrefilterSoftShadows: 0
-  m_PrefilterScreenCoord: 0
-  m_PrefilterNativeRenderPass: 0
+  m_PrefilterScreenCoord: 1
+  m_PrefilterNativeRenderPass: 1
   m_PrefilterUseLegacyLightmaps: 0
   m_PrefilterReflectionProbeBlending: 0
   m_PrefilterReflectionProbeBoxProjection: 0

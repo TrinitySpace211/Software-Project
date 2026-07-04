@@ -6,6 +6,9 @@ using System.Collections;
 
 public class DayNightCycleTests {
     private GameObject testObject;
+    private GameObject timeGO;
+    private GameObject notifGO;
+
     private DayNightCycle cycle;
 
     private TMP_Text timeText;
@@ -21,10 +24,10 @@ public class DayNightCycleTests {
         cycle = testObject.AddComponent<DayNightCycle>();
 
         // Mock UI elements
-        GameObject timeGO = new GameObject("TimeText");
+        timeGO = new GameObject("TimeText");
         timeText = timeGO.AddComponent<TextMeshProUGUI>();
 
-        GameObject notifGO = new GameObject("NotificationText");
+        notifGO = new GameObject("NotificationText");
         notificationText = notifGO.AddComponent<TextMeshProUGUI>();
 
         // Inject dependencies
@@ -33,7 +36,6 @@ public class DayNightCycleTests {
 
         yield return null;
     }
-
 
     /// <summary>
     /// Ensures system starts in a valid state.

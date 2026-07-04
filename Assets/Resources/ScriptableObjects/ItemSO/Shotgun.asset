@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0659dd53b3ca625439ae534d06aca6dd, type: 3}
+  m_Name: Shotgun
+  m_EditorClassIdentifier: 
+  itemType: 1
+  gunType: 3
+  gunSO: {fileID: 11400000, guid: fe8c164c47cedda4cbc0c00deb09224c, type: 2}
+  meleeType: 0
+  healthItemType: 0
+  ammunitionType: 0
+  itemName: Shotgun
+  icon: {fileID: 21300000, guid: 2cacde15b6710424bbaf21d584de0d72, type: 3}
+  maxStackSize: 1
+  itemPrefab: {fileID: 1893640954530389767, guid: 05849435aa8f4774ead7bb002722c4ed, type: 3}
+  handItemPrefab: {fileID: 0}
+  baseDamage: 5

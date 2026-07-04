@@ -10,6 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 148661823309698256}
   - component: {fileID: 5427726534359471549}
+  - component: {fileID: 6545705305623812503}
+  - component: {fileID: 7970446360677227621}
   m_Layer: 0
   m_Name: DayNightManager
   m_TagString: Untagged
@@ -44,11 +46,187 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee2b11da7f66d8e43a7def18799a9374, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  achievementDay1: {fileID: 11400000, guid: 7817a2c7edbda5e449c828699f507bd1, type: 2}
+  achievementDay5: {fileID: 11400000, guid: 7f9f527054c8b2545954653ed9b6cd07, type: 2}
   timeText: {fileID: 0}
   notificationText: {fileID: 0}
-  hoursPerRealSecond: 2
+  gameSavedUIText: {fileID: 0}
+  hoursPerRealSecond: 0.1
+  onNewDayStarted:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: WaveManager, Scripts
+        m_MethodName: OnNewDay
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: ObjectiveManager, Scripts
+        m_MethodName: OnDayStarted
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  onNightStarted:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: ObjectiveManager, Scripts
+        m_MethodName: OnNightStarted
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   sunLight: {fileID: 0}
-  dayLightIntensity: 1.2
-  nightLightIntensity: 0.5
-  dayColor: {r: 1, g: 1, b: 1, a: 1}
-  nightColor: {r: 0.2, g: 0.25, b: 0.4, a: 1}
+  dayLightIntensity: 2
+  nightLightIntensity: 1
+  dayColor: {r: 0.7735849, g: 0.69067514, b: 0.49261302, a: 1}
+  nightColor: {r: 0.16491634, g: 0.20463984, b: 0.3207547, a: 1}
+  dayMusic: {fileID: 8300000, guid: 549aee31c11c03e45b776df33d46036d, type: 3}
+  nightMusic: {fileID: 8300000, guid: f7ec3b7382e924b4887ecf12dbe140d0, type: 3}
+  dayMusicVolume: 0.3
+  nightMusicVolume: 0.3
+  playerObject: {fileID: 0}
+  extractionController: {fileID: 0}
+  extractionNight: 10
+  extractionScene: 3
+  extractionSceneDelay: 3
+  fadeCanvasGroup: {fileID: 0}
+  fadeDuration: 1.5
+--- !u!114 &6545705305623812503
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2948784600151051082}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5968609c11b141d4ca340c82ba4e9b70, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  deathCanvas: {fileID: 0}
+  buttonCanvas: {fileID: 0}
+  nightsText: {fileID: 0}
+  youDiedText: {fileID: 0}
+  audioSource: {fileID: 0}
+  deathSound: {fileID: 8300000, guid: 19c59907c023e1242a35b981abd8dbe7, type: 3}
+  deathSoundVolume: 1
+  youDiedSound: {fileID: 8300000, guid: dfed3cf385f60184e9c5f5d365406ed5, type: 3}
+  youDiedSoundVolume: 1
+  mainMenuScene: 0
+  gameScene: 1
+--- !u!82 &7970446360677227621
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2948784600151051082}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 0.01
+  m_Pitch: 1
+  Loop: 1
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
