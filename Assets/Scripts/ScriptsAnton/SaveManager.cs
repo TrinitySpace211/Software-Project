@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
+/// <summary>
+/// Handles the Saveing and Loading of the Game
+/// </summary>
 public class SaveManager : MonoBehaviour {
     public static SaveManager Instance { get; private set; }
 
@@ -25,11 +28,19 @@ public class SaveManager : MonoBehaviour {
         LoadGame();
     }
 
+    /// <summary>
+    /// Registers the classes that implement the ISaveable Interface in a List
+    /// </summary>
+    /// <param name="saveable">The class that implements ISaveable</param>
     public void Register(ISaveable saveable) {
         if (!saveables.Contains(saveable))
             saveables.Add(saveable);
     }
 
+    /// <summary>
+    /// Unregisters the classes that implement the ISaveable Interface in a List
+    /// </summary>
+    /// <param name="saveable">The class that implements ISaveable</param>
     public void Unregister(ISaveable saveable) {
         saveables.Remove(saveable);
     }
@@ -149,6 +160,9 @@ public class SaveManager : MonoBehaviour {
         return obj;
     }
 
+    /// <summary>
+    /// The Object Wrapper class which is the base of how the objects get displayed in the JSON
+    /// </summary>
     [Serializable]
     private class ObjectWrapper {
         public string id;
@@ -156,6 +170,9 @@ public class SaveManager : MonoBehaviour {
         public string json;
     }
 
+    /// <summary>
+    /// The Save Wrapper class which has all the Objects in a List
+    /// </summary>
     [Serializable]
     private class SaveWrapper {
         public List<ObjectWrapper> objects;

@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// Shows one random Item on the Loading Screen
+/// </summary>
 public class RandomItemLoadingModel : MonoBehaviour {
 
     [SerializeField] private GameObject[] items;

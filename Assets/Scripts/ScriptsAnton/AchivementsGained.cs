@@ -1,6 +1,11 @@
 using System.IO;
 using UnityEngine;
 
+/// <summary>
+/// Checks in the Main Menu Scene the save files 
+/// if the Player has collected the Achievements 
+/// and displays them in the lower right corner
+/// </summary>
 public class AchivementsGained : MonoBehaviour {
 
     [SerializeField] private GameObject achievement1;
@@ -11,6 +16,9 @@ public class AchivementsGained : MonoBehaviour {
     bool achievement2Gained = false;
     bool achievement3Gained = false;
 
+    /// <summary>
+    /// Shows Achievements that got earned from playing
+    /// </summary>
     private void Start() {
         if (File.Exists(Path.Combine(Application.persistentDataPath, "save.json"))) {
             DayNightCycle.DayNightData data = (DayNightCycle.DayNightData)SaveManager.Instance.LoadDataFromSave(DayNightCycle.ID);

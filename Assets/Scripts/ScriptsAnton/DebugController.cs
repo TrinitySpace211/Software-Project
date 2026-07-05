@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
+/// <summary>
+/// Creates the Cheat GUI and creates the commands
+/// </summary>
 public class DebugController : MonoBehaviour {
 
     public static DebugController Instance { get; private set; }
@@ -62,6 +65,9 @@ public class DebugController : MonoBehaviour {
 
     public List<object> commandList;
 
+    /// <summary>
+    /// Initializes all the needed commands
+    /// </summary>
     private void Awake() {
         Instance = this;
 
@@ -199,6 +205,10 @@ public class DebugController : MonoBehaviour {
         customTextFieldStyle = new GUIStyle();
     }
 
+    /// <summary>
+    /// if the console is shown and the Player presses enter 
+    /// the command text gets Handled by the HandleCommandText() Function
+    /// </summary>
     private void PlayerInputHandler_OnReturnAction() {
         if (showConsole) {
             HandleCommandText();
@@ -208,10 +218,16 @@ public class DebugController : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// If the Player presses the Cheat Console Button it will be toggled
+    /// </summary>
     private void PlayerInputHandler_OnToggleDebugAction() {
         showConsole = !showConsole;
     }
 
+    /// <summary>
+    /// The GUI gets drawn
+    /// </summary>
     private void OnGUI() {
         if (!showConsole) { return; }
 
@@ -245,6 +261,9 @@ public class DebugController : MonoBehaviour {
         input = GUI.TextField(new Rect(10f, y + 5f, Screen.width - 20f, 40f), input, customTextFieldStyle);
     }
 
+    /// <summary>
+    /// Executes what was found in the input
+    /// </summary>
     private void HandleCommandText() {
         string[] properties = input.Split(' ');
 
@@ -261,15 +280,25 @@ public class DebugController : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Getter for the console visibility
+    /// </summary>
+    /// <returns></returns>
     public bool GetConsoleVisibility() {
         return showConsole;
     }
 
+    /// <summary>
+    /// Subscribes all the Events
+    /// </summary>
     private void OnEnable() {
         PlayerInputHandler.OnToggleDebugAction += PlayerInputHandler_OnToggleDebugAction;
         PlayerInputHandler.OnReturnAction += PlayerInputHandler_OnReturnAction;
     }
 
+    /// <summary>
+    /// Unsubscribes all the Events
+    /// </summary>
     private void OnDisable() {
         PlayerInputHandler.OnToggleDebugAction -= PlayerInputHandler_OnToggleDebugAction;
         PlayerInputHandler.OnReturnAction -= PlayerInputHandler_OnReturnAction;

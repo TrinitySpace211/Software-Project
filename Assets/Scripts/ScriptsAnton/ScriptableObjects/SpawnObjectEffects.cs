@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// A Scriptable Object that determines which Prefab to spawn on Impact
+/// </summary>
 [CreateAssetMenu(fileName = "Spawn Object Effects", menuName = "Impact System/Spawn Object Effects")]
 public class SpawnObjectEffects : ScriptableObject {
     public GameObject prefab;

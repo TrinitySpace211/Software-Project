@@ -54,6 +54,11 @@ public class UpdateCursor : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Keeps the "LookAt" Object at a distance
+    /// </summary>
+    /// <param name="targetPosition">Position to check</param>
+    /// <returns>The calculated position</returns>
     private Vector3 UpdatePositionAroundPlayer(Vector3 targetPosition) {
         Vector3 playerPos = player.transform.position;
         Vector3 offset = targetPosition - playerPos;

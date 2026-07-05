@@ -3,6 +3,10 @@ using System.Collections;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
+/// <summary>
+/// Lights the Safe Zone
+/// The FloodLights get activated when the Sun sets and get deactivated when the Sun rises
+/// </summary>
 public class FloodLights : MonoBehaviour {
 
     public Light spotLight;
@@ -18,16 +22,25 @@ public class FloodLights : MonoBehaviour {
         pointLight.enabled = false;
     }
 
+    /// <summary>
+    /// When the Sun sets the Lights will be turned on
+    /// </summary>
     private void DayNightCycle_OnSunsetStarted() {
         StartCoroutine(TurnOnSpotLight());
         StartCoroutine(TurnOnPointLight());
     }
 
+    /// <summary>
+    /// When the Sun rises the Lights will be turned off
+    /// </summary>
     private void DayNightCycle_OnSunriseStarted() {
         spotLight.enabled = false;
         pointLight.enabled = false;
     }
 
+    /// <summary>
+    /// Turns the Spot Lights on by slowly increasing the intensity
+    /// </summary>
     private IEnumerator TurnOnSpotLight() {
         yield return new WaitForSeconds(waitBeforeActivate);
 
@@ -39,6 +52,10 @@ public class FloodLights : MonoBehaviour {
             yield return null;
         }
     }
+
+    /// <summary>
+    /// Turns the Point Lights on by slowly increasing the intensity
+    /// </summary>
     private IEnumerator TurnOnPointLight() {
         yield return new WaitForSeconds(waitBeforeActivate);
 
@@ -51,11 +68,17 @@ public class FloodLights : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Subscribes all the Events
+    /// </summary>
     private void OnEnable() {
         DayNightCycle.OnSunsetStarted += DayNightCycle_OnSunsetStarted;
         DayNightCycle.OnSunriseStarted += DayNightCycle_OnSunriseStarted;
     }
 
+    /// <summary>
+    /// Unsubscribes all the Events
+    /// </summary>
     private void OnDisable() {
         DayNightCycle.OnSunsetStarted -= DayNightCycle_OnSunsetStarted;
         DayNightCycle.OnSunriseStarted -= DayNightCycle_OnSunriseStarted;

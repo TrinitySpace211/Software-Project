@@ -3,6 +3,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Achivement Card class which animates the card when it is initialized
+/// </summary>
 public class AchievementCard : MonoBehaviour {
     public AchievementSO achievement;
 
@@ -24,6 +27,10 @@ public class AchievementCard : MonoBehaviour {
         padding = mask.padding;
     }
 
+    /// <summary>
+    /// Sets the AchievmentSO with the necessary data, updates it and animates the card
+    /// </summary>
+    /// <param name="achievement">The AchievementSO</param>
     public void Initialize(AchievementSO achievement) {
         this.achievement = achievement;
         UpdateDisplay();
@@ -31,6 +38,9 @@ public class AchievementCard : MonoBehaviour {
         StartCoroutine(WaitAndDestroy());
     }
 
+    /// <summary>
+    /// Sets the stats according to the achievementSO
+    /// </summary>
     private void UpdateDisplay() {
         titleDisp.text = achievement.name;
         descriptionDisp.text = achievement.description;
@@ -40,6 +50,9 @@ public class AchievementCard : MonoBehaviour {
         audioSource.Play();
     }
 
+    /// <summary>
+    /// Starts a Coroutine to animate the card with a value tween
+    /// </summary>
     private IEnumerator WaitAndDestroy() {
         const float hiddenPadding = 0f;
         const float shownPadding = -550f;

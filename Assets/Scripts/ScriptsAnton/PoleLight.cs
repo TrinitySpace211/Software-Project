@@ -3,6 +3,10 @@ using System.Collections;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
+/// <summary>
+/// Lights the Streets
+/// The Lights get activated when the Sun sets and get deactivated when the Sun rises
+/// </summary>
 public class PoleLight : MonoBehaviour {
 
     public bool ignore = false;
@@ -28,6 +32,9 @@ public class PoleLight : MonoBehaviour {
         if (ignore) return;
     }
 
+    /// <summary>
+    /// When the Sun rises the Lights will be turned off
+    /// </summary>
     private void DayNightCycle_OnSunriseStarted() {
         if (ignore) return;
 
@@ -35,12 +42,19 @@ public class PoleLight : MonoBehaviour {
         pointLight.enabled = false;
     }
 
+    /// <summary>
+    /// When the Sun sets the Lights will be turned on
+    /// </summary>
     private void DayNightCycle_OnSunsetStarted() {
         if (ignore) return;
 
         StartCoroutine(TurnOnLight());
     }
 
+    /// <summary>
+    /// Turns the Lights on by slowly increasing the intensity
+    /// and if flicker is set to true then it will start the flicker Coroutine
+    /// </summary>
     private IEnumerator TurnOnLight() {
         yield return new WaitForSeconds(waitBeforeActivate);
 
@@ -87,6 +101,9 @@ public class PoleLight : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Starts to randomly change the intensity of the Lights
+    /// </summary>
     private IEnumerator Flicker() {
         while (spotLight.enabled && pointLight.enabled) {
             spotLight.intensity = Random.Range(minIntensity, maxIntensitySpotLight);
@@ -94,11 +111,18 @@ public class PoleLight : MonoBehaviour {
             yield return new WaitForSeconds(Random.Range(minInterval, maxInterval));
         }
     }
+
+    /// <summary>
+    /// Subscribes all the Events
+    /// </summary>
     private void OnEnable() {
         DayNightCycle.OnSunsetStarted += DayNightCycle_OnSunsetStarted;
         DayNightCycle.OnSunriseStarted += DayNightCycle_OnSunriseStarted;
     }
 
+    /// <summary>
+    /// Unsubscribes all the Events
+    /// </summary>
     private void OnDisable() {
         DayNightCycle.OnSunsetStarted -= DayNightCycle_OnSunsetStarted;
         DayNightCycle.OnSunriseStarted -= DayNightCycle_OnSunriseStarted;

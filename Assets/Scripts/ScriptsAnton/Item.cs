@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+/// <summary>
+/// Class of the dropped Items
+/// </summary>
 public class Item : MonoBehaviour {
 
     private bool inRange = false;
@@ -18,6 +21,9 @@ public class Item : MonoBehaviour {
     //Event
     public static event Action<Item> OnItemCollected;
 
+    /// <summary>
+    /// Turns all the Outlines off
+    /// </summary>
     private void Start() {
         sphereCollider = GetComponent<SphereCollider>();
         outlines = GetComponentsInChildren<Outline>();
@@ -27,6 +33,10 @@ public class Item : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Sets the Outlines
+    /// </summary>
+    /// <param name="isVisible">true enables all the Outlines false disables them</param>
     public void SetOutlineState(bool isVisible) {
         foreach (Outline outline in outlines) {
             if (outline != null) {
@@ -35,6 +45,9 @@ public class Item : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Sends an Event which Item got collected and destroys the item afterwards
+    /// </summary>
     public void Collect() {
         foreach (Outline outline in outlines) {
             if (outline != null && inRange) {
@@ -45,6 +58,10 @@ public class Item : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Checks if the Player entered the Area it can be collected
+    /// </summary>
+    /// <param name="other">The Collider that entered</param>
     private void OnTriggerEnter(Collider other) {
         if (other.GetComponent<Player>()) {
             foreach (Outline outline in outlines) {
@@ -57,6 +74,10 @@ public class Item : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Checks if the Player exited the Area
+    /// </summary>
+    /// <param name="other">The Collider that exited</param>
     private void OnTriggerExit(Collider other) {
         if (other.GetComponent<Player>()) {
             foreach (Outline outline in outlines) {
@@ -68,6 +89,11 @@ public class Item : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Sets the item to a certain Type
+    /// </summary>
+    /// <typeparam name="T">The Type this item is</typeparam>
+    /// <param name="itemType">The Type of item</param>
     public void SetItemType<T>(T itemType) {
         if (itemType is MeleeType meleeType) this.meleeType = meleeType;
         if (itemType is GunType gunType) this.gunType = gunType;
@@ -76,6 +102,11 @@ public class Item : MonoBehaviour {
         if (itemType is AmmunitionType ammunitionType) this.ammunitionType = ammunitionType;
     }
 
+    /// <summary>
+    /// Getter for what type this item is
+    /// </summary>
+    /// <typeparam name="T">The Tyoe of this item</typeparam>
+    /// <returns>The Type</returns>
     public T GetItemType<T>() {
         if (typeof(T) == typeof(MeleeType) && meleeType != MeleeType.None) return (T)(object)meleeType;
         if (typeof(T) == typeof(GunType) && gunType != GunType.None) return (T)(object)gunType;
