@@ -3,7 +3,8 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Manages the gas tank's health and destruction state.
+/// Handles gas tank health, damage processing,
+/// destruction behavior, and save/load integration.
 /// </summary>
 public class GasTankHealth : MonoBehaviour, ISaveable {
     private static readonly string ID = "Objective";
@@ -20,41 +21,44 @@ public class GasTankHealth : MonoBehaviour, ISaveable {
     [Header("Generator")]
     [SerializeField] private float generatorVolume = 1f;
 
-
-
     private int currentHP;
 
     /// <summary>
-    /// Current health value of the gas tank.
+    /// Gets the current health value.
     /// </summary>
     public int CurrentHP => currentHP;
 
     /// <summary>
-    /// Maximum health value of the gas tank.
+    /// Gets the maximum health value.
     /// </summary>
     public int MaxHP => maxHP;
 
     public static event Action<Vector3> OnObjectiveDestroyed;
 
     /// <summary>
-    /// Initializes the health value.
+    /// Initializes the gas tank with full health.
     /// </summary>
     private void Awake() {
         currentHP = maxHP;
     }
 
+    /// <summary>
+    /// Starts generator audio when night begins.
+    /// </summary>
     private void DayNightCycle_OnSunsetStarted() {
-        //Debug.Log(audioSource + " " + SoundManager.Instance.volume);
         generatorAudioSource.volume = generatorVolume * SoundManager.Instance.volume;
         generatorAudioSource.Play();
     }
 
+    /// <summary>
+    /// Stops generator audio when day begins.
+    /// </summary>
     private void DayNightCycle_OnSunriseStarted() {
         generatorAudioSource.Stop();
     }
 
     /// <summary>
-    /// Applies damage to the gas tank.
+    /// Applies damage and triggers destruction if health reaches zero.
     /// </summary>
     public void TakeDamage(int damage) {
         if (currentHP <= 0)
@@ -76,7 +80,7 @@ public class GasTankHealth : MonoBehaviour, ISaveable {
     }
 
     /// <summary>
-    /// Restores health to the gas tank.
+    /// Restores health up to the maximum value.
     /// </summary>
     public void Heal(int amount) {
         if (currentHP <= 0)
@@ -89,7 +93,8 @@ public class GasTankHealth : MonoBehaviour, ISaveable {
     }
 
     /// <summary>
-    /// Handles the gas tank destruction sequence.
+    /// Executes destruction logic including effects,
+    /// disabling the player, and triggering the death screen.
     /// </summary>
     private void OnDestroyed() {
         Debug.Log("Gas Tank destroyed!");
@@ -115,32 +120,47 @@ public class GasTankHealth : MonoBehaviour, ISaveable {
     }
 
     /// <summary>
-    /// Restores the gas tank to full health.
+    /// Resets the gas tank to full health.
     /// </summary>
     public void ResetHP() {
         currentHP = maxHP;
     }
 
     #region Save/Load
+    /// <summary>
+    /// Returns the unique save identifier.
+    /// </summary>
     public string GetSaveID() => ID;
 
+    /// <summary>
+    /// Creates a save data object containing current health.
+    /// </summary>
     public object Save() {
         return new ObjectiveData {
             health = currentHP
         };
     }
 
+    /// <summary>
+    /// Restores health from saved data.
+    /// </summary>
     public void Load(object data) {
         ObjectiveData objectiveData = (ObjectiveData)data;
         currentHP = objectiveData.health;
     }
 
+    /// <summary>
+    /// Serializable container for saved gas tank data.
+    /// </summary>
     [Serializable]
     public class ObjectiveData {
         public int health;
     }
     #endregion
 
+    /// <summary>
+    /// Subscribes to events and registers for saving.
+    /// </summary>
     private void OnEnable() {
         DayNightCycle.OnSunsetStarted += DayNightCycle_OnSunsetStarted;
         DayNightCycle.OnSunriseStarted += DayNightCycle_OnSunriseStarted;
@@ -149,6 +169,9 @@ public class GasTankHealth : MonoBehaviour, ISaveable {
             SaveManager.Instance.Register(this);
     }
 
+    /// <summary>
+    /// Unsubscribes from events and unregisters from saving.
+    /// </summary>
     private void OnDisable() {
         DayNightCycle.OnSunsetStarted -= DayNightCycle_OnSunsetStarted;
         DayNightCycle.OnSunriseStarted -= DayNightCycle_OnSunriseStarted;

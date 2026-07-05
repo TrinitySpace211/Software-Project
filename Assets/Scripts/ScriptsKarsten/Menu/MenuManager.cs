@@ -6,6 +6,10 @@ using UnityEngine.UI;
 using System.IO;
 using TMPro;
 
+/// <summary>
+/// Handles main menu navigation, settings panels, game mode selection,
+/// audio setup, fade transitions, and scene loading.
+/// </summary>
 public class MenuManager : MonoBehaviour {
 
     [Header("Scene Names")]
@@ -22,7 +26,6 @@ public class MenuManager : MonoBehaviour {
     [SerializeField] private AudioClip musicClip;
     [SerializeField] private AudioClip buttonSelect;
     [SerializeField] private AudioSource musicSource;
-
 
     [Header("Buttons")]
     [SerializeField] private Image continueButtonImage;
@@ -48,6 +51,9 @@ public class MenuManager : MonoBehaviour {
     private string tutorialPath;
     private bool hasTutorial;
 
+    /// <summary>
+    /// Creates audio sources, initializes fade settings, and prepares the menu state.
+    /// </summary>
     private void Awake() {
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.playOnAwake = false;
@@ -71,6 +77,10 @@ public class MenuManager : MonoBehaviour {
         Time.timeScale = 1f;
     }
 
+    /// <summary>
+    /// Initializes menu panels, save paths, button availability,
+    /// and default UI selection.
+    /// </summary>
     private void Start() {
         if (settingsPanel != null) settingsPanel.SetActive(false);
         if (gameModePanel != null) gameModePanel.SetActive(false);
@@ -93,6 +103,7 @@ public class MenuManager : MonoBehaviour {
                 continueButtonText.color = new Color32(255, 255, 255, 255);
             }
         }
+
         // Ensure audio and controls starts hidden
         if (audioSection != null)
             audioSection.SetActive(false);
@@ -114,6 +125,9 @@ public class MenuManager : MonoBehaviour {
         ResetUISelection(firstSelectedButton);
     }
 
+    /// <summary>
+    /// Opens the game mode selection screen from the main menu.
+    /// </summary>
     public void NewGame() {
         if (isTransitioning) return;
 
@@ -128,6 +142,9 @@ public class MenuManager : MonoBehaviour {
         ResetUISelection(firstGameModeButton);
     }
 
+    /// <summary>
+    /// Selects a game mode, clears old save data, and starts the tutorial scene.
+    /// </summary>
     public void StartGameMode(GameModeType mode) {
         if (isTransitioning) return;
 
@@ -146,6 +163,9 @@ public class MenuManager : MonoBehaviour {
         StartCoroutine(FadeAndLoadScene(tutorialScene));
     }
 
+    /// <summary>
+    /// Closes the game mode panel and returns to the main menu.
+    /// </summary>
     public void OnCloseGameModeClicked() {
         PlayClick();
 
@@ -156,7 +176,9 @@ public class MenuManager : MonoBehaviour {
             mainMenuPanel.SetActive(true);
     }
 
-
+    /// <summary>
+    /// Cancels game mode selection and returns to the main menu.
+    /// </summary>
     public void CancelGameModeSelection() {
         PlayClick();
 
@@ -166,6 +188,9 @@ public class MenuManager : MonoBehaviour {
         ResetUISelection(firstSelectedButton);
     }
 
+    /// <summary>
+    /// Opens the settings menu.
+    /// </summary>
     public void OnSettingsPressed() {
         PlayClick();
 
@@ -178,6 +203,9 @@ public class MenuManager : MonoBehaviour {
         ResetUISelection(null);
     }
 
+    /// <summary>
+    /// Closes the settings menu and returns to the main menu.
+    /// </summary>
     public void OnCloseSettingsPressed() {
         PlayClick();
 
@@ -190,6 +218,9 @@ public class MenuManager : MonoBehaviour {
         ResetUISelection(firstSelectedButton);
     }
 
+    /// <summary>
+    /// Opens the audio settings section.
+    /// </summary>
     public void OnSoundPressed() {
         PlayClick();
 
@@ -197,6 +228,9 @@ public class MenuManager : MonoBehaviour {
         if (controlsSection != null) controlsSection.SetActive(false);
     }
 
+    /// <summary>
+    /// Opens the controls settings section.
+    /// </summary>
     public void OnControlsPressed() {
         PlayClick();
 
@@ -204,12 +238,18 @@ public class MenuManager : MonoBehaviour {
         if (audioSection != null) audioSection.SetActive(false);
     }
 
+    /// <summary>
+    /// Toggles fullscreen mode.
+    /// </summary>
     public void ToggleFullscreen() {
         PlayClick();
 
         Screen.fullScreen = !Screen.fullScreen;
     }
 
+    /// <summary>
+    /// Switches between windowed and fullscreen window mode.
+    /// </summary>
     public void SetWindowed() {
         PlayClick();
         if (fullScreenMode == FullScreenMode.FullScreenWindow) {
@@ -223,7 +263,9 @@ public class MenuManager : MonoBehaviour {
         }
     }
 
-
+    /// <summary>
+    /// Exits the application or stops play mode in the Unity Editor.
+    /// </summary>
     public void ExitGame() {
         PlayClick();
 
@@ -234,6 +276,9 @@ public class MenuManager : MonoBehaviour {
 #endif
     }
 
+    /// <summary>
+    /// Fades the screen and loads the given scene.
+    /// </summary>
     private IEnumerator FadeAndLoadScene(Loader.Scene scene) {
         isTransitioning = true;
         PlayClick();
@@ -248,6 +293,9 @@ public class MenuManager : MonoBehaviour {
         Loader.Load(scene);
     }
 
+    /// <summary>
+    /// Fades the overlay canvas group between two alpha values.
+    /// </summary>
     private IEnumerator Fade(float from, float to) {
         float time = 0f;
 
@@ -260,6 +308,10 @@ public class MenuManager : MonoBehaviour {
 
         fadeGroup.alpha = to;
     }
+
+    /// <summary>
+    /// Continues the game by loading the appropriate scene based on save data.
+    /// </summary>
     public void ContinueGame() {
         if (hasTutorial) {
             TutorialManager.TutorialData tutorialData = SaveManager.Instance.LoadData<TutorialManager.TutorialData>(TutorialManager.ID);
@@ -273,6 +325,9 @@ public class MenuManager : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Plays the click sound if one is assigned.
+    /// </summary>
     private void PlayClick() {
         ApplyVolumeSettings();
 
@@ -280,6 +335,9 @@ public class MenuManager : MonoBehaviour {
         audioSource.PlayOneShot(clickSound);
     }
 
+    /// <summary>
+    /// Applies global master, music, and SFX volume values.
+    /// </summary>
     public void ApplyVolumeSettings() {
         float master = OptionsMenu.MasterVolume;
         float music = OptionsMenu.MusicVolume;
@@ -294,6 +352,9 @@ public class MenuManager : MonoBehaviour {
             audioSource.volume = sfx * master;
     }
 
+    /// <summary>
+    /// Resets the current UI selection and schedules a new target for the next frame.
+    /// </summary>
     private void ResetUISelection(GameObject target) {
         if (EventSystem.current == null)
             return;
@@ -302,6 +363,9 @@ public class MenuManager : MonoBehaviour {
         StartCoroutine(SelectNextFrame(target));
     }
 
+    /// <summary>
+    /// Selects the given UI object on the next frame.
+    /// </summary>
     private IEnumerator SelectNextFrame(GameObject target) {
         yield return null;
 

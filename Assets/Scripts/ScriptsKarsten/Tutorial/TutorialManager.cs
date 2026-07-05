@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Controls the tutorial flow: player movement, messages, and scene transition.
-/// Supports skipping and fade-out to next scene.
+/// Supports skipping and fade-out to the next scene.
 /// </summary>
 public class TutorialManager : MonoBehaviour {
     public static readonly string ID = "TutorialManager";
@@ -61,7 +61,7 @@ public class TutorialManager : MonoBehaviour {
     private Coroutine messageCoroutine;
 
     /// <summary>
-    /// Initializes references and UI state.
+    /// Initializes references, fade state, and skip button handling.
     /// </summary>
     private void Awake() {
         if (playerObject != null) {
@@ -84,7 +84,7 @@ public class TutorialManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// Starts the tutorial sequence.
+    /// Starts the tutorial sequence once.
     /// </summary>
     public void StartTutorial() {
         if (isRunning) return;
@@ -92,7 +92,7 @@ public class TutorialManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// Main tutorial flow controlling movement, messages, and transitions.
+    /// Runs the full tutorial flow including movement, text, rotation, and scene transition.
     /// </summary>
     private IEnumerator TutorialRoutine() {
         isRunning = true;
@@ -123,11 +123,9 @@ public class TutorialManager : MonoBehaviour {
             tutorialText.text = tutorialMessages[tutorialMessages.Length - 1];
 
         tutorialFinished = true;
-        //Save that the tutorial got saved
         SaveManager.Instance.SaveData(ID, new TutorialData {
             tutorialFinished = tutorialFinished
         });
-        //Debug.Log("Saved tutorialFinished!" + tutorialFinished);
 
         yield return new WaitForSeconds(2f);
 
@@ -135,7 +133,7 @@ public class TutorialManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// Moves the player to a target position.
+    /// Moves the player to the given target position.
     /// </summary>
     private IEnumerator MovePlayer(Transform target) {
         if (target == null || playerObject == null) yield break;
@@ -174,17 +172,19 @@ public class TutorialManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// Displays tutorial messages sequentially.
+    /// Displays tutorial messages one after another with a fixed delay.
     /// </summary>
     private IEnumerator MessageRoutine() {
         foreach (var msg in tutorialMessages) {
-            tutorialText.text = msg;
+            if (tutorialText != null)
+                tutorialText.text = msg;
+
             yield return new WaitForSeconds(messageDelay);
         }
     }
 
     /// <summary>
-    /// Stops the message coroutine.
+    /// Stops the active message coroutine if one is running.
     /// </summary>
     private void StopMessage() {
         if (messageCoroutine != null)
@@ -192,7 +192,7 @@ public class TutorialManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// Resets animator movement values.
+    /// Resets the animator movement values after the tutorial movement ends.
     /// </summary>
     private void StopAnimation() {
         if (playerAnimator == null) return;
@@ -203,7 +203,7 @@ public class TutorialManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// Disables player control during tutorial.
+    /// Disables player control during the tutorial sequence.
     /// </summary>
     private void DisablePlayer() {
         if (aimLayer != null) aimLayer.weight = 0f;
@@ -221,7 +221,7 @@ public class TutorialManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// Skips the tutorial and starts scene transition immediately.
+    /// Skips the tutorial and starts the transition immediately.
     /// </summary>
     public void SkipTutorial() {
         if (isSkipping) return;
@@ -229,7 +229,7 @@ public class TutorialManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// Handles tutorial skip flow.
+    /// Handles the skip flow, restores control, and transitions to the next scene.
     /// </summary>
     private IEnumerator SkipRoutine() {
         isSkipping = true;
@@ -246,7 +246,6 @@ public class TutorialManager : MonoBehaviour {
         RestorePlayerControlState();
 
         tutorialFinished = true;
-        //Save that the tutorial got saved
         SaveManager.Instance.SaveData(ID, new TutorialData {
             tutorialFinished = tutorialFinished
         });
@@ -257,7 +256,7 @@ public class TutorialManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// Fades out and loads a new scene.
+    /// Fades the screen to black and loads the target scene.
     /// </summary>
     private IEnumerator FadeToScene(Loader.Scene scene) {
         if (fadeImage == null) {
@@ -282,7 +281,7 @@ public class TutorialManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// Restores player control after skipping.
+    /// Restores player control after the tutorial was skipped.
     /// </summary>
     private void RestorePlayerControlState() {
         if (aimLayer != null)
@@ -310,6 +309,9 @@ public class TutorialManager : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Serializable save data for the tutorial state.
+    /// </summary>
     public class TutorialData {
         public bool tutorialFinished = false;
     }
