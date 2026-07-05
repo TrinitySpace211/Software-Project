@@ -1495,7 +1495,7 @@ public class NPCDialog : MonoBehaviour, ISaveable {
         // Create the upgraded tower at the original spawn point position and rotation.
         GameObject upgradedTower = Instantiate(
             towerPrefabsByLevel[nextUpgradeLevel],
-            new Vector3(towerPosition.x, 0.3f, towerPosition.z),
+            towerPosition,
             towerRotation
         );
 
@@ -1503,14 +1503,8 @@ public class NPCDialog : MonoBehaviour, ISaveable {
         builtTowers[selectedTowerIndex] = upgradedTower;
         towerUpgradeLevels[selectedTowerIndex] = nextUpgradeLevel;
 
-        Debug.Log(builtTowers[selectedTowerIndex]);
-        Debug.Log(towerUpgradeLevels[selectedTowerIndex]);
-
-
         // Count the bought upgrade.
         boughtTowerUpgradeCount++;
-
-        Debug.Log(boughtTowerUpgradeCount);
 
         //Debug.Log("Tower at index " + selectedTowerIndex + " upgraded to level " + nextUpgradeLevel + ".");
 

@@ -51,9 +51,13 @@ public class PlayerScrapWallet : MonoBehaviour {
 
         // Increases the scrap amount and displays a message.
         currentScrap += amount;
-        ScrapInventorySaver.AddScrapToInventory(amount);
+
+        if (ScrapInventorySaver.instance != null) {
+            ScrapInventorySaver.instance.AddScrapToInventory(amount);
+        }
+
         ShowScrapMessage(amount);
-       
+
     }
 
     public bool TrySpendScrap(int amount) {
@@ -74,9 +78,12 @@ public class PlayerScrapWallet : MonoBehaviour {
 
     private void SyncScrapFromInventory() {
         // Updates the wallet when the scrap amount in the inventory changes.
-        if (ScrapInventorySaver.TryGetScrapAmount(out int inventoryScrap)) {
-            currentScrap = inventoryScrap;
+        if (ScrapInventorySaver.instance != null) {
+            if (ScrapInventorySaver.instance.TryGetScrapAmount(out int inventoryScrap)) {
+                currentScrap = inventoryScrap;
+            }
         }
+
     }
 
     private void ShowScrapMessage(int amount) {
@@ -86,7 +93,7 @@ public class PlayerScrapWallet : MonoBehaviour {
         }
 
         // Updates and displays the text.
-        scrapMessageText.text = $"+{amount} Scrap erhalten\nScrap: {currentScrap}";
+        scrapMessageText.text = $"+{amount} Scrap collected\nScrap: {currentScrap}";
         scrapMessageText.gameObject.SetActive(true);
         messageTimer = messageDuration;
     }
@@ -114,7 +121,7 @@ public class PlayerScrapWallet : MonoBehaviour {
         rectTransform.anchorMin = new Vector2(0.5f, 1f);
         rectTransform.anchorMax = new Vector2(0.5f, 1f);
         rectTransform.pivot = new Vector2(0.5f, 1f);
-        rectTransform.anchoredPosition = new Vector2(0f, -80f);
+        rectTransform.anchoredPosition = new Vector2(0f, -200f);
         rectTransform.sizeDelta = new Vector2(420f, 90f);
 
         // Prepares the visual appearance of the text.

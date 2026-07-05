@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
+using Random = UnityEngine.Random;
 
 public class SprinterController : MonoBehaviour, IDamageable {
     [Header("Detection")] public float roamRadius = 10f;
@@ -57,6 +59,9 @@ public class SprinterController : MonoBehaviour, IDamageable {
     private float dissolveMeterMax;
     private float dissolveMeter;
     private float dissolveSpeed = 1f;
+
+    //Event
+    public static event Action<SprinterController> OnDead;
 
     private void Start() {
         boxCollider = GetComponent<BoxCollider>();
@@ -307,9 +312,10 @@ public class SprinterController : MonoBehaviour, IDamageable {
         //animator.SetBool("isSprinting", false);
         // animator.SetBool("isAttacking", false);
 
-
         if (boxCollider != null)
             boxCollider.enabled = false;
+
+        OnDead?.Invoke(this);
 
         StartCoroutine(DissolveEnemy(3f));
     }

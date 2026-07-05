@@ -1,10 +1,10 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
 /// Creates and shoots arrows at regular intervals.
 /// </summary>
-public class Emmitter : MonoBehaviour 
-{
+public class Emmitter : MonoBehaviour {
     /// <summary>
     /// The bullet-Prefab which should be spawn.
     /// </summary>
@@ -28,65 +28,61 @@ public class Emmitter : MonoBehaviour
     /// <summary>
     /// Initializes the shooting timer and gets the FindEnemy component from the parent GameObject.
     /// </summary>
-    private void Start()
-    {
+    private void Start() {
         // To set the Timer from the inspector (timeInterval is global and public)
         currentTime = timeInterval;
 
         // Searches in the parent GameObejct the FindEnemy component
-        findEnemy = GetComponentInParent<FindEnemy>(); 
+        findEnemy = GetComponentInParent<FindEnemy>();
     }
 
     /// <summary>
     /// Counts down the timer and shoots at the current enemy when the timer reaches zero.
     /// </summary>
-    private void Update()
-    {
-        if (findEnemy == null || findEnemy.zombie == null)
-
-            // return if enemies not found, the tower doesnt shot in this case
+    private void Update() {
+        if (findEnemy == null) {
             return;
+        }
 
-        // Timer counts down
         currentTime -= Time.deltaTime;
 
-        // If timer reaches 0, the shoot() method can be called
-        if (currentTime <= 0f && !findEnemy.zombie.IsDead()) {
-            Shoot(findEnemy.zombie);
-            currentTime = timeInterval; // to reset the timer
+        if (currentTime <= 0f) {
+            if (findEnemy.zombie != null && !findEnemy.zombie.IsDead()) {
+                Shoot(findEnemy.zombie);
+                currentTime = timeInterval;
+            } else if (findEnemy.sprinter != null && !findEnemy.sprinter.IsDead()) {
+                Shoot(findEnemy.sprinter);
+                currentTime = timeInterval;
+            } else if (findEnemy.tank != null && !findEnemy.tank.IsDead()) {
+                Shoot(findEnemy.tank);
+                currentTime = timeInterval;
+            }
         }
     }
 
     /// <summary>
     /// Spawns a bullet (arrow) and assigns the given target to it.
     /// </summary>
-    private void Shoot(ZombieAI target) {
-
-        // Information for the developer
+    private void Shoot<T>(T target) where T : Component, IDamageable {
         if (bullet == null) {
             Debug.LogError("Bullet Prefab fehlt beim Emmitter!");
             return;
         }
 
-        // Creates a copy of bullet (the arrow)
         GameObject bulletInstance = Instantiate(
-            bullet, // Bullet from the inspector to copy
+            bullet,
             transform.position,
             transform.rotation
         );
 
-        // Look for the Bullet script on the root object of the newly spawned bullet.
         Bullet bulletScript = bulletInstance.GetComponent<Bullet>();
 
-        // If no Bullet Script was found in the root directory, then Unity will also search the child objects.
         if (bulletScript == null) {
             bulletScript = bulletInstance.GetComponentInChildren<Bullet>();
         }
 
         if (bulletScript != null) {
-
-            // Give the enemy to the bullet script
-            bulletScript.target = target;
+            bulletScript.SetTarget(target);
         }
 
         ExplosiveBullet explosiveBulletScript = bulletInstance.GetComponent<ExplosiveBullet>();
@@ -96,7 +92,7 @@ public class Emmitter : MonoBehaviour
         }
 
         if (explosiveBulletScript != null) {
-            explosiveBulletScript.target = target;
+            explosiveBulletScript.SetTarget(target);
         }
     }
 }

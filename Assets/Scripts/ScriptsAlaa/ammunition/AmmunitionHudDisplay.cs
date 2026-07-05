@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System;
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -52,8 +54,12 @@ public class AmmunitionHudDisplay : MonoBehaviour {
         UpdateAmmunitionText();
 
         if (player.GetPlayerHealth().GetIsDead()) {
-            canvasObject.SetActive(false);
+            hudObject.SetActive(false);
         }
+    }
+
+    private void Objective_OnObjectiveDestroyed(Vector3 vector) {
+        hudObject.SetActive(false);
     }
 
     private void FindWeaponSelectorIfMissing() {
@@ -226,5 +232,13 @@ public class AmmunitionHudDisplay : MonoBehaviour {
     public void SetVisible(bool visible) {
         if (hudObject != null)
             hudObject.SetActive(visible);
+    }
+
+    private void OnEnable() {
+        GasTankHealth.OnObjectiveDestroyed += Objective_OnObjectiveDestroyed;
+    }
+
+    private void OnDisable() {
+        GasTankHealth.OnObjectiveDestroyed -= Objective_OnObjectiveDestroyed;
     }
 }

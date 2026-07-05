@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
+using Random = UnityEngine.Random;
 
 /// <summary>
 ///     Tank-Zombie: langsam, aber deutlich mehr HP und mehr Schaden pro Treffer.
@@ -58,6 +60,10 @@ public class TankZombieController : MonoBehaviour, IDamageable {
     private float dissolveMeterMax;
     private float dissolveMeter;
     private float dissolveSpeed = 1f;
+
+    //Event
+    public static event Action<TankZombieController> OnDead;
+
     private void Start() {
         boxCollider = GetComponent<BoxCollider>();
         animator = GetComponent<Animator>();
@@ -295,6 +301,8 @@ public class TankZombieController : MonoBehaviour, IDamageable {
 
         if (boxCollider != null)
             boxCollider.enabled = false;
+
+        OnDead?.Invoke(this);
 
         StartCoroutine(DissolveEnemy(3f));
     }

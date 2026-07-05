@@ -9,10 +9,10 @@ public class AnimateLoadingModels : MonoBehaviour {
     private float animationTimer = 0f;
     private float rotationSpeed = 20f;
 
-    private void Update() {
+    /* private void Update() {
         AnimateItem();
         RotateItem();
-    }
+    } */
 
     private void AnimateItem() {
         animationTimer += Time.deltaTime;

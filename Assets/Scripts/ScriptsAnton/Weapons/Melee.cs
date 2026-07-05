@@ -12,7 +12,7 @@ public class Melee : MonoBehaviour {
 
     private void Update() {
         if (meleeSO.CanSwing() && isAttacking) {
-            Collider[] hits = Physics.OverlapSphere(transform.position, 0.7f);
+            Collider[] hits = Physics.OverlapSphere(transform.position, 1.1f);
 
             foreach (Collider hit in hits) {
                 ZombieAI zombie = hit.GetComponentInParent<ZombieAI>();
