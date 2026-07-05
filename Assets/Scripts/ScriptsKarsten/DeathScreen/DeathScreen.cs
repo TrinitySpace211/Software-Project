@@ -6,9 +6,11 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /// <summary>
-/// Controls the death screen UI, including fade-in effects,
+/// Handles the death screen flow including UI fades,
+/// audio playback, and button activation.
 /// </summary>
 public class DeathScreen : MonoBehaviour {
+
     [Header("UI")]
     public CanvasGroup deathCanvas;
     public CanvasGroup buttonCanvas;
@@ -26,28 +28,33 @@ public class DeathScreen : MonoBehaviour {
     public Loader.Scene mainMenuScene = Loader.Scene.MainMenu;
     public Loader.Scene gameScene = Loader.Scene.MainScene;
 
+    /// <summary>
+    /// Initializes UI elements to be invisible at start.
+    /// </summary>
     private void Start() {
         youDiedText.alpha = 0f;
         nightsText.alpha = 0f;
     }
 
     /// <summary>
-    /// Triggers the death screen sequence.
+    /// Starts the death screen sequence.
     /// </summary>
     public void ShowDeathScreen(int survivedNights) {
         StartCoroutine(DeathRoutine(survivedNights));
     }
 
     /// <summary>
-    /// Handles the full death screen flow including UI disabling,
-    /// fade-in animations, audio playback, and interaction enabling.
+    /// Runs the full death sequence:
+    /// delays, pauses the game, fades UI, plays sounds,
+    /// and enables user interaction.
     /// </summary>
     private IEnumerator DeathRoutine(int survivedNights) {
         yield return new WaitForSeconds(3f);
 
+        // Pause gameplay
         Time.timeScale = 0f;
 
-        // Enable death UI
+        // Enable UI elements
         deathCanvas.gameObject.SetActive(true);
         buttonCanvas.gameObject.SetActive(true);
 
@@ -57,19 +64,19 @@ public class DeathScreen : MonoBehaviour {
         buttonCanvas.interactable = false;
         buttonCanvas.blocksRaycasts = false;
 
-        // Display survived nights text
+        // Update survived nights text
         if (nightsText != null) {
             nightsText.text =
                 $"You survived {survivedNights} night{(survivedNights == 1 ? "" : "s")}";
         }
 
-        // Play you Died sound
+        // Play initial death sound
         if (audioSource != null && youDiedSound != null) {
             audioSource.volume = youDiedSoundVolume * SoundManager.Instance.volume;
             audioSource.PlayOneShot(youDiedSound);
         }
 
-        // Fade in main death canvas
+        // Fade in background canvas
         float t = 0f;
         while (t < 1f) {
             t += Time.unscaledDeltaTime;
@@ -77,13 +84,13 @@ public class DeathScreen : MonoBehaviour {
             yield return null;
         }
 
-        // Play death sound
+        // Play secondary death sound
         if (audioSource != null && deathSound != null) {
             audioSource.volume = deathSoundVolume * SoundManager.Instance.volume;
             audioSource.PlayOneShot(deathSound);
         }
 
-        // Fade in death text
+        // Fade in "You Died" text
         float dt = 0f;
         while (dt < 1f) {
             dt += Time.unscaledDeltaTime;
@@ -91,7 +98,7 @@ public class DeathScreen : MonoBehaviour {
             yield return null;
         }
 
-        // Fade in nights text
+        // Fade in nights survived text
         float nt = 0f;
         while (nt < 1f) {
             nt += Time.unscaledDeltaTime;
@@ -99,7 +106,7 @@ public class DeathScreen : MonoBehaviour {
             yield return null;
         }
 
-        // Wait before showing buttons
+        // Wait before enabling buttons
         yield return new WaitForSecondsRealtime(3f);
 
         Cursor.visible = true;
@@ -107,7 +114,7 @@ public class DeathScreen : MonoBehaviour {
         buttonCanvas.interactable = true;
         buttonCanvas.blocksRaycasts = true;
 
-        // Fade in button canvas
+        // Fade in buttons
         float b = 0f;
         while (b < 1f) {
             b += Time.unscaledDeltaTime;
@@ -117,7 +124,7 @@ public class DeathScreen : MonoBehaviour {
     }
 
     /// <summary>
-    /// Restarts the current scene.
+    /// Restarts the game by loading the gameplay scene.
     /// </summary>
     public void Retry() {
         Time.timeScale = 1f;
@@ -133,7 +140,7 @@ public class DeathScreen : MonoBehaviour {
     }
 
     /// <summary>
-    /// Exits the application or stops play mode in the Unity editor.
+    /// Exits the application or stops play mode in the editor.
     /// </summary>
     public void Exit() {
         Time.timeScale = 1f;
@@ -141,7 +148,7 @@ public class DeathScreen : MonoBehaviour {
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
-            Application.Quit();
+        Application.Quit();
 #endif
     }
 }
