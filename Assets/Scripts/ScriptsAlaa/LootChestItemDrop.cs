@@ -300,7 +300,7 @@ public class LootChestItemDrop : MonoBehaviour {
         }
 
         ScrapPickup pickup = pickupObject.AddComponent<ScrapPickup>();
-        pickup.SetAmount(1);
+        pickup.SetAmount(UnityEngine.Random.Range(1, 4));
 
         StartCoroutine(RevealItem(pickupObject, startPosition, landingPosition));
     }

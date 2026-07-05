@@ -961,6 +961,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 1406284030232274552, guid: fce20487f5116b845a9e2ca2c7ebae74, type: 3}
+      propertyPath: tankPrefab
+      value: 
+      objectReference: {fileID: 5575829872794002195, guid: 09f7abf73177da14d9104087cb2da0c2, type: 3}
+    - target: {fileID: 1406284030232274552, guid: fce20487f5116b845a9e2ca2c7ebae74, type: 3}
       propertyPath: playerTransform
       value: 
       objectReference: {fileID: 4474771663635373331}
@@ -1025,6 +1029,38 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1913510876}
+    - target: {fileID: 3773857049126186791, guid: 70240950716ddbe4ea170364e6d18096, type: 3}
+      propertyPath: m_Pivot.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3773857049126186791, guid: 70240950716ddbe4ea170364e6d18096, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3773857049126186791, guid: 70240950716ddbe4ea170364e6d18096, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3773857049126186791, guid: 70240950716ddbe4ea170364e6d18096, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3773857049126186791, guid: 70240950716ddbe4ea170364e6d18096, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3773857049126186791, guid: 70240950716ddbe4ea170364e6d18096, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 4031486890919275733, guid: 70240950716ddbe4ea170364e6d18096, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4031486890919275733, guid: 70240950716ddbe4ea170364e6d18096, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4326340787063983765, guid: 70240950716ddbe4ea170364e6d18096, type: 3}
       propertyPath: m_Name
       value: DeathPanel
@@ -1033,10 +1069,22 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4396662533751935666, guid: 70240950716ddbe4ea170364e6d18096, type: 3}
+      propertyPath: m_Alpha
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5068148864352467998, guid: 70240950716ddbe4ea170364e6d18096, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1913510876}
+    - target: {fileID: 5313764266945678291, guid: 70240950716ddbe4ea170364e6d18096, type: 3}
+      propertyPath: m_TextWrappingMode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5321896850239897349, guid: 70240950716ddbe4ea170364e6d18096, type: 3}
+      propertyPath: m_Alpha
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5646263888735965124, guid: 70240950716ddbe4ea170364e6d18096, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
@@ -1120,6 +1168,22 @@ PrefabInstance:
     - target: {fileID: 7047143751863752218, guid: 70240950716ddbe4ea170364e6d18096, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7825739331171105494, guid: 70240950716ddbe4ea170364e6d18096, type: 3}
+      propertyPath: m_VerticalAlignment
+      value: 512
+      objectReference: {fileID: 0}
+    - target: {fileID: 8837902810085033922, guid: 70240950716ddbe4ea170364e6d18096, type: 3}
+      propertyPath: m_text
+      value: 'You survived: 0'
+      objectReference: {fileID: 0}
+    - target: {fileID: 8837902810085033922, guid: 70240950716ddbe4ea170364e6d18096, type: 3}
+      propertyPath: m_VerticalAlignment
+      value: 512
+      objectReference: {fileID: 0}
+    - target: {fileID: 8837902810085033922, guid: 70240950716ddbe4ea170364e6d18096, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1445,6 +1509,10 @@ PrefabInstance:
     - target: {fileID: 917838589027900889, guid: 15a9cfe9adbab934fafe64f3521ad00b, type: 3}
       propertyPath: interactionKey
       value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 917838589027900889, guid: 15a9cfe9adbab934fafe64f3521ad00b, type: 3}
+      propertyPath: scrapDropChance
+      value: 0.25
       objectReference: {fileID: 0}
     - target: {fileID: 917838589027900889, guid: 15a9cfe9adbab934fafe64f3521ad00b, type: 3}
       propertyPath: itemPrefabs.Array.size
@@ -1800,6 +1868,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2290918045795835355, guid: d17488515ff10264e906b3c878df6af7, type: 3}
+      propertyPath: tankPrefab
+      value: 
+      objectReference: {fileID: 5575829872794002195, guid: 09f7abf73177da14d9104087cb2da0c2, type: 3}
     - target: {fileID: 2290918045795835355, guid: d17488515ff10264e906b3c878df6af7, type: 3}
       propertyPath: playerTransform
       value: 
@@ -2187,6 +2259,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4955439366606258638, guid: fac0a8190608c524eb98a64118f2930e, type: 3}
+      propertyPath: tankPrefab
+      value: 
+      objectReference: {fileID: 5575829872794002195, guid: 09f7abf73177da14d9104087cb2da0c2, type: 3}
+    - target: {fileID: 4955439366606258638, guid: fac0a8190608c524eb98a64118f2930e, type: 3}
       propertyPath: playerTransform
       value: 
       objectReference: {fileID: 4474771663635373331}
@@ -2216,9 +2292,17 @@ PrefabInstance:
       value: NPC
       objectReference: {fileID: 0}
     - target: {fileID: 3066661656993230696, guid: c046bf553c604cb469868eb7f1aec626, type: 3}
+      propertyPath: gasTankHealth
+      value: 
+      objectReference: {fileID: 535928919}
+    - target: {fileID: 3066661656993230696, guid: c046bf553c604cb469868eb7f1aec626, type: 3}
       propertyPath: playerInventory
       value: 
       objectReference: {fileID: 140243712}
+    - target: {fileID: 3066661656993230696, guid: c046bf553c604cb469868eb7f1aec626, type: 3}
+      propertyPath: rangedWeaponsButton
+      value: 
+      objectReference: {fileID: 1812871571}
     - target: {fileID: 3066661656993230696, guid: c046bf553c604cb469868eb7f1aec626, type: 3}
       propertyPath: playerWeaponSelector
       value: 
@@ -2403,6 +2487,10 @@ PrefabInstance:
     - target: {fileID: 3480368452254418628, guid: c8b3c671cc24a4244a992158cd62eb73, type: 3}
       propertyPath: interactionKey
       value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 3480368452254418628, guid: c8b3c671cc24a4244a992158cd62eb73, type: 3}
+      propertyPath: scrapDropChance
+      value: 0.25
       objectReference: {fileID: 0}
     - target: {fileID: 3480368452254418628, guid: c8b3c671cc24a4244a992158cd62eb73, type: 3}
       propertyPath: itemPrefabs.Array.size
@@ -2755,6 +2843,10 @@ PrefabInstance:
       value: SpawnZone_West
       objectReference: {fileID: 0}
     - target: {fileID: 1915589583709713610, guid: 64ba71d7f6bb1094aba3048f5296ba01, type: 3}
+      propertyPath: tankPrefab
+      value: 
+      objectReference: {fileID: 5575829872794002195, guid: 09f7abf73177da14d9104087cb2da0c2, type: 3}
+    - target: {fileID: 1915589583709713610, guid: 64ba71d7f6bb1094aba3048f5296ba01, type: 3}
       propertyPath: playerTransform
       value: 
       objectReference: {fileID: 4474771663635373331}
@@ -2950,6 +3042,10 @@ PrefabInstance:
     - target: {fileID: 766540215930761708, guid: 128817179b98b06439c3beaae7fb8614, type: 3}
       propertyPath: interactionKey
       value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 766540215930761708, guid: 128817179b98b06439c3beaae7fb8614, type: 3}
+      propertyPath: scrapDropChance
+      value: 0.25
       objectReference: {fileID: 0}
     - target: {fileID: 766540215930761708, guid: 128817179b98b06439c3beaae7fb8614, type: 3}
       propertyPath: itemPrefabs.Array.size
@@ -3179,6 +3275,10 @@ PrefabInstance:
     - target: {fileID: 8826515945597266192, guid: 1c967a96aebc27b4d9766afea24ef5de, type: 3}
       propertyPath: interactionKey
       value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 8826515945597266192, guid: 1c967a96aebc27b4d9766afea24ef5de, type: 3}
+      propertyPath: scrapDropChance
+      value: 0.25
       objectReference: {fileID: 0}
     - target: {fileID: 8826515945597266192, guid: 1c967a96aebc27b4d9766afea24ef5de, type: 3}
       propertyPath: itemPrefabs.Array.size
@@ -3482,7 +3582,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4112563897773289903, guid: 8dce40ed5e318874f81fbdc5315b161d, type: 3}
       propertyPath: scrapDropChance
-      value: 0.45
+      value: 0.25
       objectReference: {fileID: 0}
     - target: {fileID: 4112563897773289903, guid: 8dce40ed5e318874f81fbdc5315b161d, type: 3}
       propertyPath: itemPrefabs.Array.size
@@ -3894,6 +3994,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 61971306813561597, guid: 7f31adcb983982f40b713f0606d404ac, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.3
+      objectReference: {fileID: 0}
     - target: {fileID: 2859566442721408924, guid: 7f31adcb983982f40b713f0606d404ac, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -3937,6 +4041,34 @@ PrefabInstance:
     - target: {fileID: 3337706315095558653, guid: 7f31adcb983982f40b713f0606d404ac, type: 3}
       propertyPath: m_Name
       value: TowerSpawnPoints
+      objectReference: {fileID: 0}
+    - target: {fileID: 3363938993899362609, guid: 7f31adcb983982f40b713f0606d404ac, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4484638415155452160, guid: 7f31adcb983982f40b713f0606d404ac, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 5051727952675976045, guid: 7f31adcb983982f40b713f0606d404ac, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7365722678944210874, guid: 7f31adcb983982f40b713f0606d404ac, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7868234230010601073, guid: 7f31adcb983982f40b713f0606d404ac, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8065329781989423871, guid: 7f31adcb983982f40b713f0606d404ac, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8136430916499817689, guid: 7f31adcb983982f40b713f0606d404ac, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4006,6 +4138,10 @@ PrefabInstance:
     - target: {fileID: 5059389046250157684, guid: f53c8dce44ddb43469fb178d04600c33, type: 3}
       propertyPath: interactionKey
       value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 5059389046250157684, guid: f53c8dce44ddb43469fb178d04600c33, type: 3}
+      propertyPath: scrapDropChance
+      value: 0.25
       objectReference: {fileID: 0}
     - target: {fileID: 5059389046250157684, guid: f53c8dce44ddb43469fb178d04600c33, type: 3}
       propertyPath: itemPrefabs.Array.size
@@ -4145,6 +4281,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3473346894551875585, guid: 57d1ea1a8abcd6c478ba6f1c774f7b96, type: 3}
+      propertyPath: tankPrefab
+      value: 
+      objectReference: {fileID: 5575829872794002195, guid: 09f7abf73177da14d9104087cb2da0c2, type: 3}
     - target: {fileID: 3473346894551875585, guid: 57d1ea1a8abcd6c478ba6f1c774f7b96, type: 3}
       propertyPath: playerTransform
       value: 
@@ -4412,6 +4552,10 @@ PrefabInstance:
       value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 8763076807299320740, guid: 3e4ea78b126a4a94bbcc5f60de6376d6, type: 3}
+      propertyPath: scrapDropChance
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 8763076807299320740, guid: 3e4ea78b126a4a94bbcc5f60de6376d6, type: 3}
       propertyPath: itemPrefabs.Array.size
       value: 9
       objectReference: {fileID: 0}
@@ -4534,6 +4678,17 @@ Light:
   m_CorrespondingSourceObject: {fileID: 8207453988858882644, guid: c136419487cf0f84aa6253d8b382a976, type: 3}
   m_PrefabInstance: {fileID: 1943145140}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1812871571 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4666601751314229324, guid: c046bf553c604cb469868eb7f1aec626, type: 3}
+  m_PrefabInstance: {fileID: 919872252}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &1878714270 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2290918045795835355, guid: d17488515ff10264e906b3c878df6af7, type: 3}
@@ -5088,6 +5243,10 @@ PrefabInstance:
     - target: {fileID: 8774806283724233160, guid: 39a88c589375d2045a3e138720bbb026, type: 3}
       propertyPath: interactionKey
       value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 8774806283724233160, guid: 39a88c589375d2045a3e138720bbb026, type: 3}
+      propertyPath: scrapDropChance
+      value: 0.25
       objectReference: {fileID: 0}
     - target: {fileID: 8774806283724233160, guid: 39a88c589375d2045a3e138720bbb026, type: 3}
       propertyPath: itemPrefabs.Array.size

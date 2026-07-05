@@ -150,7 +150,7 @@ public class ScrapHudDisplay : MonoBehaviour {
         }
 
         int scrapAmount = playerWallet != null ? playerWallet.ScrapAmount : 0;
-        if (ScrapInventorySaver.TryGetScrapAmount(out int inventoryScrap)) {
+        if (ScrapInventorySaver.instance.TryGetScrapAmount(out int inventoryScrap)) {
             scrapAmount = inventoryScrap;
         }
 

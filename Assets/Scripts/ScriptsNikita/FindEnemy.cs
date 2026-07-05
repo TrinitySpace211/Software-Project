@@ -10,6 +10,10 @@ public class FindEnemy : MonoBehaviour {
     /// </summary>
     public ZombieAI zombie;
 
+    public SprinterController sprinter;
+
+    public TankZombieController tank;
+
     /// <summary>
     /// The search radius of the tower.
     /// </summary>
@@ -50,6 +54,9 @@ public class FindEnemy : MonoBehaviour {
 
         foreach (Collider hit in hits) {
             ZombieAI zombie = hit.gameObject.GetComponentInParent<ZombieAI>();
+            SprinterController sprinter = hit.gameObject.GetComponentInParent<SprinterController>();
+            TankZombieController tank = hit.gameObject.GetComponentInParent<TankZombieController>();
+
             if (zombie != null) {
                 if (zombie.IsDead()) {
                     continue;
@@ -58,19 +65,44 @@ public class FindEnemy : MonoBehaviour {
                     continue;
                 }
                 this.zombie = zombie; // global variable becomes the local variable
+            } else if (sprinter != null) {
+                if (sprinter.IsDead()) {
+                    continue;
+                }
+                if (IsBlockedByObject(sprinter)) {
+                    continue;
+                }
+                this.sprinter = sprinter;
+            } else if (tank != null) {
+                if (tank.IsDead()) {
+                    continue;
+                }
+                if (IsBlockedByObject(tank)) {
+                    continue;
+                }
+                this.tank = tank;
             }
         }
     }
 
     /// <summary>
     /// Checks if there is any collider between the tower and the target zombie.
+    /// Works with any zombie type that implements IDamageable and is a Component.
     /// </summary>
-    private bool IsBlockedByObject(ZombieAI targetZombie) {
+    private bool IsBlockedByObject<T>(T targetZombie) where T : Component, IDamageable {
+        if (targetZombie == null) {
+            return false;
+        }
+
         Vector3 startPosition = transform.position + Vector3.up * 1.0f;
         Vector3 targetPosition = targetZombie.transform.position + Vector3.up * 1.0f;
 
         Vector3 direction = targetPosition - startPosition;
         float distance = direction.magnitude;
+
+        if (distance <= 0f) {
+            return false;
+        }
 
         RaycastHit[] hits = Physics.RaycastAll(
             startPosition,
@@ -82,21 +114,24 @@ public class FindEnemy : MonoBehaviour {
 
         foreach (RaycastHit hit in hits) {
             // Ignore this tower itself
-            if (hit.collider.transform.IsChildOf(transform))
+            if (hit.collider.transform.IsChildOf(transform)) {
                 continue;
+            }
 
-            // Check if the hit object belongs to a zombie
-            ZombieAI hitZombie = hit.collider.GetComponentInParent<ZombieAI>();
+            T hitZombie = hit.collider.GetComponentInParent<T>();
 
-            // Ignore dead zombies. They should not block targeting.
-            if (hitZombie != null && hitZombie.IsDead())
+            if (hitZombie == null) {
                 continue;
+            }
 
-            // If the first relevant hit is the target zombie, line of sight is clear
-            if (hitZombie == targetZombie)
+            if (hitZombie == targetZombie) {
                 return false;
+            }
 
-            // If another zombie or another object is hit first, the target is blocked
+            if (hitZombie.IsDead()) {
+                continue;
+            }
+
             return true;
         }
 

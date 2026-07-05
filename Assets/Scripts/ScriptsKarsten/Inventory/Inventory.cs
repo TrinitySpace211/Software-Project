@@ -20,7 +20,6 @@ public class Inventory : MonoBehaviour, ISaveable {
     [SerializeField] private List<RectTransform> hotbarSlotsRect;
     [SerializeField] private GameObject crosshair;
     [SerializeField] private TooltipUI tooltipUI;
-    private bool visible = false;
 
     [Header("Item References")]
     [SerializeField] private ItemSO[] guns;
@@ -83,11 +82,6 @@ public class Inventory : MonoBehaviour, ISaveable {
     private bool isDragging = false;
 
     /// <summary>
-    /// Indicates whether the inventory is currently open (paused state).
-    /// </summary>
-    private bool isPaused = false;
-
-    /// <summary>
     /// Holds the previous selected hotbar slot number
     /// </summary>
     private int previousSlot = -1;
@@ -101,11 +95,6 @@ public class Inventory : MonoBehaviour, ISaveable {
     /// Saves the Slot that got selected in the hotbar
     /// </summary>
     private Slot selectedSlot = null;
-
-    /// <summary>
-    /// Path to the Save File
-    /// </summary>
-    private string savePath;
 
     /// <summary>
     /// Initializes slot collections by retrieving
@@ -543,18 +532,6 @@ public class Inventory : MonoBehaviour, ISaveable {
         if (isDragging) {
             dragIcon.transform.position = Mouse.current.position.ReadValue();
         }
-    }
-
-    /// <summary>
-    /// Toggles the inventory pause state,
-    /// enabling/disabling the inventory UI and game time.
-    /// </summary>
-    private void TogglePause() {
-        isPaused = !isPaused;
-
-        container.SetActive(isPaused);
-        Cursor.visible = isPaused;
-        Time.timeScale = isPaused ? 0f : 1f;
     }
 
     private void ToggleWeaponSelect(ItemSO weapon) {

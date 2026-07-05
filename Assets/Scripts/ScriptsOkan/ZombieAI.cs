@@ -9,7 +9,7 @@ using Random = UnityEngine.Random;
 ///     Transitions between states based on distance to the current target.
 /// </summary>
 public class ZombieAI : MonoBehaviour, IDamageable {
-    public static Action<Vector3> OnTakeDamage;
+
     public int health = 100;
 
     [SerializeField] private SkinnedMeshRenderer skinnedMeshRenderer;
@@ -58,6 +58,10 @@ public class ZombieAI : MonoBehaviour, IDamageable {
     private float dissolveMeterMax;
     private float dissolveMeter;
     private float dissolveSpeed = 1f;
+
+    //Event
+    public static Action<Vector3> OnTakeDamage;
+    public static event Action<ZombieAI> OnDead;
 
     private void Start() {
         _agent = GetComponent<NavMeshAgent>();
@@ -340,6 +344,8 @@ public class ZombieAI : MonoBehaviour, IDamageable {
 
         foreach (var joint in joints) joint.isKinematic = false;
         foreach (var collider in capsuleCollider) collider.isTrigger = false;
+
+        OnDead?.Invoke(this);
 
         StartCoroutine(DissolveEnemy(3f));
     }

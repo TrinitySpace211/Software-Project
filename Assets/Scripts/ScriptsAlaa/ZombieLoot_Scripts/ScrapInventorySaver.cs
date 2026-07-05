@@ -12,36 +12,36 @@ public class ScrapInventorySaver : MonoBehaviour {
     [SerializeField] private ItemSO scrapItem;
 
     // Allows other scripts to access this script easily.
-    private static ScrapInventorySaver instance;
+    public static ScrapInventorySaver instance { get; private set; }
 
     private void Awake() {
         // Stores this script as the current instance.
-        instance = this;
-        FindInventoryIfMissing();
-    }
-
-    public static void AddScrapToInventory(int amount) {
-        // Does nothing if this script is not in the scene.
-        if (instance == null) {
+        if (instance != null) {
+            Debug.LogError("There can't be 2 Scrap Inventory Savers!");
             return;
         }
 
-        instance.AddScrap(amount);
+        instance = this;
     }
 
-    public static bool TryGetScrapAmount(out int amount) {
+    private void Start() {
+        FindInventoryIfMissing();
+    }
+
+    public void AddScrapToInventory(int amount) {
+        // Does nothing if this script is not in the scene.
+        AddScrap(amount);
+    }
+
+    public bool TryGetScrapAmount(out int amount) {
         amount = 0;
 
-        if (instance == null) {
-            return false;
-        }
-
-        return instance.TryCountScrapInInventory(out amount);
+        return TryCountScrapInInventory(out amount);
     }
 
-    public static bool IsScrapItem(ItemSO item) {
+    public bool IsScrapItem(ItemSO item) {
         // Checks whether an item is the scrap item.
-        return instance != null && item != null && item == instance.scrapItem;
+        return item != null && item == scrapItem;
     }
 
     private void AddScrap(int amount) {

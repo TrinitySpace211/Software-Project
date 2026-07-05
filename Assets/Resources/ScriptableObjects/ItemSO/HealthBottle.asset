@@ -18,7 +18,7 @@ MonoBehaviour:
   meleeType: 0
   healthItemType: 2
   ammunitionType: 0
-  spawnWeight: 40
+  spawnWeight: 60
   itemName: HealthBottle
   icon: {fileID: 21300000, guid: 4ff1ba14890d5414c837b4c296a18879, type: 3}
   maxStackSize: 3

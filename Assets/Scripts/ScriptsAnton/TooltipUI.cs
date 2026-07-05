@@ -33,40 +33,45 @@ public class TooltipUI : MonoBehaviour, IPointerExitHandler {
         slider.wholeNumbers = true;
 
         Visibile(false);
-        salvageButton.onClick.AddListener(() => {
-            if (padding.y == hiddenExtendedCardPadding) {
-                if (slot != null && slot.GetAmount() == 1) {
-                    slot.SetItem(null);
-                    Visibile(false);
-                } else {
-                    float maxAmount = slot.GetAmount();
-                    maxAmountText.text = maxAmount.ToString();
-                    slider.maxValue = maxAmount;
-                    slider.value = 0;
 
-                    padding.y = hiddenExtendedCardPadding;
-                    mask.padding = padding;
+        salvageButton.onClick.AddListener(HandleToolip);
 
-                    LeanTween.value(extendedCard, hiddenExtendedCardPadding, shownExtendedCardPadding, 0.25f)
-                        .setEaseOutCubic()
-                        .setOnUpdate(value => {
-                            padding.y = value;
-                            mask.padding = padding;
-                        });
-                }
-            } else {
-                slot.RemoveAmount((int)slider.value);
+        slider.onValueChanged.AddListener(HandleSliderValue);
+    }
 
-                audioSource.volume = salvageVolume * SoundManager.Instance.volume;
-                audioSource.Play();
+    private void HandleSliderValue(float value) {
+        minAmountText.text = ((int)value).ToString();
+    }
 
+    public void HandleToolip() {
+        if (padding.y == hiddenExtendedCardPadding) {
+            if (slot != null && slot.GetAmount() == 1) {
+                slot.SetItem(null);
                 Visibile(false);
-            }
-        });
+            } else {
+                float maxAmount = slot.GetAmount();
+                maxAmountText.text = maxAmount.ToString();
+                slider.maxValue = maxAmount;
+                slider.value = 0;
 
-        slider.onValueChanged.AddListener(value => {
-            minAmountText.text = ((int)value).ToString();
-        });
+                padding.y = hiddenExtendedCardPadding;
+                mask.padding = padding;
+
+                LeanTween.value(extendedCard, hiddenExtendedCardPadding, shownExtendedCardPadding, 0.25f)
+                    .setEaseOutCubic()
+                    .setOnUpdate(value => {
+                        padding.y = value;
+                        mask.padding = padding;
+                    });
+            }
+        } else {
+            slot.RemoveAmount((int)slider.value);
+
+            audioSource.volume = salvageVolume * SoundManager.Instance.volume;
+            audioSource.Play();
+
+            Visibile(false);
+        }
     }
 
     public void Visibile(bool state) {
@@ -85,5 +90,10 @@ public class TooltipUI : MonoBehaviour, IPointerExitHandler {
         padding.y = hiddenExtendedCardPadding;
         mask.padding = padding;
         Visibile(false);
+    }
+
+    private void OnDestroy() {
+        salvageButton.onClick.RemoveListener(HandleToolip);
+        slider.onValueChanged.RemoveListener(HandleSliderValue);
     }
 }

@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -32,6 +34,10 @@ public class SpawnZone : MonoBehaviour {
     [SerializeField]
     private LayerMask groundLayer;
 
+    private List<ZombieAI> zombies = new();
+    private List<SprinterController> sprinters = new();
+    private List<TankZombieController> tanks = new();
+
     /// <summary>
     ///     Draws a wire sphere in the Scene View to visualize the spawn area.
     ///     Only visible when the GameObject is selected.
@@ -41,24 +47,53 @@ public class SpawnZone : MonoBehaviour {
         Gizmos.DrawWireSphere(transform.position, spawnRadius);
     } */
 
+    private void Tank_OnDead(TankZombieController tank) {
+        if (tank != null) {
+            tanks.Remove(tank);
+        }
+    }
+
+    private void Sprinter_OnDead(SprinterController sprinter) {
+        if (sprinter != null) {
+            sprinters.Remove(sprinter);
+        }
+    }
+
+    private void Zombie_OnDead(ZombieAI zombie) {
+        if (zombie != null) {
+            zombies.Remove(zombie);
+        }
+    }
+
     /// <summary>
     ///     Spawns a wave of zombies at random positions within the spawn radius.
     ///     Each zombie is initialized with this zone's center and radius for patrol behaviour.
     /// </summary>
     public void SpawnWave() {
         // Normale Zombies
-        for (var i = 0; i < zombieCount; i++) SpawnZombieAt(zombiePrefab);
+        for (var i = 0; i < zombieCount; i++) {
+            ZombieAI zombieInstance = SpawnZombieAt<ZombieAI>(zombiePrefab);
+            zombies.Add(zombieInstance);
+        }
+
         // Sprinter
-        for (var i = 0; i < sprinterCount; i++) SpawnZombieAt(sprinterPrefab);
+        for (var i = 0; i < sprinterCount; i++) {
+            SprinterController sprinter = SpawnZombieAt<SprinterController>(sprinterPrefab);
+            sprinters.Add(sprinter);
+        }
+
         // Tanks
-        for (var i = 0; i < tankCount; i++) SpawnZombieAt(tankPrefab);
+        for (var i = 0; i < tankCount; i++) {
+            TankZombieController tank = SpawnZombieAt<TankZombieController>(tankPrefab);
+            tanks.Add(tank);
+        }
+
     }
 
-    private void SpawnZombieAt(GameObject prefab) {
-        // Schutz: Prefab evtl. noch nicht im Inspector zugewiesen (z.B. tankPrefab) -> nicht crashen.
-        if (prefab == null) return;
+    private T SpawnZombieAt<T>(GameObject prefab) {
+        if (prefab == null) return default;
 
-        var randomOffset = Random.insideUnitCircle * spawnRadius;
+        var randomOffset = UnityEngine.Random.insideUnitCircle * spawnRadius;
         var spawnPos = new Vector3(
             transform.position.x + randomOffset.x,
             transform.position.y,
@@ -67,11 +102,37 @@ public class SpawnZone : MonoBehaviour {
         var go = Instantiate(prefab, spawnPos, Quaternion.identity, transform);
         var ai = go.GetComponent<ZombieAI>();
         if (ai != null) ai.Init(transform.position, spawnRadius * 2f, playerTransform);
+
+        return go.GetComponent<T>();
     }
 
     public void ClearZombies() {
         for (int i = transform.childCount - 1; i >= 0; i--) {
             Destroy(transform.GetChild(i));
         }
+    }
+
+    public List<ZombieAI> GetZombies() {
+        return zombies;
+    }
+
+    public List<SprinterController> GetSprinters() {
+        return sprinters;
+    }
+
+    public List<TankZombieController> GetTanks() {
+        return tanks;
+    }
+
+    private void OnEnable() {
+        ZombieAI.OnDead += Zombie_OnDead;
+        SprinterController.OnDead += Sprinter_OnDead;
+        TankZombieController.OnDead += Tank_OnDead;
+    }
+
+    private void OnDisable() {
+        ZombieAI.OnDead -= Zombie_OnDead;
+        SprinterController.OnDead -= Sprinter_OnDead;
+        TankZombieController.OnDead -= Tank_OnDead;
     }
 }
