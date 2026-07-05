@@ -26,61 +26,59 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
     private bool achievement2Gained = false;
 
     /// <summary>
-    /// UI text showing current time and state.
+    /// UI text showing the current time and current time state.
     /// </summary>
     public TMP_Text timeText;
 
     /// <summary>
-    /// UI text for transition notifications.
+    /// UI text used for transition notifications.
     /// </summary>
     public TMP_Text notificationText;
 
     /// <summary>
-    /// UI text for saving the game
+    /// UI text used to display the save confirmation message.
     /// </summary>
     public TextMeshProUGUI gameSavedUIText;
 
     /// <summary>
-    /// Speed of time progression (hours per real second).
+    /// Speed at which in-game time advances per real second.
     /// </summary>
     public float hoursPerRealSecond = 0.1f;
 
     /// <summary>
-    /// Current in-game time (0�24 hours).
+    /// Current in-game time of day.
     /// </summary>
     private float timeOfDay = 6f;
 
     /// <summary>
-    /// Day and Night cycle counter.
+    /// Tracks the current day and night progression.
     /// </summary>
     private int dayNumber = 1;
     private int nightNumber = 0;
 
     /// <summary>
-    /// Number of nights the player has successfully survived.
+    /// Counts how many nights the player has survived.
     /// </summary>
     private int survivedNights = 0;
 
     /// <summary>
-    /// Returns the amount of survived nights.
+    /// Gets the number of survived nights.
     /// </summary>
     public int SurvivedNights => survivedNights;
 
     /// <summary>
     /// Event fired when a new day begins.
-    /// Connect to WaveManager.OnNewDay() via the Inspector.
     /// </summary>
     [Header("Wave Events")]
     public UnityEvent onNewDayStarted;
 
     /// <summary>
     /// Event fired when a new night begins.
-    /// Connect to your objective attack logic via the Inspector.
     /// </summary>
     public UnityEvent onNightStarted;
 
     /// <summary>
-    /// Current time state.
+    /// Possible states of the current time cycle.
     /// </summary>
     private enum TimeState {
         Night,
@@ -92,112 +90,112 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
     private TimeState currentState;
 
     /// <summary>
-    /// Directional light acting as sun/moon.
+    /// Directional light used as the sun or moon.
     /// </summary>
     public Light sunLight;
 
     /// <summary>
-    /// Maximum light intensity during day.
+    /// Maximum light intensity during daytime.
     /// </summary>
     public float dayLightIntensity = 1.2f;
 
     /// <summary>
-    /// Minimum light intensity during night.
+    /// Minimum light intensity during nighttime.
     /// </summary>
     public float nightLightIntensity = 0.5f;
 
     /// <summary>
-    /// Color during daytime.
+    /// Light color used during the day.
     /// </summary>
     public Color dayColor = Color.white;
 
     /// <summary>
-    /// Color during nighttime.
+    /// Light color used during the night.
     /// </summary>
     public Color nightColor = new Color(0.45f, 0.45f, 0.55f);
 
     /// <summary>
-    /// AudioClip of the day Music
+    /// Audio clip played during the day.
     /// </summary>
     public AudioClip dayMusic;
 
     /// <summary>
-    /// AudioClip of the night Music
+    /// Audio clip played during the night.
     /// </summary>
     public AudioClip nightMusic;
 
     /// <summary>
-    /// Volume of the day Music
+    /// Volume applied to the day music.
     /// </summary>
     public float dayMusicVolume;
 
     /// <summary>
-    /// Volume of the night Music
+    /// Volume applied to the night music.
     /// </summary>
     public float nightMusicVolume;
 
     /// <summary>
-    /// Player object reference for disabling controls during extraction.
+    /// Player object reference used during extraction handling.
     /// </summary>
     public GameObject playerObject;
 
     /// <summary>
-    /// Extraction controller reference that starts the cutscene.
+    /// Reference to the extraction controller.
     /// </summary>
     public ExtractionController extractionController;
 
     /// <summary>
-    /// Night number on which extraction should start.
+    /// Night on which extraction should begin.
     /// </summary>
     public int extractionNight = 10;
 
     /// <summary>
-    /// Name of the scene that will be loaded after the extraction sequence.
+    /// Scene loaded after the extraction sequence.
     /// </summary>
     public Loader.Scene extractionScene = Loader.Scene.ExtractionScene;
 
     /// <summary>
-    /// Delay before switching to the extraction scene.
+    /// Delay before the extraction scene starts loading.
     /// </summary>
     public float extractionSceneDelay = 3f;
 
     /// <summary>
-    /// Fade screen used for the black transition.
+    /// Canvas group used for the fade-to-black transition.
     /// </summary>
     public CanvasGroup fadeCanvasGroup;
 
     /// <summary>
-    /// Duration of the black fade before loading the extraction scene.
+    /// Duration of the fade-to-black transition.
     /// </summary>
     public float fadeDuration = 1.5f;
 
     /// <summary>
-    /// Prevents the extraction from starting multiple times.
+    /// Prevents the extraction sequence from being started more than once.
     /// </summary>
     private bool extractionTriggered;
 
     /// <summary>
-    /// Cached Player script reference.
+    /// Cached reference to the Player component.
     /// </summary>
     private Player playerScript;
 
     /// <summary>
-    /// An AudioSource for the Day/Night Music playing in the background
+    /// Audio source used for day and night music.
     /// </summary>
     private AudioSource audioSource;
 
     /// <summary>
-    /// Throws an event when the sun sets
+    /// Event fired when sunset begins.
     /// </summary>
     public static event Action OnSunsetStarted;
 
     /// <summary>
-    /// Throws an event when the sun rises
+    /// Event fired when sunrise begins.
     /// </summary>
     public static event Action OnSunriseStarted;
 
     /// <summary>
-    /// Initializes system and hides notification UI.
+    /// Initializes the system and hides notification UI elements.
     /// </summary>
     void Start() {
         if (gameSavedUIText != null)
@@ -231,7 +229,7 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
     }
 
     /// <summary>
-    /// Main update loop.
+    /// Main update loop that advances time and updates state, UI, and lighting.
     /// </summary>
     void Update() {
         if (extractionTriggered)
@@ -244,15 +242,15 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
     }
 
     /// <summary>
-    /// Funktion triggers when the Player dies
+    /// Stops background music when the player dies.
     /// </summary>
-    /// <param name="position">The Position where the Player died</param>
+    /// <param name="position">World position where the player died.</param>
     private void PlayerHealth_OnDeath(Vector3 position) {
         audioSource.Stop();
     }
 
     /// <summary>
-    /// Advances in-game time.
+    /// Advances the in-game time.
     /// </summary>
     private void UpdateTime() {
         timeOfDay += Time.deltaTime * hoursPerRealSecond;
@@ -260,7 +258,7 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
     }
 
     /// <summary>
-    /// Determines current time state and handles transitions.
+    /// Detects state changes and triggers the matching transition behavior.
     /// </summary>
     private void HandleState() {
         TimeState newState = GetTimeState();
@@ -285,8 +283,6 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
                     if (nightNumber > 0) {
                         survivedNights++;
 
-                        // Ohne Null-Check bricht die Exception HandleState ab und
-                        // onNewDayStarted feuert nie -> keine neuen Zombie-Wellen.
                         if (SaveManager.Instance != null) {
                             SaveManager.Instance.SaveGame();
                             StartCoroutine(ShowSavedGame());
@@ -323,6 +319,9 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
         }
     }
 
+    /// <summary>
+    /// Fades out the current music and starts the next track with a fade-in.
+    /// </summary>
     private IEnumerator FadeInOutMusic(AudioSource audioSource, AudioClip musicClip, float targetVolume, float duration) {
         float startVolume = audioSource.volume;
         while (audioSource.volume > 0) {
@@ -345,6 +344,9 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
         audioSource.volume = targetVolume;
     }
 
+    /// <summary>
+    /// Shows and then hides the saved-game confirmation text.
+    /// </summary>
     private IEnumerator ShowSavedGame() {
         if (gameSavedUIText == null)
             yield break;
@@ -354,6 +356,9 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
         gameSavedUIText.gameObject.SetActive(false);
     }
 
+    /// <summary>
+    /// Checks whether an achievement should be awarded for the current day.
+    /// </summary>
     private void CheckAchievement() {
         if (dayNumber == 2 && !achievement1Gained) {
             AchievementManager.triggerAchievement?.Invoke(achievementDay1);
@@ -365,7 +370,7 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
     }
 
     /// <summary>
-    /// Starts the extraction sequence, disables player controls, fades the screen to black, and loads the extraction scene.
+    /// Starts the extraction sequence and prevents it from running again.
     /// </summary>
     private void TriggerExtraction() {
         if (extractionTriggered)
@@ -385,7 +390,7 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
     }
 
     /// <summary>
-    /// Loads the extraction scene after the configured delay and fade.
+    /// Waits for the configured delay, fades to black, and loads the extraction scene.
     /// </summary>
     private IEnumerator LoadExtractionSceneRoutine() {
         yield return new WaitForSeconds(extractionSceneDelay);
@@ -394,7 +399,7 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
     }
 
     /// <summary>
-    /// Fades the screen to black using the assigned CanvasGroup.
+    /// Fades the screen to black using the configured canvas group.
     /// </summary>
     private IEnumerator FadeToBlackRoutine() {
         if (fadeCanvasGroup == null)
@@ -416,7 +421,7 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
     }
 
     /// <summary>
-    /// Updates UI clock display.
+    /// Updates the on-screen time and day/night display.
     /// </summary>
     private void UpdateUI() {
         int hours = Mathf.FloorToInt(timeOfDay);
@@ -437,14 +442,14 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
     }
 
     /// <summary>
-    /// Shows a temporary notification.
+    /// Displays a temporary notification message.
     /// </summary>
     private void ShowNotification(string message) {
         StartCoroutine(NotificationRoutine(message));
     }
 
     /// <summary>
-    /// Notification coroutine.
+    /// Shows a notification for a short amount of time, then hides it again.
     /// </summary>
     private IEnumerator NotificationRoutine(string message) {
         if (notificationText == null)
@@ -459,16 +464,9 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
     }
 
     /// <summary>
-    /// Determines the current time state based on the in-game time.
-    /// The day is divided into four phases:
-    /// - Sunrise (05:00�06:00)
-    /// - Day (06:00�20:00)
-    /// - Sunset (20:00�22:00)
-    /// - Night (22:00�05:00)
+    /// Determines the current time state from the current in-game time.
     /// </summary>
-    /// <returns>
-    /// The current TimeState from enum based on timeOfDay.
-    /// </returns>
+    /// <returns>The current time state.</returns>
     private TimeState GetTimeState() {
         if (timeOfDay >= 5f && timeOfDay < 6f)
             return TimeState.Sunrise;
@@ -483,7 +481,7 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
     }
 
     /// <summary>
-    /// Updates sun rotation, intensity, color and ambient lighting.
+    /// Updates sun rotation, light intensity, light color, and ambient lighting.
     /// </summary>
     private void UpdateLighting() {
         if (sunLight == null)
@@ -537,20 +535,26 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
     }
 
     /// <summary>
-    /// Returns current time (read-only).
+    /// Returns the current in-game time.
     /// </summary>
     public float TimeOfDay => timeOfDay;
 
     /// <summary>
-    /// Sets time manually (debug/testing).
+    /// Sets the current time manually for debugging or testing.
     /// </summary>
     public void SetTime(float time) {
         timeOfDay = time;
     }
 
     #region Save/Load
+    /// <summary>
+    /// Returns the unique save ID for this object.
+    /// </summary>
     public string GetSaveID() => ID;
 
+    /// <summary>
+    /// Serializes the current day-night state.
+    /// </summary>
     public object Save() {
         return new DayNightData {
             survivedNights = survivedNights,
@@ -559,6 +563,9 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
         };
     }
 
+    /// <summary>
+    /// Restores the day-night state from saved data.
+    /// </summary>
     public void Load(object data) {
         DayNightData dayNightData = (DayNightData)data;
         survivedNights = dayNightData.survivedNights;
@@ -570,6 +577,9 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
         //Debug.Log("Loaded Night: " + survivedNights);
     }
 
+    /// <summary>
+    /// Serializable save data for the day-night cycle.
+    /// </summary>
     [Serializable]
     public class DayNightData {
         public int survivedNights;
@@ -578,6 +588,9 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
     }
     #endregion
 
+    /// <summary>
+    /// Registers event listeners and save handling when enabled.
+    /// </summary>
     private void OnEnable() {
         PlayerHealth.OnDeath += PlayerHealth_OnDeath;
 
@@ -585,6 +598,9 @@ public class DayNightCycle : MonoBehaviour, ISaveable {
             SaveManager.Instance.Register(this);
     }
 
+    /// <summary>
+    /// Unregisters event listeners and save handling when disabled.
+    /// </summary>
     private void OnDisable() {
         PlayerHealth.OnDeath -= PlayerHealth_OnDeath;
 

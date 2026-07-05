@@ -9,6 +9,7 @@ using UnityEngine.UI;
 /// animation disabling, fade effects, and UI button reveal.
 /// </summary>
 public class ExtractionController : MonoBehaviour, ISaveable {
+    /// <summary>Save identifier for the extraction controller.</summary>
     public static readonly string ID = "ExtractionController";
 
     [Header("Player")]
@@ -112,7 +113,6 @@ public class ExtractionController : MonoBehaviour, ISaveable {
             exitButtonCanvasGroup.blocksRaycasts = false;
             exitButton.gameObject.SetActive(true);
         }
-
     }
 
     /// <summary>
@@ -270,7 +270,7 @@ public class ExtractionController : MonoBehaviour, ISaveable {
     }
 
     /// <summary>
-    /// Exits the application (or stops play mode in the Unity Editor).
+    /// Exits the application or stops play mode in the Unity Editor.
     /// </summary>
     public void OnExitClicked() {
 #if UNITY_EDITOR
@@ -295,29 +295,47 @@ public class ExtractionController : MonoBehaviour, ISaveable {
     }
 
     #region Save/Load
+    /// <summary>
+    /// Returns the unique save identifier.
+    /// </summary>
     public string GetSaveID() => ID;
 
+    /// <summary>
+    /// Creates a save data object for the extraction controller.
+    /// </summary>
     public object Save() {
         return new ExtractionContollerData {
             achievement3Gained = achievement3Gained
         };
     }
 
+    /// <summary>
+    /// Restores saved extraction controller data.
+    /// </summary>
     public void Load(object data) {
         ExtractionContollerData extractionData = (ExtractionContollerData)data;
         achievement3Gained = extractionData.achievement3Gained;
     }
 
+    /// <summary>
+    /// Serializable save data for the extraction controller.
+    /// </summary>
     public class ExtractionContollerData {
         public bool achievement3Gained;
     }
     #endregion
 
+    /// <summary>
+    /// Registers the saveable object on enable.
+    /// </summary>
     private void OnEnable() {
         if (SaveManager.Instance != null)
             SaveManager.Instance.Register(this);
     }
 
+    /// <summary>
+    /// Unregisters the saveable object on disable.
+    /// </summary>
     private void OnDisable() {
         if (SaveManager.Instance != null)
             SaveManager.Instance.Unregister(this);
