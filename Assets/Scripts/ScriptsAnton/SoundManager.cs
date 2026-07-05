@@ -31,6 +31,9 @@ public class SoundManager : MonoBehaviour {
         audioSource = GetComponent<AudioSource>();
     }
 
+    /// <summary>
+    /// Subscribes all the Events
+    /// </summary>
     private void OnEnable() {
         Player.OnHeal += Player_OnHeal;
         PlayerHealth.OnTakeDamage += Player_OnTakeDamage;
@@ -42,6 +45,9 @@ public class SoundManager : MonoBehaviour {
         GasTankHealth.OnObjectiveDestroyed += GasTankHealth_OnObjectiveDestroyed;
     }
 
+    /// <summary>
+    /// Unsubscribes all the Events
+    /// </summary>
     private void OnDestroy() {
         Player.OnHeal -= Player_OnHeal;
         PlayerHealth.OnTakeDamage -= Player_OnTakeDamage;

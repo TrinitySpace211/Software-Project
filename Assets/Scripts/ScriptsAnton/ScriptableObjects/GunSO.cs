@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Pool;
 
 /// <summary>
-///     Creates a Sciptable Object for the Guns with Logic so every Weapon is the same
+/// Creates a Sciptable Object for the Guns with Logic so every Weapon is the same
 /// </summary>
 [CreateAssetMenu(fileName = "Gun", menuName = "Guns/Gun", order = 0)]
 public class GunSO : ScriptableObject {
@@ -234,10 +234,17 @@ public class GunSO : ScriptableObject {
         return gunData.effectiveMaxAmmo;
     }
 
+    /// <summary>
+    /// Getter for the GunData
+    /// </summary>
+    /// <returns></returns>
     public GunData GetGunData() {
         return gunData;
     }
 
+    /// <summary>
+    /// Saves the GunData
+    /// </summary>
     public void SaveGunData() {
         if (gunData == null) {
             gunData = new GunData();
@@ -246,6 +253,10 @@ public class GunSO : ScriptableObject {
         gunData.UpdateStats(currentAmmo, gunData.effectiveMaxAmmo, gunData.effectiveDamage);
     }
 
+    /// <summary>
+    /// Loads the GunData from the JSON File
+    /// </summary>
+    /// <param name="gunData"></param>
     public void LoadGunData(GunData gunData) {
         this.gunData = gunData;
     }
@@ -343,6 +354,9 @@ public class GunSO : ScriptableObject {
         return gunData.effectiveDamage;
     }
 
+    /// <summary>
+    /// GunData class to save all relevant stats
+    /// </summary>
     [Serializable]
     public class GunData {
         public int currentAmmo;
@@ -351,6 +365,12 @@ public class GunSO : ScriptableObject {
         public int damageUpgradeCount;
         public int ammoUpgradeCount;
 
+        /// <summary>
+        /// Stats of the gun that should be updated 
+        /// </summary>
+        /// <param name="currentAmmo">The current Ammo of the gun</param>
+        /// <param name="effectiveMaxAmmo">The calculated Max Ammo of the gun</param>
+        /// <param name="effectiveDamage">The calculated Damage of the gun</param>
         public void UpdateStats(int currentAmmo, int effectiveMaxAmmo, int effectiveDamage) {
             this.currentAmmo = currentAmmo;
             this.effectiveMaxAmmo = effectiveMaxAmmo;

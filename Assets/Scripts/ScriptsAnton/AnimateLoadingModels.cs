@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// Animation of the Loading Screen Models
+/// </summary>
 public class AnimateLoadingModels : MonoBehaviour {
 
     [SerializeField] private GameObject item;
@@ -14,6 +17,9 @@ public class AnimateLoadingModels : MonoBehaviour {
         RotateItem();
     } */
 
+    /// <summary>
+    /// The item Hovers like a Sinus Curve
+    /// </summary>
     private void AnimateItem() {
         animationTimer += Time.deltaTime;
 
@@ -21,6 +27,9 @@ public class AnimateLoadingModels : MonoBehaviour {
         item.transform.localPosition = Vector3.up * position;
     }
 
+    /// <summary>
+    /// The Item Rotates around an Axis
+    /// </summary>
     private void RotateItem() {
         item.transform.RotateAround(transform.position, Vector3.up, Time.deltaTime * rotationSpeed);
     }

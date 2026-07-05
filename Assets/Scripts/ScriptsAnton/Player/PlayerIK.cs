@@ -2,6 +2,9 @@ using System.Collections;
 using System.Linq;
 using UnityEngine;
 
+/// <summary>
+/// The Player Inverse Kinematics are set in this class for every weapon and item
+/// </summary>
 public class PlayerIK : MonoBehaviour {
 
     [Header("Runtime Filled")]
@@ -44,6 +47,12 @@ public class PlayerIK : MonoBehaviour {
         consumableLayer = animator.GetLayerIndex("Consumable");
     }
 
+    /// <summary>
+    /// Puts the Hands at there positions and sets their weights
+    /// If the targets dont exist then the weight will be 0
+    /// The Players Hands and Elbows wont stick to the items afterwards
+    /// </summary>
+    /// <param name="layerIndex">What Animation layer they are set</param>
     private void OnAnimatorIK(int layerIndex) {
         if (leftHandIKTarget != null) {
             animator.SetIKRotationWeight(AvatarIKGoal.LeftHand, handIKAmount);
@@ -77,6 +86,11 @@ public class PlayerIK : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Sets up the inverse Kinematic targets
+    /// </summary>
+    /// <param name="gunParent">The Item</param>
+    /// <param name="weaponSlotIndex">Some Items dont need both hands to be set (Two Handed/One Handed Items)</param>
     public void Setup(Transform gunParent, int weaponSlotIndex) {
         this.gunParent = gunParent;
         Transform[] allChildren = gunParent.GetComponentsInChildren<Transform>();
@@ -91,6 +105,9 @@ public class PlayerIK : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Clears the IK Targets
+    /// </summary>
     public void ClearSetup() {
         leftElbowIKTarget = null;
         rightElbowIKTarget = null;
@@ -98,14 +115,27 @@ public class PlayerIK : MonoBehaviour {
         rightHandIKTarget = null;
     }
 
+    /// <summary>
+    /// Starts the Weapon switch Animation 
+    /// where the player puts the Weapon above his shoulder and behind his back
+    /// </summary>
     public void SwitchWeapon() {
         animator.SetTrigger(switchWeaponHash);
     }
 
+    /// <summary>
+    /// Starts the Weapon switch Animation
+    /// where the player puts the item behind his back
+    /// </summary>
     public void SwitchMelee() {
         animator.SetTrigger(switchMeleeHash);
     }
 
+    /// <summary>
+    /// Starts the idle Animation for the One Handed Weapon or the Two Handed Weapon
+    /// </summary>
+    /// <param name="state">state of the animation</param>
+    /// <param name="weaponSlotIndex">One Handed or Two Handed?</param>
     public void SetMelee(bool state, int weaponSlotIndex) {
         animator.SetLayerWeight(meleeLayer, state ? 1 : 0);
 
@@ -127,9 +157,12 @@ public class PlayerIK : MonoBehaviour {
             animator.SetBool(hasMeleeOneHandedHash, state);
             animator.SetBool(hasMeleeTwoHandedHash, state);
         }
-
     }
 
+    /// <summary>
+    /// Sets the Layer in the Animator so that the Gun Movement Animations can be played
+    /// </summary>
+    /// <param name="state">state of the Animations</param>
     public void SetGun(bool state) {
         hasWeapon = state;
 
@@ -137,6 +170,12 @@ public class PlayerIK : MonoBehaviour {
         animator.SetBool(hasWeaponHash, state);
     }
 
+    /// <summary>
+    /// Sets the Consumable Layer in the Animator and sets which consumable item is active
+    /// </summary>
+    /// <typeparam name="T">HealthItemSO or Grenade Type</typeparam>
+    /// <param name="state">state of the Animation</param>
+    /// <param name="item">The item of which the type should be switched to</param>
     public void SetConsumable<T>(bool state, T item) {
         animator.SetLayerWeight(consumableLayer, state ? 1 : 0);
 
@@ -154,17 +193,34 @@ public class PlayerIK : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Getter if the player has a gun
+    /// </summary>
+    /// <returns>true if he has a gun equiped false otherwise</returns>
     public bool GetHasWeapon() {
         return hasWeapon;
     }
 
+    /// <summary>
+    /// Getter for the Item Transform where the IK targets are
+    /// </summary>
+    /// <returns></returns>
     public Transform GetParent() {
         return gunParent;
     }
+
+    /// <summary>
+    /// Getter for if the player has a One Handed Melee Weapon
+    /// </summary>
+    /// <returns>true if he has a One Handed Melee equiped false otherwise</returns>
     public bool GetHasOneHanded() {
         return hasOneHanded;
     }
 
+    /// <summary>
+    /// Getter for if the player has a Two Handed Melee Weapon
+    /// </summary>
+    /// <returns>true if he has a Two Handed Melee equiped false otherwise</returns>
     public bool GetHasTwoHanded() {
         return hasTwoHanded;
     }

@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Scriptable Object to save the Audio that should be played on impact
+/// </summary>
 [CreateAssetMenu(fileName = "Play Audio Effect", menuName = "Impact System/Play Audio Effect")]
 public class PlayAudioEffect : ScriptableObject {
     public AudioSource audioSourcePrefab;

@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Grenade class with a rigidbody for the throw
+/// </summary>
 public class Grenade : MonoBehaviour {
 
     [SerializeField] private WeaponSlot weaponSlot;
@@ -20,6 +23,11 @@ public class Grenade : MonoBehaviour {
         GrenadeTickToExplosion();
     }
 
+    /// <summary>
+    /// Spawns the Grenade on the Parent which is most likely the Players hand
+    /// </summary>
+    /// <param name="parent">The Transform to where it should be spawned at</param>
+    /// <returns>the spawned instance</returns>
     public Grenade Spawn(Transform parent) {
         Grenade grenadeInstance = Instantiate(this, parent, false);
         grenadeInstance.transform.localPosition = Vector3.zero;
@@ -37,6 +45,10 @@ public class Grenade : MonoBehaviour {
         return grenadeInstance;
     }
 
+    /// <summary>
+    /// Sets the Parent null, sets the rigidbody so that grenade gets thrown into a certain Direction
+    /// </summary>
+    /// <param name="direction">The Direction and Force</param>
     public void Throw(Vector3 direction) {
         transform.SetParent(null);
 
@@ -52,6 +64,10 @@ public class Grenade : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// When the Grenade is thrown if will explode with an Paricle Effect 
+    /// after the set explosion Delay and then destroyed
+    /// </summary>
     private void GrenadeTickToExplosion() {
         if (isThrown && !exploded) {
             explosionDelay -= Time.deltaTime;
@@ -60,9 +76,9 @@ public class Grenade : MonoBehaviour {
 
                 Collider[] hits = Physics.OverlapSphere(transform.position, explosionRadius);
 
-                HashSet<ZombieAI> zombies = new();
+                HashSet<IDamageable> zombies = new();
                 foreach (Collider hit in hits) {
-                    ZombieAI zombie = hit.GetComponentInParent<ZombieAI>();
+                    IDamageable zombie = hit.GetComponentInParent<IDamageable>();
 
                     if (zombie != null && !zombie.IsDead() && zombies.Add(zombie)) {
                         zombie.TakeDamage(damage);
@@ -77,10 +93,18 @@ public class Grenade : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Getter for the Weapon Slot it is currently set
+    /// </summary>
+    /// <returns>The Weapon Slot</returns>
     public WeaponSlot GetWeaponSlot() {
         return weaponSlot;
     }
 
+    /// <summary>
+    /// Getter for if the Grenade was thrown
+    /// </summary>
+    /// <returns>true if the grenades velocity got set false otherwise</returns>
     public bool GetIsThrown() {
         return isThrown;
     }

@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// All the HealthItem Types
+/// </summary>
 public enum HealthItemType {
     None,
     Bandage,
