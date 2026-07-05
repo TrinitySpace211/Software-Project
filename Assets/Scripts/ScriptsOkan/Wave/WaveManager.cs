@@ -1,10 +1,15 @@
+using System.IO;
 using UnityEngine;
 
-public class WaveManager : MonoBehaviour {
-    [Header("Spawn Zones")] [SerializeField]
+public class WaveManager : MonoBehaviour, ISaveable {
+    public static readonly string ID = "WaveManager";
+
+    [Header("Spawn Zones")]
+    [SerializeField]
     private SpawnZone[] spawnZones;
 
-    [Header("Day 1 Early Action")] [SerializeField]
+    [Header("Day 1 Early Action")]
+    [SerializeField]
     private int day1MinZombies = 1;
 
     [SerializeField] private int day1MaxZombies = 3;
@@ -17,11 +22,21 @@ public class WaveManager : MonoBehaviour {
         _config = DifficultyPresets.Get(GameDifficulty.Selected);
     }
 
-    [ContextMenu("Test Spawn")]
-    public void OnGameStart() {
-        _currentDay = 0;
-        SpawnEarlyAction();
-        SpawnAllZones();
+    //[ContextMenu("Test Spawn")]
+    private void Start() {
+        _config = DifficultyPresets.Get(GameDifficulty.Selected);
+
+        if (File.Exists(Path.Combine(Application.persistentDataPath, "save.json"))) {
+            WaveSaveData data = (WaveSaveData)SaveManager.Instance.LoadDataFromSave(ID);
+
+            if (data.currentWave == 0) {
+                _currentDay = 0;
+                SpawnEarlyAction();
+            }
+        } else {
+            _currentDay = 0;
+            SpawnEarlyAction();
+        }
     }
 
     public void OnNewDay() {
@@ -30,30 +45,52 @@ public class WaveManager : MonoBehaviour {
     }
 
     private void SpawnEarlyAction() {
-        var earlyCount = Random.Range(day1MinZombies, day1MaxZombies + 1);
-        var zone = spawnZones[Random.Range(0, spawnZones.Length)];
-        zone.zombieCount = 0;
-        zone.sprinterCount = 0;
-        zone.tankCount = 0;
-
-        // Spielmodus beruecksichtigen: In den "Only"-Modi spawnt auch die
-        // Tag-1-Early-Action den passenden Zombie-Typ.
-        switch (GameMode.Selected) {
-            case GameModeType.OnlySprinter:
-                zone.sprinterCount = earlyCount;
-                break;
-            case GameModeType.OnlyTanks:
-                zone.tankCount = earlyCount;
-                break;
-            default:
-                zone.zombieCount = earlyCount;
-                break;
+        if (spawnZones == null || spawnZones.Length == 0) {
+            return;
         }
 
-        zone.SpawnWave();
+        var selectedZoneCount = Mathf.Min(2, spawnZones.Length);
+        var availableIndices = new System.Collections.Generic.List<int>();
+        for (var i = 0; i < spawnZones.Length; i++) {
+            availableIndices.Add(i);
+        }
+
+        for (var i = 0; i < selectedZoneCount; i++) {
+            var randomIndex = Random.Range(0, availableIndices.Count);
+            var zoneIndex = availableIndices[randomIndex];
+            availableIndices.RemoveAt(randomIndex);
+
+            var zone = spawnZones[zoneIndex];
+            var earlyCount = Random.Range(day1MinZombies, day1MaxZombies + 1);
+
+            zone.zombieCount = 0;
+            zone.sprinterCount = 0;
+            zone.tankCount = 0;
+
+            // Spielmodus beruecksichtigen: In den "Only"-Modi spawnt auch die
+            // Tag-1-Early-Action den passenden Zombie-Typ.
+            switch (GameMode.Selected) {
+                case GameModeType.OnlySprinter:
+                    zone.sprinterCount = earlyCount;
+                    break;
+                case GameModeType.OnlyTanks:
+                    zone.tankCount = earlyCount;
+                    break;
+                default:
+                    zone.zombieCount = earlyCount;
+                    break;
+            }
+
+            zone.SpawnWave();
+        }
     }
 
     private void SpawnAllZones() {
+        if (spawnZones == null || spawnZones.Length == 0) {
+            Debug.LogWarning("WaveManager has no spawn zones assigned.");
+            return;
+        }
+
         var total = Mathf.Min(
             _config.baseZombieCount + _currentDay * _config.zombiesPerDay,
             _config.maxZombiesTotal
@@ -69,19 +106,23 @@ public class WaveManager : MonoBehaviour {
 
         ApplyGameMode(ref total, ref totalSprinters, ref totalTanks);
 
-        var perZone = total / spawnZones.Length;
-        var remainder = total % spawnZones.Length;
-        var sprintersPerZone = totalSprinters / spawnZones.Length;
-        var tanksPerZone = totalTanks / spawnZones.Length;
+        var zoneCount = spawnZones.Length;
+        var perZone = total / zoneCount;
+        var remainder = total % zoneCount;
+        var sprintersPerZone = totalSprinters / zoneCount;
+        var sprinterRemainder = totalSprinters % zoneCount;
+        var tanksPerZone = totalTanks / zoneCount;
+        var tankRemainder = totalTanks % zoneCount;
 
-        for (var i = 0; i < spawnZones.Length; i++) {
-            spawnZones[i].zombieCount = perZone + (i == 0 ? remainder : 0);
-            spawnZones[i].sprinterCount =
-                sprintersPerZone + (i == 0 ? totalSprinters % spawnZones.Length : 0);
-            spawnZones[i].tankCount =
-                tanksPerZone + (i == 0 ? totalTanks % spawnZones.Length : 0);
+        for (var i = 0; i < zoneCount; i++) {
+            spawnZones[i].zombieCount = perZone + (i < remainder ? 1 : 0);
+            spawnZones[i].sprinterCount = sprintersPerZone + (i < sprinterRemainder ? 1 : 0);
+            spawnZones[i].tankCount = tanksPerZone + (i < tankRemainder ? 1 : 0);
+            //spawnZones[i].ClearZombies();
             spawnZones[i].SpawnWave();
         }
+
+        //Debug.Log($"Wave {(_currentDay + 1)} spawned: normals={total}, sprinters={totalSprinters}, tanks={totalTanks}");
     }
 
     /// <summary>
@@ -109,15 +150,7 @@ public class WaveManager : MonoBehaviour {
         }
     }
 
-    private void ClearAllZombies() {
-        foreach (var zone in spawnZones) zone.ClearZombies();
-    }
-
-    // --- Vorbereitet für ISaveable ---
-
-    public string GetSaveID() {
-        return "WaveManager";
-    }
+    public string GetSaveID() => ID;
 
     public object Save() {
         return new WaveSaveData {
@@ -132,5 +165,15 @@ public class WaveManager : MonoBehaviour {
             GameDifficulty.Selected = save.difficulty;
             _config = DifficultyPresets.Get(GameDifficulty.Selected);
         }
+    }
+
+    private void OnEnable() {
+        if (SaveManager.Instance != null)
+            SaveManager.Instance.Register(this);
+    }
+
+    private void OnDisable() {
+        if (SaveManager.Instance != null)
+            SaveManager.Instance.Unregister(this);
     }
 }

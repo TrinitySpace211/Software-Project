@@ -168,7 +168,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6589572936657024034}
   m_Layer: 0
-  m_Name: Attack
+  m_Name: HandPivot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2669,7 +2669,7 @@ MonoBehaviour:
   - {fileID: 418706484281075426}
   - {fileID: 2609201778952031226}
   - {fileID: 7023973246208540397}
-  attackPoint: {fileID: 1095709081916607388}
+  attackPoint: {fileID: 6589572936657024034}
   patrolPoints: []
   patrolWaitTime: 2
   enemyStatsSO: {fileID: 11400000, guid: c885e3c074b298c4180c7db43d12af30, type: 2}

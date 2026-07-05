@@ -30,6 +30,7 @@ public class ObjectPool {
             pool = new ObjectPool(prefab, size);
 
             pool.parent = new GameObject(prefab.name + " Pool");
+            GameObject.DontDestroyOnLoad(pool.parent);
             pool.CreateObjects();
 
             objectPools.Add(prefab, pool);
@@ -51,32 +52,47 @@ public class ObjectPool {
         availableObjectsPool.Add(poolableObject);
     }
 
+    private void CleanupLists() {
+        availableObjectsPool.RemoveAll(item => item == null || item.gameObject == null);
+        activeObjects.RemoveAll(item => item == null || item.gameObject == null);
+    }
+
     public PoolableObject GetObject(Vector3 position, Quaternion rotation) {
-        if (availableObjectsPool.Count == 0) { //Wenn es keine Objekte mehr im Pool hat, dann soll automatisch mehr hinzugefügt werden
+        CleanupLists();
+
+        if (availableObjectsPool.Count == 0) {
             CreateObject();
+            CleanupLists();
         }
 
-        // Wenn die maximale Anzahl aktiver Objekte erreicht ist, deaktivieren wir das älteste aktive Objekt (FIFO)
-        if (activeObjects.Count >= size) {
-            PoolableObject oldest = activeObjects[0];
-            // Entferne aus aktiven Liste bevor deaktivieren, OnDisable() ruft ReturnObjectToPool
-            activeObjects.RemoveAt(0);
-            if (oldest != null && oldest.gameObject.activeSelf) {
-                oldest.gameObject.SetActive(false);
+        while (availableObjectsPool.Count > 0) {
+            PoolableObject instance = availableObjectsPool[0];
+            availableObjectsPool.RemoveAt(0);
+
+            if (instance == null || instance.gameObject == null) {
+                CleanupLists();
+                continue;
             }
+
+            if (activeObjects.Count >= size) {
+                PoolableObject oldest = activeObjects[0];
+                activeObjects.RemoveAt(0);
+                if (oldest != null && oldest.gameObject != null && oldest.gameObject.activeSelf) {
+                    oldest.gameObject.SetActive(false);
+                }
+            }
+
+            instance.transform.position = position;
+            instance.transform.rotation = rotation;
+
+            activeObjects.Add(instance);
+            instance.gameObject.SetActive(true);
+
+            return instance;
         }
 
-        PoolableObject instance = availableObjectsPool[0];
-        availableObjectsPool.RemoveAt(0);
-
-        instance.transform.position = position;
-        instance.transform.rotation = rotation;
-
-        activeObjects.Add(instance);
-
-        instance.gameObject.SetActive(true);
-
-        return instance;
+        CreateObject();
+        return GetObject(position, rotation);
     }
 
     public PoolableObject GetObject() {
@@ -84,12 +100,15 @@ public class ObjectPool {
     }
 
     public void ReturnObjectToPool(PoolableObject Object) {
-        // Remove from active list if present
+        if (Object == null || Object.gameObject == null) {
+            CleanupLists();
+            return;
+        }
+
         if (activeObjects.Contains(Object)) {
             activeObjects.Remove(Object);
         }
 
-        // Avoid duplicates in available pool
         if (!availableObjectsPool.Contains(Object)) {
             availableObjectsPool.Add(Object);
         }

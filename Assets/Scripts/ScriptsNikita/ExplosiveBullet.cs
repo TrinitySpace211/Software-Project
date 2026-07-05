@@ -5,11 +5,8 @@ using UnityEngine;
 /// This script is used for upgraded tower projectiles, such as cannon balls or rockets.
 /// </summary>
 public class ExplosiveBullet : MonoBehaviour {
-    /// <summary>
-    /// The current target of the projectile.
-    /// This value is assigned by the Emmitter script.
-    /// </summary>
-    public ZombieAI target;
+    private Transform targetTransform;
+    private IDamageable targetDamageable;
 
     /// <summary>
     /// Movement speed of the projectile.
@@ -52,13 +49,18 @@ public class ExplosiveBullet : MonoBehaviour {
     /// </summary>
     public ParticleSystem explosionEffect;
 
+    public void SetTarget<T>(T target) where T : Component, IDamageable {
+        targetTransform = target.transform;
+        targetDamageable = target;
+    }
+
     private void Update() {
-        if (target == null) {
+        if (targetTransform == null || targetDamageable == null || targetDamageable.IsDead()) {
             Destroy(gameObject);
             return;
         }
 
-        Vector3 targetPosition = target.transform.position + Vector3.up * 1f;
+        Vector3 targetPosition = targetTransform.position + Vector3.up * 1f;
         Vector3 direction = targetPosition - transform.position;
 
         float moveDistance = speed * Time.deltaTime;
@@ -83,31 +85,25 @@ public class ExplosiveBullet : MonoBehaviour {
             Instantiate(explosionEffect, transform.position, Quaternion.identity);
         }
 
-        ZombieAI directTargetZombie = null;
-
-        if (target != null) {
-            directTargetZombie = target.GetComponentInParent<ZombieAI>();
-
-            if (directTargetZombie != null && !directTargetZombie.IsDead()) {
-                directTargetZombie.TakeDamage(directDamage);
-            }
+        if (targetDamageable != null && !targetDamageable.IsDead()) {
+            targetDamageable.TakeDamage(directDamage);
         }
 
         Collider[] hits = Physics.OverlapSphere(transform.position, explosionRadius, enemyLayerMask);
 
         foreach (Collider hit in hits) {
-            ZombieAI nearbyZombie = hit.GetComponentInParent<ZombieAI>();
+            var nearbyComponent = hit.GetComponentInParent<Component>();
 
-            if (nearbyZombie == null)
+            if (nearbyComponent is not IDamageable nearbyDamageable)
                 continue;
 
-            if (nearbyZombie.IsDead())
+            if (nearbyDamageable.IsDead())
                 continue;
 
-            if (nearbyZombie == directTargetZombie)
+            if (nearbyDamageable == targetDamageable)
                 continue;
 
-            nearbyZombie.TakeDamage(areaDamage);
+            nearbyDamageable.TakeDamage(areaDamage);
         }
 
         Destroy(gameObject);

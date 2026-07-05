@@ -147,9 +147,6 @@ public class SaveManager : MonoBehaviour {
         //Debug.Log("Loaded!");
 
         return obj;
-
-
-
     }
 
     [Serializable]

@@ -94,7 +94,6 @@ public class GasTankHealth : MonoBehaviour, ISaveable {
     private void OnDestroyed() {
         Debug.Log("Gas Tank destroyed!");
 
-
         if (generatorAudioSource != null) {
             generatorAudioSource.Stop();
         }

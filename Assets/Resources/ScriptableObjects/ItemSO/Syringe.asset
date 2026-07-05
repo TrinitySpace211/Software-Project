@@ -18,7 +18,7 @@ MonoBehaviour:
   meleeType: 0
   healthItemType: 3
   ammunitionType: 0
-  spawnWeight: 40
+  spawnWeight: 60
   itemName: Syringe
   icon: {fileID: 21300000, guid: d269f117802a3c14e982c25b7ea8a26c, type: 3}
   maxStackSize: 3

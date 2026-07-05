@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -12,6 +13,7 @@ public class ObjectiveManager : MonoBehaviour {
 
     [Header("Player")][SerializeField] private Transform player;
     [Header("Objectives")] public GasTankHealth[] objectives;
+    [Header("Zones")][SerializeField] private List<SpawnZone> spawnZones;
 
     private void Awake() {
         if (Instance != null && Instance != this) {
@@ -54,25 +56,37 @@ public class ObjectiveManager : MonoBehaviour {
     ///     Redirects all active zombies to attack a random objective.
     /// </summary>
     public void OnNightStarted() {
-        var zombies = FindObjectsByType<ZombieAI>(FindObjectsSortMode.None);
-        var sprinters = FindObjectsByType<SprinterController>(FindObjectsSortMode.None); // NEU
         var redirected = 0;
 
-        foreach (var zombie in zombies) {
-            zombie.SetRageEyes();
-            if (zombie.IsDead()) continue;
-            var objective = GetRandomActiveObjective();
-            if (objective == null) break;
-            zombie.SetTarget(objective, true);
-            redirected++;
-        }
+        foreach (SpawnZone zone in spawnZones) {
+            List<ZombieAI> zombies = zone.GetZombies();
+            List<SprinterController> sprinters = zone.GetSprinters();
+            List<TankZombieController> tanks = zone.GetTanks();
 
-        foreach (var sprinter in sprinters) {
-            if (sprinter.isDead) continue;
-            var objective = GetRandomActiveObjective();
-            if (objective == null) break;
-            sprinter.SetTarget(objective, true);
-            redirected++;
+            foreach (ZombieAI zombie in zombies) {
+                zombie.SetRageEyes();
+                if (zombie.IsDead()) continue;
+                var objective = GetRandomActiveObjective();
+                if (objective == null) break;
+                zombie.SetTarget(objective, true);
+                redirected++;
+            }
+
+            foreach (SprinterController sprinter in sprinters) {
+                if (sprinter.isDead) continue;
+                var objective = GetRandomActiveObjective();
+                if (objective == null) break;
+                sprinter.SetTarget(objective, true);
+                redirected++;
+            }
+
+            foreach (TankZombieController tank in tanks) {
+                if (tank.isDead) continue;
+                var objective = GetRandomActiveObjective();
+                if (objective == null) break;
+                tank.SetTarget(objective, true);
+                redirected++;
+            }
         }
 
         Debug.Log($"[ObjectiveManager] Nacht: {redirected} Zombies greifen Objectives an.");
@@ -84,6 +98,10 @@ public class ObjectiveManager : MonoBehaviour {
     /// </summary>
     public void OnDayStarted() {
         // Zombies behalten ihr Ziel bis sie sterben.
+        foreach (SpawnZone zone in spawnZones) {
+            foreach (ZombieAI zombie in zone.GetZombies()) {
+                zombie.SetDefaultEyes();
+            }
+        }
     }
-
 }

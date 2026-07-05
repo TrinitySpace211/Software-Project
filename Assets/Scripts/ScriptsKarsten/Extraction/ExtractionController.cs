@@ -113,6 +113,15 @@ public class ExtractionController : MonoBehaviour, ISaveable {
             exitButton.gameObject.SetActive(true);
         }
 
+    }
+
+    /// <summary>
+    /// Starts the extraction sequence if it is not already running.
+    /// </summary>
+    public void StartExtraction() {
+        if (isRunning)
+            return;
+
         if (!achievement3Gained) {
             AchievementManager.triggerAchievement?.Invoke(achievementDay10);
             achievement3Gained = true;
@@ -122,17 +131,7 @@ public class ExtractionController : MonoBehaviour, ISaveable {
                     achievement3Gained = achievement3Gained
                 });
             }
-
         }
-
-    }
-
-    /// <summary>
-    /// Starts the extraction sequence if it is not already running.
-    /// </summary>
-    public void StartExtraction() {
-        if (isRunning)
-            return;
 
         StartCoroutine(ExtractionRoutine());
     }

@@ -4,12 +4,9 @@ using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 /// <summary>
 /// Moves the arrow towards its target and applies damage when it hits an enemy.
 /// </summary>
-public class Bullet : MonoBehaviour 
-{
-    /// <summary>
-    /// The founded enemy which cames from Emmitter script.
-    /// </summary>
-    public ZombieAI target; 
+public class Bullet : MonoBehaviour {
+    private Transform targetTransform;
+    private IDamageable targetDamageable;
 
     /// <summary>
     /// Speed of the arrow.   
@@ -20,7 +17,7 @@ public class Bullet : MonoBehaviour
     /// To determine the distance at which an arrow is considered to have hit the target.
     /// If the arrow is within 0.25 units of the enemy, HitTarget() is executed.
     /// </summary>
-    public float hitDistance = 0.25f; 
+    public float hitDistance = 0.25f;
 
     /// <summary>
     /// Damage of the arrow.
@@ -33,19 +30,21 @@ public class Bullet : MonoBehaviour
     public Vector3 rotationOffset;
 
 
+    public void SetTarget<T>(T target) where T : Component, IDamageable {
+        targetTransform = target.transform;
+        targetDamageable = target;
+    }
+
     /// <summary>
-    /// Moves the arrow towards the target every frame and checks if it has hit.
+    /// Moves the arrow towards its target every frame and checks if it has hit.
     /// </summary>
-    private void Update()
-    {
-        // If enemy not exists, the arrow should be destroyed
-        if(target == null) {
-            Destroy(this.gameObject);
+    private void Update() {
+        if (targetTransform == null || targetDamageable == null || targetDamageable.IsDead()) {
+            Destroy(gameObject);
             return;
         }
 
-        // Calculates the target position (enemy)
-        Vector3 targetPosition = target.transform.position + Vector3.up * 1f;
+        Vector3 targetPosition = targetTransform.position + Vector3.up * 1f;
 
         // Calculates the distance from enemy and the arrow
         Vector3 direction = targetPosition - transform.position;
@@ -56,7 +55,7 @@ public class Bullet : MonoBehaviour
         // Check if the arrow is close enough to the enemy.
         // And to avoid that arrows can go through out enemies
         if (direction.magnitude <= hitDistance || direction.magnitude <= moveDistance) {
-            HitTarget(target); // Called if a arrow hit can be analyzed
+            HitTarget();
             return;
         }
 
@@ -74,12 +73,11 @@ public class Bullet : MonoBehaviour
     /// <summary>
     /// Applies damage to the target and destroys the arrow after hitting.
     /// </summary>
-    private void HitTarget(ZombieAI zombie) {
+    private void HitTarget() {
+        if (targetDamageable != null && !targetDamageable.IsDead()) {
+            targetDamageable.TakeDamage(damage);
+        }
 
-        // Calls a method named TakeDamage on the target.
-        zombie.TakeDamage(damage);
-
-        // Destroys the arrow after a hit
         Destroy(gameObject);
     }
 }

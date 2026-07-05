@@ -190,9 +190,10 @@ public class LootChestItemDrop : MonoBehaviour {
 
         itemToSpawn = new List<ItemSO>(itemPrefabs);
 
-        // Creates the items with a short delay.
+        //Shuffle
         for (int i = 0; i < itemToSpawn.Count; i++) {
             int index = UnityEngine.Random.Range(i, itemToSpawn.Count);
+
 
             (itemToSpawn[i], itemToSpawn[index]) = (itemToSpawn[index], itemToSpawn[i]);
         }
@@ -203,8 +204,8 @@ public class LootChestItemDrop : MonoBehaviour {
         StartCoroutine(PlayRevealLight());
 
         for (int i = 0; i < itemCount; i++) {
-
             ItemSO itemSO = GetWeightedRandomItem();
+
             if (scrapItem != null && UnityEngine.Random.value < scrapDropChance) {
                 itemSO = scrapItem;
             }
@@ -300,7 +301,7 @@ public class LootChestItemDrop : MonoBehaviour {
         }
 
         ScrapPickup pickup = pickupObject.AddComponent<ScrapPickup>();
-        pickup.SetAmount(1);
+        pickup.SetAmount(UnityEngine.Random.Range(1, 4));
 
         StartCoroutine(RevealItem(pickupObject, startPosition, landingPosition));
     }

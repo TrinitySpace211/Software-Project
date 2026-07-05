@@ -18,7 +18,7 @@ MonoBehaviour:
   meleeType: 0
   healthItemType: 1
   ammunitionType: 0
-  spawnWeight: 40
+  spawnWeight: 60
   itemName: Bandage
   icon: {fileID: 21300000, guid: d17f94ba02d26114d92722a2480aee9f, type: 3}
   maxStackSize: 6
