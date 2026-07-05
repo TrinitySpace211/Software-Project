@@ -223,8 +223,8 @@ public class OptionsMenu : MonoBehaviour {
         mapAction = map.FindAction("OpenMap", true);
     }
 
-    // --- Public UI hook-up methods, intended to be wired to button OnClick() events. ---
-    // Each rebinds one direction of the WASD/arrow "Move" composite action.
+    // Public UI hook-up methods, intended to be wired to button OnClick() events.
+    // Each rebinds one direction of the WASD "Move" composite action.
     public void RebindMoveUp() => RebindComposite(moveAction, "up", moveUpText, "Move up");
     public void RebindMoveDown() => RebindComposite(moveAction, "down", moveDownText, "Move down");
     public void RebindMoveLeft() => RebindComposite(moveAction, "left", moveLeftText, "Move left");

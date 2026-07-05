@@ -112,6 +112,9 @@ public class Player : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Subscribes to all needed Events
+    /// </summary>
     private void SubscribeToEvents() {
         PlayerInputHandler.OnReloadAction += PlayerInputHandler_OnReloadAction;
         Item.OnItemCollected += Item_OnItemCollected;
@@ -119,6 +122,9 @@ public class Player : MonoBehaviour {
         DayNightCycle.OnSunriseStarted += DayNightCycle_OnSunriseStarted;
     }
 
+    /// <summary>
+    /// Unsubscribes to all Events
+    /// </summary>
     private void UnsubscribeFromEvents() {
         PlayerInputHandler.OnReloadAction -= PlayerInputHandler_OnReloadAction;
         Item.OnItemCollected -= Item_OnItemCollected;
@@ -148,6 +154,10 @@ public class Player : MonoBehaviour {
         HandleHealingKits();
     }
 
+    /// <summary>
+    /// Checks if the Update Function should be processed
+    /// </summary>
+    /// <returns>false if any state goes through true otherwise</returns>
     private bool CanProcessUpdate() {
         if (playerHealth == null || playerHealth.GetIsDead()) {
             return false;
@@ -160,6 +170,9 @@ public class Player : MonoBehaviour {
         return true;
     }
 
+    /// <summary>
+    /// Checks if the player can collect an item at any fixed frame
+    /// </summary>
     private void FixedUpdate() {
         if (playerInputHandler != null && !playerHealth.GetIsDead()) {
             if (playerInputHandler.InteractTriggered) {
@@ -191,11 +204,17 @@ public class Player : MonoBehaviour {
         this.eventSystem = eventSystem;
     }
 
+    /// <summary>
+    /// If the Sun rises the flashlight goes out
+    /// </summary>
     private void DayNightCycle_OnSunriseStarted() {
         spotLight.enabled = false;
         pointLight.enabled = false;
     }
 
+    /// <summary>
+    /// If the Sun sets the flashlight goes on
+    /// </summary>
     private void DayNightCycle_OnSunsetStarted() {
         StartCoroutine(TurnOnLight());
     }
@@ -220,6 +239,9 @@ public class Player : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Sets the Light Components of the Flashlight
+    /// </summary>
     private void CheckFlashlight() {
         for (int i = 0; i < flashlight.transform.childCount; i++) {
             Light light = flashlight.transform.GetChild(i).GetComponent<Light>();
@@ -236,6 +258,9 @@ public class Player : MonoBehaviour {
         pointLight.enabled = false;
     }
 
+    /// <summary>
+    /// Turns the Flashlight on
+    /// </summary>
     private IEnumerator TurnOnLight() {
         yield return new WaitForSeconds(waitBeforeActivate);
 

@@ -1,10 +1,17 @@
 using UnityEngine;
 
+/// <summary>
+/// Activates or disables the Sphere which cuts out the Player in the Camera
+/// </summary>
 public class CutoutObject : MonoBehaviour {
     [SerializeField] private Transform sphere;
     [SerializeField] private Camera mainCamera;
     [SerializeField] private LayerMask obstacleMask = ~0;
 
+    /// <summary>
+    /// If the player is staying behind a Object, which is on a certain Layer, the Raycast can't hit the player
+    /// then the Cutout will be scaled up, otherwise if it can hit the player then it will scale down
+    /// </summary>
     private void Update() {
         if (sphere == null || mainCamera == null) return;
 

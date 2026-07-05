@@ -149,18 +149,35 @@ public class PlayerHealth : MonoBehaviour, ISaveable {
     }
 
     #region Save and Load
+
+    /// <summary>
+    /// The ID of this class
+    /// </summary>
+    /// <returns>The name of the class</returns>
     public string GetSaveID() => ID;
+
+    /// <summary>
+    /// Saves the player health
+    /// </summary>
+    /// <returns>the PlayerData class</returns>
     public object Save() {
         return new PlayerData {
             health = playerStats.currentHealth
         };
     }
 
+    /// <summary>
+    /// Loads the PlayerData class from the send data
+    /// </summary>
+    /// <param name="data">the PlayerData class</param>
     public void Load(object data) {
         PlayerData playerData = (PlayerData)data;
         playerStats.currentHealth = playerData.health;
     }
 
+    /// <summary>
+    /// The class to be saved
+    /// </summary>
     private class PlayerData {
         public float health;
     }

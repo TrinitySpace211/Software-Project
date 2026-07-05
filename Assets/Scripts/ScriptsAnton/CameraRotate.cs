@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// Rotates the Camera around the Player through Inputs, default "Q" and "E"
+/// </summary>
 public class CameraRotate : MonoBehaviour {
     [SerializeField] private Player player;
     [SerializeField] private float turnSpeed = 10f;
@@ -11,6 +14,9 @@ public class CameraRotate : MonoBehaviour {
         playerInputHandler = player.GetPlayerInputHandler();
     }
 
+    /// <summary>
+    /// If TurnRight/TurnLeft gets triggered then the playerCamera gets turned
+    /// </summary>
     private void Update() {
         if (DebugController.Instance.GetConsoleVisibility())
             return;

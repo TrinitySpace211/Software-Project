@@ -1,4 +1,7 @@
 
+/// <summary>
+/// All the Gun Types
+/// </summary>
 public enum GunType {
     None,
     AssaultRifle,
@@ -7,6 +10,9 @@ public enum GunType {
     Sniper
 }
 
+/// <summary>
+/// All the available Slots
+/// </summary>
 public enum WeaponSlot {
     Primary = 0,
     Secondary = 1,

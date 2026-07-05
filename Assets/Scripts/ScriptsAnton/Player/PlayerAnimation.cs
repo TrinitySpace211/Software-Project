@@ -43,6 +43,10 @@ public class PlayerAnimation : MonoBehaviour {
         UpdateAnimationState();
     }
 
+    /// <summary>
+    /// The Construct for the player Input Handler
+    /// </summary>
+    /// <param name="playerInputHandler">The Player Input Handler class</param>
     public void Construct(PlayerInputHandler playerInputHandler) {
         this.playerInputHandler = playerInputHandler;
     }
@@ -91,22 +95,39 @@ public class PlayerAnimation : MonoBehaviour {
         animator.SetFloat(inputyMagnitudeHash, currentBlendInput.magnitude);
     }
 
+    /// <summary>
+    /// Starts the aim Animation
+    /// </summary>
+    /// <param name="state">the state of the animation</param>
     public void SetAimAnimation(bool state) {
         animator.SetBool(isWeaponAimingHash, state);
     }
 
+    /// <summary>
+    /// Starts the hit Animation
+    /// </summary>
     public void SetHitTrigger() {
         animator.SetTrigger(getHitHash);
     }
 
+    /// <summary>
+    /// Starts the dying animation
+    /// </summary>
     public void SetDyingTrigger() {
         animator.SetTrigger(isDeadHash);
     }
 
+    /// <summary>
+    /// Starts the dying animation with a weapon in the hand
+    /// </summary>
     public void SetDyingWithWeaponTrigger() {
         animator.SetTrigger(isDeadWithWeaponHash);
     }
 
+    /// <summary>
+    /// starts the reloading Animation
+    /// </summary>
+    /// <param name="ammoAmount">the amount of Ammunition to set the current gun</param>
     public void StartReloading(int ammoAmount) {
         isReloading = true;
         this.ammoAmount = ammoAmount;
@@ -114,6 +135,10 @@ public class PlayerAnimation : MonoBehaviour {
         animator.SetBool(isReloadingHash, isReloading);
     }
 
+    /// <summary>
+    /// After the Animation Ends, an Animation Event will execute this function
+    /// It removes the necessery amount needed from the inventory
+    /// </summary>
     public void FinishedReloading() {
         isReloading = false;
         animator.SetBool(isReloadingHash, isReloading);
@@ -129,22 +154,41 @@ public class PlayerAnimation : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Getter if the player plays the Reload Animation right now
+    /// </summary>
+    /// <returns>true if the Animation is playing false otherwise</returns>
     public bool GetIsReloading() {
         return isReloading;
     }
 
+    /// <summary>
+    /// Setter for the boolean if the Throwing-Animation is currently playing
+    /// </summary>
+    /// <param name="isThrowingGrenade">true if the animation is playing false otherwise</param>
     public void SetIsThrowingGrenade(bool isThrowingGrenade) {
         this.isThrowingGrenade = isThrowingGrenade;
     }
 
+    /// <summary>
+    /// Getter if the player is playing the throw Animation for the grenade right now
+    /// </summary>
+    /// <returns>true if the animation is playing false otherwise</returns>
     public bool GetIsThrowingGrenade() {
         return isThrowingGrenade;
     }
 
+    /// <summary>
+    /// Starts the throw Animation for the player
+    /// </summary>
     public void SetGrenadeAnimation() {
         animator.SetTrigger(grenadeThrowHash);
     }
 
+    /// <summary>
+    /// Starts the attack animation for the one handed melee weapon
+    /// Has a 50/50 chance to use one of two attack animations
+    /// </summary>
     public void SetOneHandMeleeAttack() {
         int attackVariant = UnityEngine.Random.Range(1, 3); // 1 oder 2
         if (attackVariant == 1) {
@@ -154,10 +198,17 @@ public class PlayerAnimation : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Starts the two handed melee attack Animation
+    /// </summary>
     public void SetTwoHandMeleeAttack() {
         animator.SetTrigger(meleeAttack1Hash);
     }
 
+    /// <summary>
+    /// Sets the animation speed for the melee weapons
+    /// </summary>
+    /// <param name="value"></param>
     public void SetMeleeAttackSpeed(float value) {
         animator.SetFloat(meleeAttckSpeedMultHash, value);
     }

@@ -1,4 +1,7 @@
 
+/// <summary>
+/// All the Melee Types
+/// </summary>
 public enum MeleeType {
     None,
     Knife,

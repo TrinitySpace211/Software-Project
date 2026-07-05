@@ -734,6 +734,9 @@ public class PlayerWeaponSelector : MonoBehaviour {
         playerIK.SetConsumable<HealthItemSO>(false, null);
     }
 
+    /// <summary>
+    /// Destroys the Model of the Gun and sets everything to null
+    /// </summary>
     private void OnDestroy() {
         if (selectCoroutine != null) {
             StopCoroutine(selectCoroutine);

@@ -82,17 +82,17 @@ public class Inventory : MonoBehaviour, ISaveable {
     private bool isDragging = false;
 
     /// <summary>
-    /// Holds the previous selected hotbar slot number
+    /// Holds the previously selected hotbar slot index.
     /// </summary>
     private int previousSlot = -1;
 
     /// <summary>
-    /// Saves the Time were the Player selected a hotbar
+    /// Stores the time when the player last selected a hotbar slot.
     /// </summary>
     private float lastTimeSelected;
 
     /// <summary>
-    /// Saves the Slot that got selected in the hotbar
+    /// Stores the currently selected hotbar slot.
     /// </summary>
     private Slot selectedSlot = null;
 
@@ -111,7 +111,7 @@ public class Inventory : MonoBehaviour, ISaveable {
     }
 
     /// <summary>
-    /// Hides the inventory container at startup.
+    /// Hides the inventory container at startup and sets up input event handlers.
     /// </summary>
     private void Start() {
         playerInputHandler.OnHotbarSlotPressed += PlayerInputHandler_OnHotbarSlotPressed;
@@ -134,6 +134,9 @@ public class Inventory : MonoBehaviour, ISaveable {
         }
     }
 
+    /// <summary>
+    /// Opens the tooltip for a hovered inventory item on right-click.
+    /// </summary>
     private void PlayerInputHandler_OnRightClickUIPressed() {
         foreach (Slot slot in inventorySlots) {
             if (slot.hovering && slot.GetItem() != null && slot.GetItem().gunType == GunType.None && !isDragging) {
@@ -144,8 +147,7 @@ public class Inventory : MonoBehaviour, ISaveable {
     }
 
     /// <summary>
-    /// Handles input for testing item additions, inventory toggling,
-    /// and drag-and-drop interactions.
+    /// Handles inventory toggling, drag-and-drop updates, and input-based UI behavior.
     /// </summary>
     private void Update() {
         if (pauseMenu.IsPaused || DebugController.Instance.GetConsoleVisibility())
@@ -172,11 +174,10 @@ public class Inventory : MonoBehaviour, ISaveable {
     }
 
     /// <summary>
-    /// Triggers when the Keys 1-5 are pressed.
-    /// The Hotbars get selected and if there is a Weapon or Equipment then
-    /// the Player will change to this item
+    /// Handles hotbar slot selection when the corresponding number key is pressed.
+    /// The selected item is equipped if it is allowed and the player is able to switch.
     /// </summary>
-    /// <param name="slot">the key which represents the Hotbarslot</param>
+    /// <param name="slot">The hotbar slot index that was pressed.</param>
     private void PlayerInputHandler_OnHotbarSlotPressed(int slot) {
         if (pauseMenu.IsPaused || DebugController.Instance.GetConsoleVisibility())
             return;
@@ -227,9 +228,9 @@ public class Inventory : MonoBehaviour, ISaveable {
     }
 
     /// <summary>
-    /// If an Item is collected, than it will be shown in the Inventory
+    /// Adds collected world items to the inventory based on their specific item type.
     /// </summary>
-    /// <param name="item">The item that has been collected</param>
+    /// <param name="item">The collected item instance.</param>
     private void Item_OnItemCollected(Item item) {
         GunType collectedGun = item.GetItemType<GunType>();
         MeleeType collectedMelee = item.GetItemType<MeleeType>();
@@ -267,7 +268,6 @@ public class Inventory : MonoBehaviour, ISaveable {
                 if (ammoItem.ammunitionType == collectedAmmoType) {
                     int amount = UnityEngine.Random.Range((int)(ammoItem.maxStackSize * 0.1), (int)(ammoItem.maxStackSize * 0.3));
                     AddItem(ammoItem, amount);
-                    //Debug.Log(amount + " " + ammoItem.maxStackSize + " " + ammoItem.maxStackSize * 0.1);
                     return;
                 }
             }
@@ -283,7 +283,6 @@ public class Inventory : MonoBehaviour, ISaveable {
     public void AddItem(ItemSO itemToAdd, int amount) {
         int remaining = amount;
 
-        // Fill existing stacks first
         foreach (Slot slot in inventorySlots) {
             if (slot.HasItem() && slot.GetItem() == itemToAdd) {
                 int currentAmount = slot.GetAmount();
@@ -302,7 +301,6 @@ public class Inventory : MonoBehaviour, ISaveable {
             }
         }
 
-        // Place remaining items into empty slots
         foreach (Slot slot in allSlots) {
             if (!slot.HasItem()) {
                 int amountToPlace = Mathf.Min(itemToAdd.maxStackSize, remaining);
@@ -321,6 +319,9 @@ public class Inventory : MonoBehaviour, ISaveable {
         }
     }
 
+    /// <summary>
+    /// Adds a single item by matching its type against the configured item lists.
+    /// </summary>
     public void AddItem<T>(ItemType itemType, T type) {
         switch (itemType) {
             case ItemType.Gun:
@@ -344,6 +345,9 @@ public class Inventory : MonoBehaviour, ISaveable {
         Debug.LogWarning($"No Item Found with that Type {type}");
     }
 
+    /// <summary>
+    /// Adds a stackable item by matching its type against the configured item lists.
+    /// </summary>
     public void AddItem<T>(ItemType itemType, T type, int amount) {
         switch (itemType) {
             case ItemType.Grenade:
@@ -361,7 +365,6 @@ public class Inventory : MonoBehaviour, ISaveable {
                 foreach (ItemSO ammo in ammunitions) {
                     if (EqualityComparer<T>.Default.Equals(type, (T)(object)ammo.ammunitionType)) {
                         AddItem(ammo, amount);
-                        //Debug.Log(ammo + " " + amount);
                         return;
                     }
                 }
@@ -373,14 +376,12 @@ public class Inventory : MonoBehaviour, ISaveable {
                 Debug.LogWarning($"No Item Found with that Type {type}");
                 break;
         }
-
-
     }
 
     /// <summary>
-    /// Reduces the amount left at the selected Slot
+    /// Reduces the amount of the currently selected equipped item.
     /// </summary>
-    /// <param name="amount">How much to reduce</param>
+    /// <param name="amount">How much to reduce.</param>
     public void ConsumeEquippedItem(int amount = 1) {
         if (selectedSlot == null) return;
 
@@ -396,6 +397,9 @@ public class Inventory : MonoBehaviour, ISaveable {
         }
     }
 
+    /// <summary>
+    /// Clears every inventory and hotbar slot.
+    /// </summary>
     private void ClearAllSlots() {
         foreach (var s in allSlots) {
             s.SetItem(null);
@@ -463,7 +467,6 @@ public class Inventory : MonoBehaviour, ISaveable {
         if (from == to)
             return;
 
-        // Stack items if possible
         if (to.HasItem() && to.GetItem() == from.GetItem()) {
             int max = to.GetItem().maxStackSize;
             int space = max - to.GetAmount();
@@ -481,7 +484,6 @@ public class Inventory : MonoBehaviour, ISaveable {
             }
         }
 
-        // Swap items if destination slot is occupied
         if (to.HasItem()) {
             ItemSO tempItem = to.GetItem();
             int tempAmount = to.GetAmount();
@@ -506,7 +508,6 @@ public class Inventory : MonoBehaviour, ISaveable {
             return;
         }
 
-        // Move item into empty slot
         to.SetItem(from.GetItem(), from.GetAmount());
 
         if (to.GetSelected()) {
@@ -535,14 +536,15 @@ public class Inventory : MonoBehaviour, ISaveable {
         }
     }
 
+    /// <summary>
+    /// Equips or removes the selected weapon depending on the given item.
+    /// </summary>
     private void ToggleWeaponSelect(ItemSO weapon) {
         if (weapon == null) {
             player.GetPlayerGunSelector().DequipWeapon();
             return;
         }
 
-        // Spielmodus: In Melee-Only sind keine Schusswaffen erlaubt,
-        // in Pistol+Melee nur die Pistole. Sonst gar nicht ausruesten.
         if (!IsGunAllowedInGameMode(weapon.gunType)) {
             player.GetPlayerGunSelector().DequipWeapon();
             return;
@@ -582,6 +584,9 @@ public class Inventory : MonoBehaviour, ISaveable {
         }
     }
 
+    /// <summary>
+    /// Equips or removes the selected melee weapon.
+    /// </summary>
     private void ToggleMeleeSelect(ItemSO weapon) {
         if (weapon == null) {
             player.GetPlayerGunSelector().DequipMelee();
@@ -613,6 +618,9 @@ public class Inventory : MonoBehaviour, ISaveable {
         }
     }
 
+    /// <summary>
+    /// Equips or removes the selected grenade item.
+    /// </summary>
     private void ToggleGrenade(ItemSO grenade) {
         if (grenade == null) {
             player.GetPlayerGunSelector().DequipGrenade();
@@ -621,11 +629,13 @@ public class Inventory : MonoBehaviour, ISaveable {
                 case ItemType.Grenade:
                     player.GetPlayerGunSelector().SelectGrenade();
                     break;
-
             }
         }
     }
 
+    /// <summary>
+    /// Equips or removes the selected consumable item.
+    /// </summary>
     private void ToggleConsumable(ItemSO consumable) {
         if (consumable == null) {
             player.GetPlayerGunSelector().DequipHealthPack();
@@ -634,22 +644,37 @@ public class Inventory : MonoBehaviour, ISaveable {
         }
     }
 
+    /// <summary>
+    /// Checks whether the given item is a weapon.
+    /// </summary>
     private bool IsWeapon(ItemSO item) {
         return item != null && item.itemType == ItemType.Gun;
     }
 
+    /// <summary>
+    /// Checks whether the given item is a melee item.
+    /// </summary>
     private bool IsMelee(ItemSO item) {
         return item != null && item.itemType == ItemType.Melee;
     }
 
+    /// <summary>
+    /// Checks whether the given item is a grenade.
+    /// </summary>
     private bool IsGrenade(ItemSO item) {
         return item != null && item.itemType == ItemType.Grenade;
     }
 
+    /// <summary>
+    /// Checks whether the given item is a consumable.
+    /// </summary>
     private bool IsConsumable(ItemSO item) {
         return item != null && item.itemType == ItemType.Consumable;
     }
 
+    /// <summary>
+    /// Clears the previous equipped item if it matches the given item type.
+    /// </summary>
     private void ClearPreviousSelectionIfNeeded(ItemSO item) {
         if (IsWeapon(item)) {
             ToggleWeaponSelect(null);
@@ -662,6 +687,9 @@ public class Inventory : MonoBehaviour, ISaveable {
         }
     }
 
+    /// <summary>
+    /// Checks whether enough ammunition exists for the given gun and returns the amount needed.
+    /// </summary>
     public bool GetAmmoAvailable(GunSO gun, out int ammoNeed) {
         int maxAmmo = gun.GetMaxAmmo();
 
@@ -683,6 +711,9 @@ public class Inventory : MonoBehaviour, ISaveable {
         }
     }
 
+    /// <summary>
+    /// Returns the total amount of matching ammunition across all slots.
+    /// </summary>
     public int GetAllAmmo(GunSO gun) {
         int ammoHas = 0;
         foreach (Slot slot in allSlots) {
@@ -693,6 +724,9 @@ public class Inventory : MonoBehaviour, ISaveable {
         return ammoHas;
     }
 
+    /// <summary>
+    /// Returns an ammo item ScriptableObject for the given ammunition type.
+    /// </summary>
     public ItemSO GetItemSOWithGunType<T>(T ammunitionType) {
         foreach (ItemSO ammo in ammunitions) {
             if (EqualityComparer<T>.Default.Equals(ammunitionType, (T)(object)ammo.ammunitionType)) {
@@ -702,6 +736,9 @@ public class Inventory : MonoBehaviour, ISaveable {
         return null;
     }
 
+    /// <summary>
+    /// Returns the amount of the currently selected inventory slot.
+    /// </summary>
     public int GetSelectedItemAmount() {
         if (selectedSlot != null) {
             return selectedSlot.GetAmount();
@@ -709,6 +746,9 @@ public class Inventory : MonoBehaviour, ISaveable {
         return -1;
     }
 
+    /// <summary>
+    /// Returns whether an item is currently being dragged.
+    /// </summary>
     public bool GetIsDragging() {
         return isDragging;
     }
@@ -780,13 +820,22 @@ public class Inventory : MonoBehaviour, ISaveable {
         return true;
     }
 
+    /// <summary>
+    /// Returns all inventory slots managed by this inventory.
+    /// </summary>
     public List<Slot> GetInventorySlots() {
         return inventorySlots;
     }
 
     #region Save/Load
+    /// <summary>
+    /// Returns the unique save identifier.
+    /// </summary>
     public string GetSaveID() => ID;
 
+    /// <summary>
+    /// Creates a save data object containing the contents of all slots.
+    /// </summary>
     public object Save() {
         InventoryData saveData = new InventoryData();
 
@@ -816,6 +865,9 @@ public class Inventory : MonoBehaviour, ISaveable {
         return saveData;
     }
 
+    /// <summary>
+    /// Restores inventory contents from saved data.
+    /// </summary>
     public void Load(object data) {
         InventoryData loadData = (InventoryData)data;
 
@@ -841,32 +893,42 @@ public class Inventory : MonoBehaviour, ISaveable {
         }
     }
 
+    /// <summary>
+    /// Serializable save data for a single inventory slot.
+    /// </summary>
     [Serializable]
     public class SlotSaveData {
         public string itemName;
         public int amount;
         public int slotIndex;
 
-        //Is the Item in the Slot a Gun?
         public bool isGun;
         public string gunName;
         public GunSO.GunData gunData;
     }
 
+    /// <summary>
+    /// Serializable save data container for the full inventory.
+    /// </summary>
     [Serializable]
     public class InventoryData {
         public List<SlotSaveData> slots = new();
     }
     #endregion
 
+    /// <summary>
+    /// Registers the inventory with the save manager.
+    /// </summary>
     private void OnEnable() {
         if (SaveManager.Instance != null)
             SaveManager.Instance.Register(this);
     }
 
+    /// <summary>
+    /// Unregisters the inventory from the save manager.
+    /// </summary>
     private void OnDisable() {
         if (SaveManager.Instance != null)
             SaveManager.Instance.Unregister(this);
     }
 }
-
