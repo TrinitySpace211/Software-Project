@@ -56,9 +56,6 @@ public class ObjectiveManager : MonoBehaviour {
     ///     Redirects all active zombies to attack a random objective.
     /// </summary>
     public void OnNightStarted() {
-        /* var zombies = FindObjectsByType<ZombieAI>(FindObjectsSortMode.None);
-        var sprinters = FindObjectsByType<SprinterController>(FindObjectsSortMode.None); // NEU
-        var tank = FindObjectsByType<SprinterController>(FindObjectsSortMode.None); */
         var redirected = 0;
 
         foreach (SpawnZone zone in spawnZones) {

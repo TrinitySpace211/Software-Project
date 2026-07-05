@@ -21,7 +21,7 @@ public class ZombieAI : MonoBehaviour, IDamageable {
 
     [SerializeField] private Rigidbody[] joints;
     [SerializeField] private CapsuleCollider[] capsuleCollider;
-    [SerializeField] private GameObject attackPoint;
+    [SerializeField] private Transform attackPoint;
     [SerializeField] private Transform[] patrolPoints;
     [SerializeField] private float patrolWaitTime = 2f;
 
@@ -83,7 +83,7 @@ public class ZombieAI : MonoBehaviour, IDamageable {
         dissolveMeterMax = zombieMaterial.shader.GetPropertyRangeLimits(propertyIndex).y;
         dissolveMeter = dissolveMeterMax;
 
-        if (enemyStatsSO != null) _agent.speed = enemyStatsSO.moveSpeed;
+        ApplyEnemyStats();
 
         if (target != null) {
             _targetHealth = target.GetComponentInChildren<PlayerHealth>();
@@ -171,6 +171,17 @@ public class ZombieAI : MonoBehaviour, IDamageable {
             Patrol();
     }
 
+    private void ApplyEnemyStats() {
+        if (_agent == null) return;
+
+        if (enemyStatsSO != null) {
+            _agent.speed = enemyStatsSO.moveSpeed;
+            _agent.stoppingDistance = Mathf.Max(0.1f, enemyStatsSO.attackRange - 0.05f);
+        } else {
+            _agent.stoppingDistance = 0.1f;
+        }
+    }
+
     private float SqrDistFlat(Vector3 a, Vector3 b) {
         var dx = a.x - b.x;
         var dz = a.z - b.z;
@@ -205,10 +216,19 @@ public class ZombieAI : MonoBehaviour, IDamageable {
         _animController?.TriggerAttack();
         _attackTimer = enemyStatsSO.attackCooldown;
 
+
+    }
+
+    /// <summary>
+    /// An Animation Event plays this function to check if the arm catches the player
+    /// </summary>
+    public void TryDamageObject() {
+        if (isDead) return;
+
         if (_targetObjectiveHealth != null) {
             _targetObjectiveHealth.TakeDamage(enemyStatsSO.damage);
         } else {
-            var hits = Physics.OverlapSphere(attackPoint.transform.position, enemyStatsSO.attackRange);
+            var hits = Physics.OverlapSphere(attackPoint.position, enemyStatsSO.attackRange);
             foreach (var hit in hits)
                 if (hit.GetComponent<Player>() != null) {
                     _targetHealth.TakeDamage(enemyStatsSO.damage);
@@ -263,6 +283,7 @@ public class ZombieAI : MonoBehaviour, IDamageable {
         _playerTransform = player;
         _targetHealth = player?.GetComponentInChildren<PlayerHealth>();
         _playerHealthRef = _targetHealth;
+        ApplyEnemyStats();
         _initialized = true;
     }
 
@@ -389,13 +410,17 @@ public class ZombieAI : MonoBehaviour, IDamageable {
 
     public void SetRageEyes() {
         if (rageEyes != null && skinnedMeshRenderer.materials.Length > 1) {
-            skinnedMeshRenderer.materials[1] = rageEyes;
+            Material[] materials = skinnedMeshRenderer.materials;
+            materials[1] = rageEyes;
+            skinnedMeshRenderer.materials = materials;
         }
     }
 
     public void SetDefaultEyes() {
         if (originalEyes != null && skinnedMeshRenderer.materials.Length > 1) {
-            skinnedMeshRenderer.materials[1] = originalEyes;
+            Material[] materials = skinnedMeshRenderer.materials;
+            materials[1] = originalEyes;
+            skinnedMeshRenderer.materials = materials;
         }
     }
 
@@ -405,8 +430,8 @@ public class ZombieAI : MonoBehaviour, IDamageable {
 
     /* private void OnDrawGizmos() {
         Gizmos.color = Color.red;
-        Gizmos.DrawSphere(transform.position, enemyStatsSO.detectionRange);
+        //Gizmos.DrawSphere(attackPoint.position, enemyStatsSO.detectionRange);
 
-        Gizmos.DrawWireSphere(transform.position, enemyStatsSO.detectionRange);
+        Gizmos.DrawWireSphere(attackPoint.position, enemyStatsSO.attackRange);
     } */
 }

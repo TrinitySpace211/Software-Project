@@ -126,6 +126,7 @@ public class Inventory : MonoBehaviour, ISaveable {
                 if (gun.gunType == GunType.Pistol) {
                     hotbarSlots[0].SetItem(gun);
                     AddItem(ItemType.Ammunition, AmmunitionType.Ammo9mm, 30);
+                    AddItem(ItemType.Melee, MeleeType.Baseball_Bat);
                     AddItem(ItemType.Consumable, HealthItemType.Bandage, 4);
                     AddItem(ItemType.Consumable, HealthItemType.HealthPack, 2);
                 }
@@ -135,7 +136,7 @@ public class Inventory : MonoBehaviour, ISaveable {
 
     private void PlayerInputHandler_OnRightClickUIPressed() {
         foreach (Slot slot in inventorySlots) {
-            if (slot.hovering && slot.GetItem() != null && slot.GetItem().gunType == GunType.None && slot.GetItem().meleeType == MeleeType.None) {
+            if (slot.hovering && slot.GetItem() != null && slot.GetItem().gunType == GunType.None && !isDragging) {
                 tooltipUI.Visibile(true);
                 tooltipUI.SetSelectedSlot(slot);
             }

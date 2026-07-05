@@ -243,9 +243,33 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 4474771663635373331}
     - target: {fileID: 2742016485819497352, guid: 4cd7de76949bf864e990b5cbb34996bf, type: 3}
+      propertyPath: spawnZones.Array.size
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2742016485819497352, guid: 4cd7de76949bf864e990b5cbb34996bf, type: 3}
       propertyPath: 'objectives.Array.data[0]'
       value: 
       objectReference: {fileID: 535928919}
+    - target: {fileID: 2742016485819497352, guid: 4cd7de76949bf864e990b5cbb34996bf, type: 3}
+      propertyPath: 'spawnZones.Array.data[0]'
+      value: 
+      objectReference: {fileID: 884531992}
+    - target: {fileID: 2742016485819497352, guid: 4cd7de76949bf864e990b5cbb34996bf, type: 3}
+      propertyPath: 'spawnZones.Array.data[1]'
+      value: 
+      objectReference: {fileID: 618716926}
+    - target: {fileID: 2742016485819497352, guid: 4cd7de76949bf864e990b5cbb34996bf, type: 3}
+      propertyPath: 'spawnZones.Array.data[2]'
+      value: 
+      objectReference: {fileID: 1728033329}
+    - target: {fileID: 2742016485819497352, guid: 4cd7de76949bf864e990b5cbb34996bf, type: 3}
+      propertyPath: 'spawnZones.Array.data[3]'
+      value: 
+      objectReference: {fileID: 1878714270}
+    - target: {fileID: 2742016485819497352, guid: 4cd7de76949bf864e990b5cbb34996bf, type: 3}
+      propertyPath: 'spawnZones.Array.data[4]'
+      value: 
+      objectReference: {fileID: 302008584}
     - target: {fileID: 3050171301137543543, guid: 4cd7de76949bf864e990b5cbb34996bf, type: 3}
       propertyPath: m_Name
       value: ObjectiveManager
