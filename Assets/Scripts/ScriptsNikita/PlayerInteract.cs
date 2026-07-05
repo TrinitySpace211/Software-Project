@@ -6,11 +6,21 @@ using UnityEngine.InputSystem;
 /// </summary>
 public class PlayerInteract : MonoBehaviour {
 
+    /// <summary>
+    /// Reference to the player input handler, used to read and process player input.
+    /// </summary>
     private PlayerInputHandler playerInputHandler;
+
+    /// <summary>
+    /// Reference to the player component, used to access player-related data and functionality.
+    /// </summary>
     private Player player;
 
     private void Start() {
+        // Get the Player component attached to this GameObject.
         player = GetComponent<Player>();
+
+        // Get the PlayerInputHandler from the Player component.
         playerInputHandler = player.GetPlayerInputHandler();
     }
 
