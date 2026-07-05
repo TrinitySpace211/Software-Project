@@ -5,7 +5,14 @@ using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 /// Moves the arrow towards its target and applies damage when it hits an enemy.
 /// </summary>
 public class Bullet : MonoBehaviour {
+    /// <summary>
+    /// Stores the transform of the current target.
+    /// </summary>
     private Transform targetTransform;
+
+    /// <summary>
+    /// Stores the damageable interface of the current target.
+    /// </summary>
     private IDamageable targetDamageable;
 
     /// <summary>
@@ -30,6 +37,15 @@ public class Bullet : MonoBehaviour {
     public Vector3 rotationOffset;
 
 
+    /// <summary>
+    /// Sets the current target for this object.
+    /// </summary>
+    /// <typeparam name="T">
+    /// The target type, which must be a Component and implement IDamageable.
+    /// </typeparam>
+    /// <param name="target">
+    /// The target component that should be tracked and damaged.
+    /// </param>
     public void SetTarget<T>(T target) where T : Component, IDamageable {
         targetTransform = target.transform;
         targetDamageable = target;
