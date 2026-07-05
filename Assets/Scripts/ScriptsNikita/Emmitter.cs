@@ -64,33 +64,41 @@ public class Emmitter : MonoBehaviour {
     /// Spawns a bullet (arrow) and assigns the given target to it.
     /// </summary>
     private void Shoot<T>(T target) where T : Component, IDamageable {
+        // Check if a bullet prefab has been assigned in the inspector.
         if (bullet == null) {
             Debug.LogError("Bullet Prefab fehlt beim Emmitter!");
             return;
         }
 
+        // Create a new bullet instance at the emitter's current position and rotation.
         GameObject bulletInstance = Instantiate(
             bullet,
             transform.position,
             transform.rotation
         );
 
+        // Try to get the normal Bullet script directly from the spawned object.
         Bullet bulletScript = bulletInstance.GetComponent<Bullet>();
 
+        // If the Bullet script is not on the root object, search for it in the child objects.
         if (bulletScript == null) {
             bulletScript = bulletInstance.GetComponentInChildren<Bullet>();
         }
 
+        // If this projectile uses the normal Bullet script, assign the target to it.
         if (bulletScript != null) {
             bulletScript.SetTarget(target);
         }
 
+        // Try to get the ExplosiveBullet script directly from the spawned object.
         ExplosiveBullet explosiveBulletScript = bulletInstance.GetComponent<ExplosiveBullet>();
 
+        // If the ExplosiveBullet script is not on the root object, search for it in the child objects.
         if (explosiveBulletScript == null) {
             explosiveBulletScript = bulletInstance.GetComponentInChildren<ExplosiveBullet>();
         }
 
+        // If this projectile uses the ExplosiveBullet script, assign the target to it.
         if (explosiveBulletScript != null) {
             explosiveBulletScript.SetTarget(target);
         }

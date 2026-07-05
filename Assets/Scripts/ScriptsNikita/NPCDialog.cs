@@ -344,7 +344,18 @@ public class NPCDialog : MonoBehaviour, ISaveable {
     /// </summary>
     private int boughtTowerUpgradeCount = 0;
 
+    /// <summary>
+    /// Stores the currently built tower instances.
+    /// Each array index belongs to one tower spawn point.
+    /// A null entry means that no tower has been built at that position yet.
+    /// </summary>
     private GameObject[] builtTowers;
+
+    /// <summary>
+    /// Stores the current upgrade level of each built tower.
+    /// The array index matches the same index in builtTowers and towerSpawnPoints.
+    /// Example: 0 = base tower, 1 = first upgrade, 2 = second upgrade.
+    /// </summary>
     private int[] towerUpgradeLevels;
 
     [Header("Weapon Upgrade UI")]
@@ -784,6 +795,10 @@ public class NPCDialog : MonoBehaviour, ISaveable {
         EventSystem.current.SetSelectedGameObject(null);
     }
 
+    /// <summary>
+    /// Opens the weapon type selection panel.
+    /// Hides the function panel and all weapon-related info panels before showing the weapon type panel.
+    /// </summary>
     public void OpenWeaponTypes() {
         HidePanel(functionsPanel);
         HidePanel(towerInfoPanel);
@@ -794,6 +809,9 @@ public class NPCDialog : MonoBehaviour, ISaveable {
         ShowPanel(weaponTypePanel);
     }
 
+    /// <summary>
+    /// Opens the ranged weapon shop panel if ranged weapons are allowed in the current game mode.
+    /// </summary>
     public void OpenRangedWeapons() {
         // Spielmodus: In Melee-Only / Pistol+Melee sind keine Schusswaffen kaufbar.
         if (!IsRangedShopAllowed()) {
@@ -806,6 +824,9 @@ public class NPCDialog : MonoBehaviour, ISaveable {
         ShowPanel(rangedWeaponPanel);
     }
 
+    /// <summary>
+    /// Opens the close combat weapon shop panel.
+    /// </summary>
     public void OpenCloseCombatWeapons() {
         HidePanel(weaponTypePanel);
         HidePanel(weaponInfoPanel);
@@ -813,6 +834,9 @@ public class NPCDialog : MonoBehaviour, ISaveable {
         ShowPanel(closeWeaponPanel);
     }
 
+    /// <summary>
+    /// Closes the weapon type panels and returns to the main functions panel.
+    /// </summary>
     public void BackToFunctionsFromWeaponTypes() {
         HidePanel(weaponTypePanel);
         HidePanel(rangedWeaponPanel);
@@ -822,6 +846,9 @@ public class NPCDialog : MonoBehaviour, ISaveable {
         ShowPanel(functionsPanel);
     }
 
+    /// <summary>
+    /// Closes the weapon shop panels and returns to the weapon type selection panel.
+    /// </summary>
     public void BackToWeaponTypes() {
         HidePanel(rangedWeaponPanel);
         HidePanel(closeWeaponPanel);
@@ -1811,7 +1838,11 @@ public class NPCDialog : MonoBehaviour, ISaveable {
         panel.blocksRaycasts = false;
     }
 
+    /// <summary>
+    /// Initializes the tower state arrays and resets all tower counters.
+    /// </summary>
     private void InitializeTowerState() {
+        // If no tower spawn points exist, initialize empty arrays and reset counters.
         if (towerSpawnPoints == null) {
             builtTowers = Array.Empty<GameObject>();
             towerUpgradeLevels = Array.Empty<int>();
@@ -1820,114 +1851,207 @@ public class NPCDialog : MonoBehaviour, ISaveable {
             return;
         }
 
+        // Create an array to store the built tower objects for each spawn point.
         builtTowers = new GameObject[towerSpawnPoints.Length];
+
+        // Create an array to store the upgrade level for each tower spawn point.
         towerUpgradeLevels = new int[towerSpawnPoints.Length];
+
+        // Reset the number of towers that have been built.
         builtTowerCount = 0;
+
+        // Reset the number of tower upgrades that have been bought.
         boughtTowerUpgradeCount = 0;
     }
 
+    /// <summary>
+    /// Rebuilds all towers from the saved tower data.
+    /// Existing tower objects are destroyed first, then recreated based on their saved upgrade levels.
+    /// </summary>
     private void RebuildTowersFromSaveData() {
+        // If the built tower array does not exist, initialize it as an empty array.
         if (builtTowers == null) {
             builtTowers = Array.Empty<GameObject>();
         }
 
+        // Destroy all currently existing tower objects before rebuilding them.
         for (int i = 0; i < builtTowers.Length; i++) {
+            // Check if a tower exists at this index.
             if (builtTowers[i] != null) {
+                // Destroy the existing tower GameObject.
                 Destroy(builtTowers[i]);
+
+                // Clear the reference in the array.
                 builtTowers[i] = null;
             }
         }
 
+        // Stop if required data for rebuilding towers is missing.
         if (towerSpawnPoints == null || towerPrefabsByLevel == null || towerUpgradeLevels == null) {
             return;
         }
 
+        // Limit the rebuild count to the number of available tower spawn points.
         int maxTowerIndex = Mathf.Min(builtTowerCount, towerSpawnPoints.Length);
 
+        // Rebuild each saved tower up to the saved tower count.
         for (int i = 0; i < maxTowerIndex; i++) {
+            // Skip this index if the spawn point is missing.
             if (towerSpawnPoints[i] == null) {
                 continue;
             }
 
+            // Get the saved upgrade level and make sure it stays within the valid prefab array range.
             int level = Mathf.Clamp(i < towerUpgradeLevels.Length ? towerUpgradeLevels[i] : 0, 0, towerPrefabsByLevel.Length - 1);
 
+            // Skip this tower if no prefab exists for the saved upgrade level.
             if (towerPrefabsByLevel[level] == null) {
                 continue;
             }
 
+            // Instantiate the tower prefab at the saved spawn point position and rotation.
             GameObject tower = Instantiate(
                 towerPrefabsByLevel[level],
                 towerSpawnPoints[i].position,
                 towerSpawnPoints[i].rotation
             );
 
+            // Store the newly created tower in the built tower array.
             builtTowers[i] = tower;
         }
     }
 
+    /// <summary>
+    /// Returns the unique save ID used to identify this object in the save system.
+    /// </summary>
     public string GetSaveID() => ID;
+
+    /// <summary>
+    /// Creates and returns the save data for the NPC dialog system.
+    /// This includes the number of built towers, bought tower upgrades, and tower upgrade levels.
+    /// </summary>
+    /// <returns>
+    /// An NPCDialogData object containing the current tower-related save state.
+    /// </returns>
     public object Save() {
+        // Store the total number of bought tower upgrades.
         int upgradeCount = 0;
 
+        // If tower upgrade levels exist, add all upgrade levels together.
         if (towerUpgradeLevels != null) {
             for (int i = 0; i < towerUpgradeLevels.Length; i++) {
+                // Add the upgrade level of the current tower to the total upgrade count.
                 upgradeCount += towerUpgradeLevels[i];
             }
         }
 
+        // Create and return a new save data object with the current tower state.
         return new NPCDialogData {
             builtTowerCount = builtTowerCount,
             boughtTowerUpgradeCount = upgradeCount,
+
+            // Save a copy of the tower upgrade levels to avoid modifying the original array.
             towerUpgradeLevels = towerUpgradeLevels != null ? (int[])towerUpgradeLevels.Clone() : Array.Empty<int>()
         };
     }
 
+    /// <summary>
+    /// Loads the saved NPC dialog data and restores the tower state.
+    /// This includes built towers, bought upgrades, tower upgrade levels, and rebuilding the tower objects.
+    /// </summary>
+    /// <param name="data">
+    /// The saved data object that contains the NPC dialog and tower state.
+    /// </param>
     public void Load(object data) {
+        // Cast the loaded save data back to the NPCDialogData type.
         NPCDialogData dialogData = (NPCDialogData)data;
 
+        // Reset and initialize the tower arrays and counters before loading saved values.
         InitializeTowerState();
 
+        // Restore the number of towers that were built.
         builtTowerCount = dialogData.builtTowerCount;
+
+        // Restore the number of bought tower upgrades.
         boughtTowerUpgradeCount = dialogData.boughtTowerUpgradeCount;
 
+        // Restore the saved tower upgrade levels if they exist.
         if (dialogData.towerUpgradeLevels != null) {
+            // Clone the array to avoid directly referencing the saved data array.
             towerUpgradeLevels = (int[])dialogData.towerUpgradeLevels.Clone();
         } else {
+            // Use an empty array if no upgrade level data was saved.
             towerUpgradeLevels = Array.Empty<int>();
         }
 
+        // If there are more spawn points than saved upgrade levels, resize the array.
         if (towerSpawnPoints != null && towerUpgradeLevels.Length < towerSpawnPoints.Length) {
+            // Create a new upgrade level array that matches the number of tower spawn points.
             int[] resizedLevels = new int[towerSpawnPoints.Length];
+
+            // Copy the existing saved upgrade levels into the resized array.
             Array.Copy(towerUpgradeLevels, resizedLevels, towerUpgradeLevels.Length);
+
+            // Replace the old array with the resized one.
             towerUpgradeLevels = resizedLevels;
         }
 
+        // Make sure the built tower count cannot be negative.
         if (builtTowerCount < 0) {
             builtTowerCount = 0;
         }
 
+        // Make sure the built tower count does not exceed the number of available spawn points.
         if (towerSpawnPoints != null && builtTowerCount > towerSpawnPoints.Length) {
             builtTowerCount = towerSpawnPoints.Length;
         }
 
+        // Recreate the saved towers in the scene.
         RebuildTowersFromSaveData();
+
+        // Refresh the tower information shown in the UI.
         UpdateTowerInfo();
+
+        // Refresh the tower upgrade information shown in the UI.
         UpdateTowerUpgradeInfo();
     }
 
+    /// <summary>
+    /// Serializable data class used to store the NPC dialog and tower save data.
+    /// </summary>
     [Serializable]
     public class NPCDialogData {
+        /// <summary>
+        /// Stores how many towers have been built.
+        /// </summary>
         public int builtTowerCount;
+
+        /// <summary>
+        /// Stores the total number of bought tower upgrades.
+        /// </summary>
         public int boughtTowerUpgradeCount;
+
+        /// <summary>
+        /// Stores the upgrade level of each tower.
+        /// Each array index belongs to one tower spawn point.
+        /// </summary>
         public int[] towerUpgradeLevels;
     }
 
+    //// <summary>
+    /// Registers this object in the SaveManager when it becomes active.
+    /// </summary>
     private void OnEnable() {
+        // Register this object so its data can be saved and loaded.
         if (SaveManager.Instance != null)
             SaveManager.Instance.Register(this);
     }
 
+    /// <summary>
+    /// Unregisters this object from the SaveManager when it becomes inactive.
+    /// </summary>
     private void OnDisable() {
+        // Unregister this object so the SaveManager no longer tries to save or load it.
         if (SaveManager.Instance != null)
             SaveManager.Instance.Unregister(this);
     }
